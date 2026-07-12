@@ -121,26 +121,30 @@ not an afterthought.
 No custom mode required. Point three scripts at your project, then let any Bob mode do the thinking.
 
 ```bash
+# 0 · Set this once, to wherever you cloned this repo
+KM_HOME=~/Projects/bob-llmwiki-knowledge-manager
+
 # 1 · Scaffold the knowledge base in your project
 cd ~/your-project
-~/Projects/bob-llmwiki-knowledge-manager/scripts/init-project.sh
+"$KM_HOME/scripts/init-project.sh"
 
 # 2 · Let the scripts do the reading — a full automated analysis,
 #     filed straight into docs/knowledge-base/
-~/Projects/bob-llmwiki-knowledge-manager/scripts/run-full-analysis.sh
+"$KM_HOME/scripts/run-full-analysis.sh"
 
 # 3 · Validate the knowledge-base structure
-~/Projects/bob-llmwiki-knowledge-manager/scripts/validate-kb.sh
+"$KM_HOME/scripts/validate-kb.sh"
 ```
 
-Now stay in **whatever Bob mode you're already using** (Ask, Code, …) and paste this prompt:
+Now stay in **whatever Bob mode you're already using** (Ask, Code, …) and paste this prompt — replace
+`<path-to-this-repo>` with wherever you cloned it (the same path as `$KM_HOME` above):
 
 ```text
 I want you to act as a knowledge manager for this codebase.
 
 Your role:
 - Document code in docs/knowledge-base/
-- Use templates from /Users/david.leconte/Projects/bob-llmwiki-knowledge-manager/config/templates/
+- Use templates from <path-to-this-repo>/config/templates/
 - Create concept documents for core ideas
 - Create guides for how-to instructions
 - Create references for API documentation
