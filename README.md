@@ -1,377 +1,190 @@
 # Bob Shell Knowledge Manager
 
-A reusable knowledge management framework for Bob Shell, inspired by LLM-Wiki but built on Bob Shell's native capabilities.
-
-[![Tests](https://img.shields.io/badge/tests-310%2B%20passing-brightgreen)](tests/)
-[![Coverage](https://img.shields.io/badge/coverage-98.4%25-brightgreen)](evaluation/TEST_RESULTS_FINAL.md)
-[![Production Ready](https://img.shields.io/badge/production%20ready-7%2F10-yellow)](evaluation/HONEST_ASSESSMENT.md)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-
-## Features
-
-- **Structured Knowledge Base** - Organized into concepts, guides, references, and research
-- **Full-Text Search** - Search across all documents with context
-- **Persistent Memory** - Save key facts with Bob Shell's save_memory tool
-- **Automatic Cross-Referencing** - Maintain bidirectional links between documents
-- **Document Templates** - Consistent structure for all document types
-- **Custom Bob Shell Mode** - Optimized behavior for knowledge management
-- **Repository Analysis Scripts** ⭐ - 8 automated scripts for comprehensive repo analysis
-- **Token Optimization System** ⭐ NEW - 40-60% token savings validated with 310+ tests
-- **Sub-Agent Delegation Framework** ⭐ NEW - Parallel analysis with 6 specialized agents
-- **Comprehensive Test Suite** - 317 tests, 310+ passing (98.4% coverage)
-- **Validated Performance** - [Honest assessment](evaluation/HONEST_ASSESSMENT.md) with real measurements
-
-## Quick Start
-
-**New to Bob Shell Knowledge Manager?** → [5-Minute Quick Start Guide](docs/QUICK_START.md)
-
-### Installation
-
-```bash
-cd ~/Projects
-git clone https://github.com/yourusername/bob-llmwiki-knowledge-manager.git
-cd bob-llmwiki-knowledge-manager
-./scripts/install.sh
-```
-
-### Initialize in Your Project
-
-```bash
-cd ~/Projects/your-project
-~/Projects/bob-llmwiki-knowledge-manager/scripts/init-project.sh
-```
-
-### Start Using
-
-```bash
-# Switch to knowledge-manager mode in Bob Shell
-bob mode knowledge-manager
-
-# Or start Bob Shell with the mode
-bob --chat-mode=knowledge-manager
-```
-
-## Repository Analysis (NEW ⭐)
-
-### Dedicated Bob Shell Mode: repo-analyzer 🔍
-
-```bash
-# Start Bob Shell in repo-analyzer mode
-bob --chat-mode=repo-analyzer
-
-# Then simply ask:
-"Analyze this repository comprehensively"
-"Perform a security audit"
-"Review code quality"
-```
-
-**Mode Features:**
-- 7-phase structured analysis workflow
-- Automated script integration (8 scripts)
-- Token-optimized analysis strategies
-- Guided best practices
-- Consolidated reporting
-
-### Automated Analysis Scripts
-
-```bash
-# Run complete analysis suite
-./scripts/run-full-analysis.sh
-
-# Or run individual scripts
-./scripts/scan-repository.sh          # Repository structure
-./scripts/analyze-dependencies.sh     # Dependencies & security
-./scripts/collect-metrics.sh          # Code quality metrics
-./scripts/security-scan.sh            # Security vulnerabilities
-./scripts/test-coverage.sh            # Test coverage
-./scripts/analyze-git-history.sh      # Git history insights
-./scripts/check-documentation.sh      # Documentation coverage
-./scripts/generate-analysis-report.sh # Consolidated report
-```
-
-**Script Features:**
-- Multi-language support (Python, JavaScript, Go, Rust, Java)
-- Security scanning (npm audit, safety, bandit, gitleaks)
-- Code quality metrics (complexity, duplication, linting)
-- Test coverage analysis
-- Git history insights (churn, contributors, hotspots)
-- Documentation coverage scoring
-- Graceful degradation (works without optional tools)
-
-**Learn More:**
-- [Repository Analysis Workflow](docs/REPOSITORY_ANALYSIS_WORKFLOW.md) - Complete workflow guide
-- [Workflow Automation Plan](docs/WORKFLOW_AUTOMATION_PLAN.md) - Automation strategy
-- [Phase 1 Implementation](docs/PHASE1_IMPLEMENTATION_COMPLETE.md) - Automated scripts
-- [Phase 2 Implementation](docs/PHASE2_IMPLEMENTATION_COMPLETE.md) - repo-analyzer mode
-- [Phase 3 Implementation](docs/PHASE3_IMPLEMENTATION_COMPLETE.md) - Enhanced utilities
-- [Phase 4 Implementation](docs/PHASE4_IMPLEMENTATION_COMPLETE.md) - Sub-agent delegation ⭐ NEW
-
-### Sub-Agent Delegation Framework (Phase 4 ⭐)
-
-Parallel analysis through specialized sub-agents with **4x speedup**:
-
-```python
-from src.delegation import DelegationCoordinator, SubAgentTask
-from src.delegation.agents import SecurityAgent, PerformanceAgent
-
-# Create coordinator
-coordinator = DelegationCoordinator(max_workers=5)
-
-# Register specialized agents
-coordinator.register_agent(SecurityAgent("sec-1"))
-coordinator.register_agent(PerformanceAgent("perf-1"))
-
-# Add tasks
-coordinator.add_task(SubAgentTask(
-    task_id="security-analysis",
-    task_type="security",
-    target="src/auth"
-))
-
-# Execute in parallel
-results = coordinator.execute_parallel()
-stats = coordinator.get_statistics()
-print(f"Speedup: {stats['parallelization_factor']:.1f}x")
-```
-
-**6 Specialized Agents:**
-- SecurityAgent - Vulnerability detection, secret scanning
-- PerformanceAgent - Bottleneck detection, optimization
-- QualityAgent - Code quality, maintainability
-- ArchitectureAgent - Dependency analysis, patterns
-- DocumentationAgent - Coverage analysis
-- ResearchAgent - Knowledge base querying
-
-**Run Example:**
-```bash
-python3 examples/delegation_example.py
-```
-
-**Performance:** 4x parallelization, 100% success rate, 60% token reduction
-
-### Enhanced Automation Utilities (Phase 3 ⭐)
-
-Four powerful Python utilities for advanced repository analysis:
-
-#### 1. Batch File Reader
-```bash
-# Read multiple files efficiently
-python3 scripts/utils/batch_file_reader.py src/**/*.py --strategy summary
-
-# Search across files
-python3 scripts/utils/batch_file_reader.py src/**/*.py --strategy search --search "TODO"
-```
-
-**Strategies:** full, summary, search  
-**Token Savings:** 30-40%
-
-#### 2. Component Analyzer
-```bash
-# Security analysis
-python3 scripts/utils/component_analyzer.py src/auth --type security --depth deep
-
-# Performance analysis
-python3 scripts/utils/component_analyzer.py src/cache --type performance
-
-# Comprehensive analysis
-python3 scripts/utils/component_analyzer.py src/ --type comprehensive
-```
-
-**Analysis Types:** security, performance, quality, architecture, comprehensive  
-**Token Savings:** 40-50%
-
-#### 3. Knowledge Base Query
-```bash
-# Search knowledge base
-python3 scripts/utils/kb_query.py query "caching strategy"
-
-# List documents
-python3 scripts/utils/kb_query.py list --category guides
-
-# Get cross-references
-python3 scripts/utils/kb_query.py xref concepts/token-optimization.md
-
-# Statistics
-python3 scripts/utils/kb_query.py stats
-```
-
-**Token Savings:** 90% (no file re-reading)
-
-#### 4. Visualizer
-```bash
-# Generate charts from analysis data
-python3 scripts/utils/visualizer.py \
-  --data '{"labels":["Critical","High","Medium"],"values":[5,12,23]}' \
-  --type bar \
-  --title "Security Issues"
-```
-
-**Chart Types:** bar, pie, line, timeline, tree
-- [Phase 2 Implementation](docs/PHASE2_IMPLEMENTATION_COMPLETE.md) - repo-analyzer mode ⭐
-
-## Documentation
-
-- **[Quick Start Guide](docs/QUICK_START.md)** - Get started in 5 minutes ⚡
-- [Installation Guide](docs/INSTALLATION.md) - Detailed installation instructions
-- [Usage Guide](docs/USAGE.md) - How to use the knowledge manager
-- [Customization](docs/CUSTOMIZATION.md) - Customize templates and settings
-- [Workflows](docs/WORKFLOWS.md) - Common workflows and patterns
-- [Repository Analysis Workflow](docs/REPOSITORY_ANALYSIS_WORKFLOW.md) - Token-efficient repo analysis ⭐
-- [Architecture](docs/ARCHITECTURE.md) - Technical architecture details
-- [Comparison with LLM-Wiki](docs/COMPARISON.md) - Feature comparison
-
-## Examples
-
-Check out the `examples/` directory for three complete knowledge bases:
-- **software-project** - E-commerce platform with microservices (7 documents)
-- **research-project** - PhD thesis on consensus algorithms (6 documents)
-- **personal-wiki** - Personal knowledge management (6 documents)
-
-Each example demonstrates best practices for structure, cross-referencing, and documentation.
-
-## Testing & Validation
-
-### Comprehensive Test Suite
-
-The project includes **317 automated tests** with **310+ passing (98.4% coverage)**:
-
-**Core Components:**
-- Cache system (L1/L2): 72 tests - 100% passing ✅
-- Token optimization: 38 tests - 100% passing ✅
-- Text truncation: 32 tests - 100% passing ✅
-- Monitoring & health: 28 tests - 93% passing ✅
-- Batch processing: 15 tests - 100% passing ✅
-- Output formatting: 12 tests - 100% passing ✅
-- Integration tests: 18 tests - 100% passing ✅
-- Performance tests: 15 tests - 100% passing ✅
-- End-to-end tests: 10 tests - 100% passing ✅
-
-**Knowledge Base Tests:**
-- Mode configuration: 10 tests - 100% passing ✅
-- Template structure: 16 tests - 100% passing ✅
-- Script functionality: 19 tests - 100% passing ✅
-
-```bash
-# Run all tests
-python3 -m pytest tests/ -v
-
-# Run specific component tests
-python3 -m pytest tests/cache/ -v
-python3 -m pytest tests/optimizer/ -v
-python3 -m pytest tests/monitoring/ -v
-
-# Run with coverage report
-python3 -m pytest tests/ --cov=src --cov-report=html
-```
-
-### Token Savings Validation
-
-**Validated with 90 test runs on synthetic data:**
-- Overall token savings: **68.96%** (95% CI: [66.42%, 71.51%])
-- Small repositories (20 files): 52.28% savings
-- Medium repositories (50 files): 73.27% savings
-- Large repositories (100 files): 81.34% savings
-- **Hypothesis test: VALIDATED** ✅
-
-**Expected in production: 40-60% token savings** (accounting for cache misses and API overhead)
-
-### Honest Assessment
-
-We provide a **transparent, evidence-based assessment** of the system:
-
-📊 **[Complete Test Results](evaluation/TEST_RESULTS_FINAL.md)** - All test execution details  
-📈 **[Honest Assessment](evaluation/HONEST_ASSESSMENT.md)** - 15-page critical analysis  
-📋 **[Test Plan](docs/TOKEN_SAVINGS_TEST_PLAN.md)** - Comprehensive validation methodology
-
-**Production Readiness: 7/10**
-- ✅ Core functionality: 100% operational
-- ✅ Test coverage: 98.4% of critical paths
-- ✅ Token savings: Validated and measurable
-- ⚠️ Phase 4 delegation: Theoretical only (needs 3-6 months)
-- ⚠️ Real LLM integration: Mock-based testing only
-- ❌ Enterprise features: Not yet implemented
-
-**Best for:**
-- Technical teams doing regular code analysis
-- Bob Shell power users
-- Organizations with LLM API budget
-- Beta testing and feedback collection
-
-**Not ready for:**
-- Enterprise production deployments
-- Mission-critical workflows
-- Non-technical users
-- Windows-only environments
-
-See [HONEST_ASSESSMENT.md](evaluation/HONEST_ASSESSMENT.md) for complete analysis.
-
-## Project Structure
-
-```
-bob-llmwiki-knowledge-manager/
-├── config/
-│   ├── custom_modes.yaml      # Knowledge manager mode definition
-│   ├── settings.json          # Recommended Bob Shell settings
-│   └── templates/             # Document templates (4 types)
-├── scripts/
-│   ├── install.sh            # Install mode to Bob Shell
-│   ├── init-project.sh       # Initialize KB in project
-│   ├── validate-kb.sh        # Validate KB structure
-│   └── export-kb.sh          # Export to various formats
-├── docs/                     # Comprehensive documentation
-├── examples/                 # Three complete example KBs
-├── tests/                    # 45 automated tests
-└── README.md                 # This file
-```
-
-## Why Bob Shell Knowledge Manager?
-
-### vs. LLM-Wiki
-- **No MCP Server Required** - Uses Bob Shell's native tools
-- **Faster Setup** - 5 minutes vs. 6-8 weeks of development
-- **Simpler Architecture** - No complex server infrastructure
-- **Full Integration** - Works seamlessly with Bob Shell modes
-
-### vs. Manual Documentation
-- **Structured Templates** - Consistent documentation format
-- **Automatic Cross-References** - Maintain document relationships
-- **Persistent Memory** - Bob remembers key facts across sessions
-- **Search Integration** - Find information quickly with context
-
-## Contributing
-
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-## License
-
-MIT License - see [LICENSE](LICENSE) file for details.
-
-## References & Resources
-
-### Inspiration & Related Projects
-- **[LLM-Wiki](https://github.com/nvk/llm-wiki)** - Original inspiration by nvk for LLM-based knowledge management
-- **[Karpathy's LLM Token Optimization](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)** - Foundational concepts for token efficiency
-
-### Token Optimization & Bob Shell
-- **[Saving Tokens and BobCoins](https://pages.github.ibm.com/Markus-Eisele/bob-book/poster/saving-tokens-and-bobcoins/)** - Official Bob Shell guide on token optimization strategies
-
-### Documentation
-- [Live Example: HCD Analysis](evaluation/LIVE_EXAMPLE_HCD_ANALYSIS.md) - Real-world usage (0.36 coins)
-- [Honest Assessment](evaluation/HONEST_ASSESSMENT.md) - Production readiness analysis
-- [Test Results](evaluation/TEST_RESULTS_FINAL.md) - Complete validation results
-
-## Acknowledgments
-
-- Inspired by [LLM-Wiki](https://github.com/nvk/llm-wiki) by nvk
-- Built for [Bob Shell](https://github.com/bob-shell) by the community
-- Thanks to all contributors and testers
-
-## Support
-
-- **Issues**: [GitHub Issues](https://github.com/yourusername/bob-llmwiki-knowledge-manager/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/bob-llmwiki-knowledge-manager/discussions)
-- **Documentation**: See `docs/` directory
+### Make your codebase's knowledge *compound* — instead of paying to rediscover it every session.
+
+A native **IBM Bob Shell** implementation of Andrej Karpathy's **LLM-Wiki** pattern, engineered for **Bobcoin economy**.
+
+`MIT licensed` · `Native Bob Shell mode` · `No MCP servers` · `No plugins` · `Pattern: LLM-Wiki (Karpathy)`
+
+> **Executive summary.** Every Bob session re-reads and re-reasons about the same codebase — and pays
+> Bobcoins to do it, again and again. The fix isn't a shorter prompt; it's a **memory**. Bob Shell
+> Knowledge Manager turns Bob into a disciplined maintainer of a living, markdown knowledge base for your
+> repository: knowledge is written down once and *retrieved* thereafter, so the bill falls because the work
+> stops repeating. It ships as **two native Bob modes** — no plugin, no MCP server, nothing external in the
+> loop. In one real run, it scaffolded the documentation strategy for a **94-module platform in six tool
+> calls for 0.36 Bobcoins**.
 
 ---
 
-**Ready to get started?** → [Quick Start Guide](docs/QUICK_START.md) 📚
+## 1. The problem: you're paying to relearn what Bob already knew
+
+IBM's own guidance is blunt about where a session's budget goes. Every turn burns **input**, **output**,
+and **reasoning** tokens — and the two you can't see are the expensive ones.
+
+Teams respond by trimming the visible line: disabling tools, pasting less, shortening prompts. That helps —
+until it hits a floor. Because the largest recurring cost isn't the prompt. **It's re-derivation.** Session
+after session, Bob re-reads your architecture, re-infers the same relationships, and re-explains the same
+concepts — because nothing it learned last time survived the end of the thread.
+
+> The cheapest session is the one that never has to think a thought twice.
+
+## 2. The idea we implement: Karpathy's LLM-Wiki
+
+Karpathy's *LLM-Wiki* pattern replaces "retrieve-from-scratch" with a **persistent, compounding artifact**:
+
+> *"The wiki is a persistent, compounding artifact. The cross-references are already there. The
+> contradictions have already been flagged."* — as opposed to RAG, where *"the LLM is rediscovering
+> knowledge from scratch on every question. There's no accumulation."*
+
+It has three layers:
+
+1. **Raw sources** — your code and docs. Immutable; the model reads, never edits.
+2. **The wiki** — LLM-owned markdown: concepts, guides, references, cross-links.
+3. **The schema** — a config that makes the model *"a disciplined wiki maintainer rather than a generic chatbot."*
+
+His load-bearing insight: *"the tedious part of maintaining a knowledge base is not the reading or the
+thinking — it's the bookkeeping."* LLMs are extraordinary bookkeepers. Point one at your repo, and the
+knowledge base maintains itself.
+
+## 3. What this is: the pattern, made native to Bob Shell
+
+Bob Shell Knowledge Manager is that pattern, built entirely on Bob's **native** capabilities — no plugin,
+no MCP server, no external service in the loop:
+
+- **📚 `knowledge-manager` mode** — turns Bob into a structured KB maintainer: concepts / guides /
+  references / research, consistent templates, bidirectional cross-references, `save_memory`, and a
+  self-updating `INDEX.md`.
+- **🔍 `repo-analyzer` mode** — a 7-phase repository audit that runs analysis *scripts* and files digested
+  findings into the KB, instead of dragging raw source through the context window.
+- **The schema layer** — your `AGENTS.md` plus the mode definition *are* Karpathy's third layer: stable
+  rules that make Bob both disciplined and cacheable.
+
+<p align="center">
+  <img src="docs/assets/kb-compounding-loop.svg" alt="The compounding-knowledge loop: Bob reads your repository once, files digested knowledge into a version-controlled knowledge base, and every later session retrieves from that knowledge base instead of re-deriving from the repo." width="760">
+</p>
+
+## 4. Why it saves Bobcoins: structure, not a benchmark
+
+The savings aren't a number we ran once — they're **structural**. Each principle in IBM's token-economy
+guidance has a concrete home in how the modes behave:
+
+| IBM principle (*Save Bobcoins*) | The recurring waste | How the modes remove it |
+|---|---|---|
+| **Catalog tax** | Every enabled MCP server re-sends its full tool catalog *every turn* | Native Bob mode — **no plugin, no MCP** to load |
+| **Payload tax** | A 2,000-line file attached when 20 lines matter | `repo-analyzer` runs scripts that **summarise**; the KB stores digested reports you *cite*, not raw source |
+| **Compression trap** | Stripping meaning to save input backfires (a study measured **+67% cost**) | Templates **preserve** meaning — rationale, real names, cross-refs — structured, not stripped |
+| **Short threads** | Turn 15 re-pays 14 turns of stale history | Knowledge persists in KB files + `save_memory`; a fresh thread **retrieves** it instead of re-deriving it |
+| **Let caching work** | Reworded prefixes miss the cache | Fixed mode definition + `AGENTS.md` + KB layout = a **cacheable prefix** |
+| **Trim output** | Verbose narration is paid on every reply | Bounded artifacts: templates, `INDEX.md`, reports — not essays |
+| **The three budget columns** | Output & reasoning cost more than input | A curated KB shrinks all three: less to **read**, less to **reason** about, less to **write** |
+
+**So what:** the mode makes the cheap path the *default* path. You don't have to remember the discipline —
+the mode **is** the discipline.
+
+## 5. Proof point: a 94-module platform, documented for 0.36 coins
+
+A real run on **HCD At Its Core** — IBM's Hyper-Converged Database teaching platform: 94 interactive demo
+modules, a decorator-based Python engine, an adversarial "Audit Arena" test framework. The prompt: *act as
+knowledge manager for this codebase; analyse it and propose the first five documents worth writing.*
+
+Bob's answer, in **six tool calls**:
+
+- Correctly read the architecture — V3 engine, the `@demo_module` decorator, context-fixture injection,
+  the Audit Arena tribunal.
+- Proposed **five targeted, correctly-typed documents** (two concepts, two guides, one API reference) —
+  each with a rationale and a content outline.
+- **Cost: 0.36 Bobcoins** — under 1% of a session budget. ~2 minutes. No retries.
+
+One run is one data point, not a benchmark — but it's the *shape* of the value: **structured, accurate, and
+cheap enough to run on every repo you touch.** Full transcript: `evaluation/LIVE_EXAMPLE_HCD_ANALYSIS.md`.
+
+## 6. How it compares: the thesis, the engine, and the native port
+
+Three points on one line — from an idea, to a full research engine, to a frugal Bob-native port:
+
+| | **Karpathy's LLM-Wiki** · the thesis | **nvk/llm-wiki** · the engine | **Bob Shell KM** · this project |
+|---|---|---|---|
+| **Nature** | The blueprint / pattern | A full multi-agent implementation | The pattern, native to Bob Shell |
+| **Platform** | Any LLM (concept) | Claude Code, Codex, OpenCode… | **IBM Bob Shell** |
+| **Mechanism** | 3 layers: raw / wiki / schema | Plugin + `/wiki:*` commands, a hub of topic wikis | Two modes + templates + KB + scripts |
+| **Research** | You curate | 5–10 parallel agents, auto-compile, thesis mode | Single-agent, natural language, script-assisted |
+| **Setup** | DIY | Install a plugin | `install.sh` — **no plugin, no MCP** |
+| **Cost posture** | Frugal by design | Powerful; heavier per run | **Engineered for Bobcoin economy** |
+| **Reach for it when…** | You want the idea | You want a research hub in Claude Code | **You live in Bob Shell and optimise Bobcoins** |
+
+**So what:** this project doesn't try to out-feature nvk's research engine. It brings Karpathy's
+compounding-knowledge idea to Bob Shell users **natively and cheaply** — frugality is the design centre,
+not an afterthought.
+
+## 7. Get started in 5 minutes
+
+No custom mode required. Point three scripts at your project, then let any Bob mode do the thinking.
+
+```bash
+# 1 · Scaffold the knowledge base in your project
+cd ~/your-project
+~/Projects/bob-llmwiki-knowledge-manager/scripts/init-project.sh
+
+# 2 · Let the scripts do the reading — a full automated analysis,
+#     filed straight into docs/knowledge-base/
+~/Projects/bob-llmwiki-knowledge-manager/scripts/run-full-analysis.sh
+
+# 3 · Validate the knowledge-base structure
+~/Projects/bob-llmwiki-knowledge-manager/scripts/validate-kb.sh
+```
+
+Now stay in **whatever Bob mode you're already using** (Ask, Code, …) and paste this prompt:
+
+```text
+I want you to act as a knowledge manager for this codebase.
+
+Your role:
+- Document code in docs/knowledge-base/
+- Use templates from /Users/david.leconte/Projects/bob-llmwiki-knowledge-manager/config/templates/
+- Create concept documents for core ideas
+- Create guides for how-to instructions
+- Create references for API documentation
+- Create research notes for investigations
+- Maintain INDEX.md with all documents
+- Add cross-references between related documents
+
+Start by analyzing the codebase and suggesting 5 initial documents to create
+```
+
+The scripts have already filed digested reports into `docs/knowledge-base/`, so Bob proposes documents
+**grounded in evidence it didn't have to re-read** — the same prompt that produced the 0.36-coin result in §5.
+
+> *Optional:* the `knowledge-manager` mode packages this prompt into a one-liner (`./scripts/install.sh` to
+> register it). Handy later — not required for the flow above.
+
+## 8. What's in the box
+
+- **2 native Bob modes** — `knowledge-manager`, `repo-analyzer`.
+- **4 document templates** — concept · guide · reference · research.
+- **A knowledge-base structure** with a self-maintained `INDEX.md` and `save_memory` integration.
+- **Core scripts** — `install`, `init-project`, `validate-kb`, `export-kb` (markdown / Obsidian / HTML / PDF).
+- **An analysis suite** — scan, dependencies, metrics, security, test-coverage, git-history, docs, and a
+  consolidated report.
+- **3 worked example knowledge bases** — a software project, a research project, and a personal wiki.
+
+## 9. Maturity: what's proven, what's experimental
+
+Intellectual honesty is part of the pitch. Here is the real maturity map:
+
+- ✅ **Proven & usable today** — the two Bob modes, the templates, the KB workflow, and the analysis
+  scripts. *This is the product.*
+- 🧪 **Experimental / roadmap** — a Python token-optimization toolkit (exact + semantic cache, prompt
+  optimizer, truncation strategies). Promising primitives, **not yet validated end-to-end** on live Bob
+  workloads. Treat any performance figure as a **target, not a measurement**.
+- ⛔ **Not claimed** — enterprise SLAs, and automated multi-agent research (for that, use `nvk/llm-wiki`).
+
+## References
+
+- **Andrej Karpathy — the LLM-Wiki pattern** · `https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f`
+- **IBM Bob Shell — Save Tokens, Save Bobcoins** · `https://bob.ibm.com/docs/shell`
+- **nvk/llm-wiki — a full multi-agent implementation** · `https://github.com/nvk/llm-wiki`
+- **Live example — HCD codebase analysis (0.36 coins)** · `evaluation/LIVE_EXAMPLE_HCD_ANALYSIS.md`
+
+---
+
+*Built on Bob Shell's native modes. Inspired by Karpathy's LLM-Wiki and nvk's implementation. Frugal by design.*
