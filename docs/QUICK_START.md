@@ -42,6 +42,26 @@ docs/knowledge-base/
 └── research/
 ```
 
+## Enhanced Utilities (Phase 3 ⭐)
+
+Four powerful utilities for advanced analysis:
+
+```bash
+# Batch read files
+python3 scripts/utils/batch_file_reader.py src/**/*.py --strategy summary
+
+# Analyze components
+python3 scripts/utils/component_analyzer.py src/cache --type security
+
+# Query knowledge base
+python3 scripts/utils/kb_query.py query "caching"
+
+# Generate visualizations
+python3 scripts/utils/visualizer.py --data data.json --type bar --title "Results"
+```
+
+See [Phase 3 Documentation](PHASE3_IMPLEMENTATION_COMPLETE.md) for details.
+
 ## Create Your First Document (2 minutes)
 
 ### Option 1: Using Bob Shell (Recommended)

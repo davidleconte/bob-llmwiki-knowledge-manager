@@ -1,0 +1,38 @@
+{
+  "generated_at": "2026-07-12T16:41:24.876253",
+  "scenarios": [
+    {
+      "id": 1,
+      "name": "Small Repository",
+      "files": 20,
+      "lines": 5000,
+      "components": 3
+    },
+    {
+      "id": 2,
+      "name": "Medium Repository",
+      "files": 50,
+      "lines": 15000,
+      "components": 8
+    },
+    {
+      "id": 3,
+      "name": "Large Repository",
+      "files": 100,
+      "lines": 35000,
+      "components": 15
+    },
+    {
+      "id": 4,
+      "name": "Deep Analysis (Medium + KB)",
+      "files": 50,
+      "kb_documents": 140
+    },
+    {
+      "id": 5,
+      "name": "Parallel Execution",
+      "files": 50,
+      "parallel_tasks": 6
+    }
+  ]
+}

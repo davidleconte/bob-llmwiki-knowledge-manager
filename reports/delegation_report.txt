@@ -1,0 +1,50 @@
+================================================================================
+                          Sub-Agent Delegation Report                           
+================================================================================
+
+Total Tasks: 6
+Completed: 6
+Failed: 0
+Success Rate: 100.0%
+
+Total Execution Time: 23ms
+Parallel Execution Time: 92ms
+Parallelization Factor: 4.0x
+
+Total Tokens: 997
+Registered Agents: 6
+
+Agent Statistics:
+  security (security-1):
+    Completed: 1
+    Failed: 0
+    Tokens: 94
+    Cache Size: 1
+  performance (performance-1):
+    Completed: 1
+    Failed: 0
+    Tokens: 49
+    Cache Size: 1
+  quality (quality-1):
+    Completed: 1
+    Failed: 0
+    Tokens: 97
+    Cache Size: 1
+  architecture (architecture-1):
+    Completed: 1
+    Failed: 0
+    Tokens: 218
+    Cache Size: 1
+  documentation (documentation-1):
+    Completed: 1
+    Failed: 0
+    Tokens: 81
+    Cache Size: 1
+  research (research-1):
+    Completed: 1
+    Failed: 0
+    Tokens: 458
+    Cache Size: 1
+
+
+================================================================================

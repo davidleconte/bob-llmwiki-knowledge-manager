@@ -1,0 +1,508 @@
+{
+  "security": [
+    {
+      "file": "src/auth/module_0.py",
+      "line": 10,
+      "pattern": "password = \"hardcoded123\""
+    },
+    {
+      "file": "src/auth/module_0.py",
+      "line": 15,
+      "pattern": "API_KEY = \"sk-1234567890abcdef\""
+    },
+    {
+      "file": "src/utils/module_3.py",
+      "line": 10,
+      "pattern": "password = \"hardcoded123\""
+    },
+    {
+      "file": "src/utils/module_3.py",
+      "line": 15,
+      "pattern": "API_KEY = \"sk-1234567890abcdef\""
+    },
+    {
+      "file": "src/services/module_6.py",
+      "line": 10,
+      "pattern": "password = \"hardcoded123\""
+    },
+    {
+      "file": "src/services/module_6.py",
+      "line": 15,
+      "pattern": "API_KEY = \"sk-1234567890abcdef\""
+    },
+    {
+      "file": "src/api/module_9.py",
+      "line": 10,
+      "pattern": "password = \"hardcoded123\""
+    },
+    {
+      "file": "src/api/module_9.py",
+      "line": 15,
+      "pattern": "API_KEY = \"sk-1234567890abcdef\""
+    },
+    {
+      "file": "src/models/module_2.py",
+      "line": 10,
+      "pattern": "password = \"hardcoded123\""
+    },
+    {
+      "file": "src/models/module_2.py",
+      "line": 15,
+      "pattern": "API_KEY = \"sk-1234567890abcdef\""
+    },
+    {
+      "file": "src/controllers/module_5.py",
+      "line": 10,
+      "pattern": "password = \"hardcoded123\""
+    },
+    {
+      "file": "src/controllers/module_5.py",
+      "line": 15,
+      "pattern": "API_KEY = \"sk-1234567890abcdef\""
+    },
+    {
+      "file": "src/database/module_8.py",
+      "line": 10,
+      "pattern": "password = \"hardcoded123\""
+    },
+    {
+      "file": "src/database/module_8.py",
+      "line": 15,
+      "pattern": "API_KEY = \"sk-1234567890abcdef\""
+    },
+    {
+      "file": "src/views/module_1.py",
+      "line": 10,
+      "pattern": "password = \"hardcoded123\""
+    },
+    {
+      "file": "src/views/module_1.py",
+      "line": 15,
+      "pattern": "API_KEY = \"sk-1234567890abcdef\""
+    },
+    {
+      "file": "src/auth/module_4.py",
+      "line": 10,
+      "pattern": "password = \"hardcoded123\""
+    },
+    {
+      "file": "src/auth/module_4.py",
+      "line": 15,
+      "pattern": "API_KEY = \"sk-1234567890abcdef\""
+    },
+    {
+      "file": "src/utils/module_7.py",
+      "line": 10,
+      "pattern": "password = \"hardcoded123\""
+    },
+    {
+      "file": "src/utils/module_7.py",
+      "line": 15,
+      "pattern": "API_KEY = \"sk-1234567890abcdef\""
+    },
+    {
+      "file": "src/services/module_0.py",
+      "line": 10,
+      "pattern": "password = \"hardcoded123\""
+    },
+    {
+      "file": "src/services/module_0.py",
+      "line": 15,
+      "pattern": "API_KEY = \"sk-1234567890abcdef\""
+    },
+    {
+      "file": "src/api/module_3.py",
+      "line": 10,
+      "pattern": "password = \"hardcoded123\""
+    },
+    {
+      "file": "src/api/module_3.py",
+      "line": 15,
+      "pattern": "API_KEY = \"sk-1234567890abcdef\""
+    },
+    {
+      "file": "src/models/module_6.py",
+      "line": 10,
+      "pattern": "password = \"hardcoded123\""
+    },
+    {
+      "file": "src/models/module_6.py",
+      "line": 15,
+      "pattern": "API_KEY = \"sk-1234567890abcdef\""
+    },
+    {
+      "file": "src/controllers/module_9.py",
+      "line": 10,
+      "pattern": "password = \"hardcoded123\""
+    },
+    {
+      "file": "src/controllers/module_9.py",
+      "line": 15,
+      "pattern": "API_KEY = \"sk-1234567890abcdef\""
+    },
+    {
+      "file": "src/database/module_2.py",
+      "line": 10,
+      "pattern": "password = \"hardcoded123\""
+    },
+    {
+      "file": "src/database/module_2.py",
+      "line": 15,
+      "pattern": "API_KEY = \"sk-1234567890abcdef\""
+    },
+    {
+      "file": "src/views/module_5.py",
+      "line": 10,
+      "pattern": "password = \"hardcoded123\""
+    },
+    {
+      "file": "src/views/module_5.py",
+      "line": 15,
+      "pattern": "API_KEY = \"sk-1234567890abcdef\""
+    },
+    {
+      "file": "src/auth/module_8.py",
+      "line": 10,
+      "pattern": "password = \"hardcoded123\""
+    },
+    {
+      "file": "src/auth/module_8.py",
+      "line": 15,
+      "pattern": "API_KEY = \"sk-1234567890abcdef\""
+    }
+  ],
+  "performance": [
+    {
+      "file": "src/api/module_1.py",
+      "line": 10,
+      "pattern": "for i in range(n):\n    for j in range(n):"
+    },
+    {
+      "file": "src/api/module_1.py",
+      "line": 15,
+      "pattern": "for item in items:\n    db.query(item.id)"
+    },
+    {
+      "file": "src/models/module_4.py",
+      "line": 10,
+      "pattern": "for i in range(n):\n    for j in range(n):"
+    },
+    {
+      "file": "src/models/module_4.py",
+      "line": 15,
+      "pattern": "for item in items:\n    db.query(item.id)"
+    },
+    {
+      "file": "src/controllers/module_7.py",
+      "line": 10,
+      "pattern": "for i in range(n):\n    for j in range(n):"
+    },
+    {
+      "file": "src/controllers/module_7.py",
+      "line": 15,
+      "pattern": "for item in items:\n    db.query(item.id)"
+    },
+    {
+      "file": "src/database/module_0.py",
+      "line": 10,
+      "pattern": "for i in range(n):\n    for j in range(n):"
+    },
+    {
+      "file": "src/database/module_0.py",
+      "line": 15,
+      "pattern": "for item in items:\n    db.query(item.id)"
+    },
+    {
+      "file": "src/views/module_3.py",
+      "line": 10,
+      "pattern": "for i in range(n):\n    for j in range(n):"
+    },
+    {
+      "file": "src/views/module_3.py",
+      "line": 15,
+      "pattern": "for item in items:\n    db.query(item.id)"
+    },
+    {
+      "file": "src/auth/module_6.py",
+      "line": 10,
+      "pattern": "for i in range(n):\n    for j in range(n):"
+    },
+    {
+      "file": "src/auth/module_6.py",
+      "line": 15,
+      "pattern": "for item in items:\n    db.query(item.id)"
+    },
+    {
+      "file": "src/utils/module_9.py",
+      "line": 10,
+      "pattern": "for i in range(n):\n    for j in range(n):"
+    },
+    {
+      "file": "src/utils/module_9.py",
+      "line": 15,
+      "pattern": "for item in items:\n    db.query(item.id)"
+    },
+    {
+      "file": "src/services/module_2.py",
+      "line": 10,
+      "pattern": "for i in range(n):\n    for j in range(n):"
+    },
+    {
+      "file": "src/services/module_2.py",
+      "line": 15,
+      "pattern": "for item in items:\n    db.query(item.id)"
+    },
+    {
+      "file": "src/api/module_5.py",
+      "line": 10,
+      "pattern": "for i in range(n):\n    for j in range(n):"
+    },
+    {
+      "file": "src/api/module_5.py",
+      "line": 15,
+      "pattern": "for item in items:\n    db.query(item.id)"
+    },
+    {
+      "file": "src/models/module_8.py",
+      "line": 10,
+      "pattern": "for i in range(n):\n    for j in range(n):"
+    },
+    {
+      "file": "src/models/module_8.py",
+      "line": 15,
+      "pattern": "for item in items:\n    db.query(item.id)"
+    },
+    {
+      "file": "src/controllers/module_1.py",
+      "line": 10,
+      "pattern": "for i in range(n):\n    for j in range(n):"
+    },
+    {
+      "file": "src/controllers/module_1.py",
+      "line": 15,
+      "pattern": "for item in items:\n    db.query(item.id)"
+    },
+    {
+      "file": "src/database/module_4.py",
+      "line": 10,
+      "pattern": "for i in range(n):\n    for j in range(n):"
+    },
+    {
+      "file": "src/database/module_4.py",
+      "line": 15,
+      "pattern": "for item in items:\n    db.query(item.id)"
+    },
+    {
+      "file": "src/views/module_7.py",
+      "line": 10,
+      "pattern": "for i in range(n):\n    for j in range(n):"
+    },
+    {
+      "file": "src/views/module_7.py",
+      "line": 15,
+      "pattern": "for item in items:\n    db.query(item.id)"
+    },
+    {
+      "file": "src/auth/module_0.py",
+      "line": 10,
+      "pattern": "for i in range(n):\n    for j in range(n):"
+    },
+    {
+      "file": "src/auth/module_0.py",
+      "line": 15,
+      "pattern": "for item in items:\n    db.query(item.id)"
+    },
+    {
+      "file": "src/utils/module_3.py",
+      "line": 10,
+      "pattern": "for i in range(n):\n    for j in range(n):"
+    },
+    {
+      "file": "src/utils/module_3.py",
+      "line": 15,
+      "pattern": "for item in items:\n    db.query(item.id)"
+    },
+    {
+      "file": "src/services/module_6.py",
+      "line": 10,
+      "pattern": "for i in range(n):\n    for j in range(n):"
+    },
+    {
+      "file": "src/services/module_6.py",
+      "line": 15,
+      "pattern": "for item in items:\n    db.query(item.id)"
+    },
+    {
+      "file": "src/api/module_9.py",
+      "line": 10,
+      "pattern": "for i in range(n):\n    for j in range(n):"
+    },
+    {
+      "file": "src/api/module_9.py",
+      "line": 15,
+      "pattern": "for item in items:\n    db.query(item.id)"
+    }
+  ],
+  "quality": [
+    {
+      "file": "src/database/module_2.py",
+      "line": 10,
+      "pattern": "def long_function():\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n"
+    },
+    {
+      "file": "src/database/module_2.py",
+      "line": 15,
+      "pattern": "if a and b and c and d and e and f:"
+    },
+    {
+      "file": "src/views/module_5.py",
+      "line": 10,
+      "pattern": "def long_function():\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n"
+    },
+    {
+      "file": "src/views/module_5.py",
+      "line": 15,
+      "pattern": "if a and b and c and d and e and f:"
+    },
+    {
+      "file": "src/auth/module_8.py",
+      "line": 10,
+      "pattern": "def long_function():\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n"
+    },
+    {
+      "file": "src/auth/module_8.py",
+      "line": 15,
+      "pattern": "if a and b and c and d and e and f:"
+    },
+    {
+      "file": "src/utils/module_1.py",
+      "line": 10,
+      "pattern": "def long_function():\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n"
+    },
+    {
+      "file": "src/utils/module_1.py",
+      "line": 15,
+      "pattern": "if a and b and c and d and e and f:"
+    },
+    {
+      "file": "src/services/module_4.py",
+      "line": 10,
+      "pattern": "def long_function():\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n"
+    },
+    {
+      "file": "src/services/module_4.py",
+      "line": 15,
+      "pattern": "if a and b and c and d and e and f:"
+    },
+    {
+      "file": "src/api/module_7.py",
+      "line": 10,
+      "pattern": "def long_function():\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n"
+    },
+    {
+      "file": "src/api/module_7.py",
+      "line": 15,
+      "pattern": "if a and b and c and d and e and f:"
+    },
+    {
+      "file": "src/models/module_0.py",
+      "line": 10,
+      "pattern": "def long_function():\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n"
+    },
+    {
+      "file": "src/models/module_0.py",
+      "line": 15,
+      "pattern": "if a and b and c and d and e and f:"
+    },
+    {
+      "file": "src/controllers/module_3.py",
+      "line": 10,
+      "pattern": "def long_function():\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n"
+    },
+    {
+      "file": "src/controllers/module_3.py",
+      "line": 15,
+      "pattern": "if a and b and c and d and e and f:"
+    },
+    {
+      "file": "src/database/module_6.py",
+      "line": 10,
+      "pattern": "def long_function():\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n"
+    },
+    {
+      "file": "src/database/module_6.py",
+      "line": 15,
+      "pattern": "if a and b and c and d and e and f:"
+    },
+    {
+      "file": "src/views/module_9.py",
+      "line": 10,
+      "pattern": "def long_function():\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n"
+    },
+    {
+      "file": "src/views/module_9.py",
+      "line": 15,
+      "pattern": "if a and b and c and d and e and f:"
+    },
+    {
+      "file": "src/auth/module_2.py",
+      "line": 10,
+      "pattern": "def long_function():\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n"
+    },
+    {
+      "file": "src/auth/module_2.py",
+      "line": 15,
+      "pattern": "if a and b and c and d and e and f:"
+    },
+    {
+      "file": "src/utils/module_5.py",
+      "line": 10,
+      "pattern": "def long_function():\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n"
+    },
+    {
+      "file": "src/utils/module_5.py",
+      "line": 15,
+      "pattern": "if a and b and c and d and e and f:"
+    },
+    {
+      "file": "src/services/module_8.py",
+      "line": 10,
+      "pattern": "def long_function():\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n"
+    },
+    {
+      "file": "src/services/module_8.py",
+      "line": 15,
+      "pattern": "if a and b and c and d and e and f:"
+    },
+    {
+      "file": "src/api/module_1.py",
+      "line": 10,
+      "pattern": "def long_function():\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n"
+    },
+    {
+      "file": "src/api/module_1.py",
+      "line": 15,
+      "pattern": "if a and b and c and d and e and f:"
+    },
+    {
+      "file": "src/models/module_4.py",
+      "line": 10,
+      "pattern": "def long_function():\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n"
+    },
+    {
+      "file": "src/models/module_4.py",
+      "line": 15,
+      "pattern": "if a and b and c and d and e and f:"
+    },
+    {
+      "file": "src/controllers/module_7.py",
+      "line": 10,
+      "pattern": "def long_function():\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n    pass\n"
+    },
+    {
+      "file": "src/controllers/module_7.py",
+      "line": 15,
+      "pattern": "if a and b and c and d and e and f:"
+    }
+  ]
+}
