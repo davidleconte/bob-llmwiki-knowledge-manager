@@ -1,0 +1,20 @@
+# Adversarial Review Framework Dependencies
+# Install with: pip install -r requirements.txt
+# Or with conda + uv: conda run -n ENV_NAME uv pip install -r requirements.txt
+
+# Core data analysis
+pandas>=3.0.0
+numpy>=1.24.0
+
+# Statistical analysis
+scipy>=1.10.0
+
+# Visualization
+matplotlib>=3.8.0
+seaborn>=0.13.0
+
+# Optional: Enhanced reporting
+# tabulate>=0.9.0  # For prettier markdown tables (optional)
+
+# Python version requirement
+# python_requires>=3.11

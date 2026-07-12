@@ -1,0 +1,812 @@
+[
+  {
+    "task_id": "DC_C_001",
+    "scenario": "document_creation",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "DC_C_002",
+    "scenario": "document_creation",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "DC_C_003",
+    "scenario": "document_creation",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "DC_C_004",
+    "scenario": "document_creation",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "DC_C_005",
+    "scenario": "document_creation",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "DC_C_006",
+    "scenario": "document_creation",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "DC_C_007",
+    "scenario": "document_creation",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "DC_C_008",
+    "scenario": "document_creation",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "DC_C_009",
+    "scenario": "document_creation",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "DC_C_010",
+    "scenario": "document_creation",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "RT_C_001",
+    "scenario": "retrieval",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "RT_C_002",
+    "scenario": "retrieval",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "RT_C_003",
+    "scenario": "retrieval",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "RT_C_004",
+    "scenario": "retrieval",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "RT_C_005",
+    "scenario": "retrieval",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "RT_C_006",
+    "scenario": "retrieval",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "RT_C_007",
+    "scenario": "retrieval",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "RT_C_008",
+    "scenario": "retrieval",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "RT_C_009",
+    "scenario": "retrieval",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "RT_C_010",
+    "scenario": "retrieval",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "MT_C_001",
+    "scenario": "maintenance",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "MT_C_002",
+    "scenario": "maintenance",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "MT_C_003",
+    "scenario": "maintenance",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "MT_C_004",
+    "scenario": "maintenance",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "MT_C_005",
+    "scenario": "maintenance",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "SY_C_001",
+    "scenario": "synthesis",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "SY_C_002",
+    "scenario": "synthesis",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "SY_C_003",
+    "scenario": "synthesis",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "SY_C_004",
+    "scenario": "synthesis",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  },
+  {
+    "task_id": "SY_C_005",
+    "scenario": "synthesis",
+    "condition": "control",
+    "participant": "user1",
+    "timestamp": null,
+    "metrics": {
+      "tokens_used": 0,
+      "bobcoin_cost": 0.0,
+      "time_seconds": 0,
+      "quality_score": {
+        "completeness": 0,
+        "accuracy": 0,
+        "consistency": 0,
+        "usability": 0,
+        "total": 0
+      },
+      "cross_references": 0,
+      "search_queries": 0,
+      "memory_recalls": 0
+    },
+    "artifacts": {
+      "input": "",
+      "output": "",
+      "transcript": ""
+    }
+  }
+]

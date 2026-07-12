@@ -1,0 +1,11 @@
+{
+  "total_tasks": 60,
+  "control_tasks": 30,
+  "treatment_tasks": 30,
+  "scenarios": {
+    "document_creation": 10,
+    "retrieval": 10,
+    "maintenance": 5,
+    "synthesis": 5
+  }
+}

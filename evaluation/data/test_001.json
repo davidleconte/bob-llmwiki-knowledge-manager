@@ -3,7 +3,7 @@
   "scenario": "document_creation",
   "condition": "control",
   "participant": "user1",
-  "timestamp": "2026-07-12T08:03:42.949993",
+  "timestamp": "2026-07-12T08:18:08.045394",
   "metrics": {
     "tokens_used": 450,
     "bobcoin_cost": 0.045,
