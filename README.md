@@ -187,4 +187,4 @@ Intellectual honesty is part of the pitch. Here is the real maturity map:
 
 ---
 
-*Built on Bob Shell's native modes. Inspired by Karpathy's LLM-Wiki and nvk's implementation. Frugal by design.*
+**Author:** David Leconte · **Platform:** IBM Bob Shell · Inspired by Karpathy's LLM-Wiki and nvk's implementation.
