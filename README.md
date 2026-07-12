@@ -16,6 +16,9 @@ A native **IBM Bob Shell** implementation of Andrej Karpathy's **LLM-Wiki** patt
 
 ---
 
+https://github.com/user-attachments/assets/897fecc2-8849-4fad-b8e0-3c408b026de6
+
+
 ## 1. The problem: you're paying to relearn what Bob already knew
 
 IBM's own guidance is blunt about where a session's budget goes. Every turn burns **input**, **output**,
