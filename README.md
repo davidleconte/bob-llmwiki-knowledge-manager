@@ -346,6 +346,20 @@ Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for gu
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
+## References & Resources
+
+### Inspiration & Related Projects
+- **[LLM-Wiki](https://github.com/nvk/llm-wiki)** - Original inspiration by nvk for LLM-based knowledge management
+- **[Karpathy's LLM Token Optimization](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)** - Foundational concepts for token efficiency
+
+### Token Optimization & Bob Shell
+- **[Saving Tokens and BobCoins](https://pages.github.ibm.com/Markus-Eisele/bob-book/poster/saving-tokens-and-bobcoins/)** - Official Bob Shell guide on token optimization strategies
+
+### Documentation
+- [Live Example: HCD Analysis](evaluation/LIVE_EXAMPLE_HCD_ANALYSIS.md) - Real-world usage (0.36 coins)
+- [Honest Assessment](evaluation/HONEST_ASSESSMENT.md) - Production readiness analysis
+- [Test Results](evaluation/TEST_RESULTS_FINAL.md) - Complete validation results
+
 ## Acknowledgments
 
 - Inspired by [LLM-Wiki](https://github.com/nvk/llm-wiki) by nvk
