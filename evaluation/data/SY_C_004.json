@@ -1,0 +1,43 @@
+{
+  "task_id": "SY_C_004",
+  "scenario": "synthesis",
+  "condition": "control",
+  "participant": "mock_user_v2",
+  "timestamp": "2026-07-12T09:58:36.949869",
+  "metrics": {
+    "tokens_used": 423,
+    "bobcoin_cost": 0.0423,
+    "time_seconds": 265,
+    "quality_score": {
+      "completeness": 20,
+      "accuracy": 20,
+      "consistency": 20,
+      "usability": 20,
+      "total": 83
+    },
+    "cross_references": 0,
+    "search_queries": 0,
+    "memory_recalls": 0,
+    "behavioral_metadata": {
+      "complexity": 1.03,
+      "learning_progress": 0.13,
+      "context_warm": true,
+      "had_errors": false,
+      "attempts": 1,
+      "session_task_number": 4,
+      "time_of_day": 14
+    }
+  },
+  "artifacts": {
+    "input": "",
+    "output": "",
+    "transcript": ""
+  },
+  "metadata": {
+    "mock_data": true,
+    "mock_version": "v2",
+    "generated_at": "2026-07-12T11:58:36.949868",
+    "warning": "NOT VALID FOR RESEARCH",
+    "behavioral_simulation": true
+  }
+}

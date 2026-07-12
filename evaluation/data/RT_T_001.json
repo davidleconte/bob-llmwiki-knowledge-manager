@@ -1,0 +1,43 @@
+{
+  "task_id": "RT_T_001",
+  "scenario": "retrieval",
+  "condition": "treatment",
+  "participant": "mock_user_v2",
+  "timestamp": "2026-07-12T09:58:36.951145",
+  "metrics": {
+    "tokens_used": 143,
+    "bobcoin_cost": 0.0143,
+    "time_seconds": 98,
+    "quality_score": {
+      "completeness": 22,
+      "accuracy": 22,
+      "consistency": 22,
+      "usability": 22,
+      "total": 88
+    },
+    "cross_references": 3,
+    "search_queries": 2,
+    "memory_recalls": 4,
+    "behavioral_metadata": {
+      "complexity": 0.58,
+      "learning_progress": 0.2,
+      "context_warm": false,
+      "had_errors": false,
+      "attempts": 1,
+      "session_task_number": 1,
+      "time_of_day": 12
+    }
+  },
+  "artifacts": {
+    "input": "",
+    "output": "",
+    "transcript": ""
+  },
+  "metadata": {
+    "mock_data": true,
+    "mock_version": "v2",
+    "generated_at": "2026-07-12T11:58:36.951144",
+    "warning": "NOT VALID FOR RESEARCH",
+    "behavioral_simulation": true
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "task_id": "MT_T_004",
+  "scenario": "maintenance",
+  "condition": "treatment",
+  "participant": "mock_user_v2",
+  "timestamp": "2026-07-12T09:58:36.952467",
+  "metrics": {
+    "tokens_used": 325,
+    "bobcoin_cost": 0.0325,
+    "time_seconds": 175,
+    "quality_score": {
+      "completeness": 25,
+      "accuracy": 25,
+      "consistency": 25,
+      "usability": 25,
+      "total": 100
+    },
+    "cross_references": 7,
+    "search_queries": 3,
+    "memory_recalls": 2,
+    "behavioral_metadata": {
+      "complexity": 1.71,
+      "learning_progress": 0.27,
+      "context_warm": true,
+      "had_errors": false,
+      "attempts": 1,
+      "session_task_number": 4,
+      "time_of_day": 9
+    }
+  },
+  "artifacts": {
+    "input": "",
+    "output": "",
+    "transcript": ""
+  },
+  "metadata": {
+    "mock_data": true,
+    "mock_version": "v2",
+    "generated_at": "2026-07-12T11:58:36.952466",
+    "warning": "NOT VALID FOR RESEARCH",
+    "behavioral_simulation": true
+  }
+}

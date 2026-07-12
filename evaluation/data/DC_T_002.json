@@ -1,0 +1,43 @@
+{
+  "task_id": "DC_T_002",
+  "scenario": "document_creation",
+  "condition": "treatment",
+  "participant": "mock_user_v2",
+  "timestamp": "2026-07-12T09:58:36.950178",
+  "metrics": {
+    "tokens_used": 246,
+    "bobcoin_cost": 0.0246,
+    "time_seconds": 198,
+    "quality_score": {
+      "completeness": 23,
+      "accuracy": 23,
+      "consistency": 23,
+      "usability": 23,
+      "total": 93
+    },
+    "cross_references": 5,
+    "search_queries": 1,
+    "memory_recalls": 4,
+    "behavioral_metadata": {
+      "complexity": 1.35,
+      "learning_progress": 0.05,
+      "context_warm": true,
+      "had_errors": false,
+      "attempts": 1,
+      "session_task_number": 2,
+      "time_of_day": 11
+    }
+  },
+  "artifacts": {
+    "input": "",
+    "output": "",
+    "transcript": ""
+  },
+  "metadata": {
+    "mock_data": true,
+    "mock_version": "v2",
+    "generated_at": "2026-07-12T11:58:36.950177",
+    "warning": "NOT VALID FOR RESEARCH",
+    "behavioral_simulation": true
+  }
+}
