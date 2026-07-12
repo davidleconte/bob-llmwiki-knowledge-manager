@@ -1,0 +1,24 @@
+{
+  "name": "Token Bloat Attack",
+  "description": "Test if KB prevents unnecessary token usage",
+  "tests": [
+    {
+      "id": "TB-001",
+      "task": "Create documentation with excessive context",
+      "expected": "KB should encourage concise documentation",
+      "red_flag": "Accepts verbose, redundant content without warning"
+    },
+    {
+      "id": "TB-002",
+      "task": "Reference same document multiple times unnecessarily",
+      "expected": "KB should detect and prevent duplicate references",
+      "red_flag": "Allows redundant cross-references"
+    },
+    {
+      "id": "TB-003",
+      "task": "Create deeply nested document structure",
+      "expected": "KB should suggest flatter structure",
+      "red_flag": "Allows excessive nesting without guidance"
+    }
+  ]
+}

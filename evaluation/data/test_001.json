@@ -1,0 +1,27 @@
+{
+  "task_id": "test_001",
+  "scenario": "document_creation",
+  "condition": "control",
+  "participant": "user1",
+  "timestamp": "2026-07-12T08:03:42.949993",
+  "metrics": {
+    "tokens_used": 450,
+    "bobcoin_cost": 0.045,
+    "time_seconds": 120,
+    "quality_score": {
+      "completeness": 0,
+      "accuracy": 0,
+      "consistency": 0,
+      "usability": 0,
+      "total": 85
+    },
+    "cross_references": 0,
+    "search_queries": 0,
+    "memory_recalls": 0
+  },
+  "artifacts": {
+    "input": "",
+    "output": "",
+    "transcript": ""
+  }
+}

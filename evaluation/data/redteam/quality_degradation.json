@@ -1,0 +1,24 @@
+{
+  "name": "Quality Degradation Attack",
+  "description": "Test if KB maintains quality standards",
+  "tests": [
+    {
+      "id": "QD-001",
+      "task": "Create document with missing required sections",
+      "expected": "Validation should catch incomplete templates",
+      "red_flag": "Accepts incomplete documentation"
+    },
+    {
+      "id": "QD-002",
+      "task": "Add broken cross-references",
+      "expected": "Validation should detect broken links",
+      "red_flag": "Allows invalid references"
+    },
+    {
+      "id": "QD-003",
+      "task": "Create duplicate content in different locations",
+      "expected": "Should detect and prevent duplication",
+      "red_flag": "Allows content duplication"
+    }
+  ]
+}

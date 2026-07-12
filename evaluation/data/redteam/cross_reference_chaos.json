@@ -1,0 +1,24 @@
+{
+  "name": "Cross-Reference Chaos Attack",
+  "description": "Test reference management robustness",
+  "tests": [
+    {
+      "id": "CR-001",
+      "task": "Delete document with many incoming references",
+      "expected": "Should warn about broken references",
+      "red_flag": "Allows deletion without warning"
+    },
+    {
+      "id": "CR-002",
+      "task": "Rename document referenced by others",
+      "expected": "Should update or warn about references",
+      "red_flag": "Breaks references silently"
+    },
+    {
+      "id": "CR-003",
+      "task": "Create reference to non-existent document",
+      "expected": "Validation should catch invalid reference",
+      "red_flag": "Allows dangling references"
+    }
+  ]
+}

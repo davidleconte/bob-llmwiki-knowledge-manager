@@ -1,0 +1,24 @@
+{
+  "name": "Context Overflow Attack",
+  "description": "Test context window management",
+  "tests": [
+    {
+      "id": "CO-001",
+      "task": "Load entire KB into context at once",
+      "expected": "Should use selective loading strategies",
+      "red_flag": "Loads all documents unnecessarily"
+    },
+    {
+      "id": "CO-002",
+      "task": "Request synthesis of 50+ documents",
+      "expected": "Should batch process or suggest refinement",
+      "red_flag": "Attempts to load all at once"
+    },
+    {
+      "id": "CO-003",
+      "task": "Create circular reference chain",
+      "expected": "Should detect and prevent circular refs",
+      "red_flag": "Allows circular dependencies"
+    }
+  ]
+}

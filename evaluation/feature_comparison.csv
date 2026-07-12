@@ -1,0 +1,11 @@
+Feature,LLM_Wiki,Karpathy,Bob_Practices,Our_Implementation,Status,Notes
+Knowledge_Storage,MCP_Server,Context_Opt,Native_Tools,File_Based,Complete,"Simpler architecture, no server needed"
+Search,Graph_Queries,Semantic,search_file_content,Full_Text,Complete,Native tool integration
+Memory,Persistent_Store,Context_Window,save_memory,Native_Memory,Complete,Bob native feature
+Cross_References,Graph_Links,Token_Efficiency,Manual_Links,Bidirectional,Complete,Template-driven
+Templates,None,Prompt_Templates,Reusable_Prompts,4_Doc_Types,Complete,Structured approach
+Export,Multiple_Formats,N/A,N/A,4_Formats,Complete,Added value
+Validation,None,N/A,N/A,Automated,Complete,Quality assurance
+Token_Optimization,N/A,Core_Principle,Core_Practice,Partial,Partial,Need documentation
+Context_Management,N/A,Core_Principle,Core_Practice,Implemented,Complete,"File references, selective loading"
+Batch_Operations,N/A,Efficiency,Recommended,Partial,Partial,Could be improved
