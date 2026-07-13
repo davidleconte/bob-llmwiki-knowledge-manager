@@ -441,7 +441,7 @@ class TestPerformanceTargets:
     
     def test_optimization_target(self):
         """Validate optimization <50ms target."""
-        optimizer = PromptOptimizer(TokenCounter())
+        optimizer = PromptOptimizer(model="gpt-4")
         
         prompt = "Can you help me understand how to implement caching in Python?"
         
