@@ -36,6 +36,8 @@ dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
     "pytest-mock>=3.10.0",
+    "pytest-timeout>=2.1.0",
+    "pytest-benchmark>=4.0.0",
 ]
 monitoring = [
     "psutil>=5.9.0",
@@ -59,20 +61,25 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+# Coverage is intentionally NOT in default addopts: plain `pytest` stays fast and
+# subset runs (e.g. `pytest tests/truncation`) don't trip the fail_under gate.
+# Coverage + gate are enforced via an explicit `pytest --cov=src` run (CI + the
+# documented full check); the threshold lives once in [tool.coverage.report].
 addopts = [
     "-v",
     "--strict-markers",
     "--tb=short",
-    "--cov=src",
-    "--cov-report=term-missing",
-    "--cov-report=html",
-    "--cov-report=xml",
 ]
 markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "unit: marks tests as fast, isolated unit tests",
     "integration: marks tests as integration tests",
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "e2e: marks tests as end-to-end tests",
 ]
+# Per-test wall-clock ceiling: a hung test (e.g. a lock deadlock or a leaked
+# background thread) FAILS with a full thread dump instead of stalling the whole
+# suite / CI forever. Generous enough for the benchmark tests (~seconds each).
+timeout = 60
 
 [tool.coverage.run]
 source = ["src"]
@@ -84,6 +91,14 @@ omit = [
 ]
 
 [tool.coverage.report]
+# Single home for the coverage gate. Any `pytest --cov=src` run (CI + the
+# documented full check) fails if total coverage drops below this floor.
+# Measured 72% at the Phase 2 config consolidation (up from 49.4% pre-Phase-1);
+# floor set to 70 to leave headroom while the 68 failing tests are triaged, then
+# ratcheted toward the Phase 2 target of 80%.
+fail_under = 70
+precision = 1
+show_missing = true
 exclude_lines = [
     "pragma: no cover",
     "def __repr__",
