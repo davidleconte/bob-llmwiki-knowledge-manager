@@ -1,403 +1,439 @@
-"""
-Health check module for the Token Optimization System.
+"""Health check system for monitoring operational status.
 
-Provides system health monitoring and status checks for all components.
+Provides health checks for cache systems, monitoring components, and system resources.
+Supports readiness and liveness probes for production deployments.
 """
 
 import time
-from dataclasses import dataclass
-from datetime import datetime
+import threading
+from typing import Dict, Any, List, Optional, Callable
+from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional
-import sys
 
-try:
-    import psutil
-    PSUTIL_AVAILABLE = True
-except ImportError:
-    PSUTIL_AVAILABLE = False
+from src.monitoring import get_logger
 
 
 class HealthStatus(Enum):
-    """Health status enumeration."""
+    """Health check status."""
     HEALTHY = "healthy"
     DEGRADED = "degraded"
     UNHEALTHY = "unhealthy"
+    UNKNOWN = "unknown"
 
 
 @dataclass
-class ComponentHealth:
-    """Health status for a component."""
+class HealthCheckResult:
+    """Result of a health check.
+    
+    Attributes:
+        name: Name of the health check
+        status: Health status
+        message: Optional message describing the status
+        details: Optional additional details
+        timestamp: When the check was performed
+        duration_ms: How long the check took
+    """
     name: str
     status: HealthStatus
-    message: str
-    latency_ms: Optional[float] = None
-    details: Optional[Dict[str, Any]] = None
+    message: Optional[str] = None
+    details: Dict[str, Any] = field(default_factory=dict)
+    timestamp: float = field(default_factory=time.time)
+    duration_ms: float = 0.0
+    
+    def is_healthy(self) -> bool:
+        """Check if status is healthy."""
+        return self.status == HealthStatus.HEALTHY
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
-        result = {
+        return {
             "name": self.name,
             "status": self.status.value,
-            "message": self.message
+            "message": self.message,
+            "details": self.details,
+            "timestamp": self.timestamp,
+            "duration_ms": self.duration_ms,
         }
-        if self.latency_ms is not None:
-            result["latency_ms"] = round(self.latency_ms, 2)
-        if self.details:
-            result["details"] = self.details
-        return result
+
+
+@dataclass
+class SystemHealth:
+    """Overall system health status.
+    
+    Attributes:
+        status: Overall health status
+        checks: Individual health check results
+        timestamp: When the health check was performed
+        version: System version
+    """
+    status: HealthStatus
+    checks: List[HealthCheckResult]
+    timestamp: float = field(default_factory=time.time)
+    version: str = "v1"
+    
+    def is_healthy(self) -> bool:
+        """Check if system is healthy."""
+        return self.status == HealthStatus.HEALTHY
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary."""
+        return {
+            "status": self.status.value,
+            "checks": [check.to_dict() for check in self.checks],
+            "timestamp": self.timestamp,
+            "version": self.version,
+        }
 
 
 class HealthChecker:
-    """
-    System health checker.
+    """Health check coordinator.
     
-    Monitors health of all system components and provides
-    overall system health status.
+    Manages and executes health checks for various system components.
+    Supports both synchronous and background health monitoring.
     
-    Example:
-        >>> checker = HealthChecker()
-        >>> health = checker.check_health()
-        >>> print(health["status"])
-        "healthy"
+    Attributes:
+        checks: Registered health check functions
+        check_interval: Interval for background checks (seconds)
+        background_enabled: Whether background checking is enabled
     """
     
-    def __init__(
-        self,
-        cache_l1=None,
-        cache_l2=None,
-        optimizer=None,
-        truncator=None
-    ):
-        """
-        Initialize health checker.
+    def __init__(self, check_interval: float = 60.0):
+        """Initialize health checker.
         
         Args:
-            cache_l1: L1 cache instance
-            cache_l2: L2 cache instance
-            optimizer: Optimizer instance
-            truncator: Truncator instance
+            check_interval: Interval for background checks in seconds
         """
-        self.cache_l1 = cache_l1
-        self.cache_l2 = cache_l2
-        self.optimizer = optimizer
-        self.truncator = truncator
-        self._start_time = time.time()
+        self.checks: Dict[str, Callable[[], HealthCheckResult]] = {}
+        self.check_interval = check_interval
+        self.background_enabled = False
+        self._background_thread: Optional[threading.Thread] = None
+        self._stop_event = threading.Event()
+        self._last_results: Dict[str, HealthCheckResult] = {}
+        self._lock = threading.Lock()
+        
+        self._logger = get_logger("monitoring.health")
+        
+        self._logger.info("health_checker_initialized",
+                         check_interval=check_interval)
     
-    def check_cache_health(self, cache, name: str) -> ComponentHealth:
-        """
-        Check cache health.
+    def register_check(self, name: str, check_func: Callable[[], HealthCheckResult]) -> None:
+        """Register a health check function.
         
         Args:
-            cache: Cache instance
-            name: Cache name
-            
-        Returns:
-            ComponentHealth instance
+            name: Name of the health check
+            check_func: Function that performs the check
         """
-        if cache is None:
-            return ComponentHealth(
-                name=name,
-                status=HealthStatus.UNHEALTHY,
-                message="Cache not initialized"
-            )
-        
-        try:
-            start = time.time()
-            
-            # Try a test operation
-            test_key = "__health_check__"
-            cache.get(test_key)
-            
-            latency_ms = (time.time() - start) * 1000
-            
-            # Get cache stats
-            stats = cache.stats()
-            
-            # Determine health based on hit rate and latency
-            hit_rate = stats.get("hit_rate", 0)
-            
-            if latency_ms > 100:
-                status = HealthStatus.DEGRADED
-                message = f"High latency: {latency_ms:.2f}ms"
-            elif hit_rate < 5 and stats.get("total_requests", 0) > 100:
-                status = HealthStatus.DEGRADED
-                message = f"Low hit rate: {hit_rate:.2f}%"
-            else:
-                status = HealthStatus.HEALTHY
-                message = "Operating normally"
-            
-            return ComponentHealth(
-                name=name,
-                status=status,
-                message=message,
-                latency_ms=latency_ms,
-                details={
-                    "hit_rate": round(hit_rate, 2),
-                    "total_requests": stats.get("total_requests", 0),
-                    "size": stats.get("size", 0)
-                }
-            )
-            
-        except Exception as e:
-            return ComponentHealth(
-                name=name,
-                status=HealthStatus.UNHEALTHY,
-                message=f"Error: {str(e)}"
-            )
+        with self._lock:
+            self.checks[name] = check_func
+            self._logger.debug("health_check_registered", name=name)
     
-    def check_optimizer_health(self) -> ComponentHealth:
-        """
-        Check optimizer health.
+    def unregister_check(self, name: str) -> None:
+        """Unregister a health check.
         
-        Returns:
-            ComponentHealth instance
+        Args:
+            name: Name of the health check to remove
         """
-        if self.optimizer is None:
-            return ComponentHealth(
-                name="optimizer",
-                status=HealthStatus.UNHEALTHY,
-                message="Optimizer not initialized"
-            )
-        
-        try:
-            start = time.time()
-            
-            # Try a test optimization
-            test_text = "This is a test prompt for health checking."
-            result = self.optimizer.optimize(test_text)
-            
-            latency_ms = (time.time() - start) * 1000
-            
-            # Check if optimization worked
-            if result.get("optimized") and latency_ms < 100:
-                status = HealthStatus.HEALTHY
-                message = "Operating normally"
-            elif latency_ms >= 100:
-                status = HealthStatus.DEGRADED
-                message = f"High latency: {latency_ms:.2f}ms"
-            else:
-                status = HealthStatus.DEGRADED
-                message = "Optimization may not be working correctly"
-            
-            return ComponentHealth(
-                name="optimizer",
-                status=status,
-                message=message,
-                latency_ms=latency_ms
-            )
-            
-        except Exception as e:
-            return ComponentHealth(
-                name="optimizer",
-                status=HealthStatus.UNHEALTHY,
-                message=f"Error: {str(e)}"
-            )
+        with self._lock:
+            if name in self.checks:
+                del self.checks[name]
+                if name in self._last_results:
+                    del self._last_results[name]
+                self._logger.debug("health_check_unregistered", name=name)
     
-    def check_truncator_health(self) -> ComponentHealth:
-        """
-        Check truncator health.
+    def check(self, name: Optional[str] = None) -> SystemHealth:
+        """Perform health checks.
         
+        Args:
+            name: Optional specific check to run. If None, runs all checks.
+            
         Returns:
-            ComponentHealth instance
+            SystemHealth with results
         """
-        if self.truncator is None:
-            return ComponentHealth(
-                name="truncator",
-                status=HealthStatus.UNHEALTHY,
-                message="Truncator not initialized"
-            )
+        start_time = time.time()
+        results: List[HealthCheckResult] = []
         
-        try:
-            start = time.time()
-            
-            # Try a test truncation
-            test_text = "This is a test text for health checking. " * 100
-            result = self.truncator.truncate(test_text, max_tokens=100)
-            
-            latency_ms = (time.time() - start) * 1000
-            
-            # Check if truncation worked
-            if len(result) <= 100 and latency_ms < 50:
-                status = HealthStatus.HEALTHY
-                message = "Operating normally"
-            elif latency_ms >= 50:
-                status = HealthStatus.DEGRADED
-                message = f"High latency: {latency_ms:.2f}ms"
-            else:
-                status = HealthStatus.DEGRADED
-                message = "Truncation may not be working correctly"
-            
-            return ComponentHealth(
-                name="truncator",
-                status=status,
-                message=message,
-                latency_ms=latency_ms
-            )
-            
-        except Exception as e:
-            return ComponentHealth(
-                name="truncator",
-                status=HealthStatus.UNHEALTHY,
-                message=f"Error: {str(e)}"
-            )
-    
-    def check_system_resources(self) -> ComponentHealth:
-        """
-        Check system resource usage.
+        with self._lock:
+            checks_to_run = {name: self.checks[name]} if name and name in self.checks else self.checks.copy()
         
-        Returns:
-            ComponentHealth instance
-        """
-        if not PSUTIL_AVAILABLE:
-            return ComponentHealth(
-                name="system_resources",
-                status=HealthStatus.DEGRADED,
-                message="psutil not available - install with: pip install psutil"
-            )
-        
-        try:
-            # Get CPU and memory usage
-            cpu_percent = psutil.cpu_percent(interval=0.1)
-            memory = psutil.virtual_memory()
-            memory_percent = memory.percent
-            
-            # Determine health based on resource usage
-            if cpu_percent > 90 or memory_percent > 90:
-                status = HealthStatus.UNHEALTHY
-                message = "Critical resource usage"
-            elif cpu_percent > 70 or memory_percent > 70:
-                status = HealthStatus.DEGRADED
-                message = "High resource usage"
-            else:
-                status = HealthStatus.HEALTHY
-                message = "Normal resource usage"
-            
-            return ComponentHealth(
-                name="system_resources",
-                status=status,
-                message=message,
-                details={
-                    "cpu_percent": round(cpu_percent, 2),
-                    "memory_percent": round(memory_percent, 2),
-                    "memory_available_mb": round(memory.available / 1024 / 1024, 2)
-                }
-            )
-            
-        except Exception as e:
-            return ComponentHealth(
-                name="system_resources",
-                status=HealthStatus.DEGRADED,
-                message=f"Could not check resources: {str(e)}"
-            )
-    
-    def check_health(self) -> Dict[str, Any]:
-        """
-        Check overall system health.
-        
-        Returns:
-            Dictionary containing health status for all components
-        """
-        components: List[ComponentHealth] = []
-        
-        # Check cache health
-        if self.cache_l1:
-            components.append(self.check_cache_health(self.cache_l1, "cache_l1"))
-        if self.cache_l2:
-            components.append(self.check_cache_health(self.cache_l2, "cache_l2"))
-        
-        # Check optimizer health
-        if self.optimizer:
-            components.append(self.check_optimizer_health())
-        
-        # Check truncator health
-        if self.truncator:
-            components.append(self.check_truncator_health())
-        
-        # Check system resources
-        components.append(self.check_system_resources())
+        # Run checks
+        for check_name, check_func in checks_to_run.items():
+            try:
+                check_start = time.time()
+                result = check_func()
+                result.duration_ms = (time.time() - check_start) * 1000
+                results.append(result)
+                
+                # Cache result
+                with self._lock:
+                    self._last_results[check_name] = result
+                
+            except Exception as e:
+                self._logger.error("health_check_failed",
+                                 check_name=check_name,
+                                 error=str(e))
+                results.append(HealthCheckResult(
+                    name=check_name,
+                    status=HealthStatus.UNHEALTHY,
+                    message=f"Check failed: {str(e)}",
+                    duration_ms=(time.time() - check_start) * 1000
+                ))
         
         # Determine overall status
-        unhealthy_count = sum(1 for c in components if c.status == HealthStatus.UNHEALTHY)
-        degraded_count = sum(1 for c in components if c.status == HealthStatus.DEGRADED)
-        
-        if unhealthy_count > 0:
-            overall_status = HealthStatus.UNHEALTHY
-            overall_message = f"{unhealthy_count} component(s) unhealthy"
-        elif degraded_count > 0:
-            overall_status = HealthStatus.DEGRADED
-            overall_message = f"{degraded_count} component(s) degraded"
-        else:
+        if not results:
+            overall_status = HealthStatus.UNKNOWN
+        elif all(r.status == HealthStatus.HEALTHY for r in results):
             overall_status = HealthStatus.HEALTHY
-            overall_message = "All components healthy"
+        elif any(r.status == HealthStatus.UNHEALTHY for r in results):
+            overall_status = HealthStatus.UNHEALTHY
+        else:
+            overall_status = HealthStatus.DEGRADED
         
-        return {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
-            "status": overall_status.value,
-            "message": overall_message,
-            "uptime_seconds": round(time.time() - self._start_time, 2),
-            "components": [c.to_dict() for c in components],
-            "python_version": sys.version,
-            "platform": sys.platform
-        }
+        duration_ms = (time.time() - start_time) * 1000
+        
+        self._logger.debug("health_check_complete",
+                         status=overall_status.value,
+                         checks_run=len(results),
+                         duration_ms=duration_ms)
+        
+        return SystemHealth(
+            status=overall_status,
+            checks=results,
+            timestamp=time.time()
+        )
     
-    def is_healthy(self) -> bool:
-        """
-        Check if system is healthy.
+    def get_last_results(self) -> Dict[str, HealthCheckResult]:
+        """Get cached results from last check.
         
         Returns:
-            True if system is healthy, False otherwise
+            Dictionary of check name to result
         """
-        health = self.check_health()
-        return health["status"] == HealthStatus.HEALTHY.value
+        with self._lock:
+            return self._last_results.copy()
+    
+    def start_background_checks(self) -> None:
+        """Start background health checking."""
+        if self.background_enabled:
+            self._logger.warning("background_checks_already_running")
+            return
+        
+        self.background_enabled = True
+        self._stop_event.clear()
+        self._background_thread = threading.Thread(
+            target=self._background_check_loop,
+            daemon=True,
+            name="health-checker"
+        )
+        self._background_thread.start()
+        
+        self._logger.info("background_checks_started",
+                         interval=self.check_interval)
+    
+    def stop_background_checks(self) -> None:
+        """Stop background health checking."""
+        if not self.background_enabled:
+            return
+        
+        self.background_enabled = False
+        self._stop_event.set()
+        
+        if self._background_thread:
+            self._background_thread.join(timeout=5.0)
+            self._background_thread = None
+        
+        self._logger.info("background_checks_stopped")
+    
+    def _background_check_loop(self) -> None:
+        """Background check loop."""
+        while not self._stop_event.is_set():
+            try:
+                # Run all checks
+                health = self.check()
+                
+                # Log if unhealthy
+                if not health.is_healthy():
+                    self._logger.warning("system_unhealthy",
+                                       status=health.status.value,
+                                       unhealthy_checks=[
+                                           c.name for c in health.checks
+                                           if c.status != HealthStatus.HEALTHY
+                                       ])
+                
+            except Exception as e:
+                self._logger.error("background_check_error", error=str(e))
+            
+            # Wait for next interval
+            self._stop_event.wait(self.check_interval)
 
 
 # Global health checker instance
-_global_checker: Optional[HealthChecker] = None
-
-
-def configure_health_checker(
-    cache_l1=None,
-    cache_l2=None,
-    optimizer=None,
-    truncator=None
-) -> None:
-    """
-    Configure global health checker.
-    
-    Args:
-        cache_l1: L1 cache instance
-        cache_l2: L2 cache instance
-        optimizer: Optimizer instance
-        truncator: Truncator instance
-    """
-    global _global_checker
-    _global_checker = HealthChecker(
-        cache_l1=cache_l1,
-        cache_l2=cache_l2,
-        optimizer=optimizer,
-        truncator=truncator
-    )
+_health_checker: Optional[HealthChecker] = None
+_health_checker_lock = threading.Lock()
 
 
 def get_health_checker() -> HealthChecker:
-    """
-    Get global health checker instance.
+    """Get global health checker instance.
     
     Returns:
-        HealthChecker instance
+        Global HealthChecker instance
     """
-    global _global_checker
-    if _global_checker is None:
-        _global_checker = HealthChecker()
-    return _global_checker
-
-
-def check_health() -> Dict[str, Any]:
-    """
-    Check system health using global checker.
+    global _health_checker
     
-    Returns:
-        Health status dictionary
+    if _health_checker is None:
+        with _health_checker_lock:
+            if _health_checker is None:
+                _health_checker = HealthChecker()
+    
+    return _health_checker
+
+
+def register_cache_health_check(cache_name: str, cache_instance: Any) -> None:
+    """Register health check for a cache instance.
+    
+    Args:
+        cache_name: Name of the cache (e.g., "L1", "L2")
+        cache_instance: Cache instance with stats() method
     """
-    return get_health_checker().check_health()
+    def check_cache_health() -> HealthCheckResult:
+        """Check cache health."""
+        try:
+            stats = cache_instance.stats()
+            
+            # Check if cache is responsive
+            size = stats.get('size', 0)
+            max_size = stats.get('max_size', 1)
+            utilization = (size / max_size) * 100 if max_size > 0 else 0
+            
+            # Determine status based on utilization
+            if utilization < 80:
+                status = HealthStatus.HEALTHY
+                message = f"Cache operating normally ({utilization:.1f}% full)"
+            elif utilization < 95:
+                status = HealthStatus.DEGRADED
+                message = f"Cache utilization high ({utilization:.1f}% full)"
+            else:
+                status = HealthStatus.DEGRADED
+                message = f"Cache nearly full ({utilization:.1f}% full)"
+            
+            return HealthCheckResult(
+                name=f"cache_{cache_name}",
+                status=status,
+                message=message,
+                details={
+                    "size": size,
+                    "max_size": max_size,
+                    "utilization": utilization,
+                    "hit_rate": stats.get('hit_rate', 0),
+                }
+            )
+            
+        except Exception as e:
+            return HealthCheckResult(
+                name=f"cache_{cache_name}",
+                status=HealthStatus.UNHEALTHY,
+                message=f"Cache check failed: {str(e)}"
+            )
+    
+    checker = get_health_checker()
+    checker.register_check(f"cache_{cache_name}", check_cache_health)
+
+
+def register_system_health_check() -> None:
+    """Register system resource health check."""
+    def check_system_health() -> HealthCheckResult:
+        """Check system resources."""
+        try:
+            # Try to import psutil for system metrics
+            try:
+                import psutil
+                
+                # Check memory
+                memory = psutil.virtual_memory()
+                memory_percent = memory.percent
+                
+                # Check CPU
+                cpu_percent = psutil.cpu_percent(interval=0.1)
+                
+                # Determine status
+                if memory_percent < 80 and cpu_percent < 80:
+                    status = HealthStatus.HEALTHY
+                    message = "System resources normal"
+                elif memory_percent < 90 and cpu_percent < 90:
+                    status = HealthStatus.DEGRADED
+                    message = "System resources elevated"
+                else:
+                    status = HealthStatus.DEGRADED
+                    message = "System resources high"
+                
+                return HealthCheckResult(
+                    name="system_resources",
+                    status=status,
+                    message=message,
+                    details={
+                        "memory_percent": memory_percent,
+                        "cpu_percent": cpu_percent,
+                        "memory_available_mb": memory.available / (1024 * 1024),
+                    }
+                )
+                
+            except ImportError:
+                # psutil not available, return healthy with limited info
+                return HealthCheckResult(
+                    name="system_resources",
+                    status=HealthStatus.HEALTHY,
+                    message="System monitoring unavailable (psutil not installed)",
+                    details={"psutil_available": False}
+                )
+                
+        except Exception as e:
+            return HealthCheckResult(
+                name="system_resources",
+                status=HealthStatus.UNKNOWN,
+                message=f"System check failed: {str(e)}"
+            )
+    
+    checker = get_health_checker()
+    checker.register_check("system_resources", check_system_health)
+
+
+def register_monitoring_health_check() -> None:
+    """Register monitoring system health check."""
+    def check_monitoring_health() -> HealthCheckResult:
+        """Check monitoring system."""
+        try:
+            from src.monitoring import get_metrics_collector
+            
+            metrics = get_metrics_collector()
+            metrics_data = metrics.get_metrics()
+            
+            # Check if metrics are being collected
+            total_operations = (
+                metrics_data.get('cache_hits', 0) +
+                metrics_data.get('cache_misses', 0)
+            )
+            
+            if total_operations > 0:
+                status = HealthStatus.HEALTHY
+                message = "Monitoring system operational"
+            else:
+                status = HealthStatus.HEALTHY
+                message = "Monitoring system ready (no operations yet)"
+            
+            return HealthCheckResult(
+                name="monitoring",
+                status=status,
+                message=message,
+                details={
+                    "total_operations": total_operations,
+                    "metrics_available": True,
+                }
+            )
+            
+        except Exception as e:
+            return HealthCheckResult(
+                name="monitoring",
+                status=HealthStatus.DEGRADED,
+                message=f"Monitoring check failed: {str(e)}"
+            )
+    
+    checker = get_health_checker()
+    checker.register_check("monitoring", check_monitoring_health)

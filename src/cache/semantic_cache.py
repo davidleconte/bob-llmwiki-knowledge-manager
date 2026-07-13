@@ -10,6 +10,7 @@ Target metrics:
 """
 
 import time
+import threading
 from typing import Optional, Dict, Any, List, Tuple
 import numpy as np
 
@@ -57,6 +58,9 @@ class SemanticCache(CacheInterface):
         self.similarity_threshold = similarity_threshold
         self.max_size = max_size
         self.track_costs = track_costs
+        
+        # Thread safety lock
+        self._lock = threading.RLock()
         
         # Storage (keys are versioned)
         self.embeddings: Dict[str, np.ndarray] = {}
@@ -133,6 +137,8 @@ class SemanticCache(CacheInterface):
     def get(self, key: str, version: Optional[str] = None) -> Optional[str]:
         """Retrieve cached response for semantically similar key.
         
+        Thread-safe: Uses lock to protect shared state.
+        
         Args:
             key: The cache key (prompt)
             version: Optional version (defaults to current VERSION)
@@ -143,83 +149,86 @@ class SemanticCache(CacheInterface):
         start_time = time.time()
         target_version = version or self.VERSION
         
-        # Check if query will cause vocabulary change
-        will_change_vocab = key not in self.embedding_generator.corpus
-        
-        # Generate embedding for query
-        query_embedding = self.embedding_generator.generate(key)
-        
-        # If vocabulary changed, regenerate all cached embeddings
-        if will_change_vocab and len(self.embeddings) > 0:
-            self._regenerate_all_embeddings()
-        
-        # Find most similar cached prompt (only within target version)
-        best_match = None
-        best_similarity = 0.0
-        
-        for versioned_prompt, cached_embedding in self.embeddings.items():
-            # Only consider entries from target version
-            if self._extract_version(versioned_prompt) != target_version:
-                continue
+        with self._lock:
+            # Check if query will cause vocabulary change
+            will_change_vocab = key not in self.embedding_generator.corpus
             
-            similarity = cosine_similarity_vectors(query_embedding, cached_embedding)
+            # Generate embedding for query
+            query_embedding = self.embedding_generator.generate(key)
             
-            if similarity > best_similarity:
-                best_similarity = similarity
-                best_match = versioned_prompt
-        
-        latency_ms = (time.time() - start_time) * 1000
-        
-        # Check if best match exceeds threshold
-        if best_match and best_similarity >= self.similarity_threshold:
-            # Update entry access stats
-            if best_match in self.entries:
-                self.entries[best_match].access()
+            # If vocabulary changed, regenerate all cached embeddings
+            if will_change_vocab and len(self.embeddings) > 0:
+                self._regenerate_all_embeddings()
             
-            # Record hit and similarity score
-            self._stats.record_hit()
-            self._similarity_scores.append(best_similarity)
+            # Find most similar cached prompt (only within target version)
+            best_match = None
+            best_similarity = 0.0
+            
+            for versioned_prompt, cached_embedding in self.embeddings.items():
+                # Only consider entries from target version
+                if self._extract_version(versioned_prompt) != target_version:
+                    continue
+                
+                similarity = cosine_similarity_vectors(query_embedding, cached_embedding)
+                
+                if similarity > best_similarity:
+                    best_similarity = similarity
+                    best_match = versioned_prompt
+        
+            latency_ms = (time.time() - start_time) * 1000
+            
+            # Check if best match exceeds threshold
+            if best_match and best_similarity >= self.similarity_threshold:
+                # Update entry access stats
+                if best_match in self.entries:
+                    self.entries[best_match].access()
+                
+                # Record hit and similarity score
+                self._stats.record_hit()
+                self._similarity_scores.append(best_similarity)
+                
+                # Record metrics
+                self._metrics.record_cache_hit("L2", latency_ms)
+                
+                # Log hit
+                self._logger.debug("cache_hit",
+                                 cache_level="L2",
+                                 version=target_version,
+                                 similarity=best_similarity,
+                                 latency_ms=latency_ms,
+                                 vocab_changed=will_change_vocab)
+                
+                # Track cost savings if enabled
+                if self.track_costs and self._cost_tracker and best_match in self.entries:
+                    # Estimate tokens saved (from metadata if available)
+                    tokens_saved = self.entries[best_match].metadata.get('tokens', 0)
+                    if tokens_saved > 0:
+                        self._cost_tracker.record_cache_hit(tokens_saved)
+                
+                return self.responses[best_match]
+            
+            # Record miss
+            self._stats.record_miss()
             
             # Record metrics
-            self._metrics.record_cache_hit("L2", latency_ms)
+            self._metrics.record_cache_miss("L2")
             
-            # Log hit
-            self._logger.debug("cache_hit",
+            # Log miss
+            self._logger.debug("cache_miss",
                              cache_level="L2",
                              version=target_version,
-                             similarity=best_similarity,
+                             best_similarity=best_similarity,
+                             threshold=self.similarity_threshold,
                              latency_ms=latency_ms,
                              vocab_changed=will_change_vocab)
             
-            # Track cost savings if enabled
-            if self.track_costs and self._cost_tracker and best_match in self.entries:
-                # Estimate tokens saved (from metadata if available)
-                tokens_saved = self.entries[best_match].metadata.get('tokens', 0)
-                if tokens_saved > 0:
-                    self._cost_tracker.record_cache_hit(tokens_saved)
-            
-            return self.responses[best_match]
-        
-        # Record miss
-        self._stats.record_miss()
-        
-        # Record metrics
-        self._metrics.record_cache_miss("L2")
-        
-        # Log miss
-        self._logger.debug("cache_miss",
-                         cache_level="L2",
-                         version=target_version,
-                         best_similarity=best_similarity,
-                         threshold=self.similarity_threshold,
-                         latency_ms=latency_ms,
-                         vocab_changed=will_change_vocab)
-        
-        return None
+            return None
     
     def set(self, key: str, value: str, version: Optional[str] = None,
             metadata: Optional[Dict[str, Any]] = None) -> None:
         """Store response in cache with embedding.
+        
+        Thread-safe: Uses lock to protect shared state.
         
         Args:
             key: The cache key (prompt)
@@ -227,57 +236,61 @@ class SemanticCache(CacheInterface):
             version: Optional version (defaults to current VERSION)
             metadata: Optional metadata
         """
-        versioned_key = self._make_versioned_key(key, version)
-        is_update = versioned_key in self.embeddings
-        
-        # Check if we need to evict
-        if not is_update and len(self.embeddings) >= self.max_size:
-            self._evict_lru()
-        
-        # Check if this is a new key that will cause vocabulary change
-        is_new_key = versioned_key not in self.embeddings
-        
-        # Generate and store embedding
-        embedding = self.embedding_generator.generate(key)
-        self.embeddings[versioned_key] = embedding
-        
-        # If vocabulary changed (new key added), regenerate all embeddings
-        # to ensure consistent dimensions
-        if is_new_key and len(self.embeddings) > 1:
-            self._regenerate_all_embeddings()
-        
-        # Store response and metadata
-        self.responses[versioned_key] = value
-        if metadata is None:
-            metadata = {}
-        
-        # Add version to metadata
-        metadata['version'] = version or self.VERSION
-        self.metadata_store[versioned_key] = metadata
-        
-        # Create cache entry
-        entry = CacheEntry(
-            response=value,
-            metadata=metadata,
-            timestamp=time.time()
-        )
-        self.entries[versioned_key] = entry
-        
-        # Update cache size metric
-        self._metrics.update_cache_size("L2", len(self.embeddings))
-        
-        # Log cache set
-        self._logger.debug("cache_set",
-                         cache_level="L2",
-                         version=version or self.VERSION,
-                         is_update=is_update,
-                         cache_size=len(self.embeddings),
-                         vocab_size=len(self.embedding_generator.corpus),
-                         response_length=len(value))
+        with self._lock:
+            versioned_key = self._make_versioned_key(key, version)
+            is_update = versioned_key in self.embeddings
+            
+            # Check if we need to evict
+            if not is_update and len(self.embeddings) >= self.max_size:
+                self._evict_lru()
+            
+            # Check if this is a new key that will cause vocabulary change
+            is_new_key = versioned_key not in self.embeddings
+            
+            # Generate and store embedding
+            embedding = self.embedding_generator.generate(key)
+            self.embeddings[versioned_key] = embedding
+            
+            # If vocabulary changed (new key added), regenerate all embeddings
+            # to ensure consistent dimensions
+            if is_new_key and len(self.embeddings) > 1:
+                self._regenerate_all_embeddings()
+            
+            # Store response and metadata
+            self.responses[versioned_key] = value
+            if metadata is None:
+                metadata = {}
+            
+            # Add version to metadata
+            metadata['version'] = version or self.VERSION
+            self.metadata_store[versioned_key] = metadata
+            
+            # Create cache entry
+            entry = CacheEntry(
+                response=value,
+                metadata=metadata,
+                timestamp=time.time()
+            )
+            self.entries[versioned_key] = entry
+            
+            # Update cache size metric
+            self._metrics.update_cache_size("L2", len(self.embeddings))
+            
+            # Log cache set
+            self._logger.debug("cache_set",
+                             cache_level="L2",
+                             version=version or self.VERSION,
+                             is_update=is_update,
+                             cache_size=len(self.embeddings),
+                             vocab_size=len(self.embedding_generator.corpus),
+                             response_length=len(value))
     
     def _regenerate_all_embeddings(self) -> None:
-        """Regenerate all embeddings to ensure consistent dimensions."""
-        # Get all versioned keys
+        """Regenerate all embeddings to ensure consistent dimensions.
+        
+        Thread-safe: Must be called with lock held.
+        """
+        # Get all versioned keys (snapshot to avoid iteration issues)
         versioned_keys = list(self.embeddings.keys())
         
         # Clear embeddings
@@ -290,7 +303,10 @@ class SemanticCache(CacheInterface):
             self.embeddings[versioned_key] = embedding
     
     def _evict_lru(self) -> None:
-        """Evict least recently used entry."""
+        """Evict least recently used entry.
+        
+        Thread-safe: Must be called with lock held.
+        """
         if not self.entries:
             return
         
@@ -320,28 +336,35 @@ class SemanticCache(CacheInterface):
                          access_count=evicted_entry.access_count)
     
     def clear(self) -> None:
-        """Clear all entries from cache."""
-        entries_cleared = len(self.embeddings)
-        self.embeddings.clear()
-        self.responses.clear()
-        self.metadata_store.clear()
-        self.entries.clear()
-        self._stats.reset()
-        self._similarity_scores.clear()
+        """Clear all entries from cache.
         
-        # Log clear
-        self._logger.info("cache_cleared",
-                        cache_level="L2",
-                        entries_cleared=entries_cleared)
-        self.embedding_generator.clear_cache()
+        Thread-safe: Uses lock to protect shared state.
+        """
+        with self._lock:
+            entries_cleared = len(self.embeddings)
+            self.embeddings.clear()
+            self.responses.clear()
+            self.metadata_store.clear()
+            self.entries.clear()
+            self._stats.reset()
+            self._similarity_scores.clear()
+            
+            # Log clear
+            self._logger.info("cache_cleared",
+                            cache_level="L2",
+                            entries_cleared=entries_cleared)
+            self.embedding_generator.clear_cache()
     
     def size(self) -> int:
         """Get number of entries in cache.
         
+        Thread-safe: Uses lock to protect shared state.
+        
         Returns:
             Number of cached entries
         """
-        return len(self.embeddings)
+        with self._lock:
+            return len(self.embeddings)
     
     def hit_rate(self) -> float:
         """Calculate cache hit rate.
@@ -354,28 +377,35 @@ class SemanticCache(CacheInterface):
     def stats(self) -> Dict[str, Any]:
         """Get cache statistics.
         
+        Thread-safe: Uses lock to protect shared state.
+        
         Returns:
             Dictionary with cache statistics
         """
-        avg_similarity = (
-            sum(self._similarity_scores) / len(self._similarity_scores)
-            if self._similarity_scores else 0.0
-        )
-        
-        return {
-            **self._stats.to_dict(),
-            "size": self.size(),
-            "max_size": self.max_size,
-            "utilization": (self.size() / self.max_size) * 100,
-            "similarity_threshold": self.similarity_threshold,
-            "avg_similarity_score": avg_similarity,
-            "embedding_cache_size": self.embedding_generator.cache_size(),
-            "version": self.VERSION,
-        }
+        with self._lock:
+            avg_similarity = (
+                sum(self._similarity_scores) / len(self._similarity_scores)
+                if self._similarity_scores else 0.0
+            )
+            
+            size = len(self.embeddings)
+            
+            return {
+                **self._stats.to_dict(),
+                "size": size,
+                "max_size": self.max_size,
+                "utilization": (size / self.max_size) * 100,
+                "similarity_threshold": self.similarity_threshold,
+                "avg_similarity_score": avg_similarity,
+                "embedding_cache_size": self.embedding_generator.cache_size(),
+                "version": self.VERSION,
+            }
     
     def find_similar(self, key: str, top_k: int = 5, 
                     version: Optional[str] = None) -> List[Tuple[str, float, str]]:
         """Find top-k most similar cached prompts.
+        
+        Thread-safe: Uses lock to protect shared state.
         
         Args:
             key: Query prompt
@@ -385,39 +415,42 @@ class SemanticCache(CacheInterface):
         Returns:
             List of (prompt, similarity, response) tuples
         """
-        if not self.embeddings:
-            return []
-        
-        target_version = version or self.VERSION
-        
-        # Check if query will cause vocabulary change
-        will_change_vocab = key not in self.embedding_generator.corpus
-        
-        query_embedding = self.embedding_generator.generate(key)
-        
-        # If vocabulary changed, regenerate all cached embeddings
-        if will_change_vocab and len(self.embeddings) > 0:
-            self._regenerate_all_embeddings()
-        
-        # Calculate similarities for all cached prompts in target version
-        similarities = []
-        for versioned_prompt, cached_embedding in self.embeddings.items():
-            # Only consider entries from target version
-            if self._extract_version(versioned_prompt) != target_version:
-                continue
+        with self._lock:
+            if not self.embeddings:
+                return []
             
-            similarity = cosine_similarity_vectors(query_embedding, cached_embedding)
-            base_prompt = self._extract_base_key(versioned_prompt)
-            response = self.responses[versioned_prompt]
-            similarities.append((base_prompt, similarity, response))
-        
-        # Sort by similarity (descending)
-        similarities.sort(key=lambda x: x[1], reverse=True)
-        
-        return similarities[:top_k]
+            target_version = version or self.VERSION
+            
+            # Check if query will cause vocabulary change
+            will_change_vocab = key not in self.embedding_generator.corpus
+            
+            query_embedding = self.embedding_generator.generate(key)
+            
+            # If vocabulary changed, regenerate all cached embeddings
+            if will_change_vocab and len(self.embeddings) > 0:
+                self._regenerate_all_embeddings()
+            
+            # Calculate similarities for all cached prompts in target version
+            similarities = []
+            for versioned_prompt, cached_embedding in self.embeddings.items():
+                # Only consider entries from target version
+                if self._extract_version(versioned_prompt) != target_version:
+                    continue
+                
+                similarity = cosine_similarity_vectors(query_embedding, cached_embedding)
+                base_prompt = self._extract_base_key(versioned_prompt)
+                response = self.responses[versioned_prompt]
+                similarities.append((base_prompt, similarity, response))
+            
+            # Sort by similarity (descending)
+            similarities.sort(key=lambda x: x[1], reverse=True)
+            
+            return similarities[:top_k]
     
     def get_with_similarity(self, key: str, version: Optional[str] = None) -> Optional[Tuple[str, float]]:
         """Get cached response with similarity score.
+        
+        Thread-safe: Uses lock to protect shared state.
         
         Args:
             key: The cache key (prompt)
@@ -426,35 +459,36 @@ class SemanticCache(CacheInterface):
         Returns:
             Tuple of (response, similarity_score) if found, None otherwise
         """
-        target_version = version or self.VERSION
-        
-        # Check if query will cause vocabulary change
-        will_change_vocab = key not in self.embedding_generator.corpus
-        
-        query_embedding = self.embedding_generator.generate(key)
-        
-        # If vocabulary changed, regenerate all cached embeddings
-        if will_change_vocab and len(self.embeddings) > 0:
-            self._regenerate_all_embeddings()
-        
-        best_match = None
-        best_similarity = 0.0
-        
-        for versioned_prompt, cached_embedding in self.embeddings.items():
-            # Only consider entries from target version
-            if self._extract_version(versioned_prompt) != target_version:
-                continue
+        with self._lock:
+            target_version = version or self.VERSION
             
-            similarity = cosine_similarity_vectors(query_embedding, cached_embedding)
+            # Check if query will cause vocabulary change
+            will_change_vocab = key not in self.embedding_generator.corpus
             
-            if similarity > best_similarity:
-                best_similarity = similarity
-                best_match = versioned_prompt
-        
-        if best_match and best_similarity >= self.similarity_threshold:
-            return (self.responses[best_match], best_similarity)
-        
-        return None
+            query_embedding = self.embedding_generator.generate(key)
+            
+            # If vocabulary changed, regenerate all cached embeddings
+            if will_change_vocab and len(self.embeddings) > 0:
+                self._regenerate_all_embeddings()
+            
+            best_match = None
+            best_similarity = 0.0
+            
+            for versioned_prompt, cached_embedding in self.embeddings.items():
+                # Only consider entries from target version
+                if self._extract_version(versioned_prompt) != target_version:
+                    continue
+                
+                similarity = cosine_similarity_vectors(query_embedding, cached_embedding)
+                
+                if similarity > best_similarity:
+                    best_similarity = similarity
+                    best_match = versioned_prompt
+            
+            if best_match and best_similarity >= self.similarity_threshold:
+                return (self.responses[best_match], best_similarity)
+            
+            return None
     
     def contains(self, key: str, version: Optional[str] = None) -> bool:
         """Check if semantically similar key exists in cache.
@@ -506,6 +540,7 @@ class SemanticCache(CacheInterface):
     def migrate(self, from_version: str, to_version: str) -> int:
         """Migrate entries from one version to another.
         
+        Thread-safe: Uses lock to protect shared state.
         Creates new versioned entries for all entries matching from_version.
         Original entries are preserved.
         
@@ -516,16 +551,17 @@ class SemanticCache(CacheInterface):
         Returns:
             Number of entries migrated
         """
-        migrated = 0
-        entries_to_migrate = []
+        with self._lock:
+            migrated = 0
+            entries_to_migrate = []
+            
+            # Collect entries to migrate
+            for versioned_key, entry in self.entries.items():
+                if self._extract_version(versioned_key) == from_version:
+                    base_key = self._extract_base_key(versioned_key)
+                    entries_to_migrate.append((base_key, entry))
         
-        # Collect entries to migrate
-        for versioned_key, entry in self.entries.items():
-            if self._extract_version(versioned_key) == from_version:
-                base_key = self._extract_base_key(versioned_key)
-                entries_to_migrate.append((base_key, entry))
-        
-        # Migrate entries
+        # Migrate entries (set() has its own lock)
         for base_key, entry in entries_to_migrate:
             # Create new versioned entry
             self.set(base_key, entry.response, to_version, entry.metadata.copy())
@@ -541,37 +577,40 @@ class SemanticCache(CacheInterface):
     def cleanup_version(self, version: str) -> int:
         """Remove all entries for a specific version.
         
+        Thread-safe: Uses lock to protect shared state.
+        
         Args:
             version: Version to clean up
             
         Returns:
             Number of entries removed
         """
-        removed = 0
-        keys_to_remove = []
-        
-        # Collect keys to remove
-        for versioned_key in self.entries.keys():
-            if self._extract_version(versioned_key) == version:
-                keys_to_remove.append(versioned_key)
-        
-        # Remove entries
-        for versioned_key in keys_to_remove:
-            if versioned_key in self.embeddings:
-                del self.embeddings[versioned_key]
-            if versioned_key in self.responses:
-                del self.responses[versioned_key]
-            if versioned_key in self.metadata_store:
-                del self.metadata_store[versioned_key]
-            if versioned_key in self.entries:
-                del self.entries[versioned_key]
-            removed += 1
-        
-        self._logger.info("version_cleanup",
-                        version=version,
-                        removed=removed)
-        
-        return removed
+        with self._lock:
+            removed = 0
+            keys_to_remove = []
+            
+            # Collect keys to remove
+            for versioned_key in self.entries.keys():
+                if self._extract_version(versioned_key) == version:
+                    keys_to_remove.append(versioned_key)
+            
+            # Remove entries
+            for versioned_key in keys_to_remove:
+                if versioned_key in self.embeddings:
+                    del self.embeddings[versioned_key]
+                if versioned_key in self.responses:
+                    del self.responses[versioned_key]
+                if versioned_key in self.metadata_store:
+                    del self.metadata_store[versioned_key]
+                if versioned_key in self.entries:
+                    del self.entries[versioned_key]
+                removed += 1
+            
+            self._logger.info("version_cleanup",
+                            version=version,
+                            removed=removed)
+            
+            return removed
     
     def reset_stats(self) -> None:
         """Reset statistics counters."""

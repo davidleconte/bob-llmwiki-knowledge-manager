@@ -67,12 +67,14 @@ class EmbeddingGenerator:
             )
         else:
             # For multiple documents, use standard parameters
+            # Use min_df=1 to ensure at least some terms remain
+            # Use max_df=0.99 to be more permissive with common terms
             self.vectorizer = TfidfVectorizer(
                 max_features=self.max_features,
                 stop_words='english',
                 ngram_range=(1, 2),
                 min_df=1,
-                max_df=0.95
+                max_df=0.99  # More permissive to avoid pruning all terms
             )
         
         # Fit on entire corpus

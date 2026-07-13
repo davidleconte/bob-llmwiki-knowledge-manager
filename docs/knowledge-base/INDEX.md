@@ -9,7 +9,10 @@ Last Updated: 2026-07-13
 - [Research](./research/) - Research notes and findings
 
 ## Recent Additions
-- 2026-07-13: [Phase 1 Lessons Learned](./research/phase1-lessons-learned-2026-07-13.md) - Research ⭐ NEW
+- 2026-07-13: [Phase 2 Performance Baseline Results](./research/phase2-performance-baseline-results.md) - Research ⭐ NEW
+- 2026-07-13: [Phase 2 Performance Baseline Analysis](./research/phase2-performance-baseline-analysis.md) - Research
+- 2026-07-13: [Phase 2 Performance Optimization Plan](./guides/phase2-performance-optimization-plan.md) - Guide
+- 2026-07-13: [Phase 1 Lessons Learned](./research/phase1-lessons-learned-2026-07-13.md) - Research
 - 2026-07-13: [Phase 6 Real-World Validation Plan](./guides/phase6-real-world-validation-plan.md) - Guide ⭐ NEW
 - 2026-07-13: [Phase 5 Documentation Reconciliation Complete](./guides/phase5-documentation-reconciliation-complete.md) - Guide ⭐ NEW
 - 2026-07-13: [Audit Remediation Status](./guides/audit-remediation-status.md) - Guide ⭐ NEW
