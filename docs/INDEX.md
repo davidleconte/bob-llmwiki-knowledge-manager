@@ -2,7 +2,7 @@
 
 **Version:** 2.0  
 **Last Updated:** 2026-07-12  
-**Status:** Production Ready with Monitoring ✅
+**Status:** Beta — Not Production Ready (remediation in progress; see [Institutional Audit 2026-07-13](knowledge-base/research/audit-2026-07-13-institutional.md))
 
 ---
 
@@ -309,5 +309,5 @@ See [Quick Start](QUICK_START.md) for more details.
 ---
 
 **Last Updated:** 2026-07-12  
-**Status:** Production Ready with Monitoring ✅  
+**Status:** Beta — Not Production Ready (remediation in progress; see [Institutional Audit 2026-07-13](knowledge-base/research/audit-2026-07-13-institutional.md))  
 **Next:** Production validation (Week 20 Days 6-10)

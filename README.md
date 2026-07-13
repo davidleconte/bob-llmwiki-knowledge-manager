@@ -238,7 +238,7 @@ The scripts have already filed digested reports into `docs/knowledge-base/`, so 
 - Caching system tested and working (E2E validated)
 - Script-based analysis reduces manual effort by 70-80%
 - **Test pass rate:** 98.4% (312/317 tests) — Note: This is pass rate, not code coverage
-- **Code coverage:** Not yet measured (requires --cov run)
+- **Code coverage:** 49.4% measured (delegation 0%, monitoring 11–42%; see [STATUS.md](STATUS.md) · [Institutional Audit 2026-07-13](docs/knowledge-base/research/audit-2026-07-13-institutional.md))
 
 ### 🧪 Experimental / Needs Validation
 

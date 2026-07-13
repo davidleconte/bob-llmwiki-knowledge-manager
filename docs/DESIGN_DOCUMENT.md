@@ -4,7 +4,7 @@
 **Framework:** McKinsey MECE (Mutually Exclusive, Collectively Exhaustive)  
 **Version:** 1.0  
 **Date:** July 12, 2026  
-**Status:** Production Ready (7/10)  
+**Status:** Beta — Not Production Ready (see [STATUS.md](../STATUS.md))  
 **Authors:** Architecture Team
 
 ---

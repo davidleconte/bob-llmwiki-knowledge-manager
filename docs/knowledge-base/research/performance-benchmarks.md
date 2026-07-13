@@ -6,7 +6,7 @@ This research document presents comprehensive performance benchmarks for the Tok
 ## Research Context
 
 **Research Period**: Week 19 (July 2026)  
-**System Version**: 1.0 (Production Ready)  
+**System Version**: 1.0 (Beta — Not Production Ready; see [STATUS.md](../../../STATUS.md))  
 **Test Environment**:
 - Python 3.11
 - macOS/Linux test environments
