@@ -15,6 +15,22 @@ if str(src_path) not in sys.path:
     sys.path.insert(0, str(src_path))
 
 import pytest
+from hypothesis import HealthCheck, settings
+
+# Deterministic hypothesis profile: the example stream is a pure function of the
+# test (derandomize=True) with no persisted database, so property tests are
+# reproducible across runs and machines — the suite's determinism guarantee is
+# load-bearing. deadline=None disables per-example wall-clock deadlines (avoids
+# flaky timing failures); the global pytest ``timeout=60`` still bounds each test.
+settings.register_profile(
+    "ci",
+    derandomize=True,
+    deadline=None,
+    max_examples=200,
+    database=None,
+    suppress_health_check=[HealthCheck.function_scoped_fixture],
+)
+settings.load_profile("ci")
 
 
 @pytest.fixture(autouse=True)

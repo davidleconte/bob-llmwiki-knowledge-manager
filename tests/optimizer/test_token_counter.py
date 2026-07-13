@@ -238,6 +238,29 @@ class TestTokenCounter:
         assert result.endswith("...")
         assert counter.count_tokens(result) <= 50
     
+    def test_truncate_to_tokens_multibyte_respects_budget(self):
+        """Emoji/CJK are multiple tokens per character; token-accurate truncation
+        must still honor the budget (the old char heuristic overshot ~10x)."""
+        counter = TokenCounter()
+        for text in ["\U0001f30d" * 1000, "世界" * 1000]:
+            result = counter.truncate_to_tokens(text, max_tokens=50)
+            assert counter.count_tokens(result) <= 50
+
+    def test_truncate_to_tokens_dense_ascii_respects_budget(self):
+        """Dense/random ASCII tokenizes near ~1.3 chars/token; truncation must not
+        exceed the budget (the old int(N*3.5) heuristic overshot ~2.6x)."""
+        counter = TokenCounter()
+        text = "!@#$%^&*()_+" * 500
+        result = counter.truncate_to_tokens(text, max_tokens=20)
+        assert counter.count_tokens(result) <= 20
+
+    def test_truncate_to_tokens_zero_or_negative_budget_is_empty(self):
+        """A zero/negative token budget fits nothing -> empty string. The old
+        heuristic returned text[:-3] (nearly the whole input) for N=0."""
+        counter = TokenCounter()
+        assert counter.truncate_to_tokens("word " * 1000, max_tokens=0) == ""
+        assert counter.truncate_to_tokens("anything", max_tokens=-5) == ""
+
     def test_whitespace_handling(self):
         """Test handling of extra whitespace."""
         counter = TokenCounter()

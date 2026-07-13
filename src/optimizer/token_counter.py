@@ -224,28 +224,47 @@ class TokenCounter:
         return self.count_tokens(text) <= max_tokens
     
     def truncate_to_tokens(self, text: str, max_tokens: int) -> str:
-        """Truncate text to fit within token limit.
-        
-        Simple truncation by characters, approximating token count.
-        
+        """Truncate text to fit within a token budget.
+
+        Guarantees ``count_tokens(result) <= max_tokens``. With tiktoken the text
+        is encoded, cut to the budget (reserving room for the "..." marker), then
+        decoded — so the postcondition holds for *any* text, including multibyte
+        scripts (emoji/CJK) where a fixed chars-per-token ratio overshoots. The
+        previous char-count heuristic (``int(max_tokens * 3.5)``) violated the
+        budget for dense/random text by up to ~2.6x and never fit at all for
+        ``max_tokens <= 0``.
+
         Args:
-            text: Text to truncate
-            max_tokens: Maximum tokens allowed
-            
+            text: Text to truncate.
+            max_tokens: Maximum tokens allowed. ``<= 0`` yields an empty string
+                (nothing fits in a zero budget).
+
         Returns:
-            Truncated text
+            Truncated text — ends with "..." when content was dropped, or the
+            original text unchanged when it already fits.
         """
-        current_tokens = self.count_tokens(text)
-        
-        if current_tokens <= max_tokens:
+        if max_tokens <= 0:
+            return ""
+
+        if self.count_tokens(text) <= max_tokens:
             return text
-        
-        # Approximate character limit
-        # Use conservative ratio to ensure we don't exceed
-        char_limit = int(max_tokens * 3.5)  # ~3.5 chars per token
-        
-        if len(text) <= char_limit:
-            return text
-        
-        # Truncate and add ellipsis
-        return text[:char_limit - 3] + "..."
+
+        if not self.use_tiktoken or self.encoding is None:
+            # No tokenizer available: token counts are already approximate on
+            # this path, so fall back to the conservative character heuristic.
+            char_limit = int(max_tokens * 3.5)
+            if len(text) <= char_limit:
+                return text
+            return text[:max(0, char_limit - 3)] + "..."
+
+        # Token-accurate path: reserve room for the ellipsis marker, cut, decode,
+        # then re-trim to absorb any encode(decode(...)) boundary drift.
+        ellipsis = "..."
+        ellipsis_tokens = len(self.encoding.encode(ellipsis))
+        budget = max(0, max_tokens - ellipsis_tokens)
+        tokens = self.encoding.encode(text)[:budget]
+        result = self.encoding.decode(tokens) + ellipsis
+        while tokens and self.count_tokens(result) > max_tokens:
+            tokens = tokens[:-1]
+            result = self.encoding.decode(tokens) + ellipsis
+        return result
