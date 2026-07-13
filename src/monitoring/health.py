@@ -112,7 +112,7 @@ class HealthChecker:
             latency_ms = (time.time() - start) * 1000
             
             # Get cache stats
-            stats = cache.get_stats()
+            stats = cache.stats()
             
             # Determine health based on hit rate and latency
             hit_rate = stats.get("hit_rate", 0)
@@ -213,7 +213,7 @@ class HealthChecker:
             
             # Try a test truncation
             test_text = "This is a test text for health checking. " * 100
-            result = self.truncator.truncate(test_text, max_length=100)
+            result = self.truncator.truncate(test_text, max_tokens=100)
             
             latency_ms = (time.time() - start) * 1000
             

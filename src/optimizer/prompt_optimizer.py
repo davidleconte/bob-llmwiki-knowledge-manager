@@ -46,7 +46,12 @@ class PromptOptimizer:
             track_costs: Whether to track costs with CostTracker
         """
         self.token_counter = TokenCounter(model=model, track_costs=track_costs)
-        self.cache = MultiLevelCache() if use_cache else None
+        # Use only L1 (exact) cache to avoid semantic matches returning wrong prompt's optimization
+        if use_cache:
+            from src.cache.exact_cache import ExactCache
+            self.cache = ExactCache(max_size=1000, track_costs=track_costs)
+        else:
+            self.cache = None
         self.target_savings = target_savings
         self.min_quality = min_quality
         self.track_costs = track_costs

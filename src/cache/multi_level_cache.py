@@ -128,8 +128,9 @@ class MultiLevelCache(CacheInterface):
             Number of unique cached entries
         """
         # Count unique keys across both caches
+        # L1 uses hashed keys, L2 uses raw prompts - need to hash L2 keys for proper comparison
         l1_keys = set(self.l1_cache.cache.keys())
-        l2_keys = set(self.l2_cache.embeddings.keys())
+        l2_keys = set(self.l1_cache._hash_key(k) for k in self.l2_cache.embeddings.keys())
         return len(l1_keys | l2_keys)
     
     def hit_rate(self) -> float:
@@ -268,7 +269,9 @@ class MultiLevelCache(CacheInterface):
         Returns:
             True if key exists in L1 or L2, False otherwise
         """
-        return key in self.l1_cache.cache or self.l2_cache.contains_similar(key)
+        # Hash key for L1 comparison (L1 stores hashed keys)
+        hashed_key = self.l1_cache._hash_key(key)
+        return hashed_key in self.l1_cache.cache or self.l2_cache.contains_similar(key)
     
     def average_lookup_time_ms(self) -> float:
         """Get average lookup time in milliseconds.

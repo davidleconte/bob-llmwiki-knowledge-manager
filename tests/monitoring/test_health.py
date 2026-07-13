@@ -145,7 +145,7 @@ class TestHealthChecker:
         """Test successful cache health check."""
         cache = Mock()
         cache.get.return_value = None
-        cache.get_stats.return_value = {
+        cache.stats.return_value = {
             "hit_rate": 75.0,
             "total_requests": 100,
             "size": 50
@@ -167,7 +167,7 @@ class TestHealthChecker:
         """Test cache health check with low hit rate."""
         cache = Mock()
         cache.get.return_value = None
-        cache.get_stats.return_value = {
+        cache.stats.return_value = {
             "hit_rate": 3.0,
             "total_requests": 200,
             "size": 50
@@ -274,7 +274,7 @@ class TestHealthChecker:
         """Test overall health check when all components healthy."""
         cache = Mock()
         cache.get.return_value = None
-        cache.get_stats.return_value = {
+        cache.stats.return_value = {
             "hit_rate": 75.0,
             "total_requests": 100,
             "size": 50
@@ -301,7 +301,7 @@ class TestHealthChecker:
         
         cache = Mock()
         cache.get.return_value = None
-        cache.get_stats.return_value = {
+        cache.stats.return_value = {
             "hit_rate": 75.0,
             "total_requests": 100,
             "size": 50
