@@ -38,6 +38,7 @@ Last Updated: 2026-07-13
 - [Phase 5 Documentation Reconciliation Complete](./guides/phase5-documentation-reconciliation-complete.md) - Complete report on Phase 5: moved deprecated docs, created UNIFIED_ARCHITECTURE.md, fixed all cross-references
 - [Phase 6 Real-World Validation Plan](./guides/phase6-real-world-validation-plan.md) - Comprehensive 10-14 day execution plan for real-world validation with LLM APIs, replacing fabricated metrics with real measurements
 - [Phase 6 Bob Shell Validation Approach](./guides/phase6-bob-shell-validation-approach.md) - Updated Phase 6 approach using Bob Shell itself as LLM API, eliminating need for external APIs, 100-200 BC budget, self-validation strategy
+- [Phase 6 Lessons Learned](./research/phase6-lessons-learned-2026-07-13.md) - Critical insights from Phase 6 self-validation: 39.3% savings achieved, 76% confidence, self-validation superior to external APIs, budget estimation lessons, optimization patterns discovered
 - [Real-Time Savings Measurement Guide](./guides/real-time-savings-measurement-guide.md) - Complete guide for measuring actual token savings in real-time, bridging Bob Shell's native tracking with optimization tools using estimation, shadow, and integration modes
 - [Bob Shell UI Integration](./guides/bob-shell-ui-integration.md) - UI integration specification for real-time cost tracking indicator in Bob Shell chat interface
 - [Cost Tracking Guide](./guides/cost-tracking-guide.md) - Comprehensive guide for Bobcoin cost tracking, budget management, and ROI monitoring
