@@ -40,8 +40,8 @@
 **Architecture**: 6-layer system with complex orchestration
 
 **Documentation Files**:
-- `docs/architecture/MASTER.md` (671+ lines)
-- `docs/architecture/components/CACHE.md` (3,428 lines)
+- `docs/architecture/deprecated/MASTER.md` (671+ lines) - DEPRECATED: Original 6-layer architecture (not implemented)
+docs/architecture/deprecated/
 - `docs/architecture/components/OPTIMIZER.md` (3,892 lines)
 - `docs/architecture/components/FORMATTER.md` (3,156 lines)
 - `docs/architecture/components/TRUNCATION.md` (3,584 lines)

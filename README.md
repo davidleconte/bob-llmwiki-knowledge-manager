@@ -16,6 +16,26 @@ A native **IBM Bob Shell** implementation of Andrej Karpathy's **LLM-Wiki** patt
 
 ---
 
+## ⚠️ Repository Contains Two Systems
+
+**This repository contains TWO DISTINCT SYSTEMS:**
+
+1. **Bob Shell Knowledge Manager** (this README) - Lightweight documentation framework (~500 lines)
+   - Purpose: Organize knowledge bases using Bob Shell
+   - Technology: Bash scripts, YAML, Markdown templates
+   - Status: Stable (v1.0)
+
+2. **Token Optimization System** (separate codebase) - Python-based LLM optimization (~3,500 lines)
+   - Purpose: Reduce LLM token costs through caching and optimization
+   - Technology: Python 3.11+, tiktoken, scikit-learn
+   - Status: Beta (7/10) - Not Production Ready
+
+**These systems are NOT integrated.** They share a repository but serve different purposes.
+
+**For complete architecture:** See [docs/architecture/UNIFIED_ARCHITECTURE.md](docs/architecture/UNIFIED_ARCHITECTURE.md)
+
+---
+
 https://github.com/user-attachments/assets/897fecc2-8849-4fad-b8e0-3c408b026de6
 
 

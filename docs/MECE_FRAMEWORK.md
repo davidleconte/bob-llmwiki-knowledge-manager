@@ -163,7 +163,8 @@ Bob Shell Knowledge Manager
 - Data structures (that's Data Architecture)
 
 **Documents:**
-- docs/architecture/components/ (individual components)
+- docs/architecture/deprecated/ (deprecated component specs - historical reference only)
+- docs/architecture/UNIFIED_ARCHITECTURE.md (current complete architecture)
 - docs/api/ (component APIs)
 
 ### 2.3 Data Architecture

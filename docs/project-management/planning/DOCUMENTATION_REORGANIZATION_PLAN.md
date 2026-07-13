@@ -189,12 +189,12 @@ mkdir -p docs/project-management/reviews
 
 ```bash
 # Move master architecture docs
-mv ARCHITECTURE_MASTER.md docs/architecture/MASTER.md
+mv ARCHITECTURE_MASTER.md docs/architecture/deprecated/MASTER.md
 mv ARCHITECTURE_QUALITY_ATTRIBUTES.md docs/architecture/QUALITY_ATTRIBUTES.md
 mv ARCHITECTURE_DOCUMENTATION_PLAN.md docs/architecture/DOCUMENTATION_PLAN.md
 
 # Move component specs
-mv ARCHITECTURE_CACHE.md docs/architecture/components/CACHE.md
+docs/architecture/deprecated/
 mv ARCHITECTURE_OPTIMIZER.md docs/architecture/components/OPTIMIZER.md
 mv ARCHITECTURE_FORMATTER.md docs/architecture/components/FORMATTER.md
 mv ARCHITECTURE_TRUNCATION.md docs/architecture/components/TRUNCATION.md
