@@ -282,8 +282,23 @@ def get_health_checker() -> HealthChecker:
         with _health_checker_lock:
             if _health_checker is None:
                 _health_checker = HealthChecker()
-    
+
     return _health_checker
+
+
+def reset_health_checker() -> None:
+    """Reset the global health checker.
+
+    Stops any running background monitoring thread and drops the shared
+    instance, so checks registered on it (e.g. by
+    ``register_monitoring_health_check``) do not leak across callers. Mirrors
+    ``reset_metrics()`` in ``metrics.py``; primarily used to isolate tests.
+    """
+    global _health_checker
+    with _health_checker_lock:
+        if _health_checker is not None:
+            _health_checker.stop_background_checks()
+            _health_checker = None
 
 
 def register_cache_health_check(cache_name: str, cache_instance: Any) -> None:

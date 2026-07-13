@@ -17,6 +17,29 @@ if str(src_path) not in sys.path:
 import pytest
 
 
+@pytest.fixture(autouse=True)
+def _reset_monitoring_singletons():
+    """Isolate every test from the process-global monitoring singletons.
+
+    ``get_metrics_collector`` / ``get_health_checker`` / ``get_cost_tracker``
+    return module-level singletons that otherwise accumulate state across tests
+    (recorded cache hits, registered health checks), coupling test ordering and
+    masking bugs. Reset them before and after each test so each starts clean.
+    Lazy imports keep a monitoring import error from breaking unrelated tests.
+    """
+    def _reset():
+        from src.monitoring.metrics import reset_metrics
+        from src.monitoring.health import reset_health_checker
+        from src.monitoring.cost_tracker import reset_cost_tracker
+        reset_metrics()
+        reset_health_checker()
+        reset_cost_tracker()
+
+    _reset()
+    yield
+    _reset()
+
+
 @pytest.fixture
 def sample_prompt():
     """Fixture providing a sample prompt for testing."""

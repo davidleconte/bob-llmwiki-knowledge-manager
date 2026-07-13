@@ -77,9 +77,24 @@ class TokenCounter:
         # Track cost if enabled
         if self.track_costs and self._cost_tracker:
             self._cost_tracker.record_token_counting(tokens)
-        
+
         return tokens
-    
+
+    def count_tokens_batch(self, texts: list[str]) -> list[int]:
+        """Count tokens for a batch of texts.
+
+        Convenience wrapper over :meth:`count_tokens` for many texts at once.
+        Delegates per item so batch and single-count semantics stay identical
+        (empty-string handling, tiktoken-vs-approximation, cost tracking).
+
+        Args:
+            texts: Texts to count tokens for.
+
+        Returns:
+            Per-text token counts, in the same order as ``texts``.
+        """
+        return [self.count_tokens(text) for text in texts]
+
     def _approximate_tokens(self, text: str) -> int:
         """Approximate token count.
         

@@ -56,6 +56,25 @@ class TestTokenCounter:
         assert tokens > 10
         assert tokens < 30
     
+    def test_count_tokens_batch(self):
+        """Batch counting returns per-text counts identical to single counts."""
+        counter = TokenCounter()
+
+        texts = ["Hello world", "", "This is a longer piece of text."]
+        batch = counter.count_tokens_batch(texts)
+
+        assert len(batch) == len(texts)
+        # Order preserved and each entry equals the single-count result.
+        assert batch == [counter.count_tokens(t) for t in texts]
+        # Empty string contributes 0, matching count_tokens semantics.
+        assert batch[1] == 0
+
+    def test_count_tokens_batch_empty_list(self):
+        """Batch counting an empty list returns an empty list."""
+        counter = TokenCounter()
+
+        assert counter.count_tokens_batch([]) == []
+
     def test_approximate_tokens(self):
         """Test approximate token counting."""
         counter = TokenCounter()

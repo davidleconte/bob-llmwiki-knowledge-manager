@@ -7,7 +7,7 @@ Integrates with the existing metrics system to provide comprehensive cost visibi
 
 import time
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 from threading import Lock
 from collections import defaultdict, deque
@@ -133,7 +133,7 @@ class BudgetAlert:
         
         if should_trigger:
             self.triggered = True
-            self.triggered_at = datetime.utcnow()
+            self.triggered_at = datetime.now(timezone.utc)
         
         return should_trigger
     
@@ -435,7 +435,7 @@ class CostTracker:
         active_alerts = self.get_active_alerts()
         
         return {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             "budget": budget_status,
             "costs": cost_metrics,
             "rate": cost_rate,

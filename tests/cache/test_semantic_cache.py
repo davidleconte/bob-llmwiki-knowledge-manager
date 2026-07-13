@@ -56,6 +56,63 @@ class TestSemanticCache:
         assert result == "Python is a programming language"
         assert cache.size() == 1
     
+    @pytest.mark.xfail(
+        strict=True,
+        reason="Phase 4 cache-quality: dense HashingVectorizer embeddings with "
+        "n_features=1000 collide for distinct single-token keys, so get() can "
+        "return a colliding neighbour's value at similarity 1.0 even when the "
+        "exact key is stored. Fix (exact-key fast-path, or larger/sparse "
+        "embeddings) is scoped to Phase 4.",
+    )
+    def test_exact_key_returns_its_own_value_under_collisions(self):
+        """An exactly-stored key must return ITS OWN value, not a neighbour's.
+
+        Populates enough single-token keys that HashingVectorizer buckets
+        collide (birthday paradox: 500 keys in n_features=1000), then requires
+        every stored key to retrieve its own value. Currently fails because
+        get() returns a colliding embedding's value at similarity 1.0.
+        """
+        cache = SemanticCache(max_size=500, similarity_threshold=0.85)
+        for i in range(500):
+            cache.set(f"prompt_{i}", f"result_{i}")
+
+        mismatches = [i for i in range(500) if cache.get(f"prompt_{i}") != f"result_{i}"]
+        assert not mismatches, (
+            f"{len(mismatches)} keys returned a colliding neighbour's value; "
+            f"first few: {mismatches[:5]}"
+        )
+
+    def test_population_is_linear_not_quadratic(self):
+        """Populating N distinct keys generates O(N) embeddings, not O(N^2).
+
+        Regression guard for the removed ``_regenerate_all_embeddings()``
+        O(n^2) path (which timed out the scalability/stress tests): each
+        ``set()`` of a novel key must generate exactly one new embedding, not
+        rebuild the whole cache. Counts ``generate()`` calls — deterministic,
+        no wall-clock assertion (which would be flaky).
+        """
+        cache = SemanticCache(max_size=1000)
+        gen = cache.embedding_generator
+        original_generate = gen.generate
+        calls = {"n": 0}
+
+        def counting_generate(text, use_cache=True):
+            calls["n"] += 1
+            return original_generate(text, use_cache=use_cache)
+
+        gen.generate = counting_generate
+
+        n = 200
+        for i in range(n):
+            cache.set(f"key_{i}", f"value_{i}")
+
+        # O(n) population is ~1 generate per set; the old O(n^2) regeneration
+        # would be ~n*(n-1)/2 (~20k for n=200). 3*n is a wide, robust margin.
+        assert calls["n"] <= 3 * n, (
+            f"{calls['n']} generate() calls for {n} sets — "
+            "O(n^2) regeneration reintroduced?"
+        )
+
     def test_semantic_similarity_match(self):
         """Test semantic similarity matching with similar prompts."""
         cache = SemanticCache(similarity_threshold=0.70)

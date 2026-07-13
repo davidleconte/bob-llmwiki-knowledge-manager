@@ -6,7 +6,7 @@ Foundation for all specialized sub-agents
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 
 
@@ -39,7 +39,7 @@ class SubAgentResult:
     warnings: List[str] = field(default_factory=list)
     execution_time_ms: float = 0.0
     token_count: int = 0
-    timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     metadata: Dict[str, Any] = field(default_factory=dict)
     
     def is_success(self) -> bool:
@@ -169,7 +169,7 @@ class SubAgent(ABC):
         self._status = SubAgentStatus.RUNNING
         self._current_task = task
         
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
         
         try:
             # Check cache if enabled
@@ -184,7 +184,7 @@ class SubAgent(ABC):
             result = self.analyze(task)
             
             # Update statistics
-            execution_time = (datetime.utcnow() - start_time).total_seconds() * 1000
+            execution_time = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
             result.execution_time_ms = execution_time
             
             self._tasks_completed += 1
@@ -208,7 +208,7 @@ class SubAgent(ABC):
                 status=SubAgentStatus.FAILED,
                 data={},
                 errors=[str(e)],
-                execution_time_ms=(datetime.utcnow() - start_time).total_seconds() * 1000
+                execution_time_ms=(datetime.now(timezone.utc) - start_time).total_seconds() * 1000
             )
         finally:
             self._current_task = None
