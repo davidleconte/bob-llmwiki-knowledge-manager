@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Phase 3 Validation Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        h1 { color: #333; }
+        h2 { color: #666; margin-top: 30px; }
+        table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .metric { font-size: 24px; font-weight: bold; color: #2196F3; }
+        .good { color: #4CAF50; }
+        .warning { color: #FF9800; }
+        .bad { color: #F44336; }
+        .recommendation { margin: 10px 0; padding: 10px; background-color: #f9f9f9; border-left: 4px solid #2196F3; }
+    </style>
+</head>
+<body>
+    <h1>Phase 3 Validation Report</h1>
+    <p>Generated: 2026-07-13 11:41:02</p>
+    
+    <h2>Summary</h2>
+    <div class="metric">
+        Token Reduction: 26.5%
+    </div>
+    <div class="metric">
+        Tokens Saved: 19,749
+    </div>
+    
+    <h2>Baseline Statistics</h2>
+    <table>
+        <tr><th>Metric</th><th>Value</th></tr>
+        <tr><td>Sessions</td><td>5</td></tr>
+        <tr><td>Total Queries</td><td>51</td></tr>
+        <tr><td>Total Tokens</td><td>62,076</td></tr>
+        <tr><td>Mean Latency</td><td>5.2ms</td></tr>
+    </table>
+    
+    <h2>Optimized Statistics</h2>
+    <table>
+        <tr><th>Metric</th><th>Value</th></tr>
+        <tr><td>Sessions</td><td>5</td></tr>
+        <tr><td>Total Queries</td><td>51</td></tr>
+        <tr><td>Total Tokens</td><td>45,602</td></tr>
+        <tr><td>Tokens Saved</td><td>19,749</td></tr>
+        <tr><td>Savings</td><td>30.2%</td></tr>
+        <tr><td>Cache Hit Rate</td><td>17.4%</td></tr>
+        <tr><td>Optimization Rate</td><td>60.5%</td></tr>
+        <tr><td>Mean Latency</td><td>9.5ms</td></tr>
+    </table>
+    
+    <h2>Savings Distribution</h2>
+    <table>
+        <tr><th>Statistic</th><th>Value</th></tr>
+        <tr><td>Mean</td><td>30.4%</td></tr>
+        <tr><td>Median</td><td>30.4%</td></tr>
+        <tr><td>P95</td><td>34.4%</td></tr>
+        <tr><td>Min</td><td>24.5%</td></tr>
+        <tr><td>Max</td><td>35.1%</td></tr>
+        <tr><td>95% CI</td><td>[27.0%, 33.7%]</td></tr>
+    </table>
+    
+    <h2>Recommendations</h2>
+    <div class="recommendation">✅ Good token reduction (26.5%). Consider increasing cache size for better results.</div>
+    <div class="recommendation">❌ Low cache hit rate (17.4%). Review cache configuration and query patterns.</div>
+    <div class="recommendation">⚠️ Moderate optimization rate (60.5%). Some prompts may not benefit from optimization.</div>
+    <div class="recommendation">✅ Minimal latency overhead (4.4ms). Performance impact is negligible.</div>
+
+</body>
+</html>
