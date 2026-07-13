@@ -44,6 +44,7 @@ Last Updated: 2026-07-13
 - [Token Optimization](./concepts/token-optimization.md) - Systematic approach to reducing LLM token consumption through caching, optimization, and truncation
 
 ### Guides
+- [Phase 3 Validation User Guide](./guides/phase3-validation-user-guide.md) - Comprehensive guide for collecting baseline and optimized measurements: best practices, query examples, troubleshooting, FAQ, and analysis instructions
 - [Phase 3 Real-World Validation Plan](./guides/phase3-real-world-validation-plan.md) - Comprehensive 2-3 week plan for real-world validation using Bob Shell, measuring actual token savings and preparing for production deployment
 - [Phase 2 Performance Optimization Plan](./guides/phase2-performance-optimization-plan.md) - Complete Phase 2 implementation plan with performance targets, thread-safety, health checks, and vocabulary drift monitoring
 - [Audit Remediation Action Plan](./guides/audit-remediation-action-plan.md) - Comprehensive 6-phase plan to address external audit findings with timeline and success criteria
