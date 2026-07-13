@@ -28,6 +28,7 @@ Last Updated: 2026-07-13
 - [Token Optimization](./concepts/token-optimization.md) - Systematic approach to reducing LLM token consumption through caching, optimization, and truncation
 
 ### Guides
+- [Audit Remediation Action Plan](./guides/audit-remediation-action-plan.md) - Comprehensive 6-phase plan to address external audit findings with timeline and success criteria
 - [Bob Shell UI Integration](./guides/bob-shell-ui-integration.md) - UI integration specification for real-time cost tracking indicator in Bob Shell chat interface
 - [Cost Tracking Guide](./guides/cost-tracking-guide.md) - Comprehensive guide for Bobcoin cost tracking, budget management, and ROI monitoring
 - [E2E Testing Setup Guide](./guides/e2e-testing-setup-guide.md) - Complete guide for setting up and running E2E tests, including common API compatibility issues and troubleshooting
