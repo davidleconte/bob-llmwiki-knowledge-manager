@@ -9,7 +9,8 @@ Last Updated: 2026-07-13
 - [Research](./research/) - Research notes and findings
 
 ## Recent Additions
-- 2026-07-13: [External Audit 2026-07-12](./research/external-audit-2026-07-12.md) - Research ⭐ NEW
+- 2026-07-13: [Coverage Measurement 2026-07-13](./research/coverage-measurement-2026-07-13.md) - Research ⭐ NEW
+- 2026-07-13: [External Audit 2026-07-12](./research/external-audit-2026-07-12.md) - Research
 - 2026-07-13: [Cost Tracking Lessons Learned](./research/cost-tracking-lessons-learned.md) - Research
 - 2026-07-13: [Bob Shell UI Integration](./guides/bob-shell-ui-integration.md) - Guide
 - 2026-07-13: [Cost Tracking Guide](./guides/cost-tracking-guide.md) - Guide
@@ -39,6 +40,7 @@ Last Updated: 2026-07-13
 - [Cache API Reference](./references/cache-api.md) - Complete API documentation for all cache classes, methods, and usage examples
 
 ### Research
+- [Coverage Measurement 2026-07-13](./research/coverage-measurement-2026-07-13.md) - Real code coverage measurement revealing 49% actual coverage vs claimed 98.4% pass rate, with 28% orphaned code identified
 - [External Audit 2026-07-12](./research/external-audit-2026-07-12.md) - Independent external audit identifying critical findings, fabricated metrics, and documentation drift with recommended remediation
 - [Cost Tracking Lessons Learned](./research/cost-tracking-lessons-learned.md) - Key lessons learned from implementing the comprehensive Bobcoin cost tracking system with KB savings estimation
 - [Performance Benchmarks](./research/performance-benchmarks.md) - Comprehensive performance analysis including latency, throughput, memory usage, and token savings measurements
