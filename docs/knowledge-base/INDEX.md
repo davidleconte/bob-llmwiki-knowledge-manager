@@ -9,7 +9,11 @@ Last Updated: 2026-07-13
 - [Research](./research/) - Research notes and findings
 
 ## Recent Additions
-- 2026-07-13: [Coverage Measurement 2026-07-13](./research/coverage-measurement-2026-07-13.md) - Research ⭐ NEW
+- 2026-07-13: [Phase 6 Real-World Validation Plan](./guides/phase6-real-world-validation-plan.md) - Guide ⭐ NEW
+- 2026-07-13: [Phase 5 Documentation Reconciliation Complete](./guides/phase5-documentation-reconciliation-complete.md) - Guide ⭐ NEW
+- 2026-07-13: [Audit Remediation Status](./guides/audit-remediation-status.md) - Guide ⭐ NEW
+- 2026-07-13: [Delegation Integration Analysis](./research/delegation-integration-analysis-2026-07-13.md) - Research ⭐ NEW
+- 2026-07-13: [Coverage Measurement 2026-07-13](./research/coverage-measurement-2026-07-13.md) - Research
 - 2026-07-13: [External Audit 2026-07-12](./research/external-audit-2026-07-12.md) - Research
 - 2026-07-13: [Cost Tracking Lessons Learned](./research/cost-tracking-lessons-learned.md) - Research
 - 2026-07-13: [Bob Shell UI Integration](./guides/bob-shell-ui-integration.md) - Guide
@@ -30,6 +34,9 @@ Last Updated: 2026-07-13
 
 ### Guides
 - [Audit Remediation Action Plan](./guides/audit-remediation-action-plan.md) - Comprehensive 6-phase plan to address external audit findings with timeline and success criteria
+- [Audit Remediation Status](./guides/audit-remediation-status.md) - Current status of audit remediation with Phases 1-4 complete, monitoring integrated, all critical bugs fixed
+- [Phase 5 Documentation Reconciliation Complete](./guides/phase5-documentation-reconciliation-complete.md) - Complete report on Phase 5: moved deprecated docs, created UNIFIED_ARCHITECTURE.md, fixed all cross-references
+- [Phase 6 Real-World Validation Plan](./guides/phase6-real-world-validation-plan.md) - Comprehensive 10-14 day execution plan for real-world validation with LLM APIs, replacing fabricated metrics with real measurements
 - [Bob Shell UI Integration](./guides/bob-shell-ui-integration.md) - UI integration specification for real-time cost tracking indicator in Bob Shell chat interface
 - [Cost Tracking Guide](./guides/cost-tracking-guide.md) - Comprehensive guide for Bobcoin cost tracking, budget management, and ROI monitoring
 - [E2E Testing Setup Guide](./guides/e2e-testing-setup-guide.md) - Complete guide for setting up and running E2E tests, including common API compatibility issues and troubleshooting
@@ -40,6 +47,7 @@ Last Updated: 2026-07-13
 - [Cache API Reference](./references/cache-api.md) - Complete API documentation for all cache classes, methods, and usage examples
 
 ### Research
+- [Delegation Integration Analysis 2026-07-13](./research/delegation-integration-analysis-2026-07-13.md) - Analysis of delegation module revealing 28% orphaned code, 0% test coverage, and experimental status with no integration into core system
 - [Coverage Measurement 2026-07-13](./research/coverage-measurement-2026-07-13.md) - Real code coverage measurement revealing 49% actual coverage vs claimed 98.4% pass rate, with 28% orphaned code identified
 - [External Audit 2026-07-12](./research/external-audit-2026-07-12.md) - Independent external audit identifying critical findings, fabricated metrics, and documentation drift with recommended remediation
 - [Cost Tracking Lessons Learned](./research/cost-tracking-lessons-learned.md) - Key lessons learned from implementing the comprehensive Bobcoin cost tracking system with KB savings estimation
