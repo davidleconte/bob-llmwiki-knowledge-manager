@@ -250,6 +250,25 @@ Fourth paragraph to complete."""
         assert result["original_tokens"] == 0
         assert result["truncated_tokens"] == 0
 
+    @pytest.mark.parametrize("strategy", ["simple", "priority", "semantic", "sliding_window"])
+    @pytest.mark.parametrize("text", [
+        "Hello 世界 " * 50,           # CJK / multibyte, no sentence punctuation
+        "word " * 200,                # long, no punctuation (one "sentence")
+        "supercalifragilistic" * 40,  # one long token-dense stream
+        "A. " * 100,                  # many tiny sentences
+    ])
+    def test_truncation_never_exceeds_budget(self, strategy, text):
+        """Invariant (audit C-3): truncated tokens must never exceed max_tokens.
+
+        A fixed chars-per-token ratio in SimpleTruncationStrategy overshot the
+        budget for multibyte/CJK text; every strategy must respect max_tokens.
+        """
+        truncator = Truncator()
+        max_tokens = 20
+        result = truncator.truncate(text, max_tokens=max_tokens, strategy=strategy)
+        assert result["was_truncated"] is True
+        assert result["truncated_tokens"] <= max_tokens
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

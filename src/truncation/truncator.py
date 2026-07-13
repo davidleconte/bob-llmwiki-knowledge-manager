@@ -106,9 +106,17 @@ class Truncator:
         # Apply truncation
         truncation_strategy = self.strategies[strategy_name]
         truncated = truncation_strategy.truncate(text, max_tokens, self.token_counter)
-        
+
         # Count truncated tokens
         truncated_tokens = self.token_counter.count_tokens(truncated)
+
+        # Enforce the hard invariant: never exceed the token budget, regardless
+        # of which strategy ran (a strategy may overshoot on unusual input).
+        if truncated_tokens > max_tokens:
+            truncated = SimpleTruncationStrategy().truncate(
+                truncated, max_tokens, self.token_counter
+            )
+            truncated_tokens = self.token_counter.count_tokens(truncated)
         tokens_removed = original_tokens - truncated_tokens
         latency_ms = (time.time() - start_time) * 1000
         

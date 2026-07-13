@@ -40,38 +40,62 @@ class SimpleTruncationStrategy(TruncationStrategy):
     """
     
     def truncate(self, text: str, max_tokens: int, token_counter) -> str:
-        """Truncate text using simple character-based approach.
-        
+        """Truncate text to a token-accurate prefix with an ellipsis marker.
+
+        Uses the token counter directly (binary search) so the result never
+        exceeds ``max_tokens``. A fixed chars-per-token ratio undershoots for
+        multibyte/CJK text and overshoots the budget.
+
         Args:
             text: Text to truncate
             max_tokens: Maximum tokens allowed
             token_counter: TokenCounter instance
-            
+
         Returns:
-            Truncated text
+            Truncated text whose token count is <= ``max_tokens``
         """
         current_tokens = token_counter.count_tokens(text)
-        
+
         if current_tokens <= max_tokens:
             return text
-        
-        # Estimate character limit (conservative: 3.5 chars per token)
-        char_limit = int(max_tokens * 3.5)
-        
-        if len(text) <= char_limit:
-            return text
-        
-        # Truncate and add ellipsis
-        truncated = text[:char_limit - 3] + "..."
-        
-        # Verify token count
-        if token_counter.count_tokens(truncated) > max_tokens:
-            # Be more aggressive
-            char_limit = int(max_tokens * 3.0)
-            truncated = text[:char_limit - 3] + "..."
-        
-        return truncated
-    
+
+        if max_tokens <= 0:
+            return ""
+
+        ellipsis = "..."
+        ellipsis_tokens = token_counter.count_tokens(ellipsis)
+
+        # Reserve room for the ellipsis marker when it fits, then verify the
+        # combined result stays within budget (BPE can merge across the join).
+        if ellipsis_tokens < max_tokens:
+            prefix = self._token_safe_prefix(
+                text, max_tokens - ellipsis_tokens, token_counter
+            )
+            candidate = (prefix + ellipsis) if prefix else ellipsis
+            if token_counter.count_tokens(candidate) <= max_tokens:
+                return candidate
+
+        # Fall back to using the full budget for content (no marker).
+        return self._token_safe_prefix(text, max_tokens, token_counter)
+
+    def _token_safe_prefix(self, text: str, max_tokens: int, token_counter) -> str:
+        """Longest character prefix of ``text`` with token count <= ``max_tokens``.
+
+        Binary search on the character index using the real token counter, so
+        the invariant holds for any tokenizer (including multibyte text).
+        """
+        if max_tokens <= 0:
+            return ""
+        lo, hi, best = 0, len(text), 0
+        while lo <= hi:
+            mid = (lo + hi) // 2
+            if token_counter.count_tokens(text[:mid]) <= max_tokens:
+                best = mid
+                lo = mid + 1
+            else:
+                hi = mid - 1
+        return text[:best]
+
     def get_name(self) -> str:
         """Get strategy name."""
         return "simple"
