@@ -10,7 +10,7 @@ from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Deque
-from threading import Lock
+from threading import RLock
 import statistics
 
 
@@ -206,7 +206,11 @@ class MetricsCollector:
     
     def __init__(self):
         """Initialize metrics collector."""
-        self._lock = Lock()
+        # Reentrant: get_metrics()/get_summary() hold the lock and then call
+        # get_combined_cache_hit_rate(), which re-acquires it. A plain Lock
+        # self-deadlocked on every get_metrics() call (previously misdiagnosed
+        # as a "Python 3.14" issue and the tests were skipped).
+        self._lock = RLock()
         self._start_time = time.time()
         
         # Cache metrics
