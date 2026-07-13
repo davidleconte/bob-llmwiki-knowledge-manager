@@ -141,18 +141,21 @@ class PriorityTruncationStrategy(TruncationStrategy):
         # Split into sections
         sections = self._split_sections(text)
         
-        # Prioritize sections
+        # Prioritize sections (each carries its original index)
         prioritized = self._prioritize_sections(sections)
-        
-        # Build truncated text from high-priority sections
-        result = []
+
+        # SELECT high-priority sections within the token budget, remembering
+        # each one's original position. We choose by priority but must EMIT in
+        # original document order -- appending in priority order scrambled the
+        # document (e.g. the last section landed before earlier ones) (C-9).
+        selected = []  # list of (original_index, text_to_emit)
         total_tokens = 0
-        
-        for section, priority in prioritized:
+
+        for index, section, priority in prioritized:
             section_tokens = token_counter.count_tokens(section)
-            
+
             if total_tokens + section_tokens <= max_tokens:
-                result.append(section)
+                selected.append((index, section))
                 total_tokens += section_tokens
             elif total_tokens < max_tokens:
                 # Partial section
@@ -160,12 +163,14 @@ class PriorityTruncationStrategy(TruncationStrategy):
                 truncated_section = SimpleTruncationStrategy().truncate(
                     section, remaining, token_counter
                 )
-                result.append(truncated_section)
+                selected.append((index, truncated_section))
                 break
             else:
                 break
-        
-        return "\n\n".join(result)
+
+        # Restore original document order before joining.
+        selected.sort(key=lambda item: item[0])
+        return "\n\n".join(text for _, text in selected)
     
     def _split_sections(self, text: str) -> List[str]:
         """Split text into sections.
@@ -187,16 +192,18 @@ class PriorityTruncationStrategy(TruncationStrategy):
             sections: List of sections
             
         Returns:
-            List of (section, priority) tuples, sorted by priority
+            List of (original_index, section, priority) tuples, sorted by
+            priority (highest first). The index lets the caller restore
+            original document order after selecting by priority.
         """
         prioritized = []
-        
+
         for i, section in enumerate(sections):
             priority = self._calculate_priority(section, i, len(sections))
-            prioritized.append((section, priority))
-        
+            prioritized.append((i, section, priority))
+
         # Sort by priority (higher first)
-        prioritized.sort(key=lambda x: x[1], reverse=True)
+        prioritized.sort(key=lambda x: x[2], reverse=True)
         
         return prioritized
     

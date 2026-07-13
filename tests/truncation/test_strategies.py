@@ -110,6 +110,36 @@ Last paragraph."""
         strategy = PriorityTruncationStrategy()
         assert strategy.get_name() == "priority"
 
+    def test_preserves_original_section_order(self):
+        """Kept sections must stay in original document order (C-9 regression).
+
+        Previously the strategy appended sections in PRIORITY order and joined,
+        so the output scrambled the document: with preserve_first_last, the last
+        section (high priority) was emitted before earlier middle sections,
+        producing text whose sections were out of their original sequence.
+        """
+        strategy = PriorityTruncationStrategy(preserve_first_last=True)
+        counter = TokenCounter()
+
+        # Six plainly-ordered sections, each uniquely identifiable by a marker.
+        sections = [f"MARKER{i} some ordinary section content here" for i in range(6)]
+        text = "\n\n".join(sections)
+
+        # Budget for roughly half -> forces a proper subset, guaranteeing that
+        # the high-priority first & last plus at least one middle survive.
+        total = counter.count_tokens(text)
+        result = strategy.truncate(text, max_tokens=total // 2, token_counter=counter)
+
+        # Recover which original sections survived, in output order.
+        present = [i for i in range(6) if f"MARKER{i}" in result]
+        output_order = sorted(present, key=lambda i: result.index(f"MARKER{i}"))
+
+        assert len(present) >= 3, f"expected a proper subset to survive, got {present}"
+        # Their order in the output must match their original document order.
+        assert output_order == sorted(output_order), (
+            f"sections emitted out of original order: {output_order}"
+        )
+
 
 class TestSemanticTruncationStrategy:
     """Test suite for SemanticTruncationStrategy."""
