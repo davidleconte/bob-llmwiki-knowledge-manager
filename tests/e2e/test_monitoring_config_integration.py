@@ -44,7 +44,8 @@ class TestMonitoringConfigIntegration:
         metrics.record_cache_miss('L1')
         
         stats = metrics.get_metrics()
-        assert stats['cache_hits'] > 0
+        # get_metrics() nests cache stats under cache.<level> (C-8), not a flat key.
+        assert stats['cache']['L1']['hits'] > 0
     
     def test_health_checker_uses_config_interval(self, config_manager):
         """Test health checker uses interval from configuration."""

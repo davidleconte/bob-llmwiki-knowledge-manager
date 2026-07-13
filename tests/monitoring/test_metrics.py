@@ -440,11 +440,12 @@ class TestMetricsCollector:
         assert collector.optimization.count == 0
     
     def test_thread_safety(self):
-        """Test thread-safe operations."""
-        pytest.skip("Thread safety test hangs on Python 3.14 - known pytest/threading interaction issue")
-        
-        import threading
-        
+        """Concurrent recording is thread-safe (RLock; C-8b).
+
+        Previously skipped as a "Python 3.14 hang" — the same misdiagnosis as
+        ``get_metrics()``; the real cause was the non-reentrant lock, fixed by
+        the RLock. Re-enabled and bounded by the suite ``--timeout``.
+        """
         collector = MetricsCollector()
         
         def record_hits():
@@ -460,9 +461,13 @@ class TestMetricsCollector:
         assert collector.l1_cache.hits == 1000
 
 
-@pytest.mark.skip(reason="Global singleton tests cause hangs on Python 3.14 - state pollution issue")
 class TestGlobalFunctions:
-    """Test global convenience functions."""
+    """Test global convenience functions.
+
+    Formerly skipped for "state pollution" across the process-global
+    singleton; the autouse ``_reset_monitoring_singletons`` fixture (plus this
+    class's own ``setup_method`` reset) now isolates each test, so these run.
+    """
     
     def setup_method(self):
         """Reset global state before each test."""

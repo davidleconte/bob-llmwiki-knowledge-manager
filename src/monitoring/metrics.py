@@ -8,7 +8,7 @@ latency percentiles, token savings, and system health indicators.
 import time
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Deque
 from threading import RLock
 import statistics
@@ -387,7 +387,7 @@ class MetricsCollector:
         """
         with self._lock:
             return {
-                "timestamp": datetime.utcnow().isoformat() + "Z",
+                "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
                 "uptime_seconds": round(self.get_uptime_seconds(), 2),
                 "cache": {
                     "L1": self.l1_cache.to_dict(),

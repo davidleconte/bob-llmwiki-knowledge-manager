@@ -309,21 +309,25 @@ class SemanticCache(CacheInterface):
                              response_length=len(value))
     
     def _regenerate_all_embeddings(self) -> None:
-        """Regenerate all embeddings to ensure consistent dimensions.
-        
-        Thread-safe: Must be called with lock held.
+        """No-op retained for API/call-site compatibility (see body).
+
+        Historically recomputed every cached embedding when the vocabulary
+        changed; with the stateless HashingVectorizer that is unnecessary and
+        was O(n^2). Kept callable, does nothing.
         """
-        # Get all versioned keys (snapshot to avoid iteration issues)
-        versioned_keys = list(self.embeddings.keys())
-        
-        # Clear embeddings
-        self.embeddings.clear()
-        
-        # Regenerate each embedding using base key
-        for versioned_key in versioned_keys:
-            base_key = self._extract_base_key(versioned_key)
-            embedding = self.embedding_generator.generate(base_key, use_cache=False)
-            self.embeddings[versioned_key] = embedding
+        # Intentionally a no-op since C-5.
+        #
+        # In the TF-IDF era a new key changed the vocabulary, so every cached
+        # embedding had to be recomputed against the new vocab. The embedding
+        # generator is now a *stateless* HashingVectorizer: ``generate`` is a
+        # pure function of its input, so regenerating reproduces byte-for-byte
+        # identical vectors (verified). Doing that on every novel key made cache
+        # population O(n^2) and timed out the scalability / stress tests
+        # (tests/performance/test_optimizer_performance.py::...cache_scalability,
+        # tests/concurrency/test_cache_concurrency.py::...stress_multilevel).
+        # Embeddings therefore never need rebuilding; kept as a no-op so the
+        # guarded call sites (and any external callers) remain valid.
+        return
     
     def _remove_entry(self, versioned_key: str) -> None:
         """Remove a key from every store defensively.

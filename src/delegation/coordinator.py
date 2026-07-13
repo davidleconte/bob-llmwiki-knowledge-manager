@@ -6,7 +6,7 @@ Orchestrates parallel execution of sub-agents
 import asyncio
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 from typing import Dict, List, Optional, Set, Tuple
-from datetime import datetime
+from datetime import datetime, timezone
 import time
 
 from .base import SubAgent, SubAgentTask, SubAgentResult, SubAgentStatus, SubAgentPriority
@@ -72,7 +72,7 @@ class DelegationCoordinator:
         Returns:
             Dictionary mapping task IDs to results
         """
-        self._start_time = datetime.utcnow()
+        self._start_time = datetime.now(timezone.utc)
         self._results.clear()
         self._completed_tasks.clear()
         self._failed_tasks.clear()
@@ -181,7 +181,7 @@ class DelegationCoordinator:
             # queued. Already-running timed-out tasks finish in the background.
             executor.shutdown(wait=False, cancel_futures=True)
 
-        self._end_time = datetime.utcnow()
+        self._end_time = datetime.now(timezone.utc)
         return self._results
     
     def _execute_task(self, task: SubAgentTask) -> SubAgentResult:

@@ -8,7 +8,7 @@ context enrichment for production monitoring and debugging.
 import json
 import logging
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
 from enum import Enum
@@ -100,7 +100,7 @@ class StructuredLogger:
             JSON-formatted log message
         """
         log_entry = {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             "level": level,
             "component": self.component,
             "event": event,
