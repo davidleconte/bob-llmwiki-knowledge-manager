@@ -44,6 +44,7 @@ Last Updated: 2026-07-13
 - [Token Optimization](./concepts/token-optimization.md) - Systematic approach to reducing LLM token consumption through caching, optimization, and truncation
 
 ### Guides
+- [Real-Time Monitoring Guide](./guides/real-time-monitoring-guide.md) - Complete guide for real-time session monitoring and quality validation during data collection ⭐ NEW
 - [Phase 3 Validation User Guide](./guides/phase3-validation-user-guide.md) - Comprehensive guide for collecting baseline and optimized measurements: best practices, query examples, troubleshooting, FAQ, and analysis instructions
 - [Phase 3 Validation Testing Plan](./guides/phase3-validation-testing-plan.md) - Comprehensive testing strategy for validation tools: unit tests, integration tests, data validation, performance tests, and quality assurance
 - [Phase 3 Day 7-8 Final Validation Template](./guides/phase3-day7-8-final-validation-template.md) - Complete template for final validation report: executive summary, results analysis, statistical significance, production readiness assessment
