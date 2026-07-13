@@ -19,6 +19,7 @@ from typing import Optional, Dict, Any, Tuple
 from src.cache.base import CacheInterface
 from src.cache.exact_cache import ExactCache
 from src.cache.semantic_cache import SemanticCache
+from src.monitoring import get_logger, get_metrics_collector
 
 
 class MultiLevelCache(CacheInterface):
@@ -56,11 +57,21 @@ class MultiLevelCache(CacheInterface):
         )
         self.promote_l2_hits = promote_l2_hits
         
+        # Initialize monitoring
+        self._logger = get_logger("cache.multi_level")
+        self._metrics = get_metrics_collector()
+        
         # Statistics
         self.l1_hits = 0
         self.l2_hits = 0
         self.misses = 0
         self._lookup_times: list[float] = []
+        
+        self._logger.info("multi_level_cache_initialized",
+                        l1_max_size=l1_max_size,
+                        l2_max_size=l2_max_size,
+                        similarity_threshold=similarity_threshold,
+                        promote_l2_hits=promote_l2_hits)
     
     def get(self, key: str) -> Optional[str]:
         """Retrieve cached response, trying L1 then L2.
@@ -77,13 +88,19 @@ class MultiLevelCache(CacheInterface):
         result = self.l1_cache.get(key)
         if result is not None:
             self.l1_hits += 1
+            latency_ms = (time.time() - start_time) * 1000
             self._lookup_times.append(time.time() - start_time)
+            
+            self._logger.debug("multi_level_hit",
+                             cache_level="L1",
+                             latency_ms=latency_ms)
             return result
         
         # Try L2 (semantic similarity)
         result = self.l2_cache.get(key)
         if result is not None:
             self.l2_hits += 1
+            latency_ms = (time.time() - start_time) * 1000
             
             # Promote to L1 for future fast access
             if self.promote_l2_hits:
@@ -91,13 +108,29 @@ class MultiLevelCache(CacheInterface):
                 l2_entry = self.l2_cache.get_entry(key)
                 metadata = l2_entry.metadata if l2_entry else {}
                 self.l1_cache.set(key, result, metadata)
+                
+                # Record promotion
+                self._metrics.record_cache_promotion()
+                
+                self._logger.debug("cache_promotion",
+                                 from_level="L2",
+                                 to_level="L1")
             
             self._lookup_times.append(time.time() - start_time)
+            
+            self._logger.debug("multi_level_hit",
+                             cache_level="L2",
+                             latency_ms=latency_ms,
+                             promoted=self.promote_l2_hits)
             return result
         
         # Cache miss
         self.misses += 1
+        latency_ms = (time.time() - start_time) * 1000
         self._lookup_times.append(time.time() - start_time)
+        
+        self._logger.debug("multi_level_miss",
+                         latency_ms=latency_ms)
         return None
     
     def set(self, key: str, response: str, metadata: Optional[Dict[str, Any]] = None) -> None:

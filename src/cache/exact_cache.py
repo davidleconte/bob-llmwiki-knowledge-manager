@@ -15,6 +15,7 @@ from collections import OrderedDict
 from typing import Optional, Dict, Any
 
 from src.cache.base import CacheInterface, CacheEntry, CacheStats
+from src.monitoring import get_logger, get_metrics_collector
 
 
 class ExactCache(CacheInterface):
@@ -45,6 +46,10 @@ class ExactCache(CacheInterface):
         self._stats = CacheStats()
         self.track_costs = track_costs
         
+        # Initialize monitoring
+        self._logger = get_logger("cache.exact")
+        self._metrics = get_metrics_collector()
+        
         # Initialize cost tracker if enabled
         self._cost_tracker = None
         if self.track_costs:
@@ -53,6 +58,8 @@ class ExactCache(CacheInterface):
                 self._cost_tracker = get_cost_tracker()
             except ImportError:
                 self.track_costs = False
+        
+        self._logger.info("exact_cache_initialized", max_size=max_size, track_costs=track_costs)
     
     def _hash_key(self, key: str) -> str:
         """Generate SHA-256 hash of key.
@@ -74,6 +81,7 @@ class ExactCache(CacheInterface):
         Returns:
             Cached response if found, None otherwise
         """
+        start_time = time.time()
         hashed_key = self._hash_key(key)
         
         if hashed_key in self.cache:
@@ -86,6 +94,17 @@ class ExactCache(CacheInterface):
             
             # Record hit
             self._stats.record_hit()
+            latency_ms = (time.time() - start_time) * 1000
+            
+            # Record metrics
+            self._metrics.record_cache_hit("L1", latency_ms)
+            
+            # Log hit
+            self._logger.debug("cache_hit", 
+                             cache_level="L1",
+                             key_hash=hashed_key[:8],
+                             latency_ms=latency_ms,
+                             access_count=entry.access_count)
             
             # Track cost savings if enabled
             if self.track_costs and self._cost_tracker:
@@ -98,6 +117,17 @@ class ExactCache(CacheInterface):
         
         # Record miss
         self._stats.record_miss()
+        latency_ms = (time.time() - start_time) * 1000
+        
+        # Record metrics
+        self._metrics.record_cache_miss("L1")
+        
+        # Log miss
+        self._logger.debug("cache_miss",
+                         cache_level="L1",
+                         key_hash=hashed_key[:8],
+                         latency_ms=latency_ms)
+        
         return None
     
     def set(self, key: str, response: str, metadata: Optional[Dict[str, Any]] = None) -> None:
@@ -109,9 +139,10 @@ class ExactCache(CacheInterface):
             metadata: Optional metadata (tokens, quality, etc.)
         """
         hashed_key = self._hash_key(key)
+        is_update = hashed_key in self.cache
         
         # Check if we need to evict
-        if hashed_key not in self.cache and len(self.cache) >= self.max_size:
+        if not is_update and len(self.cache) >= self.max_size:
             self._evict_lru()
         
         # Create cache entry
@@ -127,18 +158,45 @@ class ExactCache(CacheInterface):
         # Store and move to end (most recently used)
         self.cache[hashed_key] = entry
         self.cache.move_to_end(hashed_key)
+        
+        # Update cache size metric
+        self._metrics.update_cache_size("L1", len(self.cache))
+        
+        # Log cache set
+        self._logger.debug("cache_set",
+                         cache_level="L1",
+                         key_hash=hashed_key[:8],
+                         is_update=is_update,
+                         cache_size=len(self.cache),
+                         response_length=len(response))
     
     def _evict_lru(self) -> None:
         """Evict least recently used entry."""
         if self.cache:
             # Remove first item (least recently used)
-            self.cache.popitem(last=False)
+            evicted_key, evicted_entry = self.cache.popitem(last=False)
             self._stats.record_eviction()
+            
+            # Record metrics
+            self._metrics.record_cache_eviction("L1")
+            
+            # Log eviction
+            self._logger.debug("cache_eviction",
+                             cache_level="L1",
+                             evicted_key_hash=evicted_key[:8],
+                             cache_size=len(self.cache),
+                             access_count=evicted_entry.access_count)
     
     def clear(self) -> None:
         """Clear all entries from cache."""
+        entries_cleared = len(self.cache)
         self.cache.clear()
         self._stats.reset()
+        
+        # Log clear
+        self._logger.info("cache_cleared",
+                        cache_level="L1",
+                        entries_cleared=entries_cleared)
     
     def size(self) -> int:
         """Get number of entries in cache.

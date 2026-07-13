@@ -15,6 +15,7 @@ import numpy as np
 
 from src.cache.base import CacheInterface, CacheEntry, CacheStats
 from src.cache.embeddings import EmbeddingGenerator, cosine_similarity_vectors
+from src.monitoring import get_logger, get_metrics_collector
 
 
 class SemanticCache(CacheInterface):
@@ -66,6 +67,10 @@ class SemanticCache(CacheInterface):
         self._stats = CacheStats()
         self._similarity_scores: List[float] = []  # Track similarity scores for hits
         
+        # Initialize monitoring
+        self._logger = get_logger("cache.semantic")
+        self._metrics = get_metrics_collector()
+        
         # Initialize cost tracker if enabled
         self._cost_tracker = None
         if self.track_costs:
@@ -74,6 +79,11 @@ class SemanticCache(CacheInterface):
                 self._cost_tracker = get_cost_tracker()
             except ImportError:
                 self.track_costs = False
+        
+        self._logger.info("semantic_cache_initialized", 
+                        similarity_threshold=similarity_threshold,
+                        max_size=max_size,
+                        track_costs=track_costs)
     
     def get(self, key: str) -> Optional[str]:
         """Retrieve cached response for semantically similar key.
@@ -84,6 +94,8 @@ class SemanticCache(CacheInterface):
         Returns:
             Cached response if similar match found, None otherwise
         """
+        start_time = time.time()
+        
         # Check if query will cause vocabulary change
         will_change_vocab = key not in self.embedding_generator.corpus
         
@@ -105,6 +117,8 @@ class SemanticCache(CacheInterface):
                 best_similarity = similarity
                 best_match = cached_prompt
         
+        latency_ms = (time.time() - start_time) * 1000
+        
         # Check if best match exceeds threshold
         if best_match and best_similarity >= self.similarity_threshold:
             # Update entry access stats
@@ -114,6 +128,16 @@ class SemanticCache(CacheInterface):
             # Record hit and similarity score
             self._stats.record_hit()
             self._similarity_scores.append(best_similarity)
+            
+            # Record metrics
+            self._metrics.record_cache_hit("L2", latency_ms)
+            
+            # Log hit
+            self._logger.debug("cache_hit",
+                             cache_level="L2",
+                             similarity=best_similarity,
+                             latency_ms=latency_ms,
+                             vocab_changed=will_change_vocab)
             
             # Track cost savings if enabled
             if self.track_costs and self._cost_tracker and best_match in self.entries:
@@ -126,6 +150,18 @@ class SemanticCache(CacheInterface):
         
         # Record miss
         self._stats.record_miss()
+        
+        # Record metrics
+        self._metrics.record_cache_miss("L2")
+        
+        # Log miss
+        self._logger.debug("cache_miss",
+                         cache_level="L2",
+                         best_similarity=best_similarity,
+                         threshold=self.similarity_threshold,
+                         latency_ms=latency_ms,
+                         vocab_changed=will_change_vocab)
+        
         return None
     
     def set(self, key: str, response: str, metadata: Optional[Dict[str, Any]] = None) -> None:
@@ -136,8 +172,10 @@ class SemanticCache(CacheInterface):
             response: The response to cache
             metadata: Optional metadata
         """
+        is_update = key in self.embeddings
+        
         # Check if we need to evict
-        if key not in self.embeddings and len(self.embeddings) >= self.max_size:
+        if not is_update and len(self.embeddings) >= self.max_size:
             self._evict_lru()
         
         # Check if this is a new key that will cause vocabulary change
@@ -165,6 +203,17 @@ class SemanticCache(CacheInterface):
             timestamp=time.time()
         )
         self.entries[key] = entry
+        
+        # Update cache size metric
+        self._metrics.update_cache_size("L2", len(self.embeddings))
+        
+        # Log cache set
+        self._logger.debug("cache_set",
+                         cache_level="L2",
+                         is_update=is_update,
+                         cache_size=len(self.embeddings),
+                         vocab_size=len(self.embedding_generator.corpus),
+                         response_length=len(response))
     
     def _regenerate_all_embeddings(self) -> None:
         """Regenerate all embeddings to ensure consistent dimensions."""
@@ -188,6 +237,8 @@ class SemanticCache(CacheInterface):
         lru_key = min(self.entries.keys(), 
                      key=lambda k: self.entries[k].last_access)
         
+        evicted_entry = self.entries[lru_key]
+        
         # Remove from all stores
         del self.embeddings[lru_key]
         del self.responses[lru_key]
@@ -195,15 +246,30 @@ class SemanticCache(CacheInterface):
         del self.entries[lru_key]
         
         self._stats.record_eviction()
+        
+        # Record metrics
+        self._metrics.record_cache_eviction("L2")
+        
+        # Log eviction
+        self._logger.debug("cache_eviction",
+                         cache_level="L2",
+                         cache_size=len(self.embeddings),
+                         access_count=evicted_entry.access_count)
     
     def clear(self) -> None:
         """Clear all entries from cache."""
+        entries_cleared = len(self.embeddings)
         self.embeddings.clear()
         self.responses.clear()
         self.metadata_store.clear()
         self.entries.clear()
         self._stats.reset()
         self._similarity_scores.clear()
+        
+        # Log clear
+        self._logger.info("cache_cleared",
+                        cache_level="L2",
+                        entries_cleared=entries_cleared)
         self.embedding_generator.clear_cache()
     
     def size(self) -> int:
