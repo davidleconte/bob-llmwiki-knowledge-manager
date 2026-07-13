@@ -169,23 +169,35 @@ class ConfigManager:
                 self._merge_config(env_config)
                 self._add_version('load_from_env', ['Loaded from environment'])
     
-    def _merge_config(self, new_config: Dict[str, Any]) -> None:
-        """Merge new configuration with existing config.
-        
+    def _compute_merge(self, base: Dict[str, Any], new_config: Dict[str, Any]) -> Dict[str, Any]:
+        """Return ``base`` with ``new_config`` recursively merged in.
+
+        Pure: does not mutate ``self._config``, so the result can be validated
+        before being committed.
+
         Args:
+            base: Base configuration to merge into (not mutated at top level)
             new_config: New configuration to merge
         """
-        def merge_dicts(base: Dict, update: Dict) -> Dict:
+        def merge_dicts(b: Dict, update: Dict) -> Dict:
             """Recursively merge dictionaries."""
-            result = base.copy()
+            result = b.copy()
             for key, value in update.items():
                 if key in result and isinstance(result[key], dict) and isinstance(value, dict):
                     result[key] = merge_dicts(result[key], value)
                 else:
                     result[key] = value
             return result
-        
-        self._config = merge_dicts(self._config, new_config)
+
+        return merge_dicts(base, new_config)
+
+    def _merge_config(self, new_config: Dict[str, Any]) -> None:
+        """Merge new configuration into the active config.
+
+        Args:
+            new_config: New configuration to merge
+        """
+        self._config = self._compute_merge(self._config, new_config)
     
     def update(self, updates: Dict[str, Any]) -> None:
         """Update configuration at runtime.
@@ -217,14 +229,13 @@ class ConfigManager:
             current[parts[-1]] = value
             changes.append(f'{key}={value}')
         
-        # Validate updates
-        temp_config = self._config.copy()
-        self._merge_config(nested_updates)
-        self._validator.validate(self._config)
-        
-        # Apply updates
+        # Build a candidate, validate it, then commit atomically. On a
+        # validation failure self._config is left unchanged (no partial state),
+        # and the whole compute-validate-commit runs under the update lock.
         with self._update_lock:
-            self._merge_config(nested_updates)
+            candidate = self._compute_merge(self._config, nested_updates)
+            self._validator.validate(candidate)
+            self._config = candidate
             self._add_version('runtime_update', changes)
     
     def get(self, key: str, default: Any = None) -> Any:

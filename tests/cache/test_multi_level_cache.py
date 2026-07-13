@@ -435,5 +435,20 @@ class TestMultiLevelCache:
         assert stats["total_misses"] == 1
 
 
+class TestMultiLevelCacheTTL:
+    """MultiLevelCache must thread TTL config into its sub-caches (C-6)."""
+
+    def test_ttl_config_reaches_sub_caches(self):
+        cache = MultiLevelCache(l1_ttl_seconds=3600, l2_ttl_seconds=86400)
+        # Config must actually reach the caches, not be silently inert.
+        assert cache.l1_cache.ttl_seconds == 3600
+        assert cache.l2_cache.ttl_seconds == 86400
+
+    def test_ttl_defaults_to_none(self):
+        cache = MultiLevelCache()
+        assert cache.l1_cache.ttl_seconds is None
+        assert cache.l2_cache.ttl_seconds is None
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

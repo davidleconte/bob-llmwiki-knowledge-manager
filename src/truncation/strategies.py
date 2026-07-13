@@ -40,38 +40,62 @@ class SimpleTruncationStrategy(TruncationStrategy):
     """
     
     def truncate(self, text: str, max_tokens: int, token_counter) -> str:
-        """Truncate text using simple character-based approach.
-        
+        """Truncate text to a token-accurate prefix with an ellipsis marker.
+
+        Uses the token counter directly (binary search) so the result never
+        exceeds ``max_tokens``. A fixed chars-per-token ratio undershoots for
+        multibyte/CJK text and overshoots the budget.
+
         Args:
             text: Text to truncate
             max_tokens: Maximum tokens allowed
             token_counter: TokenCounter instance
-            
+
         Returns:
-            Truncated text
+            Truncated text whose token count is <= ``max_tokens``
         """
         current_tokens = token_counter.count_tokens(text)
-        
+
         if current_tokens <= max_tokens:
             return text
-        
-        # Estimate character limit (conservative: 3.5 chars per token)
-        char_limit = int(max_tokens * 3.5)
-        
-        if len(text) <= char_limit:
-            return text
-        
-        # Truncate and add ellipsis
-        truncated = text[:char_limit - 3] + "..."
-        
-        # Verify token count
-        if token_counter.count_tokens(truncated) > max_tokens:
-            # Be more aggressive
-            char_limit = int(max_tokens * 3.0)
-            truncated = text[:char_limit - 3] + "..."
-        
-        return truncated
-    
+
+        if max_tokens <= 0:
+            return ""
+
+        ellipsis = "..."
+        ellipsis_tokens = token_counter.count_tokens(ellipsis)
+
+        # Reserve room for the ellipsis marker when it fits, then verify the
+        # combined result stays within budget (BPE can merge across the join).
+        if ellipsis_tokens < max_tokens:
+            prefix = self._token_safe_prefix(
+                text, max_tokens - ellipsis_tokens, token_counter
+            )
+            candidate = (prefix + ellipsis) if prefix else ellipsis
+            if token_counter.count_tokens(candidate) <= max_tokens:
+                return candidate
+
+        # Fall back to using the full budget for content (no marker).
+        return self._token_safe_prefix(text, max_tokens, token_counter)
+
+    def _token_safe_prefix(self, text: str, max_tokens: int, token_counter) -> str:
+        """Longest character prefix of ``text`` with token count <= ``max_tokens``.
+
+        Binary search on the character index using the real token counter, so
+        the invariant holds for any tokenizer (including multibyte text).
+        """
+        if max_tokens <= 0:
+            return ""
+        lo, hi, best = 0, len(text), 0
+        while lo <= hi:
+            mid = (lo + hi) // 2
+            if token_counter.count_tokens(text[:mid]) <= max_tokens:
+                best = mid
+                lo = mid + 1
+            else:
+                hi = mid - 1
+        return text[:best]
+
     def get_name(self) -> str:
         """Get strategy name."""
         return "simple"
@@ -117,18 +141,21 @@ class PriorityTruncationStrategy(TruncationStrategy):
         # Split into sections
         sections = self._split_sections(text)
         
-        # Prioritize sections
+        # Prioritize sections (each carries its original index)
         prioritized = self._prioritize_sections(sections)
-        
-        # Build truncated text from high-priority sections
-        result = []
+
+        # SELECT high-priority sections within the token budget, remembering
+        # each one's original position. We choose by priority but must EMIT in
+        # original document order -- appending in priority order scrambled the
+        # document (e.g. the last section landed before earlier ones) (C-9).
+        selected = []  # list of (original_index, text_to_emit)
         total_tokens = 0
-        
-        for section, priority in prioritized:
+
+        for index, section, priority in prioritized:
             section_tokens = token_counter.count_tokens(section)
-            
+
             if total_tokens + section_tokens <= max_tokens:
-                result.append(section)
+                selected.append((index, section))
                 total_tokens += section_tokens
             elif total_tokens < max_tokens:
                 # Partial section
@@ -136,12 +163,14 @@ class PriorityTruncationStrategy(TruncationStrategy):
                 truncated_section = SimpleTruncationStrategy().truncate(
                     section, remaining, token_counter
                 )
-                result.append(truncated_section)
+                selected.append((index, truncated_section))
                 break
             else:
                 break
-        
-        return "\n\n".join(result)
+
+        # Restore original document order before joining.
+        selected.sort(key=lambda item: item[0])
+        return "\n\n".join(text for _, text in selected)
     
     def _split_sections(self, text: str) -> List[str]:
         """Split text into sections.
@@ -163,16 +192,18 @@ class PriorityTruncationStrategy(TruncationStrategy):
             sections: List of sections
             
         Returns:
-            List of (section, priority) tuples, sorted by priority
+            List of (original_index, section, priority) tuples, sorted by
+            priority (highest first). The index lets the caller restore
+            original document order after selecting by priority.
         """
         prioritized = []
-        
+
         for i, section in enumerate(sections):
             priority = self._calculate_priority(section, i, len(sections))
-            prioritized.append((section, priority))
-        
+            prioritized.append((i, section, priority))
+
         # Sort by priority (higher first)
-        prioritized.sort(key=lambda x: x[1], reverse=True)
+        prioritized.sort(key=lambda x: x[2], reverse=True)
         
         return prioritized
     

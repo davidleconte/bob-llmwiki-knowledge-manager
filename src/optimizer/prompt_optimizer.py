@@ -14,6 +14,7 @@ import time
 from src.optimizer.token_counter import TokenCounter
 from src.cache.multi_level_cache import MultiLevelCache
 from src.monitoring import get_logger, get_metrics_collector
+from src.pricing import DEFAULT_MODEL
 
 
 class PromptOptimizer:
@@ -33,7 +34,7 @@ class PromptOptimizer:
     """
     
     def __init__(self,
-                 model: str = "gpt-4",
+                 model: str = DEFAULT_MODEL,
                  target_savings: float = 0.893,
                  min_quality: float = 0.918,
                  use_cache: bool = True,
@@ -102,10 +103,13 @@ class PromptOptimizer:
         # Check cache first
         if self.cache:
             cached = self.cache.get(prompt)
-            if cached:
+            if cached is not None:
+                entry = self.cache.get_entry(prompt)
                 self._logger.debug("optimization_cache_hit",
                                  prompt_length=len(prompt))
-                return self._parse_cached_result(cached)
+                return self._parse_cached_result(
+                    cached, entry.metadata if entry else None
+                )
         
         # Count original tokens
         original_tokens = self.token_counter.count_tokens(prompt)
@@ -385,28 +389,48 @@ class PromptOptimizer:
             "quality_score": result["quality_score"],
         }
         
-        self.cache.set(prompt, result["optimized"], metadata)
+        # Pass metadata as a keyword arg: ExactCache.set()'s third positional
+        # parameter is ``version`` -- passing metadata there corrupts the cache
+        # key so set()/get() never agree (write-only cache, 0% hit rate).
+        self.cache.set(prompt, result["optimized"], metadata=metadata)
     
-    def _parse_cached_result(self, cached: str) -> Dict[str, Any]:
-        """Parse cached result into standard format.
-        
+    def _parse_cached_result(self, cached: str,
+                             metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Parse a cache hit into the standard result format.
+
+        Restores the token/quality metadata stored alongside the cached
+        response so savings tracking stays meaningful on cache hits. Falls back
+        to recounting tokens when metadata is unavailable.
+
         Args:
-            cached: Cached optimized prompt
-            
+            cached: Cached optimized prompt (the stored response).
+            metadata: Metadata stored with the cache entry, if any.
+
         Returns:
-            Result dictionary
+            Result dictionary with ``from_cache`` set to True.
         """
-        # Note: In real implementation, would retrieve metadata from cache
-        optimized_tokens = self.token_counter.count_tokens(cached)
-        
+        metadata = metadata or {}
+
+        optimized_tokens = metadata.get("optimized_tokens")
+        if optimized_tokens is None:
+            optimized_tokens = self.token_counter.count_tokens(cached)
+        original_tokens = metadata.get("original_tokens")
+        quality = metadata.get("quality_score")
+
+        tokens_saved = None
+        savings_pct = None
+        if original_tokens is not None and optimized_tokens is not None:
+            tokens_saved = original_tokens - optimized_tokens
+            savings_pct = (tokens_saved / original_tokens * 100) if original_tokens > 0 else 0.0
+
         return {
-            "original": None,  # Not stored in cache
+            "original": None,  # original prompt is not stored in the cache
             "optimized": cached,
-            "original_tokens": None,
+            "original_tokens": original_tokens,
             "optimized_tokens": optimized_tokens,
-            "tokens_saved": None,
-            "savings_percentage": None,
-            "quality_score": None,
+            "tokens_saved": tokens_saved,
+            "savings_percentage": savings_pct,
+            "quality_score": quality,
             "meets_target": None,
             "from_cache": True,
         }

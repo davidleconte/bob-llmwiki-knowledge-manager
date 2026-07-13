@@ -12,7 +12,7 @@ Target metrics:
 import hashlib
 import time
 from collections import OrderedDict
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Callable
 
 from src.cache.base import CacheInterface, CacheEntry, CacheStats
 from src.monitoring import get_logger, get_metrics_collector
@@ -35,17 +35,29 @@ class ExactCache(CacheInterface):
     
     VERSION: str = "v1"  # Current cache version
     
-    def __init__(self, max_size: int = 1000, track_costs: bool = False):
+    def __init__(self, max_size: int = 1000, track_costs: bool = False,
+                 ttl_seconds: Optional[float] = None,
+                 clock: Callable[[], float] = time.time):
         """Initialize exact cache.
-        
+
         Args:
             max_size: Maximum number of entries before eviction
             track_costs: Whether to track costs with CostTracker
+            ttl_seconds: Optional entry time-to-live. When set, an entry older
+                than this (by creation timestamp) is treated as a miss and
+                evicted on read. ``None`` disables expiry (default), preserving
+                behaviour for callers that don't opt in.
+            clock: Time source for stamping/expiry, injectable for
+                deterministic tests. Defaults to ``time.time``.
         """
         if max_size <= 0:
             raise ValueError("max_size must be positive")
-        
+        if ttl_seconds is not None and ttl_seconds <= 0:
+            raise ValueError("ttl_seconds must be positive when set")
+
         self.max_size = max_size
+        self.ttl_seconds = ttl_seconds
+        self._clock = clock
         self.cache: OrderedDict[str, CacheEntry] = OrderedDict()
         self._stats = CacheStats()
         self.track_costs = track_costs
@@ -108,13 +120,28 @@ class ExactCache(CacheInterface):
         hashed_key = self._hash_key(versioned_key)
         
         if hashed_key in self.cache:
+            entry = self.cache[hashed_key]
+
+            # Enforce TTL: an entry older than ttl_seconds (by creation
+            # timestamp, not last access) is expired -> evict and report a miss.
+            if (self.ttl_seconds is not None and
+                    (self._clock() - entry.timestamp) > self.ttl_seconds):
+                del self.cache[hashed_key]
+                self._stats.record_miss()
+                self._metrics.record_cache_miss("L1")
+                self._logger.debug("cache_expired",
+                                 cache_level="L1",
+                                 key_hash=hashed_key[:8],
+                                 version=version or self.VERSION,
+                                 ttl_seconds=self.ttl_seconds)
+                return None
+
             # Move to end (most recently used)
             self.cache.move_to_end(hashed_key)
-            
+
             # Update entry access stats
-            entry = self.cache[hashed_key]
             entry.access()
-            
+
             # Record hit
             self._stats.record_hit()
             latency_ms = (time.time() - start_time) * 1000
@@ -183,9 +210,9 @@ class ExactCache(CacheInterface):
         entry = CacheEntry(
             response=value,
             metadata=metadata,
-            timestamp=time.time()
+            timestamp=self._clock()
         )
-        
+
         # Store and move to end (most recently used)
         self.cache[hashed_key] = entry
         self.cache.move_to_end(hashed_key)

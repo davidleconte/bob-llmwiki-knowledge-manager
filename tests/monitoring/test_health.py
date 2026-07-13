@@ -509,35 +509,32 @@ class TestSystemHealthCheck:
 class TestMonitoringHealthCheck:
     """Tests for monitoring health check."""
     
-    def test_monitoring_health_check(self):
-        """Test monitoring system health check."""
-        checker = HealthChecker()
-        
-        def check_monitoring():
-            # Simulate metrics collector
-            metrics_data = {
-                'cache_hits': 100,
-                'cache_misses': 50,
-            }
-            
-            total_operations = metrics_data['cache_hits'] + metrics_data['cache_misses']
-            
-            return HealthCheckResult(
-                name="monitoring",
-                status=HealthStatus.HEALTHY,
-                message="Monitoring system operational",
-                details={
-                    "total_operations": total_operations,
-                    "metrics_available": True,
-                }
-            )
-        
-        checker.register_check("monitoring", check_monitoring)
-        
-        health = checker.check()
-        
-        assert health.status == HealthStatus.HEALTHY
-        assert health.checks[0].details["total_operations"] == 150
+    def test_monitoring_health_reflects_real_cache_operations(self):
+        """The monitoring check must report REAL cache activity (C-8 regression).
+
+        Previously ``check_monitoring_health`` read flat ``cache_hits`` /
+        ``cache_misses`` keys that ``MetricsCollector.get_metrics()`` never
+        exposes -- the real counts live nested under ``cache.L1``/``cache.L2``
+        as ``hits``/``misses``. So ``total_operations`` was ALWAYS 0 and a busy
+        system was reported as idle ("no operations yet"). This drives the real
+        registered check against the real collector.
+        """
+        from src.monitoring.metrics import get_metrics_collector
+
+        collector = get_metrics_collector()
+        collector.reset()
+        collector.record_cache_hit("L1", 1.0)
+        collector.record_cache_hit("L1", 1.0)
+        collector.record_cache_miss("L2")
+
+        register_monitoring_health_check()
+        checker = get_health_checker()
+        health = checker.check("monitoring")
+
+        monitoring = next(c for c in health.checks if c.name == "monitoring")
+        # 2 L1 hits + 1 L2 miss = 3 real operations, not the always-0 default.
+        assert monitoring.details["total_operations"] == 3
+        assert monitoring.message == "Monitoring system operational"
 
 
 class TestHealthCheckConcurrency:

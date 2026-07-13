@@ -16,6 +16,7 @@ from src.truncation.strategies import (
     SlidingWindowStrategy,
 )
 from src.monitoring import get_logger, get_metrics_collector
+from src.pricing import DEFAULT_MODEL
 
 
 class Truncator:
@@ -30,7 +31,7 @@ class Truncator:
         strategies: Available truncation strategies
     """
     
-    def __init__(self, model: str = "gpt-4", default_strategy: str = "semantic"):
+    def __init__(self, model: str = DEFAULT_MODEL, default_strategy: str = "semantic"):
         """Initialize truncator.
         
         Args:
@@ -105,9 +106,17 @@ class Truncator:
         # Apply truncation
         truncation_strategy = self.strategies[strategy_name]
         truncated = truncation_strategy.truncate(text, max_tokens, self.token_counter)
-        
+
         # Count truncated tokens
         truncated_tokens = self.token_counter.count_tokens(truncated)
+
+        # Enforce the hard invariant: never exceed the token budget, regardless
+        # of which strategy ran (a strategy may overshoot on unusual input).
+        if truncated_tokens > max_tokens:
+            truncated = SimpleTruncationStrategy().truncate(
+                truncated, max_tokens, self.token_counter
+            )
+            truncated_tokens = self.token_counter.count_tokens(truncated)
         tokens_removed = original_tokens - truncated_tokens
         latency_ms = (time.time() - start_time) * 1000
         

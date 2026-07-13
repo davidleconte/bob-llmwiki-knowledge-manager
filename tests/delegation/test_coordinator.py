@@ -11,6 +11,7 @@ Tests cover:
 
 import pytest
 import time
+import threading
 from unittest.mock import Mock, patch, MagicMock
 
 from src.delegation.coordinator import DelegationCoordinator
@@ -317,6 +318,82 @@ class TestDelegationCoordinator:
         # parallel should be ~0.01s, sequential would be ~0.03s
         assert execution_time < 0.05  # Allow some overhead
         assert len(results) == 3
+
+
+class SlowAgent(SubAgent):
+    """Agent whose analyze() blocks until released, simulating a hung task."""
+
+    def __init__(self, release: threading.Event, agent_id="slow_agent", agent_type="slow"):
+        super().__init__(agent_id, agent_type)
+        self._release = release
+
+    def analyze(self, task: SubAgentTask) -> SubAgentResult:
+        # Block until the test releases us (bounded so a leaked thread can't
+        # hang forever). The point is that this outlasts the task timeout.
+        self._release.wait(timeout=5.0)
+        return SubAgentResult(
+            agent_id=self.agent_id,
+            agent_type=self.agent_type,
+            status=SubAgentStatus.SUCCESS,
+            data={"result": "eventually"},
+            execution_time_ms=1.0,
+        )
+
+    def get_capabilities(self):
+        return ["slow"]
+
+
+class TestDelegationCoordinatorTimeout:
+    """Per-task timeout must actually fire (C-7 regression).
+
+    Previously execute_parallel() drained futures via `as_completed()` with no
+    timeout, which blocks until the next future *completes*. So the per-task
+    `future.result(timeout=task.timeout_seconds)` was unreachable for a hung
+    task, and the `with ThreadPoolExecutor(...)` teardown's shutdown(wait=True)
+    then blocked on the runaway worker -- the coordinator hung for the full
+    task duration (or forever) instead of honoring timeout_seconds.
+    """
+
+    def test_execute_parallel_times_out_on_hung_task(self):
+        release = threading.Event()
+        coordinator = DelegationCoordinator(max_workers=2, enable_retry=False)
+        coordinator.register_agent(SlowAgent(release))
+
+        task = SubAgentTask(
+            task_id="t-slow",
+            task_type="slow",
+            target="/path",
+            timeout_seconds=1,
+        )
+        coordinator.add_task(task)
+
+        try:
+            start = time.time()
+            results = coordinator.execute_parallel()
+            elapsed = time.time() - start
+
+            # Must return promptly (~1s timeout), not after the full ~5s block.
+            assert elapsed < 3.0, (
+                f"coordinator hung {elapsed:.1f}s instead of honoring the 1s task timeout"
+            )
+            assert results["t-slow"].status == SubAgentStatus.FAILED
+            assert any("timed out" in e.lower() for e in results["t-slow"].errors)
+        finally:
+            # Release the abandoned worker so it doesn't linger past the test.
+            release.set()
+
+    def test_fast_tasks_unaffected_by_timeout_path(self):
+        # A normal fast task still succeeds under the new bounded-wait loop.
+        release = threading.Event()
+        release.set()  # never blocks
+        coordinator = DelegationCoordinator(max_workers=2, enable_retry=False)
+        coordinator.register_agent(SlowAgent(release))
+
+        task = SubAgentTask(task_id="t-fast", task_type="slow", target="/path", timeout_seconds=5)
+        coordinator.add_task(task)
+
+        results = coordinator.execute_parallel()
+        assert results["t-fast"].status == SubAgentStatus.SUCCESS
 
 
 if __name__ == "__main__":

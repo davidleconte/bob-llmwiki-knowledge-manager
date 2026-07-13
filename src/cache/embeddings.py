@@ -1,7 +1,11 @@
 """Embedding generation for semantic caching.
 
 This module provides embedding generation for semantic similarity matching.
-Uses simple TF-IDF vectors for fast, dependency-light embeddings.
+Uses a stateless, fixed-dimension HashingVectorizer so embeddings are
+deterministic and reproducible: identical input always yields the identical
+vector, regardless of corpus history or which instance produced it. (A prior
+TF-IDF implementation refit on every newly-seen text, making embeddings drift
+with the corpus -- see C-5.)
 
 For production, can be extended to use:
 - OpenAI embeddings
@@ -11,7 +15,7 @@ For production, can be extended to use:
 
 import numpy as np
 from typing import List, Dict
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 
@@ -30,137 +34,82 @@ class EmbeddingGenerator:
     
     def __init__(self, max_features: int = 1000, max_corpus_size: int = 1000):
         """Initialize embedding generator.
-        
+
         Args:
-            max_features: Maximum number of features for TF-IDF
-            max_corpus_size: Maximum corpus size before LRU eviction (default: 1000)
+            max_features: Embedding dimensionality (fixed hashing feature space)
+            max_corpus_size: Maximum tracked corpus size before LRU eviction.
+                The corpus is bookkeeping only (used for logging / drift
+                monitoring); it no longer influences the embedding.
         """
         self.max_features = max_features
         self.max_corpus_size = max_corpus_size
-        self.vectorizer = None
+        # Stateless + fixed-dimension: no fit, no vocabulary, so transform() is
+        # a pure function of the input text. This is what makes embeddings
+        # deterministic and reproducible across corpus growth and instances.
+        self.vectorizer = HashingVectorizer(
+            n_features=max_features,
+            ngram_range=(1, 2),
+            norm='l2',
+            alternate_sign=False,
+            stop_words='english',
+        )
         self.corpus: List[str] = []
         self.embeddings_cache: Dict[str, np.ndarray] = {}
-        self._fitted = False
-    
+        # No fitting is required for a HashingVectorizer; always "ready".
+        self._fitted = True
+
     def fit(self, texts: List[str]) -> None:
-        """Fit vectorizer on corpus of texts.
-        
+        """Record texts into the tracked corpus.
+
+        Retained for API compatibility. The HashingVectorizer is stateless, so
+        there is nothing to fit; this only records corpus membership (used for
+        logging and vocabulary-drift bookkeeping).
+
         Args:
-            texts: List of texts to fit on
+            texts: List of texts to record
         """
         if not texts:
             raise ValueError("Cannot fit on empty corpus")
-        
-        # Add new texts to corpus
+
         for text in texts:
             if text not in self.corpus:
                 self.corpus.append(text)
-        
-        # Create vectorizer with appropriate parameters based on corpus size
-        if len(self.corpus) == 1:
-            # For single document, use simpler parameters
-            self.vectorizer = TfidfVectorizer(
-                max_features=self.max_features,
-                ngram_range=(1, 2),
-                min_df=1,
-                max_df=1.0  # Allow all terms for single doc
-            )
-        else:
-            # For multiple documents, use standard parameters
-            # Use min_df=1 to ensure at least some terms remain
-            # Use max_df=0.99 to be more permissive with common terms
-            self.vectorizer = TfidfVectorizer(
-                max_features=self.max_features,
-                stop_words='english',
-                ngram_range=(1, 2),
-                min_df=1,
-                max_df=0.99  # More permissive to avoid pruning all terms
-            )
-        
-        # Fit on entire corpus
-        self.vectorizer.fit(self.corpus)
         self._fitted = True
-        
-        # Clear cache when refitting
-        self.embeddings_cache.clear()
-    
+
     def generate(self, text: str, use_cache: bool = True) -> np.ndarray:
-        """Generate embedding for text.
-        
+        """Generate a deterministic embedding for text.
+
         Args:
             text: Text to generate embedding for
             use_cache: Whether to use cached embeddings
-            
+
         Returns:
-            Numpy array embedding vector
+            Numpy array embedding vector of length ``max_features``
         """
-        # Handle empty or whitespace-only text
+        # Handle empty or whitespace-only text: fixed-dimension zero vector.
         if not text or not text.strip():
-            # Return zero vector of appropriate size
-            if self._fitted and self.vectorizer is not None:
-                vocab_size = len(self.vectorizer.vocabulary_)
-                return np.zeros(min(vocab_size, self.max_features))
-            else:
-                # Default size if not fitted yet
-                return np.zeros(self.max_features)
-        
+            return np.zeros(self.max_features)
+
         # Check cache first
         if use_cache and text in self.embeddings_cache:
             return self.embeddings_cache[text]
-        
-        # Add to corpus and refit if this is a new text
-        needs_refit = False
+
+        # Track corpus membership for logging / drift bookkeeping only. This no
+        # longer affects the embedding (the vectorizer is stateless), so it does
+        # NOT reintroduce the corpus-dependent drift that C-5 fixed.
         if text not in self.corpus:
-            # Implement LRU eviction if corpus exceeds max size
             if len(self.corpus) >= self.max_corpus_size:
-                # Remove oldest entry (first in list)
                 removed_text = self.corpus.pop(0)
-                # Also remove from cache
                 self.embeddings_cache.pop(removed_text, None)
-                needs_refit = True  # Need to refit after removal
-            
             self.corpus.append(text)
-            needs_refit = True
-        
-        # Fit or refit if needed
-        if not self._fitted or needs_refit:
-            # Refit on entire corpus to maintain consistent dimensions
-            if len(self.corpus) == 1:
-                self.vectorizer = TfidfVectorizer(
-                    max_features=self.max_features,
-                    ngram_range=(1, 2),
-                    min_df=1,
-                    max_df=1.0
-                )
-            else:
-                self.vectorizer = TfidfVectorizer(
-                    max_features=self.max_features,
-                    stop_words='english',
-                    ngram_range=(1, 2),
-                    min_df=1,
-                    max_df=0.95
-                )
-            
-            try:
-                self.vectorizer.fit(self.corpus)
-                self._fitted = True
-                
-                # Clear cache when refitting since dimensions may have changed
-                self.embeddings_cache.clear()
-            except ValueError as e:
-                # Handle empty vocabulary error
-                if "empty vocabulary" in str(e):
-                    # Return zero vector
-                    return np.zeros(self.max_features)
-                raise
-        
-        # Generate embedding
+
+        # Pure transform: identical text -> identical vector, always.
         embedding = self.vectorizer.transform([text]).toarray()[0]
-        
+
         # Cache if requested
         if use_cache:
             self.embeddings_cache[text] = embedding
-        
+
         return embedding
     
     def generate_batch(self, texts: List[str]) -> List[np.ndarray]:

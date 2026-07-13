@@ -3,6 +3,7 @@ Tests for the metrics collection module.
 """
 
 import time
+import threading
 import pytest
 
 from src.monitoring.metrics import (
@@ -361,41 +362,69 @@ class TestMetricsCollector:
         uptime = collector.get_uptime_seconds()
         assert uptime >= 0.1
     
-    @pytest.mark.skip(reason="get_metrics() hangs on Python 3.14 - lock/threading issue")
     def test_get_metrics(self):
-        """Test getting all metrics."""
+        """get_metrics() must return without deadlocking (C-8b regression).
+
+        Previously ``get_metrics()`` held ``self._lock`` (a non-reentrant Lock)
+        and then called ``get_combined_cache_hit_rate()``, which re-acquired the
+        same lock -> permanent self-deadlock on EVERY call. It was misdiagnosed
+        as a "Python 3.14" issue and skipped. We now run it in a worker thread
+        with a bounded join so a regression fails fast instead of hanging the
+        whole suite.
+        """
         collector = MetricsCollector()
         collector.record_cache_hit("L1", 0.5)
+        collector.record_cache_hit("L1", 0.5)
+        collector.record_cache_miss("L2")
         collector.record_optimization(1000, 800, 10.0)
         collector.record_truncation("priority", 1000, 600, 5.0)
         collector.record_request(100.0)
-        
-        metrics = collector.get_metrics()
-        
-        assert "timestamp" in metrics
-        assert "uptime_seconds" in metrics
-        assert "cache" in metrics
-        assert "optimization" in metrics
-        assert "truncation" in metrics
-        assert "requests" in metrics
-        assert "errors" in metrics
-    
-    @pytest.mark.skip(reason="get_summary() hangs on Python 3.14 - lock/threading issue")
+
+        box = {}
+        done = threading.Event()
+
+        def _run():
+            box["metrics"] = collector.get_metrics()
+            done.set()
+
+        worker = threading.Thread(target=_run, daemon=True)
+        worker.start()
+        assert done.wait(timeout=5.0), (
+            "get_metrics() deadlocked: self._lock re-acquired under itself"
+        )
+
+        metrics = box["metrics"]
+        for key in ("timestamp", "uptime_seconds", "cache",
+                    "optimization", "truncation", "requests", "errors"):
+            assert key in metrics
+        # The nested cache structure the health check depends on (C-8).
+        assert metrics["cache"]["L1"]["hits"] == 2
+        assert metrics["cache"]["L2"]["misses"] == 1
+        # combined_hit_rate is exactly the path that used to deadlock: 2/3.
+        assert metrics["cache"]["combined_hit_rate_percent"] == pytest.approx(66.67, abs=0.01)
+
     def test_get_summary(self):
-        """Test getting summary metrics."""
+        """get_summary() must not deadlock (C-8b regression; it calls get_metrics())."""
         collector = MetricsCollector()
         collector.record_cache_hit("L1", 0.5)
         collector.record_optimization(1000, 800, 10.0)
         collector.record_request(100.0)
-        
-        summary = collector.get_summary()
-        
-        assert "uptime_seconds" in summary
-        assert "total_requests" in summary
-        assert "cache_hit_rate_percent" in summary
-        assert "avg_token_savings_percent" in summary
-        assert "avg_request_latency_ms" in summary
-        assert "total_errors" in summary
+
+        box = {}
+        done = threading.Event()
+
+        def _run():
+            box["summary"] = collector.get_summary()
+            done.set()
+
+        worker = threading.Thread(target=_run, daemon=True)
+        worker.start()
+        assert done.wait(timeout=5.0), "get_summary() deadlocked via get_metrics()"
+
+        summary = box["summary"]
+        for key in ("uptime_seconds", "total_requests", "cache_hit_rate_percent",
+                    "avg_token_savings_percent", "avg_request_latency_ms", "total_errors"):
+            assert key in summary
     
     def test_reset(self):
         """Test resetting metrics."""

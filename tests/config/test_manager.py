@@ -169,7 +169,22 @@ class TestConfigManager:
         """Test updating with invalid values raises ValidationError."""
         with pytest.raises(ValidationError):
             config_manager.update({'cache.l1.max_size': -1})
-    
+
+    def test_update_rolls_back_on_validation_error(self, config_manager):
+        """A failed update must not mutate the live config (atomicity, C-4).
+
+        Previously update() merged into self._config *before* validating, with
+        no rollback, so a ValidationError left the config corrupted.
+        """
+        original = config_manager.get('cache.l1.max_size')
+        with pytest.raises(ValidationError):
+            config_manager.update({'cache.l1.max_size': -1})
+        # The invalid value must NOT have been committed.
+        assert config_manager.get('cache.l1.max_size') == original
+        # A subsequent valid update must still work (config not left corrupt).
+        config_manager.update({'cache.l1.max_size': 2000})
+        assert config_manager.get('cache.l1.max_size') == 2000
+
     def test_get_cache_config(self, config_manager):
         """Test getting cache configuration."""
         cache_config = config_manager.get_cache_config()

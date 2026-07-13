@@ -126,10 +126,15 @@ class VocabularyDriftMonitor:
             if self.snapshots:
                 return self.snapshots[-1]
         
-        # Get vocabulary from vectorizer
+        # Get vocabulary from vectorizer. A stateless embedder (e.g.
+        # HashingVectorizer) has no ``vocabulary_``; treat it as an empty
+        # vocabulary rather than crashing -- a hashed embedder has no
+        # enumerable vocabulary to drift.
         vocabulary = set()
         if embedding_generator.vectorizer is not None:
-            vocabulary = set(embedding_generator.vectorizer.vocabulary_.keys())
+            vocab = getattr(embedding_generator.vectorizer, 'vocabulary_', None)
+            if vocab is not None:
+                vocabulary = set(vocab.keys())
         
         # Get top terms if available
         top_terms = []
