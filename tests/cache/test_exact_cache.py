@@ -138,7 +138,7 @@ class TestExactCache:
         cache = ExactCache()
         
         metadata = {"tokens": 100, "quality": 0.95}
-        cache.set("key1", "response1", metadata)
+        cache.set("key1", "response1", metadata=metadata)
         
         entry = cache.get_entry("key1")
         assert entry is not None

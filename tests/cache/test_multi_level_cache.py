@@ -337,7 +337,7 @@ class TestMultiLevelCache:
         cache = MultiLevelCache()
         
         metadata = {"tokens": 100, "quality": 0.95}
-        cache.set("key1", "response1", metadata)
+        cache.set("key1", "response1", metadata=metadata)
         
         # Check L1
         l1_entry = cache.l1_cache.get_entry("key1")
@@ -362,7 +362,8 @@ class TestMultiLevelCache:
             # Check L1 can retrieve
             assert cache.l1_cache.get(f"key_{i}") == f"response_{i}"
             # Check L2 has the key
-            assert f"key_{i}" in cache.l2_cache.embeddings
+            versioned_key = cache.l2_cache._make_versioned_key(f"key_{i}")
+            assert versioned_key in cache.l2_cache.embeddings
     
     def test_l1_fast_l2_fallback(self):
         """Test that L1 is tried first, then L2."""

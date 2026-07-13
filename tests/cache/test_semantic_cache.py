@@ -145,7 +145,7 @@ class TestSemanticCache:
         cache = SemanticCache()
         
         metadata = {"tokens": 100, "quality": 0.95}
-        cache.set("key1", "response1", metadata)
+        cache.set("key1", "response1", metadata=metadata)
         
         entry = cache.get_entry("key1")
         assert entry is not None
@@ -204,12 +204,12 @@ class TestSemanticCache:
         cache.set("Python programming", "Python is great")
         
         # Exact match should exist
-        assert cache.contains_similar("Python programming") is True
+        assert cache.contains("Python programming") is True
         
         # Very different prompt should not exist
         cache_strict = SemanticCache(similarity_threshold=0.95)
         cache_strict.set("Python programming", "Python is great")
-        assert cache_strict.contains_similar("Completely different topic") is False
+        assert cache_strict.contains("Completely different topic") is False
     
     def test_update_threshold(self):
         """Test updating similarity threshold."""
@@ -285,8 +285,9 @@ class TestSemanticCache:
         cache.set("test prompt", "test response")
         
         # Check that embedding exists
-        assert "test prompt" in cache.embeddings
-        assert cache.embeddings["test prompt"] is not None
+        versioned_key = cache._make_versioned_key("test prompt")
+        assert versioned_key in cache.embeddings
+        assert cache.embeddings[versioned_key] is not None
     
     def test_unicode_handling(self):
         """Test handling of unicode prompts."""
