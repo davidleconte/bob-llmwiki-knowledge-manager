@@ -405,10 +405,16 @@ def register_monitoring_health_check() -> None:
             metrics = get_metrics_collector()
             metrics_data = metrics.get_metrics()
             
-            # Check if metrics are being collected
+            # Check if metrics are being collected. The real hit/miss counts
+            # live nested under cache.L1/L2 (see MetricsCollector.get_metrics /
+            # CacheMetrics.to_dict); the old flat 'cache_hits'/'cache_misses'
+            # keys never existed, so total_operations was always 0.
+            cache = metrics_data.get('cache', {})
+            l1 = cache.get('L1', {})
+            l2 = cache.get('L2', {})
             total_operations = (
-                metrics_data.get('cache_hits', 0) +
-                metrics_data.get('cache_misses', 0)
+                l1.get('hits', 0) + l1.get('misses', 0) +
+                l2.get('hits', 0) + l2.get('misses', 0)
             )
             
             if total_operations > 0:
