@@ -124,13 +124,16 @@ class DelegationCoordinator:
                         
                         if result.is_success():
                             self._completed_tasks.add(task.task_id)
+                            # Remove from failed tasks if this was a retry
+                            self._failed_tasks.discard(task.task_id)
                         else:
-                            self._failed_tasks.add(task.task_id)
-                            
                             # Retry if enabled
                             if self.enable_retry and task.should_retry():
                                 task.retry_count += 1
                                 continue  # Don't remove from remaining_tasks
+                            
+                            # Only mark as failed if not retrying
+                            self._failed_tasks.add(task.task_id)
                         
                         remaining_tasks.discard(task.task_id)
                         

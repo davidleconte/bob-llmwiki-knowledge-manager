@@ -67,7 +67,7 @@ Implement 7 core components based on existing architecture documentation:
 
 ### Week 1: Multi-Level Cache System
 
-**Reference:** `docs/architecture/components/CACHE.md` (3,428 lines)
+docs/architecture/deprecated/
 
 #### Day 1-2: Cache Foundation
 **Deliverables:**

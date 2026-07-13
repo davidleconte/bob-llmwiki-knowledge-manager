@@ -28,13 +28,15 @@ class EmbeddingGenerator:
         embeddings_cache: Cache of generated embeddings
     """
     
-    def __init__(self, max_features: int = 1000):
+    def __init__(self, max_features: int = 1000, max_corpus_size: int = 1000):
         """Initialize embedding generator.
         
         Args:
             max_features: Maximum number of features for TF-IDF
+            max_corpus_size: Maximum corpus size before LRU eviction (default: 1000)
         """
         self.max_features = max_features
+        self.max_corpus_size = max_corpus_size
         self.vectorizer = None
         self.corpus: List[str] = []
         self.embeddings_cache: Dict[str, np.ndarray] = {}
@@ -65,12 +67,14 @@ class EmbeddingGenerator:
             )
         else:
             # For multiple documents, use standard parameters
+            # Use min_df=1 to ensure at least some terms remain
+            # Use max_df=0.99 to be more permissive with common terms
             self.vectorizer = TfidfVectorizer(
                 max_features=self.max_features,
                 stop_words='english',
                 ngram_range=(1, 2),
                 min_df=1,
-                max_df=0.95
+                max_df=0.99  # More permissive to avoid pruning all terms
             )
         
         # Fit on entire corpus
@@ -107,6 +111,14 @@ class EmbeddingGenerator:
         # Add to corpus and refit if this is a new text
         needs_refit = False
         if text not in self.corpus:
+            # Implement LRU eviction if corpus exceeds max size
+            if len(self.corpus) >= self.max_corpus_size:
+                # Remove oldest entry (first in list)
+                removed_text = self.corpus.pop(0)
+                # Also remove from cache
+                self.embeddings_cache.pop(removed_text, None)
+                needs_refit = True  # Need to refit after removal
+            
             self.corpus.append(text)
             needs_refit = True
         

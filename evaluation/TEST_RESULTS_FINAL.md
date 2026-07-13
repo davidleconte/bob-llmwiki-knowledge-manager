@@ -4,6 +4,8 @@
 **Test Execution:** Complete  
 **Status:** ✅ All Critical Tests Passing
 
+> ⚠️ **RETRACTION NOTICE (2026-07-13).** Any `"hypothesis_test": "VALIDATED"` or token-savings figure reproduced in this file derives from the **fabricated** validation run (see [VALIDATION_DISCLAIMER.md](./VALIDATION_DISCLAIMER.md)). "Tests passing" is unit-test **pass rate**, not validated savings and not code coverage. Current status: **Beta — Not Production Ready.**
+
 ---
 
 ## Executive Summary

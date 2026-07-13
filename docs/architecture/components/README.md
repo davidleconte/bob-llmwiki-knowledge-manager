@@ -1,106 +1,99 @@
-# Component Specifications
+# Component Documentation
 
-This directory contains detailed architecture specifications for each system component.
+**Status:** Moved to Deprecated  
+**Date:** July 13, 2026  
+**Reason:** Original component specifications described planned system that was not implemented
 
-## Components Overview
+---
 
-Each component specification includes:
-- Executive summary with key metrics
-- Architecture diagrams (Mermaid)
-- Implementation details with code examples
-- Testing strategies with pytest examples
-- Security considerations
-- Monitoring and observability
-- Performance characteristics
+## ⚠️ IMPORTANT: Documentation Has Moved
 
-## Component List
+All component specifications have been **moved to the deprecated folder** because they describe a planned system that was **NOT implemented**.
 
-### 1. Cache System
-**File:** [CACHE.md](CACHE.md) (3,428 lines)
+### Where to Find Current Documentation
 
-Multi-level caching system with exact match (L1) and semantic similarity (L2) caching.
+**For Actual Implementation:** See [ACTUAL_SYSTEM_ARCHITECTURE.md](../ACTUAL_SYSTEM_ARCHITECTURE.md)
 
-**Key Metrics:**
-- Cache hit rate: 23.33%
-- L1 hit rate: 15%
-- L2 hit rate: 8.33%
-- Lookup latency: <10ms
+This document contains:
+- **Section 2:** Cache System (L1 ExactCache, L2 SemanticCache, MultiLevelCache)
+- **Section 3:** Optimizer System (TokenCounter, PromptOptimizer)
+- **Section 4:** Truncation System (4 strategies, Truncator)
+- **Section 5:** Integration & Data Flow
+- **Section 6:** Performance Characteristics
+- **Section 7:** Testing Strategy
 
-### 2. Optimizer
-**File:** [OPTIMIZER.md](OPTIMIZER.md) (3,892 lines)
+---
 
-Prompt optimization engine using TF-IDF scoring and context extraction.
+## Deprecated Documentation
 
-**Key Metrics:**
-- Token reduction: 89.3%
-- Quality preservation: 91.80%
-- Processing time: <50ms
-- Compression ratio: 10:1
+Original component specifications (5,534 lines total) have been moved to:
 
-### 3. Formatter
-**File:** [FORMATTER.md](FORMATTER.md) (3,156 lines)
+**Location:** [deprecated/](../deprecated/)
 
-Output format control and validation system.
+**Contents:**
+- BATCH.md (828 lines) - Batch processing (not implemented)
+- CACHE.md (670 lines) - Original cache design (implemented differently)
+- FORMATTER.md (750 lines) - Format control (not implemented)
+- INTEGRATION.md (858 lines) - Integration layer (not implemented)
+- MONITORING.md (873 lines) - Original monitoring (implemented differently)
+- OPTIMIZER.md (698 lines) - Original optimizer (implemented differently)
+- TRUNCATION.md (751 lines) - Original truncation (implemented differently)
 
-**Key Metrics:**
-- Format compliance: 99.5%
-- Validation time: <5ms
-- Supported formats: JSON, XML, YAML, Markdown
+**Why Deprecated:** See [deprecated/README.md](../deprecated/README.md)
 
-### 4. Truncation
-**File:** [TRUNCATION.md](TRUNCATION.md) (3,584 lines)
+---
 
-Smart truncation system with relevance-based content selection.
+## Quick Navigation
 
-**Key Metrics:**
-- Quality preservation: 95%
-- Processing time: <30ms
-- Truncation accuracy: 98%
+### Current Architecture
 
-### 5. Batch Processor
-**File:** [BATCH.md](BATCH.md) (3,712 lines)
+1. **System Overview:** [ACTUAL_SYSTEM_ARCHITECTURE.md](../ACTUAL_SYSTEM_ARCHITECTURE.md)
+2. **Cache Layer:** [ACTUAL_SYSTEM_ARCHITECTURE.md#2-layer-1-cache-system](../ACTUAL_SYSTEM_ARCHITECTURE.md#2-layer-1-cache-system)
+3. **Optimizer Layer:** [ACTUAL_SYSTEM_ARCHITECTURE.md#3-layer-2-optimizer-system](../ACTUAL_SYSTEM_ARCHITECTURE.md#3-layer-2-optimizer-system)
+4. **Truncation Layer:** [ACTUAL_SYSTEM_ARCHITECTURE.md#4-layer-3-truncation-system](../ACTUAL_SYSTEM_ARCHITECTURE.md#4-layer-3-truncation-system)
+5. **Monitoring:** [docs/MONITORING.md](../../MONITORING.md)
 
-Batch processing engine with similarity grouping.
+### Source Code
 
-**Key Metrics:**
-- Throughput: 600 tasks/second
-- Batch size: 50 tasks
-- Grouping efficiency: 85%
+- **Cache:** `src/cache/` (5 modules, 122 tests)
+- **Optimizer:** `src/optimizer/` (2 modules, 53 tests)
+- **Truncation:** `src/truncation/` (2 modules, 38 tests)
+- **Monitoring:** `src/monitoring/` (4 modules, 91 tests)
 
-### 6. Integration Layer
-**File:** [INTEGRATION.md](INTEGRATION.md) (4,128 lines)
+### Architecture Decisions
 
-System integration and orchestration layer.
+- **ADRs:** [docs/adr/](../../adr/) (12 decision records)
+- **Design Rationale:** See individual ADRs for component decisions
 
-**Key Metrics:**
-- End-to-end latency: <100ms
-- Success rate: 99.9%
-- Concurrent requests: 100+
+---
 
-### 7. Monitoring System
-**File:** [MONITORING.md](MONITORING.md) (3,524 lines)
+## What Changed?
 
-Comprehensive monitoring and observability system.
+### Original Plan (Week 18)
+- 8 components across 6 layers
+- Complex orchestration
+- Format validation
+- Batch processing
 
-**Key Metrics:**
-- Metrics collected: 50+
-- Dashboard refresh: 1s
-- Alert latency: <5s
+### Actual Implementation (Week 19-20)
+- 11 components across 3 layers
+- Simple layered architecture
+- Direct component usage
+- Deferred batch processing
 
-## Architecture Principles
+**Result:** Simpler, faster, more maintainable system
 
-All components follow these principles:
-
-1. **Separation of Concerns** - Each component has a single, well-defined responsibility
-2. **Fail-Safe Design** - Graceful degradation on component failure
-3. **Performance First** - Sub-100ms latency target
-4. **Quality Preservation** - 90%+ quality maintained
-5. **Observability** - Comprehensive metrics at each stage
-6. **Security by Design** - Security considerations built-in
-7. **Testability** - Comprehensive test coverage
+---
 
 ## Related Documentation
 
-- [Architecture Master](../MASTER.md) - Complete system architecture
-- [Architecture Decision Records](../../adr/) - Design decisions
-- [Project Management](../../project-management/) - Implementation planning
+- **Current Architecture:** [ACTUAL_SYSTEM_ARCHITECTURE.md](../ACTUAL_SYSTEM_ARCHITECTURE.md)
+- **Deprecated Specs:** [deprecated/](../deprecated/)
+- **Project Status:** [docs/project-management/PROJECT_STATUS.md](../../project-management/PROJECT_STATUS.md)
+- **Gap Analysis:** [docs/knowledge-base/research/external-audit-2026-07-12.md](../../knowledge-base/research/external-audit-2026-07-12.md)
+
+---
+
+**Last Updated:** July 13, 2026  
+**Maintained By:** Architecture Team  
+**Purpose:** Redirect to current documentation

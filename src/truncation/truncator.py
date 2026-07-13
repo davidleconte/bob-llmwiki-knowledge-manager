@@ -5,6 +5,7 @@ truncation strategies to prompts.
 """
 
 import re
+import time
 from typing import Optional, Dict, Any
 from src.optimizer.token_counter import TokenCounter
 from src.truncation.strategies import (
@@ -14,6 +15,7 @@ from src.truncation.strategies import (
     SemanticTruncationStrategy,
     SlidingWindowStrategy,
 )
+from src.monitoring import get_logger, get_metrics_collector
 
 
 class Truncator:
@@ -47,10 +49,19 @@ class Truncator:
         
         self.default_strategy = default_strategy
         
+        # Initialize monitoring
+        self._logger = get_logger("truncation.truncator")
+        self._metrics = get_metrics_collector()
+        
         # Statistics
         self.truncations_count = 0
         self.total_tokens_removed = 0
         self.total_original_tokens = 0
+        
+        self._logger.info("truncator_initialized",
+                        model=model,
+                        default_strategy=default_strategy,
+                        available_strategies=list(self.strategies.keys()))
     
     def truncate(self,
                  text: str,
@@ -66,6 +77,7 @@ class Truncator:
         Returns:
             Dictionary with truncation results
         """
+        start_time = time.time()
         strategy_name = strategy or self.default_strategy
         
         if strategy_name not in self.strategies:
@@ -76,6 +88,10 @@ class Truncator:
         
         # Check if truncation needed
         if original_tokens <= max_tokens:
+            self._logger.debug("truncation_skipped",
+                             original_tokens=original_tokens,
+                             max_tokens=max_tokens,
+                             strategy=strategy_name)
             return {
                 "original": text,
                 "truncated": text,
@@ -93,11 +109,24 @@ class Truncator:
         # Count truncated tokens
         truncated_tokens = self.token_counter.count_tokens(truncated)
         tokens_removed = original_tokens - truncated_tokens
+        latency_ms = (time.time() - start_time) * 1000
         
         # Update statistics
         self.truncations_count += 1
         self.total_tokens_removed += tokens_removed
         self.total_original_tokens += original_tokens
+        
+        # Record metrics
+        self._metrics.record_truncation(strategy_name, original_tokens, truncated_tokens, latency_ms)
+        
+        # Log truncation
+        self._logger.info("truncation_complete",
+                        strategy=strategy_name,
+                        original_tokens=original_tokens,
+                        truncated_tokens=truncated_tokens,
+                        tokens_removed=tokens_removed,
+                        reduction_pct=(tokens_removed / original_tokens * 100) if original_tokens > 0 else 0,
+                        latency_ms=latency_ms)
         
         return {
             "original": text,

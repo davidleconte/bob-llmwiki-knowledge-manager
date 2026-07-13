@@ -26,13 +26,30 @@ A Python-based framework that reduces token usage for LLM operations through cac
 
 **Purpose:** Reduce LLM token costs while preserving quality  
 **Technology:** Python 3.11+, tiktoken, scikit-learn, numpy, pytest  
-**Complexity:** ~5,000+ lines of Python code with 213 tests  
+**Complexity:** ~3,500 lines of Python code (core system)  
 
 **Key Components:**
 - Multi-level caching (L1: exact, L2: semantic)
 - Prompt optimization and token counting
 - Text truncation strategies
 - Monitoring and observability
+
+### 3. Delegation Module (Experimental - Not Integrated)
+
+A parallel sub-agent framework for repository analysis. **This is a separate system, not integrated with the token optimizer.**
+
+**Purpose:** Parallel code repository analysis  
+**Technology:** Python 3.11+, ThreadPoolExecutor  
+**Complexity:** ~1,588 lines of Python code  
+**Status:** Experimental, 0% coverage, demo-only  
+
+**Key Components:**
+- DelegationCoordinator (parallel execution)
+- 6 specialized agents (security, performance, quality, architecture, documentation, research)
+- Task queue with priority scheduling
+- Result aggregation and reporting
+
+**Note:** See `src/delegation/EXPERIMENTAL.md` and `docs/knowledge-base/research/delegation-integration-analysis-2026-07-13.md` for details.
 
 ---
 
@@ -326,17 +343,28 @@ metrics.record_optimization(1000, 800, 10.0)
 
 ## Project Status
 
+⚠️ **Overall Status: Beta (7/10) — Not Production Ready**
+
+See: `docs/knowledge-base/research/external-audit-2026-07-12.md` for complete audit findings and `docs/knowledge-base/guides/audit-remediation-action-plan.md` for remediation plan.
+
 ### Bob Shell Knowledge Manager
-- **Status:** Production ready ✅
+- **Status:** Functional, needs validation
 - **Tests:** 45 tests passing
 - **Version:** 1.0
+- **Note:** Original project, well-documented
 
 ### Token Optimization System
-- **Implementation:** 100% complete (213 tests passing)
-- **Test Coverage:** 1.14:1 test-to-code ratio
+- **Implementation:** Core system complete (304 tests passing, 35 skipped)
+- **Code Coverage:** 49% (measured, not fabricated)
 - **Code Quality:** Grade A (95/100)
-- **Week 20 Status:** Monitoring & API docs complete
-- **Next:** Production validation (Week 20 Days 6-10)
+- **Known Issues:** All 7 critical bugs fixed, documentation drift remains
+- **Next:** Real-world validation, documentation reconciliation
+
+### Delegation Module (Experimental)
+- **Status:** Functional but not integrated with core system
+- **Coverage:** 0% (demo-only, no integration tests)
+- **Purpose:** Parallel repository analysis (separate use case)
+- **Note:** See `src/delegation/EXPERIMENTAL.md` for details
 
 ---
 

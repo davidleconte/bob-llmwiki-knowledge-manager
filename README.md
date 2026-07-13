@@ -16,6 +16,26 @@ A native **IBM Bob Shell** implementation of Andrej Karpathy's **LLM-Wiki** patt
 
 ---
 
+## ⚠️ Repository Contains Two Systems
+
+**This repository contains TWO DISTINCT SYSTEMS:**
+
+1. **Bob Shell Knowledge Manager** (this README) - Lightweight documentation framework (~500 lines)
+   - Purpose: Organize knowledge bases using Bob Shell
+   - Technology: Bash scripts, YAML, Markdown templates
+   - Status: Stable (v1.0)
+
+2. **Token Optimization System** (separate codebase) - Python-based LLM optimization (~3,500 lines)
+   - Purpose: Reduce LLM token costs through caching and optimization
+   - Technology: Python 3.11+, tiktoken, scikit-learn
+   - Status: Beta (7/10) - Not Production Ready
+
+**These systems are NOT integrated.** They share a repository but serve different purposes.
+
+**For complete architecture:** See [docs/architecture/UNIFIED_ARCHITECTURE.md](docs/architecture/UNIFIED_ARCHITECTURE.md)
+
+---
+
 https://github.com/user-attachments/assets/897fecc2-8849-4fad-b8e0-3c408b026de6
 
 
@@ -174,16 +194,93 @@ The scripts have already filed digested reports into `docs/knowledge-base/`, so 
   consolidated report.
 - **3 worked example knowledge bases** — a software project, a research project, and a personal wiki.
 
-## 9. Maturity: what's proven, what's experimental
+## 9. Token savings: real-world expectations
 
-Intellectual honesty is part of the pitch. Here is the real maturity map:
+⚠️ **IMPORTANT DISCLAIMER:** Token savings metrics require validation on real repositories.
 
-- ✅ **Proven & usable today** — the two Bob modes, the templates, the KB workflow, and the analysis
-  scripts. *This is the product.*
-- 🧪 **Experimental / roadmap** — a Python token-optimization toolkit (exact + semantic cache, prompt
-  optimizer, truncation strategies). Promising primitives, **not yet validated end-to-end** on live Bob
-  workloads. Treat any performance figure as a **target, not a measurement**.
-- ⛔ **Not claimed** — enterprise SLAs, and automated multi-agent research (for that, use `nvk/llm-wiki`).
+**E2E Test Results (Controlled Environment):**
+- Prompt optimization: 10-20% measured savings
+- Cache hits: 100% savings when cache matches
+- Combined: 40-60% in ideal conditions
+
+**Synthetic Validation Claims (NOT VALIDATED):**
+- "68.96% token savings" - from hardcoded simulation, not real optimizer
+- "95% CI [66.42, 71.51]" - fabricated precision (std=0.0)
+- "52/73/81% scaling" - artifact of capped baseline
+- **Status:** Awaiting real-world validation (see Phase 6 of remediation plan)
+
+**Expected Real-World Performance:**
+- First-time analysis: 5-15% savings (cold cache)
+- Repetitive tasks: 20-40% savings (warm cache)
+- Cache hit rate: 10-20% realistic (not 23.33% theoretical)
+
+**The 0.36 Bobcoin example (§5)** is real but represents an ideal case: structured analysis with script-assisted digestion. Your actual savings will vary significantly based on task type, repetition patterns, and cache effectiveness.
+
+**See:** `docs/knowledge-base/research/external-audit-2026-07-12.md` for complete audit findings.
+
+## 10. Maturity: what's proven, what's experimental
+
+**Status: Beta (7/10) — Not Production Ready**
+
+⚠️ This system requires real-world validation before production use. See audit findings and remediation plan in knowledge base.
+
+### ✅ Proven & Usable Today
+
+**What Works:**
+- Two native Bob modes (`knowledge-manager`, `repo-analyzer`)
+- Document templates and KB structure
+- Phase 1 automation scripts (8 scripts, production-ready)
+- Comprehensive documentation
+- 98.4% test pass rate (312/317 tests passing)
+
+**Validated Claims:**
+- Token optimization framework functional (213 tests passing)
+- Caching system tested and working (E2E validated)
+- Script-based analysis reduces manual effort by 70-80%
+- **Test pass rate:** 98.4% (312/317 tests) — Note: This is pass rate, not code coverage
+- **Code coverage:** 49.4% measured (delegation 0%, monitoring 11–42%; see [STATUS.md](STATUS.md) · [Institutional Audit 2026-07-13](docs/knowledge-base/research/audit-2026-07-13-institutional.md))
+
+### 🧪 Experimental / Needs Validation
+
+**What Needs Work:**
+- Real LLM API integration (currently mock-based testing)
+- Production validation on diverse repositories
+- Phase 4 delegation framework (theoretical only)
+- Windows support (bash scripts not cross-platform)
+
+**Performance Claims:**
+- Token savings: Measured 10-20% optimization, 40-60% combined (with caching)
+- Cache hit rates: Theoretical 23%, real-world likely 15-25%
+- Cost savings: Depends heavily on workload patterns
+
+### ⚠️ Known Limitations
+
+1. **Testing:** Most tests use mocks, not real LLM APIs
+2. **Platform:** Bash scripts require Unix-like environment (macOS, Linux)
+3. **Dependencies:** Some features require optional dependencies (psutil for monitoring)
+4. **Validation:** Performance claims based on synthetic data and E2E token counting
+5. **Enterprise:** No SLA guarantees, audit trails, or vendor support
+6. **Documentation Drift:** Two projects (KB manager + token optimization) merged but not fully reconciled
+7. **Correctness Bugs:** 7 known bugs in health checks, caching, and delegation (see audit findings)
+8. **Orphaned Code:** ~27% of src/ (delegation, monitoring) not integrated into main workflows
+
+### ⛔ Not Claimed
+
+- Enterprise SLAs or production support
+- Automated multi-agent research (use `nvk/llm-wiki` for that)
+- Guaranteed token savings percentages
+- Cross-platform compatibility (Windows)
+
+### 📋 Production Checklist
+
+Before deploying to production:
+- [ ] Run E2E tests with real token counting (`RUN_E2E_TESTS=1 pytest tests/e2e/ -v`)
+- [ ] Validate on your specific repository types
+- [ ] Measure actual Bobcoin costs for your workload
+- [ ] Set up monitoring and cost tracking
+- [ ] Review limitations and ensure they're acceptable
+
+See `docs/knowledge-base/guides/p0-critical-fixes-implementation.md` for detailed production readiness steps.
 
 ## References
 

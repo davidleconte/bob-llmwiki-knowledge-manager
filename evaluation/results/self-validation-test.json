@@ -1,0 +1,111 @@
+{
+  "validation_metadata": {
+    "timestamp": "2026-07-13T04:50:38.702981",
+    "budget_bobcoins": 5.0,
+    "budget_spent": 5.21675,
+    "validation_method": "estimation_mode",
+    "accuracy_estimate": "60-70%"
+  },
+  "aggregate_results": {
+    "repositories_analyzed": 1,
+    "total_files_analyzed": 5,
+    "total_cost": 5.21675,
+    "total_estimated_baseline": 8.387205357142857,
+    "total_estimated_savings": 3.1704553571428575,
+    "average_savings_percent": 37.8010937152359,
+    "average_confidence": 0.7,
+    "budget_spent": 5.21675,
+    "budget_remaining": -0.21675000000000022,
+    "repositories": [
+      {
+        "name": "bob-llmwiki-knowledge-manager",
+        "files": 5,
+        "cost": 5.21675,
+        "savings": 3.1704553571428575,
+        "savings_percent": 37.8010937152359
+      }
+    ]
+  },
+  "repository_results": [
+    {
+      "repo_path": ".",
+      "repo_name": "bob-llmwiki-knowledge-manager",
+      "files_analyzed": 5,
+      "total_cost": 5.21675,
+      "estimated_baseline": 8.387205357142857,
+      "estimated_savings": 3.1704553571428575,
+      "savings_percent": 37.8010937152359,
+      "average_confidence": 0.7,
+      "operations": [
+        {
+          "file": "tests/test_workflows.py",
+          "cost": 2.02475,
+          "baseline": 3.3986875000000003,
+          "savings": 1.3739375000000003,
+          "savings_percent": 40.42553191489362,
+          "confidence": 0.8,
+          "tokens": 2024,
+          "optimizations": [
+            "prompt_optimization",
+            "truncation"
+          ]
+        },
+        {
+          "file": "tests/conftest.py",
+          "cost": 0.28375,
+          "baseline": 0.40535714285714286,
+          "savings": 0.12160714285714286,
+          "savings_percent": 30.0,
+          "confidence": 0.8,
+          "tokens": 283,
+          "optimizations": [
+            "prompt_optimization"
+          ]
+        },
+        {
+          "file": "tests/test_templates.py",
+          "cost": 1.7105,
+          "baseline": 2.8711964285714284,
+          "savings": 1.1606964285714285,
+          "savings_percent": 40.42553191489362,
+          "confidence": 0.8,
+          "tokens": 1710,
+          "optimizations": [
+            "prompt_optimization",
+            "truncation"
+          ]
+        },
+        {
+          "file": "tests/__init__.py",
+          "cost": 0.0125,
+          "baseline": 0.018750000000000003,
+          "savings": 0.006250000000000002,
+          "savings_percent": 33.333333333333336,
+          "confidence": 0.3,
+          "tokens": 12,
+          "optimizations": [
+            "default_estimate"
+          ]
+        },
+        {
+          "file": "tests/test_mode_config.py",
+          "cost": 1.18525,
+          "baseline": 1.6932142857142858,
+          "savings": 0.5079642857142859,
+          "savings_percent": 30.00000000000001,
+          "confidence": 0.8,
+          "tokens": 1185,
+          "optimizations": [
+            "prompt_optimization"
+          ]
+        }
+      ],
+      "timestamp": "2026-07-13T04:50:38.702878",
+      "metadata": {
+        "total_files_found": 10,
+        "budget_spent": 5.21675,
+        "budget_remaining": -0.21675000000000022
+      }
+    }
+  ]
+}

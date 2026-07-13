@@ -5,6 +5,8 @@
 **Cost:** 0.36 coins (< 1% of budget)  
 **Result:** ✅ Excellent
 
+> ⚠️ **PROVENANCE / RETRACTION NOTICE (2026-07-13).** The "0.36 coins", "ROI 20,000–30,000%", and "Validated ✅" claims in this document are a **single unverifiable anecdote** — no token counts, tokenizer, model, or transcript, and **not reproducible** (no manifest). Retained as a record; **not evidence of validated savings.** See [Institutional Audit 2026-07-13](../docs/knowledge-base/research/audit-2026-07-13-institutional.md).
+
 ---
 
 ## Overview
@@ -244,7 +246,7 @@ Start by analyzing the codebase and suggesting 5 initial documents to create
 - **Claimed savings:** 55%
 - **Tested savings:** 68.96% (synthetic data)
 - **Expected savings:** 40-60% (production)
-- **Status:** Validated ✅
+- **Status:** RETRACTED — unverified anecdote, not reproducible (see notice at top)
 
 ### Combined Value
 Using Bob Shell Knowledge Manager with token optimization:

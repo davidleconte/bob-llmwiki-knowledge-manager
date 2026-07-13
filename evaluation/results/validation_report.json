@@ -1,5 +1,6 @@
 {
   "metadata": {
+    "_RETRACTED_2026-07-13": "FABRICATED — the optimizer was never invoked; std=0.0 across 90 deterministic duplicates makes the CI and p-value meaningless; a -13093.9% time result (130x slower) was undisclosed. See evaluation/VALIDATION_DISCLAIMER.md and docs/knowledge-base/research/audit-2026-07-13-institutional.md. DO NOT cite as validated.",
     "generated_at": "2026-07-12T16:41:42.514299",
     "total_iterations": 90,
     "scenarios_tested": 3

@@ -244,4 +244,4 @@ For questions or issues:
 
 **Version**: 1.0.0  
 **Last Updated**: 2026-07-12  
-**Status**: Production Ready
+**Status**: Beta — Not Production Ready (remediation in progress)

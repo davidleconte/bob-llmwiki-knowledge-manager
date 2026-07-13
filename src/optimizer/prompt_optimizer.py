@@ -9,9 +9,11 @@ This module implements the core optimization logic achieving:
 from typing import Optional, Dict, Any, List, Tuple
 import re
 import hashlib
+import time
 
 from src.optimizer.token_counter import TokenCounter
 from src.cache.multi_level_cache import MultiLevelCache
+from src.monitoring import get_logger, get_metrics_collector
 
 
 class PromptOptimizer:
@@ -34,7 +36,8 @@ class PromptOptimizer:
                  model: str = "gpt-4",
                  target_savings: float = 0.893,
                  min_quality: float = 0.918,
-                 use_cache: bool = True):
+                 use_cache: bool = True,
+                 track_costs: bool = False):
         """Initialize prompt optimizer.
         
         Args:
@@ -42,16 +45,43 @@ class PromptOptimizer:
             target_savings: Target token savings (0-1)
             min_quality: Minimum quality threshold (0-1)
             use_cache: Whether to use caching
+            track_costs: Whether to track costs with CostTracker
         """
-        self.token_counter = TokenCounter(model=model)
-        self.cache = MultiLevelCache() if use_cache else None
+        self.token_counter = TokenCounter(model=model, track_costs=track_costs)
+        # Use only L1 (exact) cache to avoid semantic matches returning wrong prompt's optimization
+        if use_cache:
+            from src.cache.exact_cache import ExactCache
+            self.cache = ExactCache(max_size=1000, track_costs=track_costs)
+        else:
+            self.cache = None
         self.target_savings = target_savings
         self.min_quality = min_quality
+        self.track_costs = track_costs
         
         # Statistics
         self.optimizations_count = 0
         self.total_tokens_saved = 0
         self.total_original_tokens = 0
+        
+        # Initialize monitoring
+        self._logger = get_logger("optimizer.prompt")
+        self._metrics = get_metrics_collector()
+        
+        # Initialize cost tracker if enabled
+        self._cost_tracker = None
+        if self.track_costs:
+            try:
+                from src.monitoring.cost_tracker import get_cost_tracker
+                self._cost_tracker = get_cost_tracker()
+            except ImportError:
+                self.track_costs = False
+        
+        self._logger.info("prompt_optimizer_initialized",
+                        model=model,
+                        target_savings=target_savings,
+                        min_quality=min_quality,
+                        use_cache=use_cache,
+                        track_costs=track_costs)
     
     def optimize(self, 
                  prompt: str,
@@ -67,10 +97,14 @@ class PromptOptimizer:
         Returns:
             Dictionary with optimized prompt and statistics
         """
+        start_time = time.time()
+        
         # Check cache first
         if self.cache:
             cached = self.cache.get(prompt)
             if cached:
+                self._logger.debug("optimization_cache_hit",
+                                 prompt_length=len(prompt))
                 return self._parse_cached_result(cached)
         
         # Count original tokens
@@ -93,11 +127,29 @@ class PromptOptimizer:
         tokens_saved = original_tokens - optimized_tokens
         savings_pct = (tokens_saved / original_tokens) if original_tokens > 0 else 0
         quality = self._estimate_quality(prompt, optimized)
+        latency_ms = (time.time() - start_time) * 1000
         
         # Update statistics
         self.optimizations_count += 1
         self.total_tokens_saved += tokens_saved
         self.total_original_tokens += original_tokens
+        
+        # Record metrics
+        self._metrics.record_optimization(original_tokens, optimized_tokens, latency_ms)
+        
+        # Log optimization
+        self._logger.info("optimization_complete",
+                        original_tokens=original_tokens,
+                        optimized_tokens=optimized_tokens,
+                        tokens_saved=tokens_saved,
+                        savings_pct=savings_pct * 100,
+                        quality_score=quality,
+                        latency_ms=latency_ms,
+                        meets_target=savings_pct >= self.target_savings and quality >= self.min_quality)
+        
+        # Track optimization cost if enabled
+        if self.track_costs and self._cost_tracker:
+            self._cost_tracker.record_optimization(original_tokens, optimized_tokens)
         
         result = {
             "original": prompt,

@@ -26,10 +26,20 @@ from .metrics import (
 from .health import (
     HealthChecker,
     HealthStatus,
-    ComponentHealth,
-    configure_health_checker,
+    HealthCheckResult,
+    SystemHealth,
     get_health_checker,
-    check_health
+    register_cache_health_check,
+    register_system_health_check,
+    register_monitoring_health_check,
+)
+
+from .vocabulary_drift import (
+    VocabularySnapshot,
+    DriftMetrics,
+    VocabularyDriftMonitor,
+    get_drift_monitor,
+    configure_drift_monitor,
 )
 
 __all__ = [
@@ -52,8 +62,17 @@ __all__ = [
     # Health
     "HealthChecker",
     "HealthStatus",
-    "ComponentHealth",
-    "configure_health_checker",
+    "HealthCheckResult",
+    "SystemHealth",
     "get_health_checker",
-    "check_health",
+    "register_cache_health_check",
+    "register_system_health_check",
+    "register_monitoring_health_check",
+    
+    # Vocabulary Drift
+    "VocabularySnapshot",
+    "DriftMetrics",
+    "VocabularyDriftMonitor",
+    "get_drift_monitor",
+    "configure_drift_monitor",
 ]
