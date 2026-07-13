@@ -4,7 +4,7 @@ Orchestrates parallel execution of sub-agents
 """
 
 import asyncio
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 from typing import Dict, List, Optional, Set, Tuple
 from datetime import datetime
 import time
@@ -84,10 +84,17 @@ class DelegationCoordinator:
             reverse=True
         )
         
-        # Execute tasks in waves based on dependencies
-        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+        # Execute tasks in waves based on dependencies.
+        #
+        # The executor lifecycle is managed explicitly (not via `with`) because
+        # a `with` block's shutdown(wait=True) blocks on a runaway/hung worker.
+        # Python threads cannot be force-killed, so on a per-task timeout we
+        # abandon the worker (it finishes its uncancellable work in the
+        # background) and return promptly instead of hanging.
+        executor = ThreadPoolExecutor(max_workers=self.max_workers)
+        try:
             remaining_tasks = set(task.task_id for task in sorted_tasks)
-            
+
             while remaining_tasks:
                 # Find tasks that can be executed (dependencies met)
                 executable_tasks = [
@@ -95,7 +102,7 @@ class DelegationCoordinator:
                     for task_id in remaining_tasks
                     if self._tasks[task_id].can_execute(self._completed_tasks)
                 ]
-                
+
                 if not executable_tasks:
                     # Deadlock - circular dependencies or all remaining tasks failed
                     for task_id in remaining_tasks:
@@ -108,20 +115,23 @@ class DelegationCoordinator:
                         )
                         self._failed_tasks.add(task_id)
                     break
-                
+
                 # Submit executable tasks
                 future_to_task = {
                     executor.submit(self._execute_task, task): task
                     for task in executable_tasks
                 }
-                
-                # Wait for completion
-                for future in as_completed(future_to_task):
-                    task = future_to_task[future]
+
+                # Collect results with a BOUNDED per-task wait. Iterating the
+                # submitted futures directly (rather than as_completed() with no
+                # timeout, which blocks until the next future *completes*) makes
+                # future.result(timeout=...) actually enforce each task's
+                # deadline -- the case the timeout was meant to handle.
+                for future, task in future_to_task.items():
                     try:
                         result = future.result(timeout=task.timeout_seconds)
                         self._results[task.task_id] = result
-                        
+
                         if result.is_success():
                             self._completed_tasks.add(task.task_id)
                             # Remove from failed tasks if this was a retry
@@ -131,16 +141,31 @@ class DelegationCoordinator:
                             if self.enable_retry and task.should_retry():
                                 task.retry_count += 1
                                 continue  # Don't remove from remaining_tasks
-                            
+
                             # Only mark as failed if not retrying
                             self._failed_tasks.add(task.task_id)
-                        
+
                         remaining_tasks.discard(task.task_id)
-                        
+
                         # Update statistics
                         self._total_execution_time_ms += result.execution_time_ms
                         self._total_tokens += result.token_count
-                        
+
+                    except FuturesTimeoutError:
+                        # The worker cannot be cancelled once running; abandon it
+                        # and record a timeout failure so the coordinator returns
+                        # promptly rather than blocking on the runaway task.
+                        future.cancel()
+                        self._results[task.task_id] = SubAgentResult(
+                            agent_id="coordinator",
+                            agent_type="system",
+                            status=SubAgentStatus.FAILED,
+                            data={},
+                            errors=[f"Task timed out after {task.timeout_seconds}s"]
+                        )
+                        self._failed_tasks.add(task.task_id)
+                        remaining_tasks.discard(task.task_id)
+
                     except Exception as e:
                         self._results[task.task_id] = SubAgentResult(
                             agent_id="coordinator",
@@ -151,7 +176,11 @@ class DelegationCoordinator:
                         )
                         self._failed_tasks.add(task.task_id)
                         remaining_tasks.discard(task.task_id)
-        
+        finally:
+            # Do not block on abandoned/runaway workers; cancel anything still
+            # queued. Already-running timed-out tasks finish in the background.
+            executor.shutdown(wait=False, cancel_futures=True)
+
         self._end_time = datetime.utcnow()
         return self._results
     
