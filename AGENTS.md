@@ -326,17 +326,23 @@ metrics.record_optimization(1000, 800, 10.0)
 
 ## Project Status
 
+⚠️ **Overall Status: Beta (7/10) — Not Production Ready**
+
+See: `docs/knowledge-base/research/external-audit-2026-07-12.md` for complete audit findings and `docs/knowledge-base/guides/audit-remediation-action-plan.md` for remediation plan.
+
 ### Bob Shell Knowledge Manager
-- **Status:** Production ready ✅
+- **Status:** Functional, needs validation
 - **Tests:** 45 tests passing
 - **Version:** 1.0
+- **Note:** Original project, well-documented
 
 ### Token Optimization System
 - **Implementation:** 100% complete (213 tests passing)
-- **Test Coverage:** 1.14:1 test-to-code ratio
+- **Test Pass Rate:** 98.4% (312/317 tests) — Note: Pass rate, not code coverage
+- **Code Coverage:** Not yet measured (requires --cov run)
 - **Code Quality:** Grade A (95/100)
-- **Week 20 Status:** Monitoring & API docs complete
-- **Next:** Production validation (Week 20 Days 6-10)
+- **Known Issues:** 7 correctness bugs, ~27% orphaned code, documentation drift
+- **Next:** Real-world validation, bug fixes, documentation reconciliation
 
 ---
 

@@ -2,7 +2,11 @@
 
 **Last Updated:** 2026-07-13  
 **Current Phase:** All Phases Complete ✅  
-**Overall Status:** Beta Ready (7/10) - Production Hardening Needed
+**Overall Status:** Beta (7/10) — Not Production Ready
+
+⚠️ **IMPORTANT:** External audit identified critical issues. See:
+- [External Audit Findings](../knowledge-base/research/external-audit-2026-07-12.md)
+- [Remediation Action Plan](../knowledge-base/guides/audit-remediation-action-plan.md)
 
 ---
 

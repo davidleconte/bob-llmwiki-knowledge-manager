@@ -176,24 +176,33 @@ The scripts have already filed digested reports into `docs/knowledge-base/`, so 
 
 ## 9. Token savings: real-world expectations
 
-**Measured Performance (E2E Tests):**
-- Prompt optimization: 10-20% typical savings
-- Cache hits: 100% savings (when applicable)
-- Combined realistic average: **40-60% token savings**
+⚠️ **IMPORTANT DISCLAIMER:** Token savings metrics require validation on real repositories.
 
-**Important Context:**
-- **First-time analysis:** Minimal savings (cold cache, no prior knowledge)
-- **Repetitive tasks:** Higher savings (warm cache, established patterns)
-- **Cache hit rate:** 15-25% typical (depends heavily on workload patterns)
+**E2E Test Results (Controlled Environment):**
+- Prompt optimization: 10-20% measured savings
+- Cache hits: 100% savings when cache matches
+- Combined: 40-60% in ideal conditions
 
-**Theoretical Maximum:** 68.96% (synthetic data, ideal conditions)  
-**Production Reality:** 40-60% (measured with real token counting)
+**Synthetic Validation Claims (NOT VALIDATED):**
+- "68.96% token savings" - from hardcoded simulation, not real optimizer
+- "95% CI [66.42, 71.51]" - fabricated precision (std=0.0)
+- "52/73/81% scaling" - artifact of capped baseline
+- **Status:** Awaiting real-world validation (see Phase 6 of remediation plan)
 
-The 0.36 Bobcoin example (§5) represents an ideal case: structured analysis with script-assisted digestion. Your mileage will vary based on task type and repetition patterns.
+**Expected Real-World Performance:**
+- First-time analysis: 5-15% savings (cold cache)
+- Repetitive tasks: 20-40% savings (warm cache)
+- Cache hit rate: 10-20% realistic (not 23.33% theoretical)
+
+**The 0.36 Bobcoin example (§5)** is real but represents an ideal case: structured analysis with script-assisted digestion. Your actual savings will vary significantly based on task type, repetition patterns, and cache effectiveness.
+
+**See:** `docs/knowledge-base/research/external-audit-2026-07-12.md` for complete audit findings.
 
 ## 10. Maturity: what's proven, what's experimental
 
-**Production Readiness: 7/10** — Good foundation, needs real-world validation
+**Status: Beta (7/10) — Not Production Ready**
+
+⚠️ This system requires real-world validation before production use. See audit findings and remediation plan in knowledge base.
 
 ### ✅ Proven & Usable Today
 
@@ -205,9 +214,11 @@ The 0.36 Bobcoin example (§5) represents an ideal case: structured analysis wit
 - 98.4% test pass rate (312/317 tests passing)
 
 **Validated Claims:**
-- Token optimization framework functional
-- Caching system tested and working
+- Token optimization framework functional (213 tests passing)
+- Caching system tested and working (E2E validated)
 - Script-based analysis reduces manual effort by 70-80%
+- **Test pass rate:** 98.4% (312/317 tests) — Note: This is pass rate, not code coverage
+- **Code coverage:** Not yet measured (requires --cov run)
 
 ### 🧪 Experimental / Needs Validation
 
@@ -229,6 +240,9 @@ The 0.36 Bobcoin example (§5) represents an ideal case: structured analysis wit
 3. **Dependencies:** Some features require optional dependencies (psutil for monitoring)
 4. **Validation:** Performance claims based on synthetic data and E2E token counting
 5. **Enterprise:** No SLA guarantees, audit trails, or vendor support
+6. **Documentation Drift:** Two projects (KB manager + token optimization) merged but not fully reconciled
+7. **Correctness Bugs:** 7 known bugs in health checks, caching, and delegation (see audit findings)
+8. **Orphaned Code:** ~27% of src/ (delegation, monitoring) not integrated into main workflows
 
 ### ⛔ Not Claimed
 
