@@ -1,0 +1,213 @@
+{
+  "validation_metadata": {
+    "timestamp": "2026-07-13T04:52:24.913726",
+    "budget_bobcoins": 25.0,
+    "budget_spent": 27.99975,
+    "validation_method": "estimation_mode",
+    "accuracy_estimate": "60-70%"
+  },
+  "aggregate_results": {
+    "repositories_analyzed": 1,
+    "total_files_analyzed": 13,
+    "total_cost": 27.99975,
+    "total_estimated_baseline": 46.11997321428572,
+    "total_estimated_savings": 18.120223214285723,
+    "average_savings_percent": 39.28931859976224,
+    "average_confidence": 0.7615384615384616,
+    "budget_spent": 27.99975,
+    "budget_remaining": -2.999749999999999,
+    "repositories": [
+      {
+        "name": "bob-llmwiki-knowledge-manager",
+        "files": 13,
+        "cost": 27.99975,
+        "savings": 18.120223214285723,
+        "savings_percent": 39.28931859976224
+      }
+    ]
+  },
+  "repository_results": [
+    {
+      "repo_path": ".",
+      "repo_name": "bob-llmwiki-knowledge-manager",
+      "files_analyzed": 13,
+      "total_cost": 27.99975,
+      "estimated_baseline": 46.11997321428572,
+      "estimated_savings": 18.120223214285723,
+      "savings_percent": 39.28931859976224,
+      "average_confidence": 0.7615384615384616,
+      "operations": [
+        {
+          "file": "tests/test_workflows.py",
+          "cost": 2.02475,
+          "baseline": 3.3986875000000003,
+          "savings": 1.3739375000000003,
+          "savings_percent": 40.42553191489362,
+          "confidence": 0.8,
+          "tokens": 2024,
+          "optimizations": [
+            "prompt_optimization",
+            "truncation"
+          ]
+        },
+        {
+          "file": "tests/conftest.py",
+          "cost": 0.28375,
+          "baseline": 0.40535714285714286,
+          "savings": 0.12160714285714286,
+          "savings_percent": 30.0,
+          "confidence": 0.8,
+          "tokens": 283,
+          "optimizations": [
+            "prompt_optimization"
+          ]
+        },
+        {
+          "file": "tests/test_templates.py",
+          "cost": 1.7105,
+          "baseline": 2.8711964285714284,
+          "savings": 1.1606964285714285,
+          "savings_percent": 40.42553191489362,
+          "confidence": 0.8,
+          "tokens": 1710,
+          "optimizations": [
+            "prompt_optimization",
+            "truncation"
+          ]
+        },
+        {
+          "file": "tests/__init__.py",
+          "cost": 0.0125,
+          "baseline": 0.018750000000000003,
+          "savings": 0.006250000000000002,
+          "savings_percent": 33.333333333333336,
+          "confidence": 0.3,
+          "tokens": 12,
+          "optimizations": [
+            "default_estimate"
+          ]
+        },
+        {
+          "file": "tests/test_mode_config.py",
+          "cost": 1.18525,
+          "baseline": 1.6932142857142858,
+          "savings": 0.5079642857142859,
+          "savings_percent": 30.00000000000001,
+          "confidence": 0.8,
+          "tokens": 1185,
+          "optimizations": [
+            "prompt_optimization"
+          ]
+        },
+        {
+          "file": "examples/kb_aware_session_tracker.py",
+          "cost": 4.06875,
+          "baseline": 6.8296875,
+          "savings": 2.7609375000000007,
+          "savings_percent": 40.425531914893625,
+          "confidence": 0.8,
+          "tokens": 4068,
+          "optimizations": [
+            "prompt_optimization",
+            "truncation"
+          ]
+        },
+        {
+          "file": "examples/kb_estimation_demo.py",
+          "cost": 0.7955,
+          "baseline": 1.1364285714285716,
+          "savings": 0.3409285714285716,
+          "savings_percent": 30.00000000000001,
+          "confidence": 0.8,
+          "tokens": 795,
+          "optimizations": [
+            "prompt_optimization"
+          ]
+        },
+        {
+          "file": "examples/savings_estimator.py",
+          "cost": 4.29775,
+          "baseline": 7.214080357142857,
+          "savings": 2.916330357142857,
+          "savings_percent": 40.42553191489361,
+          "confidence": 0.8,
+          "tokens": 4297,
+          "optimizations": [
+            "prompt_optimization",
+            "truncation"
+          ]
+        },
+        {
+          "file": "examples/cost_comparison_analysis.py",
+          "cost": 2.27575,
+          "baseline": 3.8200089285714287,
+          "savings": 1.5442589285714288,
+          "savings_percent": 40.42553191489362,
+          "confidence": 0.8,
+          "tokens": 2275,
+          "optimizations": [
+            "prompt_optimization",
+            "truncation"
+          ]
+        },
+        {
+          "file": "examples/current_session_tracker.py",
+          "cost": 1.245,
+          "baseline": 1.778571428571429,
+          "savings": 0.5335714285714288,
+          "savings_percent": 30.00000000000001,
+          "confidence": 0.8,
+          "tokens": 1245,
+          "optimizations": [
+            "prompt_optimization"
+          ]
+        },
+        {
+          "file": "examples/delegation_example.py",
+          "cost": 1.63175,
+          "baseline": 2.7390089285714287,
+          "savings": 1.1072589285714287,
+          "savings_percent": 40.42553191489362,
+          "confidence": 0.8,
+          "tokens": 1631,
+          "optimizations": [
+            "prompt_optimization",
+            "truncation"
+          ]
+        },
+        {
+          "file": "examples/kb_aware_session_tracker_v2.py",
+          "cost": 4.06925,
+          "baseline": 6.830526785714286,
+          "savings": 2.761276785714286,
+          "savings_percent": 40.42553191489362,
+          "confidence": 0.8,
+          "tokens": 4069,
+          "optimizations": [
+            "prompt_optimization",
+            "truncation"
+          ]
+        },
+        {
+          "file": "examples/live_session_tracker.py",
+          "cost": 4.39925,
+          "baseline": 7.384455357142858,
+          "savings": 2.985205357142858,
+          "savings_percent": 40.425531914893625,
+          "confidence": 0.8,
+          "tokens": 4399,
+          "optimizations": [
+            "prompt_optimization",
+            "truncation"
+          ]
+        }
+      ],
+      "timestamp": "2026-07-13T04:52:24.913626",
+      "metadata": {
+        "total_files_found": 50,
+        "budget_spent": 27.99975,
+        "budget_remaining": -2.999749999999999
+      }
+    }
+  ]
+}
