@@ -35,12 +35,14 @@ class SemanticCache(CacheInterface):
     
     def __init__(self, 
                  similarity_threshold: float = 0.85,
-                 max_size: int = 500):
+                 max_size: int = 500,
+                 track_costs: bool = False):
         """Initialize semantic cache.
         
         Args:
             similarity_threshold: Minimum similarity for cache hit (0-1)
             max_size: Maximum number of entries before eviction
+            track_costs: Whether to track costs with CostTracker
         """
         if not 0 <= similarity_threshold <= 1:
             raise ValueError("similarity_threshold must be between 0 and 1")
@@ -49,6 +51,7 @@ class SemanticCache(CacheInterface):
         
         self.similarity_threshold = similarity_threshold
         self.max_size = max_size
+        self.track_costs = track_costs
         
         # Storage
         self.embeddings: Dict[str, np.ndarray] = {}
@@ -62,6 +65,15 @@ class SemanticCache(CacheInterface):
         # Statistics
         self._stats = CacheStats()
         self._similarity_scores: List[float] = []  # Track similarity scores for hits
+        
+        # Initialize cost tracker if enabled
+        self._cost_tracker = None
+        if self.track_costs:
+            try:
+                from src.monitoring.cost_tracker import get_cost_tracker
+                self._cost_tracker = get_cost_tracker()
+            except ImportError:
+                self.track_costs = False
     
     def get(self, key: str) -> Optional[str]:
         """Retrieve cached response for semantically similar key.
@@ -102,6 +114,13 @@ class SemanticCache(CacheInterface):
             # Record hit and similarity score
             self._stats.record_hit()
             self._similarity_scores.append(best_similarity)
+            
+            # Track cost savings if enabled
+            if self.track_costs and self._cost_tracker and best_match in self.entries:
+                # Estimate tokens saved (from metadata if available)
+                tokens_saved = self.entries[best_match].metadata.get('tokens', 0)
+                if tokens_saved > 0:
+                    self._cost_tracker.record_cache_hit(tokens_saved)
             
             return self.responses[best_match]
         

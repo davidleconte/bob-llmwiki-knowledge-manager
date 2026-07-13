@@ -6,6 +6,7 @@ supporting both tiktoken (OpenAI) and approximate counting methods.
 
 from typing import Optional, Dict, Any
 import re
+import time
 
 
 class TokenCounter:
@@ -18,17 +19,20 @@ class TokenCounter:
         model: Model name for token counting
         encoding: Tiktoken encoding (if available)
         use_tiktoken: Whether tiktoken is available
+        track_costs: Whether to track costs with CostTracker
     """
     
-    def __init__(self, model: str = "gpt-4"):
+    def __init__(self, model: str = "gpt-4", track_costs: bool = False):
         """Initialize token counter.
         
         Args:
             model: Model name (e.g., "gpt-4", "gpt-3.5-turbo")
+            track_costs: Whether to track costs with CostTracker
         """
         self.model = model
         self.encoding = None
         self.use_tiktoken = False
+        self.track_costs = track_costs
         
         # Try to import tiktoken
         try:
@@ -38,6 +42,15 @@ class TokenCounter:
         except (ImportError, KeyError):
             # Fallback to approximation
             self.use_tiktoken = False
+        
+        # Initialize cost tracker if enabled
+        self._cost_tracker = None
+        if self.track_costs:
+            try:
+                from ..monitoring.cost_tracker import get_cost_tracker
+                self._cost_tracker = get_cost_tracker()
+            except ImportError:
+                self.track_costs = False
     
     def count_tokens(self, text: str) -> int:
         """Count tokens in text.
@@ -51,11 +64,19 @@ class TokenCounter:
         if not text:
             return 0
         
+        start_time = time.time()
+        
         if self.use_tiktoken and self.encoding:
-            return len(self.encoding.encode(text))
+            tokens = len(self.encoding.encode(text))
         else:
             # Approximation: ~4 characters per token
-            return self._approximate_tokens(text)
+            tokens = self._approximate_tokens(text)
+        
+        # Track cost if enabled
+        if self.track_costs and self._cost_tracker:
+            self._cost_tracker.record_token_counting(tokens)
+        
+        return tokens
     
     def _approximate_tokens(self, text: str) -> int:
         """Approximate token count.
@@ -165,6 +186,10 @@ class TokenCounter:
         
         savings = original_tokens - optimized_tokens
         savings_pct = (savings / original_tokens * 100) if original_tokens > 0 else 0
+        
+        # Track optimization cost if enabled
+        if self.track_costs and self._cost_tracker and savings > 0:
+            self._cost_tracker.record_optimization(original_tokens, optimized_tokens)
         
         return {
             "original_tokens": original_tokens,

@@ -1,6 +1,6 @@
 # Complete Repository Analysis: bob-llmwiki-knowledge-manager
 
-**Generated:** 2026-07-12 16:13:48  
+**Generated:** 2026-07-13 01:48:06  
 **Tool:** generate-analysis-report.sh  
 **Version:** 1.0
 
@@ -30,7 +30,7 @@ This comprehensive analysis provides insights into the current state of the **bo
 
 ## Repository Overview
 
-*Source: `docs/knowledge-base/research/repo-scan-2026-07-12.md`*
+*Source: `docs/knowledge-base/research/repo-scan-2026-07-13.md`*
 
 ## Executive Summary
 
@@ -40,13 +40,13 @@ This comprehensive analysis provides insights into the current state of the **bo
 
 | Type | Count | Percentage |
 |------|-------|------------|
-| .py | 41 | 16.7% |
-| .md | 114 | 46.5% |
-| .txt | 2 | 0.8% |
-| .json | 70 | 28.6% |
-| .yaml | 1 | 0.4% |
+| .py | 209 | 34.8% |
+| .md | 287 | 47.8% |
+| .txt | 3 | 0.5% |
+| .json | 83 | 13.8% |
+| .yaml | 1 | 0.2% |
 
-**Total Files:** 245
+**Total Files:** 601
 
 ---
 ## Directory Structure
@@ -92,48 +92,48 @@ This comprehensive analysis provides insights into the current state of the **bo
 │   │   ├── QUALITY_ATTRIBUTES.md
 │   │   └── README.md
 │   ├── ARCHITECTURE.md
+│   ├── assets
+│   │   └── kb-compounding-loop.svg
+│   ├── BOOK_APPENDIX_A.md
+│   ├── BOOK_APPENDIX_B.md
+│   ├── BOOK_APPENDIX_C.md
+│   ├── BOOK_CHAPTER_01.md
+│   ├── BOOK_CHAPTER_02.md
+│   ├── BOOK_CHAPTER_03.md
+│   ├── BOOK_CHAPTER_04.md
+│   ├── BOOK_CHAPTER_05.md
+│   ├── BOOK_CHAPTER_06.md
+│   ├── BOOK_CHAPTER_07.md
+│   ├── BOOK_CHAPTER_08.md
+│   ├── BOOK_CHAPTER_09.md
+│   ├── BOOK_SUMMARY.md
+│   ├── BOOK_TABLE_OF_CONTENTS.md
 │   ├── COMPARISON.md
 │   ├── CUSTOMIZATION.md
+│   ├── DESIGN_DOCUMENT_KB_ADDENDUM.md
+│   ├── DESIGN_DOCUMENT.md
 │   ├── INDEX.md
 │   ├── INSTALLATION.md
 │   ├── knowledge-base
+│   │   ├── concepts
+│   │   ├── guides
+│   │   ├── INDEX.md
+│   │   ├── references
 │   │   └── research
+│   ├── MECE_FRAMEWORK.md
 │   ├── MONITORING.md
 │   ├── PHASE1_IMPLEMENTATION_COMPLETE.md
+│   ├── PHASE2_IMPLEMENTATION_COMPLETE.md
+│   ├── PHASE3_IMPLEMENTATION_COMPLETE.md
+│   ├── PHASE4_IMPLEMENTATION_COMPLETE.md
 │   ├── project-management
 │   │   ├── phases
 │   │   ├── planning
 │   │   ├── PROJECT_STATUS.md
 │   │   ├── README.md
 │   │   └── reviews
-│   ├── QUICK_START.md
-│   ├── REPOSITORY_ANALYSIS_WORKFLOW.md
-│   ├── USAGE.md
-│   ├── WORKFLOW_AUTOMATION_PLAN.md
-│   └── WORKFLOWS.md
-├── evaluation
-│   ├── data
-│   │   ├── DC_C_001.json
-│   │   ├── DC_C_002.json
-│   │   ├── DC_C_003.json
-│   │   ├── DC_C_004.json
-│   │   ├── DC_C_005.json
-│   │   ├── DC_C_006.json
-│   │   ├── DC_C_007.json
-│   │   ├── DC_C_008.json
-│   │   ├── DC_C_009.json
-│   │   ├── DC_C_010.json
-│   │   ├── DC_T_001.json
-│   │   ├── DC_T_002.json
-│   │   ├── DC_T_003.json
-│   │   ├── DC_T_004.json
-│   │   ├── DC_T_005.json
-│   │   ├── DC_T_006.json
-│   │   ├── DC_T_007.json
-│   │   ├── DC_T_008.json
-│   │   ├── DC_T_009.json
 
-*For full details, see: [`docs/knowledge-base/research/repo-scan-2026-07-12.md`](docs/knowledge-base/research/repo-scan-2026-07-12.md)*
+*For full details, see: [`docs/knowledge-base/research/repo-scan-2026-07-13.md`](docs/knowledge-base/research/repo-scan-2026-07-13.md)*
 
 
 ---
@@ -197,7 +197,7 @@ No vulnerabilities found or safety check failed
 
 ## Code Quality Metrics
 
-*Source: `docs/knowledge-base/research/code-metrics-2026-07-12.md`*
+*Source: `docs/knowledge-base/research/code-metrics-2026-07-13.md`*
 
 ## Executive Summary
 
@@ -205,7 +205,7 @@ No vulnerabilities found or safety check failed
 
 **Manual Count (approximate):**
 
-- .py files: 9368 lines
+- .py files: 60912 lines
 - .js files:  lines
 - .ts files:  lines
 - .jsx files:  lines
@@ -246,14 +246,14 @@ No vulnerabilities found or safety check failed
 
 ---
 
-*For full details, see: [`docs/knowledge-base/research/code-metrics-2026-07-12.md`](docs/knowledge-base/research/code-metrics-2026-07-12.md)*
+*For full details, see: [`docs/knowledge-base/research/code-metrics-2026-07-13.md`](docs/knowledge-base/research/code-metrics-2026-07-13.md)*
 
 
 ---
 
 ## Security Assessment
 
-*Source: `docs/knowledge-base/research/security-scan-2026-07-12.md`*
+*Source: `docs/knowledge-base/research/security-scan-2026-07-13.md`*
 
 ## Executive Summary
 
@@ -356,14 +356,14 @@ No vulnerabilities found or safety check failed
   PYSEC-2026-25: ### Summary  There is no CSRF protection on the cache feature on most integrations clients.  ### Details In `authlib.integrations.starlette_client.OAuth`, no CSRF protection is set up when using the cache parameter. When _not_ using the cache parameter, the use of SessionMiddleware ties the client to the auth state, preventing CSRF attacks. With the cache, there is no such mechanism. Other integratons have the same issue, it's not just starlette.  The state parameter is taken from the callback URL and the state is fetched from the cache without checking that it is the same client calling the redirect endpoint as was the one that initiated the auth flow.  This issue is documented in RFC 6749 section 10.12: https://datatracker.ietf.org/doc/html/rfc6749#section-10.12  ### PoC - Set up a Starlette integration with a cache - The attacker starts the auth flow up until before the callback URL is followed. - The attacked sends the redirect URL to the victim - The victim now completes the authorisation  ### Impact This impacts all users that use the cache to store auth state.  All users will be vulnerable to CSRF attacks and may have an attacker's account tied to their own.
   Fix: 1.6.11
 
-*For full details, see: [`docs/knowledge-base/research/security-scan-2026-07-12.md`](docs/knowledge-base/research/security-scan-2026-07-12.md)*
+*For full details, see: [`docs/knowledge-base/research/security-scan-2026-07-13.md`](docs/knowledge-base/research/security-scan-2026-07-13.md)*
 
 
 ---
 
 ## Test Coverage
 
-*Source: `docs/knowledge-base/research/test-coverage-2026-07-12.md`*
+*Source: `docs/knowledge-base/research/test-coverage-2026-07-13.md`*
 
 ## Executive Summary
 
@@ -401,26 +401,26 @@ No vulnerabilities found or safety check failed
 
 ---
 
-*For full details, see: [`docs/knowledge-base/research/test-coverage-2026-07-12.md`](docs/knowledge-base/research/test-coverage-2026-07-12.md)*
+*For full details, see: [`docs/knowledge-base/research/test-coverage-2026-07-13.md`](docs/knowledge-base/research/test-coverage-2026-07-13.md)*
 
 
 ---
 
 ## Git History Insights
 
-*Source: `docs/knowledge-base/research/git-analysis-2026-07-12.md`*
+*Source: `docs/knowledge-base/research/git-analysis-2026-07-13.md`*
 
 ## Executive Summary
 
 ### Commit Frequency
 
-**Total Commits:** 11
+**Total Commits:** 22
 
 #### Commits by Month (Last 12 Months)
 
 | Month | Commits |
 |-------|---------|
-| 2026-07 | 11 |
+| 2026-07 | 22 |
 | 2026-06 | 0 |
 | 2026-05 | 0 |
 | 2026-04 | 0 |
@@ -448,16 +448,16 @@ No vulnerabilities found or safety check failed
 | Friday | 0
 0 |
 | Saturday | 2 |
-| Sunday | 9 |
+| Sunday | 20 |
 
 ---
 ## Summary & Insights
 
 ### Key Findings
 
-1. **Activity Level:** 11 total commits
+1. **Activity Level:** 22 total commits
 2. **Team Size:** 1 contributors
-3. **Recent Activity:** 11 commits in last 30 days
+3. **Recent Activity:** 22 commits in last 30 days
 4. **Releases:** 0 tagged releases
 
 ### Recommendations
@@ -470,14 +470,14 @@ No vulnerabilities found or safety check failed
 
 ---
 
-*For full details, see: [`docs/knowledge-base/research/git-analysis-2026-07-12.md`](docs/knowledge-base/research/git-analysis-2026-07-12.md)*
+*For full details, see: [`docs/knowledge-base/research/git-analysis-2026-07-13.md`](docs/knowledge-base/research/git-analysis-2026-07-13.md)*
 
 
 ---
 
 ## Documentation Coverage
 
-*Source: `docs/knowledge-base/research/doc-coverage-2026-07-12.md`*
+*Source: `docs/knowledge-base/research/doc-coverage-2026-07-13.md`*
 
 ## Executive Summary
 
@@ -491,12 +491,12 @@ No vulnerabilities found or safety check failed
 |---------|---------|
 | Headings | ✅ |
 | Installation | ✅ |
-| Usage | ✅ |
+| Usage | ❌ |
 | Examples | ✅ |
-| Contributing | ✅ |
+| Contributing | ❌ |
 | License | ✅ |
 
-**Length:** 175 lines
+**Length:** 197 lines
 ✅ README length is appropriate
 
 ---
@@ -520,7 +520,7 @@ No vulnerabilities found or safety check failed
 
 ---
 
-*For full details, see: [`docs/knowledge-base/research/doc-coverage-2026-07-12.md`](docs/knowledge-base/research/doc-coverage-2026-07-12.md)*
+*For full details, see: [`docs/knowledge-base/research/doc-coverage-2026-07-13.md`](docs/knowledge-base/research/doc-coverage-2026-07-13.md)*
 
 
 ---
@@ -591,7 +591,7 @@ Based on the comprehensive analysis, here are prioritized recommendations:
 ## Analysis Metadata
 
 **Repository:** bob-llmwiki-knowledge-manager
-**Analysis Date:** 2026-07-12 16:13:48
+**Analysis Date:** 2026-07-13 01:48:06
 **Generated By:** Bob Shell Knowledge Manager
 **Tool Version:** 1.0
 
@@ -599,11 +599,17 @@ Based on the comprehensive analysis, here are prioritized recommendations:
 
 - `docs/knowledge-base/concepts/dependency-analysis.md`
 - `docs/knowledge-base/research/code-metrics-2026-07-12.md`
+- `docs/knowledge-base/research/code-metrics-2026-07-13.md`
 - `docs/knowledge-base/research/doc-coverage-2026-07-12.md`
+- `docs/knowledge-base/research/doc-coverage-2026-07-13.md`
 - `docs/knowledge-base/research/git-analysis-2026-07-12.md`
+- `docs/knowledge-base/research/git-analysis-2026-07-13.md`
 - `docs/knowledge-base/research/repo-scan-2026-07-12.md`
+- `docs/knowledge-base/research/repo-scan-2026-07-13.md`
 - `docs/knowledge-base/research/security-scan-2026-07-12.md`
+- `docs/knowledge-base/research/security-scan-2026-07-13.md`
 - `docs/knowledge-base/research/test-coverage-2026-07-12.md`
+- `docs/knowledge-base/research/test-coverage-2026-07-13.md`
 
 ### How to Update This Report
 

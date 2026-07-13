@@ -45,3 +45,6 @@ htmlcov/
 
 # Logs
 *.log
+
+# Knowledge Base
+docs/knowledge-base/.DS_Store

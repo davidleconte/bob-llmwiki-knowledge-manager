@@ -34,7 +34,8 @@ class PromptOptimizer:
                  model: str = "gpt-4",
                  target_savings: float = 0.893,
                  min_quality: float = 0.918,
-                 use_cache: bool = True):
+                 use_cache: bool = True,
+                 track_costs: bool = False):
         """Initialize prompt optimizer.
         
         Args:
@@ -42,16 +43,27 @@ class PromptOptimizer:
             target_savings: Target token savings (0-1)
             min_quality: Minimum quality threshold (0-1)
             use_cache: Whether to use caching
+            track_costs: Whether to track costs with CostTracker
         """
-        self.token_counter = TokenCounter(model=model)
+        self.token_counter = TokenCounter(model=model, track_costs=track_costs)
         self.cache = MultiLevelCache() if use_cache else None
         self.target_savings = target_savings
         self.min_quality = min_quality
+        self.track_costs = track_costs
         
         # Statistics
         self.optimizations_count = 0
         self.total_tokens_saved = 0
         self.total_original_tokens = 0
+        
+        # Initialize cost tracker if enabled
+        self._cost_tracker = None
+        if self.track_costs:
+            try:
+                from src.monitoring.cost_tracker import get_cost_tracker
+                self._cost_tracker = get_cost_tracker()
+            except ImportError:
+                self.track_costs = False
     
     def optimize(self, 
                  prompt: str,
@@ -98,6 +110,10 @@ class PromptOptimizer:
         self.optimizations_count += 1
         self.total_tokens_saved += tokens_saved
         self.total_original_tokens += original_tokens
+        
+        # Track optimization cost if enabled
+        if self.track_costs and self._cost_tracker:
+            self._cost_tracker.record_optimization(original_tokens, optimized_tokens)
         
         result = {
             "original": prompt,

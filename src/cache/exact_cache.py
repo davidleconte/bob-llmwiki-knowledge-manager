@@ -27,13 +27,15 @@ class ExactCache(CacheInterface):
         max_size: Maximum number of entries (default: 1000)
         cache: OrderedDict storing cache entries
         stats: Cache statistics tracker
+        track_costs: Whether to track costs with CostTracker
     """
     
-    def __init__(self, max_size: int = 1000):
+    def __init__(self, max_size: int = 1000, track_costs: bool = False):
         """Initialize exact cache.
         
         Args:
             max_size: Maximum number of entries before eviction
+            track_costs: Whether to track costs with CostTracker
         """
         if max_size <= 0:
             raise ValueError("max_size must be positive")
@@ -41,6 +43,16 @@ class ExactCache(CacheInterface):
         self.max_size = max_size
         self.cache: OrderedDict[str, CacheEntry] = OrderedDict()
         self._stats = CacheStats()
+        self.track_costs = track_costs
+        
+        # Initialize cost tracker if enabled
+        self._cost_tracker = None
+        if self.track_costs:
+            try:
+                from src.monitoring.cost_tracker import get_cost_tracker
+                self._cost_tracker = get_cost_tracker()
+            except ImportError:
+                self.track_costs = False
     
     def _hash_key(self, key: str) -> str:
         """Generate SHA-256 hash of key.
@@ -74,6 +86,13 @@ class ExactCache(CacheInterface):
             
             # Record hit
             self._stats.record_hit()
+            
+            # Track cost savings if enabled
+            if self.track_costs and self._cost_tracker:
+                # Estimate tokens saved (from metadata if available)
+                tokens_saved = entry.metadata.get('tokens', 0)
+                if tokens_saved > 0:
+                    self._cost_tracker.record_cache_hit(tokens_saved)
             
             return entry.response
         
