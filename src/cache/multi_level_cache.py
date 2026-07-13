@@ -45,19 +45,26 @@ class MultiLevelCache(CacheInterface):
                  l1_max_size: int = 1000,
                  l2_max_size: int = 500,
                  similarity_threshold: float = 0.85,
-                 promote_l2_hits: bool = True):
+                 promote_l2_hits: bool = True,
+                 l1_ttl_seconds: Optional[float] = None,
+                 l2_ttl_seconds: Optional[float] = None):
         """Initialize multi-level cache.
-        
+
         Args:
             l1_max_size: Maximum size for L1 cache
             l2_max_size: Maximum size for L2 cache
             similarity_threshold: Similarity threshold for L2
             promote_l2_hits: Whether to promote L2 hits to L1
+            l1_ttl_seconds: Optional TTL for L1 entries (None disables expiry).
+            l2_ttl_seconds: Optional TTL for L2 entries (None disables expiry).
+                Threaded through so CacheConfig's ttl_seconds actually reaches
+                the caches instead of being silently inert.
         """
-        self.l1_cache = ExactCache(max_size=l1_max_size)
+        self.l1_cache = ExactCache(max_size=l1_max_size, ttl_seconds=l1_ttl_seconds)
         self.l2_cache = SemanticCache(
             max_size=l2_max_size,
-            similarity_threshold=similarity_threshold
+            similarity_threshold=similarity_threshold,
+            ttl_seconds=l2_ttl_seconds
         )
         self.promote_l2_hits = promote_l2_hits
         

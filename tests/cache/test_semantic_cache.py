@@ -358,5 +358,29 @@ class TestSemanticCache:
         assert entry.access_count > initial_access_count
 
 
+class TestSemanticCacheTTL:
+    """TTL enforcement on read for L2 (C-6 regression)."""
+
+    def test_expired_match_becomes_miss_and_is_evicted(self):
+        clock = [1000.0]
+        cache = SemanticCache(max_size=10, ttl_seconds=10, clock=lambda: clock[0])
+
+        cache.set("what is python", "a language")
+        # Exact-text lookup is self-similarity 1.0 -> a hit while fresh.
+        assert cache.get("what is python") == "a language"
+
+        clock[0] = 1011.0  # advance past ttl
+        assert cache.get("what is python") is None  # expired -> miss
+        assert cache.size() == 0  # evicted from all stores
+
+    def test_ttl_none_never_expires(self):
+        clock = [1000.0]
+        cache = SemanticCache(max_size=10, ttl_seconds=None, clock=lambda: clock[0])
+
+        cache.set("what is python", "a language")
+        clock[0] = 10_000_000.0
+        assert cache.get("what is python") == "a language"
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -11,7 +11,7 @@ Target metrics:
 
 import time
 import threading
-from typing import Optional, Dict, Any, List, Tuple
+from typing import Optional, Dict, Any, List, Tuple, Callable
 import numpy as np
 
 from src.cache.base import CacheInterface, CacheEntry, CacheStats
@@ -39,25 +39,36 @@ class SemanticCache(CacheInterface):
     
     VERSION: str = "v1"  # Current cache version
     
-    def __init__(self, 
+    def __init__(self,
                  similarity_threshold: float = 0.85,
                  max_size: int = 500,
-                 track_costs: bool = False):
+                 track_costs: bool = False,
+                 ttl_seconds: Optional[float] = None,
+                 clock: Callable[[], float] = time.time):
         """Initialize semantic cache.
-        
+
         Args:
             similarity_threshold: Minimum similarity for cache hit (0-1)
             max_size: Maximum number of entries before eviction
             track_costs: Whether to track costs with CostTracker
+            ttl_seconds: Optional entry time-to-live. When set, a matched entry
+                older than this (by creation timestamp) is treated as a miss and
+                evicted on read. ``None`` disables expiry (default).
+            clock: Time source for stamping/expiry, injectable for
+                deterministic tests. Defaults to ``time.time``.
         """
         if not 0 <= similarity_threshold <= 1:
             raise ValueError("similarity_threshold must be between 0 and 1")
         if max_size <= 0:
             raise ValueError("max_size must be positive")
-        
+        if ttl_seconds is not None and ttl_seconds <= 0:
+            raise ValueError("ttl_seconds must be positive when set")
+
         self.similarity_threshold = similarity_threshold
         self.max_size = max_size
         self.track_costs = track_costs
+        self.ttl_seconds = ttl_seconds
+        self._clock = clock
         
         # Thread safety lock
         self._lock = threading.RLock()
@@ -179,6 +190,18 @@ class SemanticCache(CacheInterface):
             
             # Check if best match exceeds threshold
             if best_match and best_similarity >= self.similarity_threshold:
+                # Enforce TTL: a stale match is expired -> evict and miss.
+                if (self.ttl_seconds is not None and best_match in self.entries and
+                        (self._clock() - self.entries[best_match].timestamp) > self.ttl_seconds):
+                    self._remove_entry(best_match)
+                    self._stats.record_miss()
+                    self._metrics.record_cache_miss("L2")
+                    self._logger.debug("cache_expired",
+                                     cache_level="L2",
+                                     version=target_version,
+                                     ttl_seconds=self.ttl_seconds)
+                    return None
+
                 # Update entry access stats
                 if best_match in self.entries:
                     self.entries[best_match].access()
@@ -269,7 +292,7 @@ class SemanticCache(CacheInterface):
             entry = CacheEntry(
                 response=value,
                 metadata=metadata,
-                timestamp=time.time()
+                timestamp=self._clock()
             )
             self.entries[versioned_key] = entry
             
@@ -302,9 +325,19 @@ class SemanticCache(CacheInterface):
             embedding = self.embedding_generator.generate(base_key, use_cache=False)
             self.embeddings[versioned_key] = embedding
     
+    def _remove_entry(self, versioned_key: str) -> None:
+        """Remove a key from every store defensively.
+
+        Thread-safe: Must be called with lock held. Used for TTL expiry.
+        """
+        self.embeddings.pop(versioned_key, None)
+        self.responses.pop(versioned_key, None)
+        self.metadata_store.pop(versioned_key, None)
+        self.entries.pop(versioned_key, None)
+
     def _evict_lru(self) -> None:
         """Evict least recently used entry.
-        
+
         Thread-safe: Must be called with lock held.
         """
         if not self.entries:

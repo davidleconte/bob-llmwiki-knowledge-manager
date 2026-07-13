@@ -341,5 +341,43 @@ class TestExactCache:
         assert entry.idle_seconds() >= 0.1
 
 
+class TestExactCacheTTL:
+    """TTL enforcement on read (C-6 regression).
+
+    Previously ttl_seconds was configured (l1=3600) but never plumbed into any
+    cache or checked on get(): an entry lived until LRU eviction regardless of
+    age, so the TTL config was silently inert. These use an injected clock for
+    deterministic time control (no time.sleep).
+    """
+
+    def test_get_returns_miss_after_ttl_expiry(self):
+        clock = [1000.0]
+        cache = ExactCache(max_size=10, ttl_seconds=10, clock=lambda: clock[0])
+
+        cache.set("key1", "response1")
+        assert cache.get("key1") == "response1"  # fresh hit at t=1000
+
+        clock[0] = 1011.0  # advance past ttl (11 > 10)
+        assert cache.get("key1") is None  # expired -> miss
+        assert cache.size() == 0  # evicted on the expired read
+
+    def test_entry_within_ttl_is_a_hit(self):
+        clock = [1000.0]
+        cache = ExactCache(max_size=10, ttl_seconds=10, clock=lambda: clock[0])
+
+        cache.set("key1", "response1")
+        clock[0] = 1009.0  # still within ttl (9 < 10)
+        assert cache.get("key1") == "response1"
+        assert cache.size() == 1
+
+    def test_ttl_none_never_expires(self):
+        clock = [1000.0]
+        cache = ExactCache(max_size=10, ttl_seconds=None, clock=lambda: clock[0])
+
+        cache.set("key1", "response1")
+        clock[0] = 10_000_000.0  # far in the future
+        assert cache.get("key1") == "response1"  # no ttl -> no expiry
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
