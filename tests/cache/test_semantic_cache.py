@@ -56,21 +56,14 @@ class TestSemanticCache:
         assert result == "Python is a programming language"
         assert cache.size() == 1
     
-    @pytest.mark.xfail(
-        strict=True,
-        reason="Phase 4 cache-quality: dense HashingVectorizer embeddings with "
-        "n_features=1000 collide for distinct single-token keys, so get() can "
-        "return a colliding neighbour's value at similarity 1.0 even when the "
-        "exact key is stored. Fix (exact-key fast-path, or larger/sparse "
-        "embeddings) is scoped to Phase 4.",
-    )
     def test_exact_key_returns_its_own_value_under_collisions(self):
         """An exactly-stored key must return ITS OWN value, not a neighbour's.
 
         Populates enough single-token keys that HashingVectorizer buckets
         collide (birthday paradox: 500 keys in n_features=1000), then requires
-        every stored key to retrieve its own value. Currently fails because
-        get() returns a colliding embedding's value at similarity 1.0.
+        every stored key to retrieve its own value. Guards the exact-key
+        fast-path in ``SemanticCache.get()`` (C-5 cache-quality fix): without it,
+        get() could return a colliding embedding's value at similarity 1.0.
         """
         cache = SemanticCache(max_size=500, similarity_threshold=0.85)
         for i in range(500):

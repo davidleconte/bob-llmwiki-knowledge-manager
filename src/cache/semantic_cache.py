@@ -21,8 +21,11 @@ from src.monitoring import get_logger, get_metrics_collector
 
 class SemanticCache(CacheInterface):
     """L2 cache for semantically similar prompts with version support.
-    
-    Uses TF-IDF embeddings and cosine similarity to find similar prompts.
+
+    Uses stateless HashingVectorizer embeddings and cosine similarity to find
+    similar prompts. An exact-key fast-path in ``get()`` guarantees an
+    exactly-stored key returns its own value (never a hash-colliding neighbour's);
+    the similarity search is the fallback for non-exact, semantically-close keys.
     Slower than exact cache but provides fuzzy matching. Supports versioning
     for cache evolution without breaking existing cached data.
     
@@ -159,83 +162,58 @@ class SemanticCache(CacheInterface):
         """
         start_time = time.time()
         target_version = version or self.VERSION
-        
+
         with self._lock:
+            # Exact-key fast-path (C-5 cache-quality fix): an exactly-stored key
+            # must return ITS OWN value. The stateless HashingVectorizer
+            # (n_features=1000) collides for distinct short keys, so a pure
+            # similarity search could hand back a colliding neighbour's value at
+            # cosine similarity 1.0. A dict hit on the versioned key is
+            # unambiguous, so short-circuit before embedding + similarity.
+            versioned_key = self._make_versioned_key(key, target_version)
+            if versioned_key in self.responses:
+                return self._finalize_hit(versioned_key, 1.0, start_time,
+                                          target_version, vocab_changed=False)
+
+            # Semantic fallback: embed the query and find the most similar key.
             # Check if query will cause vocabulary change
             will_change_vocab = key not in self.embedding_generator.corpus
-            
+
             # Generate embedding for query
             query_embedding = self.embedding_generator.generate(key)
-            
+
             # If vocabulary changed, regenerate all cached embeddings
             if will_change_vocab and len(self.embeddings) > 0:
                 self._regenerate_all_embeddings()
-            
+
             # Find most similar cached prompt (only within target version)
             best_match = None
             best_similarity = 0.0
-            
+
             for versioned_prompt, cached_embedding in self.embeddings.items():
                 # Only consider entries from target version
                 if self._extract_version(versioned_prompt) != target_version:
                     continue
-                
+
                 similarity = cosine_similarity_vectors(query_embedding, cached_embedding)
-                
+
                 if similarity > best_similarity:
                     best_similarity = similarity
                     best_match = versioned_prompt
-        
-            latency_ms = (time.time() - start_time) * 1000
-            
+
             # Check if best match exceeds threshold
             if best_match and best_similarity >= self.similarity_threshold:
-                # Enforce TTL: a stale match is expired -> evict and miss.
-                if (self.ttl_seconds is not None and best_match in self.entries and
-                        (self._clock() - self.entries[best_match].timestamp) > self.ttl_seconds):
-                    self._remove_entry(best_match)
-                    self._stats.record_miss()
-                    self._metrics.record_cache_miss("L2")
-                    self._logger.debug("cache_expired",
-                                     cache_level="L2",
-                                     version=target_version,
-                                     ttl_seconds=self.ttl_seconds)
-                    return None
+                return self._finalize_hit(best_match, best_similarity, start_time,
+                                          target_version,
+                                          vocab_changed=will_change_vocab)
 
-                # Update entry access stats
-                if best_match in self.entries:
-                    self.entries[best_match].access()
-                
-                # Record hit and similarity score
-                self._stats.record_hit()
-                self._similarity_scores.append(best_similarity)
-                
-                # Record metrics
-                self._metrics.record_cache_hit("L2", latency_ms)
-                
-                # Log hit
-                self._logger.debug("cache_hit",
-                                 cache_level="L2",
-                                 version=target_version,
-                                 similarity=best_similarity,
-                                 latency_ms=latency_ms,
-                                 vocab_changed=will_change_vocab)
-                
-                # Track cost savings if enabled
-                if self.track_costs and self._cost_tracker and best_match in self.entries:
-                    # Estimate tokens saved (from metadata if available)
-                    tokens_saved = self.entries[best_match].metadata.get('tokens', 0)
-                    if tokens_saved > 0:
-                        self._cost_tracker.record_cache_hit(tokens_saved)
-                
-                return self.responses[best_match]
-            
             # Record miss
+            latency_ms = (time.time() - start_time) * 1000
             self._stats.record_miss()
-            
+
             # Record metrics
             self._metrics.record_cache_miss("L2")
-            
+
             # Log miss
             self._logger.debug("cache_miss",
                              cache_level="L2",
@@ -244,9 +222,62 @@ class SemanticCache(CacheInterface):
                              threshold=self.similarity_threshold,
                              latency_ms=latency_ms,
                              vocab_changed=will_change_vocab)
-            
+
             return None
-    
+
+    def _finalize_hit(self, matched_key: str, similarity: float, start_time: float,
+                      target_version: str, vocab_changed: bool) -> Optional[str]:
+        """Enforce TTL on a candidate match, then record the hit (or a miss).
+
+        Shared by the exact-key fast-path and the similarity-search branch so the
+        TTL / stats / metrics / cost bookkeeping lives in one place. Must be
+        called with ``self._lock`` held.
+
+        Returns the cached value on a live hit, or ``None`` when the matched
+        entry has expired (recorded as a miss and evicted).
+        """
+        latency_ms = (time.time() - start_time) * 1000
+
+        # Enforce TTL: a stale match is expired -> evict and miss.
+        if (self.ttl_seconds is not None and matched_key in self.entries and
+                (self._clock() - self.entries[matched_key].timestamp) > self.ttl_seconds):
+            self._remove_entry(matched_key)
+            self._stats.record_miss()
+            self._metrics.record_cache_miss("L2")
+            self._logger.debug("cache_expired",
+                             cache_level="L2",
+                             version=target_version,
+                             ttl_seconds=self.ttl_seconds)
+            return None
+
+        # Update entry access stats
+        if matched_key in self.entries:
+            self.entries[matched_key].access()
+
+        # Record hit and similarity score
+        self._stats.record_hit()
+        self._similarity_scores.append(similarity)
+
+        # Record metrics
+        self._metrics.record_cache_hit("L2", latency_ms)
+
+        # Log hit
+        self._logger.debug("cache_hit",
+                         cache_level="L2",
+                         version=target_version,
+                         similarity=similarity,
+                         latency_ms=latency_ms,
+                         vocab_changed=vocab_changed)
+
+        # Track cost savings if enabled
+        if self.track_costs and self._cost_tracker and matched_key in self.entries:
+            # Estimate tokens saved (from metadata if available)
+            tokens_saved = self.entries[matched_key].metadata.get('tokens', 0)
+            if tokens_saved > 0:
+                self._cost_tracker.record_cache_hit(tokens_saved)
+
+        return self.responses[matched_key]
+
     def set(self, key: str, value: str, version: Optional[str] = None,
             metadata: Optional[Dict[str, Any]] = None) -> None:
         """Store response in cache with embedding.

@@ -20,15 +20,20 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 
 class EmbeddingGenerator:
-    """Generate embeddings for text using TF-IDF.
-    
-    This is a lightweight implementation suitable for semantic caching.
-    For production use with large corpora, consider using pre-trained
+    """Generate deterministic embeddings for text using a HashingVectorizer.
+
+    This is a lightweight, stateless implementation suitable for semantic
+    caching. For production use with large corpora, consider using pre-trained
     embedding models.
-    
+
+    Note: the fixed hashing feature space means distinct short texts can collide
+    to the same vector. Exact-match correctness therefore does not rely on the
+    embedding -- ``SemanticCache.get()`` has an exact-key fast-path; the
+    embedding is only used for approximate (fuzzy) matching.
+
     Attributes:
-        vectorizer: TF-IDF vectorizer
-        corpus: List of texts used to fit vectorizer
+        vectorizer: Stateless HashingVectorizer (no fit, no vocabulary)
+        corpus: List of texts recorded for logging / drift bookkeeping only
         embeddings_cache: Cache of generated embeddings
     """
     
