@@ -9,7 +9,8 @@ Last Updated: 2026-07-13
 - [Research](./research/) - Research notes and findings
 
 ## Recent Additions
-- 2026-07-13: [Bob Shell UI Integration](./guides/bob-shell-ui-integration.md) - Guide ⭐ NEW
+- 2026-07-13: [Cost Tracking Lessons Learned](./research/cost-tracking-lessons-learned.md) - Research ⭐ NEW
+- 2026-07-13: [Bob Shell UI Integration](./guides/bob-shell-ui-integration.md) - Guide
 - 2026-07-13: [Cost Tracking Guide](./guides/cost-tracking-guide.md) - Guide
 - 2026-07-13: [E2E Testing Setup Guide](./guides/e2e-testing-setup-guide.md) - Guide
 - 2026-07-13: [Repository Improvement Plan](./research/repository-improvement-plan.md) - Research
@@ -36,6 +37,7 @@ Last Updated: 2026-07-13
 - [Cache API Reference](./references/cache-api.md) - Complete API documentation for all cache classes, methods, and usage examples
 
 ### Research
+- [Cost Tracking Lessons Learned](./research/cost-tracking-lessons-learned.md) - Key lessons learned from implementing the comprehensive Bobcoin cost tracking system with KB savings estimation
 - [Performance Benchmarks](./research/performance-benchmarks.md) - Comprehensive performance analysis including latency, throughput, memory usage, and token savings measurements
 
 ---
