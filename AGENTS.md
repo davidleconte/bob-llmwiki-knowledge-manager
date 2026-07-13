@@ -41,7 +41,7 @@ A parallel sub-agent framework for repository analysis. **This is a separate sys
 **Purpose:** Parallel code repository analysis  
 **Technology:** Python 3.11+, ThreadPoolExecutor  
 **Complexity:** ~1,588 lines of Python code  
-**Status:** Experimental, 0% coverage, demo-only  
+**Status:** Experimental, orphaned (not wired into runtime), demo-only. Held at a ~54% per-package coverage floor (`scripts/check_coverage_by_package.py`); a Phase-4 rewrite is planned.  
 
 **Key Components:**
 - DelegationCoordinator (parallel execution)
@@ -219,7 +219,7 @@ src/
 
 - **Mock-based testing** - No external dependencies required
 - **Test-to-code ratio:** 1.14:1 (higher is better)
-- **Coverage target:** 80%+ (currently 87%)
+- **Coverage gate:** >=80%, enforced by `fail_under` in `pyproject.toml` (the single home for the number; see [`STATUS.md`](STATUS.md) for the current measured snapshot)
 - **Test categories:** Unit, integration, performance
 
 #### Code Quality Standards
@@ -354,11 +354,11 @@ See: `docs/knowledge-base/research/external-audit-2026-07-12.md` for complete au
 - **Note:** Original project, well-documented
 
 ### Token Optimization System
-- **Implementation:** Core system complete (304 tests passing, 35 skipped)
-- **Code Coverage:** 49% (measured, not fabricated)
-- **Code Quality:** Grade A (95/100)
-- **Known Issues:** All 7 critical bugs fixed, documentation drift remains
-- **Next:** Real-world validation, documentation reconciliation
+- **Implementation:** Core library in place; unified facade/CLI + config wiring are Phase 4
+- **Tests / Coverage:** see [`STATUS.md`](STATUS.md) (gate >=80%, enforced by `pyproject.toml`)
+- **Maturity:** Beta — Not Production Ready (≈D- vs the institutional bar; [`STATUS.md`](STATUS.md) is authoritative)
+- **Known Issues:** Phase-1 correctness bugs fixed (incl. the C-5 semantic-cache collision); Phase-4 integration gaps and residual documentation drift remain
+- **Next:** Phase 3 supply-chain hardening, then Phase 4 integration and Phase 5 real validation
 
 ### Delegation Module (Experimental)
 - **Status:** Functional but not integrated with core system

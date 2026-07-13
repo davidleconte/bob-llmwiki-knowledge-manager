@@ -1,3 +1,10 @@
+> ⚠️ **STALE — DO NOT USE AS CURRENT STATUS.** This handoff describes an
+> **unrelated** "HCD (Hyper Converged Database)" documentation project and quotes
+> metrics (e.g. "89.3% token savings", "87% test coverage") that do **not** apply
+> to this repository. It is retained only as a historical artifact. For actual
+> project status see [`STATUS.md`](../../../STATUS.md). This file is a candidate
+> for deletion.
+
 # Bob Shell Session Handoff - Week 18 Documentation Project
 
 ## Context Summary

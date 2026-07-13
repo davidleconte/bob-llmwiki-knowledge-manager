@@ -207,7 +207,7 @@ The scripts have already filed digested reports into `docs/knowledge-base/`, so 
 - "68.96% token savings" - from hardcoded simulation, not real optimizer
 - "95% CI [66.42, 71.51]" - fabricated precision (std=0.0)
 - "52/73/81% scaling" - artifact of capped baseline
-- **Status:** Awaiting real-world validation (see Phase 6 of remediation plan)
+- **Status:** Awaiting real-world validation (see Phase 5 of the remediation plan)
 
 **Expected Real-World Performance:**
 - First-time analysis: 5-15% savings (cold cache)
@@ -231,14 +231,13 @@ The scripts have already filed digested reports into `docs/knowledge-base/`, so 
 - Document templates and KB structure
 - Phase 1 automation scripts (8 scripts, production-ready)
 - Comprehensive documentation
-- 98.4% test pass rate (312/317 tests passing)
+- A green test suite behind an enforced coverage gate
 
 **Validated Claims:**
-- Token optimization framework functional (213 tests passing)
+- Token optimization library functional (unit + e2e tested)
 - Caching system tested and working (E2E validated)
 - Script-based analysis reduces manual effort by 70-80%
-- **Test pass rate:** 98.4% (312/317 tests) — Note: This is pass rate, not code coverage
-- **Code coverage:** 49.4% measured (delegation 0%, monitoring 11–42%; see [STATUS.md](STATUS.md) · [Institutional Audit 2026-07-13](docs/knowledge-base/research/audit-2026-07-13-institutional.md))
+- **Tests & coverage:** the coverage gate (`>=80%`, `fail_under` in `pyproject.toml`) is the single home for the number; see [STATUS.md](STATUS.md) for the current measured snapshot and [Institutional Audit 2026-07-13](docs/knowledge-base/research/audit-2026-07-13-institutional.md). Test *pass rate* is not the same as *code coverage* — do not conflate them.
 
 ### 🧪 Experimental / Needs Validation
 

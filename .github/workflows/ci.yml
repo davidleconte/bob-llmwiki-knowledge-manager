@@ -42,6 +42,10 @@ jobs:
         run: pytest --cov=src --cov-report=json:coverage.json --cov-report=term-missing
       - name: Enforce per-package coverage floors
         run: python scripts/check_coverage_by_package.py coverage.json
+      - name: Enforce status/coverage "one home per value" consistency
+        # Fails if a live status doc cites a coverage gate that disagrees with
+        # pyproject fail_under, or reintroduces a retracted maturity claim.
+        run: python scripts/check_status_consistency.py
 
   e2e:
     name: e2e (RUN_E2E_TESTS)
