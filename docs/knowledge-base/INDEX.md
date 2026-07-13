@@ -37,6 +37,7 @@ Last Updated: 2026-07-13
 - [Audit Remediation Status](./guides/audit-remediation-status.md) - Current status of audit remediation with Phases 1-4 complete, monitoring integrated, all critical bugs fixed
 - [Phase 5 Documentation Reconciliation Complete](./guides/phase5-documentation-reconciliation-complete.md) - Complete report on Phase 5: moved deprecated docs, created UNIFIED_ARCHITECTURE.md, fixed all cross-references
 - [Phase 6 Real-World Validation Plan](./guides/phase6-real-world-validation-plan.md) - Comprehensive 10-14 day execution plan for real-world validation with LLM APIs, replacing fabricated metrics with real measurements
+- [Real-Time Savings Measurement Guide](./guides/real-time-savings-measurement-guide.md) - Complete guide for measuring actual token savings in real-time, bridging Bob Shell's native tracking with optimization tools using estimation, shadow, and integration modes
 - [Bob Shell UI Integration](./guides/bob-shell-ui-integration.md) - UI integration specification for real-time cost tracking indicator in Bob Shell chat interface
 - [Cost Tracking Guide](./guides/cost-tracking-guide.md) - Comprehensive guide for Bobcoin cost tracking, budget management, and ROI monitoring
 - [E2E Testing Setup Guide](./guides/e2e-testing-setup-guide.md) - Complete guide for setting up and running E2E tests, including common API compatibility issues and troubleshooting
