@@ -16,6 +16,7 @@ from src.truncation.strategies import (
     SlidingWindowStrategy,
 )
 from src.monitoring import get_logger, get_metrics_collector
+from src.pricing import DEFAULT_MODEL
 
 
 class Truncator:
@@ -30,7 +31,7 @@ class Truncator:
         strategies: Available truncation strategies
     """
     
-    def __init__(self, model: str = "gpt-4", default_strategy: str = "semantic"):
+    def __init__(self, model: str = DEFAULT_MODEL, default_strategy: str = "semantic"):
         """Initialize truncator.
         
         Args:

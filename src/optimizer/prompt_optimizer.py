@@ -14,6 +14,7 @@ import time
 from src.optimizer.token_counter import TokenCounter
 from src.cache.multi_level_cache import MultiLevelCache
 from src.monitoring import get_logger, get_metrics_collector
+from src.pricing import DEFAULT_MODEL
 
 
 class PromptOptimizer:
@@ -33,7 +34,7 @@ class PromptOptimizer:
     """
     
     def __init__(self,
-                 model: str = "gpt-4",
+                 model: str = DEFAULT_MODEL,
                  target_savings: float = 0.893,
                  min_quality: float = 0.918,
                  use_cache: bool = True,

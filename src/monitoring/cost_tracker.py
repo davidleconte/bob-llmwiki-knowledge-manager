@@ -12,11 +12,12 @@ from typing import Any, Dict, List, Optional, Tuple
 from threading import Lock
 from collections import defaultdict, deque
 
+from src import pricing
 
-# Bobcoin pricing model (tokens per Bobcoin)
-# Based on typical LLM pricing: ~$0.01 per 1K tokens = 1 Bobcoin per 1K tokens
-TOKENS_PER_BOBCOIN = 1000
-DEFAULT_BUDGET_BOBCOINS = 100.0
+# Pricing/Bobcoin constants have one home (src.pricing). Re-exported here so
+# this module's public API is unchanged.
+TOKENS_PER_BOBCOIN = pricing.TOKENS_PER_BOBCOIN
+DEFAULT_BUDGET_BOBCOINS = pricing.DEFAULT_BUDGET_BOBCOINS
 
 
 @dataclass
@@ -481,7 +482,7 @@ def tokens_to_bobcoins(tokens: int) -> float:
     Returns:
         Equivalent Bobcoins
     """
-    return tokens / TOKENS_PER_BOBCOIN
+    return pricing.tokens_to_bobcoins(tokens)
 
 
 def bobcoins_to_tokens(bobcoins: float) -> int:
@@ -494,4 +495,4 @@ def bobcoins_to_tokens(bobcoins: float) -> int:
     Returns:
         Equivalent tokens
     """
-    return int(bobcoins * TOKENS_PER_BOBCOIN)
+    return pricing.bobcoins_to_tokens(bobcoins)

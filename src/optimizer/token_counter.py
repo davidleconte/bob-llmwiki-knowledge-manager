@@ -8,6 +8,8 @@ from typing import Optional, Dict, Any
 import re
 import time
 
+from src.pricing import DEFAULT_MODEL, usd_cost
+
 
 class TokenCounter:
     """Token counter for LLM prompts.
@@ -22,9 +24,9 @@ class TokenCounter:
         track_costs: Whether to track costs with CostTracker
     """
     
-    def __init__(self, model: str = "gpt-4", track_costs: bool = False):
+    def __init__(self, model: str = DEFAULT_MODEL, track_costs: bool = False):
         """Initialize token counter.
-        
+
         Args:
             model: Model name (e.g., "gpt-4", "gpt-3.5-turbo")
             track_costs: Whether to track costs with CostTracker
@@ -137,17 +139,9 @@ class TokenCounter:
             Estimated cost in USD
         """
         model = model or self.model
-        
-        # Pricing per 1K tokens (as of 2024)
-        pricing = {
-            "gpt-4": 0.03,
-            "gpt-4-32k": 0.06,
-            "gpt-3.5-turbo": 0.002,
-            "gpt-3.5-turbo-16k": 0.004,
-        }
-        
-        rate = pricing.get(model, 0.03)  # Default to GPT-4 pricing
-        return (tokens / 1000) * rate
+        # Delegate to the single pricing source (src.pricing) so USD rates and
+        # the default-model fallback have exactly one home.
+        return usd_cost(tokens, model)
     
     def get_stats(self, text: str) -> Dict[str, Any]:
         """Get comprehensive token statistics.
