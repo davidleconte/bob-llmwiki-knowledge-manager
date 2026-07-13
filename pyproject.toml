@@ -38,6 +38,7 @@ dev = [
     "pytest-mock>=3.10.0",
     "pytest-timeout>=2.1.0",
     "pytest-benchmark>=4.0.0",
+    "hypothesis>=6.100.0",
 ]
 monitoring = [
     "psutil>=5.9.0",
@@ -94,10 +95,12 @@ omit = [
 # Single home for the coverage gate. Any `pytest --cov=src` run (CI + the
 # documented full check) fails if total coverage drops below this floor.
 # History: 49.4% pre-Phase-1 → 72% at the Phase 2 config consolidation → 74.5%
-# after the Phase 2 triage (stale suite deleted, real bugs fixed, suite green).
-# Floor ratcheted 70 → 73 to lock in the gain with a small margin for
-# optional-dependency skip variance (matplotlib/psutil), en route to the 80% target.
-fail_under = 73
+# after the Phase 2 triage → 82.5% after Phase 2 hardening (property tests +
+# cost_tracker/cost_reporting driven 34%/11% → 100%, plus the RLock deadlock fix).
+# Floor ratcheted 73 → 80 (the plan's target) with ~2.5pt margin for
+# optional-dependency skip variance (matplotlib/psutil). Per-package floors
+# (monitoring ≥70, delegation ≥54 staged) live in scripts/check_coverage_by_package.py.
+fail_under = 80
 precision = 1
 show_missing = true
 exclude_lines = [

@@ -9,7 +9,7 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from threading import Lock
+from threading import RLock
 from collections import defaultdict, deque
 
 from src import pricing
@@ -175,7 +175,10 @@ class CostTracker:
             budget_bobcoins: Total budget in Bobcoins
             alert_thresholds: List of alert thresholds (e.g., [50, 75, 90])
         """
-        self._lock = Lock()
+        # RLock (re-entrant): reset()/set_budget() hold the lock and then call
+        # reset_alerts(), which re-acquires it. A plain Lock self-deadlocks there
+        # — the same C-8b bug already fixed for MetricsCollector (metrics.py:213).
+        self._lock = RLock()
         self.budget_bobcoins = budget_bobcoins
         self.metrics = CostMetrics()
         
