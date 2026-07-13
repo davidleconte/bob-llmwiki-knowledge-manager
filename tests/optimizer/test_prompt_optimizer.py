@@ -141,8 +141,32 @@ More content"""
         # Second optimization (should use cache)
         result2 = optimizer.optimize(prompt)
         
-        # Results should be similar
+        # Results should be identical (optimization is deterministic)
         assert result1["optimized"] == result2["optimized"]
+        # ...and the SECOND call must be served from the exact cache, not recomputed.
+        assert result2.get("from_cache") is True
+        assert optimizer.cache.hit_rate() > 0
+
+    def test_cache_actually_hits_on_repeat(self):
+        """Regression: the exact cache must HIT on a repeated prompt.
+
+        Guards the write-only-cache bug where PromptOptimizer._cache_result
+        passed the metadata dict into ExactCache.set()'s positional ``version``
+        slot, so set() stored under "{metadata}:{prompt}" while get() looked up
+        "v1:{prompt}" -- the keys never matched and the cache never hit.
+        """
+        optimizer = PromptOptimizer(use_cache=True)
+        prompt = "Summarize the following text for me please."
+
+        first = optimizer.optimize(prompt)
+        assert first.get("from_cache") is not True  # first call computes fresh
+
+        second = optimizer.optimize(prompt)
+        assert second.get("from_cache") is True      # second call served from cache
+        assert optimizer.cache.hit_rate() > 0         # a real hit was recorded
+        # cache hit returns the same optimized text and restored metadata
+        assert second["optimized"] == first["optimized"]
+        assert second["optimized_tokens"] == first["optimized_tokens"]
     
     def test_statistics_tracking(self):
         """Test statistics tracking."""
