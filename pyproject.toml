@@ -50,10 +50,11 @@ monitoring = [
 bob-optimize = "src.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/yourusername/bob-llmwiki-knowledge-manager"
-Documentation = "https://github.com/yourusername/bob-llmwiki-knowledge-manager/tree/main/docs"
-Repository = "https://github.com/yourusername/bob-llmwiki-knowledge-manager"
-Issues = "https://github.com/yourusername/bob-llmwiki-knowledge-manager/issues"
+Homepage = "https://github.com/davidleconte/bob-llmwiki-knowledge-manager"
+Documentation = "https://github.com/davidleconte/bob-llmwiki-knowledge-manager/tree/main/docs"
+Repository = "https://github.com/davidleconte/bob-llmwiki-knowledge-manager"
+Issues = "https://github.com/davidleconte/bob-llmwiki-knowledge-manager/issues"
+Security = "https://github.com/davidleconte/bob-llmwiki-knowledge-manager/security/policy"
 
 [tool.setuptools]
 packages = ["src"]
