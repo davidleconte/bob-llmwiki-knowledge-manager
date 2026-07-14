@@ -7,7 +7,7 @@ name = "bob-llmwiki-knowledge-manager"
 version = "1.0.0"
 description = "Bob Shell Knowledge Manager - LLM-Wiki pattern implementation for IBM Bob Shell"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 license = {text = "MIT"}
 authors = [
     {name = "David Leconte"}
@@ -18,9 +18,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
@@ -40,6 +37,8 @@ dev = [
     "pytest-benchmark>=4.0.0",
     "hypothesis>=6.100.0",
     "PyYAML>=6.0",
+    "ruff>=0.6.0",
+    "mypy>=1.11.0",
 ]
 monitoring = [
     "psutil>=5.9.0",
@@ -114,3 +113,41 @@ exclude_lines = [
     "class .*\\bProtocol\\):",
     "@(abc\\.)?abstractmethod",
 ]
+
+[tool.ruff]
+# Single home for lint + format config. CI runs `ruff check` and
+# `ruff format --check`; both read from here.
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+# Conservative, near-fully-autofixable baseline (pyflakes + pycodestyle + isort).
+# The formatter owns line length, so E501 is disabled here. Stricter families
+# (B, UP, SIM, ...) can be ratcheted in later once this baseline is green.
+select = ["E", "F", "W", "I"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests legitimately bind intermediate values for readability/asserts elsewhere,
+# bootstrap sys.path before importing, and import optional deps to probe them.
+"tests/**" = ["F841"]
+"tests/conftest.py" = ["E402"]
+"tests/monitoring/test_health.py" = ["F401"]
+# These e2e tests embed prompt fixtures whose trailing/blank-line whitespace is
+# intentional string content; the formatter preserves it, so silence the linter.
+"tests/e2e/test_real_llm.py" = ["W291", "W293"]
+"tests/e2e/test_cost_tracking.py" = ["W291", "W293"]
+
+[tool.mypy]
+# First type-gate: non-strict baseline, ratchet toward strict later. Runs once on
+# 3.12 in CI (the numpy stubs use 3.12 syntax, so an older --python-version can't
+# parse them); the supported *runtime* floor is still 3.11.
+python_version = "3.12"
+files = ["src"]
+# src/delegation is the orphaned, staged subsystem (see
+# scripts/check_coverage_by_package.py) slated for a Phase-4 rewrite; typing it
+# now would be as much wasted effort as covering it. Re-include in Phase 4.
+exclude = "^src/delegation/"
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true

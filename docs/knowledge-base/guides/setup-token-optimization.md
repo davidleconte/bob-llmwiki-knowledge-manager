@@ -46,8 +46,8 @@ You should see `(venv)` in your terminal prompt.
 Install required Python packages:
 
 ```bash
-# Install core dependencies
-pip install -r requirements.txt
+# Install the package with dev + monitoring extras (single home: pyproject.toml)
+pip install -e ".[dev,monitoring]"
 ```
 
 **Core Dependencies**:
@@ -327,7 +327,7 @@ The system gracefully degrades to character-based counting if tiktoken is unavai
 ```bash
 # Reinstall dependencies
 pip uninstall -y numpy scikit-learn tiktoken
-pip install -r requirements.txt
+pip install -e ".[dev,monitoring]"
 
 # Clear Python cache
 find . -type d -name "__pycache__" -exec rm -r {} +
@@ -402,7 +402,7 @@ After successful setup:
 
 ## References
 - [System Architecture](../../architecture/ACTUAL_SYSTEM_ARCHITECTURE.md) - Technical architecture
-- [Requirements File](../../../requirements.txt) - Complete dependency list
+- [pyproject.toml](../../../pyproject.toml) - Complete dependency list (single home)
 - [Test Suite](../../../tests/) - All test files
 
 ---

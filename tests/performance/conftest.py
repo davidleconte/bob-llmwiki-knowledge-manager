@@ -20,24 +20,18 @@ def benchmark_config():
 def performance_thresholds():
     """Performance thresholds for validation."""
     return {
-        "l1_lookup_ms": 1.0,      # L1 cache lookup <1ms
-        "l2_lookup_ms": 100.0,    # L2 cache lookup <100ms
-        "token_count_ms": 10.0,   # Token counting <10ms per 1K tokens
+        "l1_lookup_ms": 1.0,  # L1 cache lookup <1ms
+        "l2_lookup_ms": 100.0,  # L2 cache lookup <100ms
+        "token_count_ms": 10.0,  # Token counting <10ms per 1K tokens
         "optimization_ms": 50.0,  # Optimization <50ms
-        "pipeline_ms": 100.0,     # Full pipeline <100ms
+        "pipeline_ms": 100.0,  # Full pipeline <100ms
     }
 
 
 def pytest_configure(config):
     """Configure pytest for performance tests."""
-    config.addinivalue_line(
-        "markers",
-        "benchmark: mark test as a performance benchmark"
-    )
-    config.addinivalue_line(
-        "markers",
-        "slow: mark test as slow running"
-    )
+    config.addinivalue_line("markers", "benchmark: mark test as a performance benchmark")
+    config.addinivalue_line("markers", "slow: mark test as slow running")
 
 
 def pytest_benchmark_update_json(config, benchmarks, output_json):
@@ -51,5 +45,5 @@ def pytest_benchmark_update_json(config, benchmarks, output_json):
             "token_counting": "<10ms per 1K tokens",
             "optimization": "<50ms",
             "pipeline": "<100ms (p95)",
-        }
+        },
     }

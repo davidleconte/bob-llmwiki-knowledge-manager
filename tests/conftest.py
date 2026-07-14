@@ -43,10 +43,12 @@ def _reset_monitoring_singletons():
     masking bugs. Reset them before and after each test so each starts clean.
     Lazy imports keep a monitoring import error from breaking unrelated tests.
     """
+
     def _reset():
-        from src.monitoring.metrics import reset_metrics
-        from src.monitoring.health import reset_health_checker
         from src.monitoring.cost_tracker import reset_cost_tracker
+        from src.monitoring.health import reset_health_checker
+        from src.monitoring.metrics import reset_metrics
+
         reset_metrics()
         reset_health_checker()
         reset_cost_tracker()

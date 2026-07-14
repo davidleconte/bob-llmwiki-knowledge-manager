@@ -12,8 +12,8 @@ Target metrics:
 
 from src.cache.base import CacheEntry, CacheInterface
 from src.cache.exact_cache import ExactCache
-from src.cache.semantic_cache import SemanticCache
 from src.cache.multi_level_cache import MultiLevelCache
+from src.cache.semantic_cache import SemanticCache
 
 __all__ = [
     "CacheEntry",

@@ -54,9 +54,11 @@ def main(argv: list[str]) -> int:
         with open(report_path, encoding="utf-8") as fh:
             report = json.load(fh)
     except FileNotFoundError:
-        print(f"ERROR: coverage report not found: {report_path}\n"
-              f"Generate it with: pytest --cov=src --cov-report=json:{report_path}",
-              file=sys.stderr)
+        print(
+            f"ERROR: coverage report not found: {report_path}\n"
+            f"Generate it with: pytest --cov=src --cov-report=json:{report_path}",
+            file=sys.stderr,
+        )
         return 2
 
     failures = []
@@ -71,12 +73,15 @@ def main(argv: list[str]) -> int:
         status = "OK " if pct >= floor else "FAIL"
         if pct < floor:
             failures.append(package)
-        print(f"  {status} {package}: {pct:5.1f}%  (floor {floor:.0f}%, "
-              f"{covered}/{statements} stmts)")
+        print(
+            f"  {status} {package}: {pct:5.1f}%  (floor {floor:.0f}%, {covered}/{statements} stmts)"
+        )
 
     if failures:
-        print(f"\nFAILED: {len(failures)} package(s) below floor: "
-              f"{', '.join(sorted(failures))}", file=sys.stderr)
+        print(
+            f"\nFAILED: {len(failures)} package(s) below floor: {', '.join(sorted(failures))}",
+            file=sys.stderr,
+        )
         return 1
     print("\nAll per-package coverage floors satisfied.")
     return 0

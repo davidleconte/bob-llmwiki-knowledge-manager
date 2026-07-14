@@ -2,21 +2,23 @@
 
 **Last Updated:** 2026-07-13  
 **Test Framework:** pytest  
-**Python Version:** 3.8+
+**Python Version:** 3.11+ (CI runs 3.11 and 3.12; see `pyproject.toml`)
 
 ---
 
 ## Test Statistics
 
+Snapshot from CI, 2026-07-13 (point-in-time; the authoritative status is
+[`STATUS.md`](../STATUS.md)):
+
 ```
-Total Tests:    317
-Passing:        312 (98.4%)
-Skipped:        5 (1.6%)
-Failing:        0 (0%)
-Execution Time: ~1.8s
+Total Tests:    676 (641 passed, 23 skipped, 12 xfailed)
+Coverage:       82.4%  (gate: >=80%, enforced by pyproject.toml fail_under)
 ```
 
-**Status:** ✅ All implemented features fully tested
+The `xfailed` tests are strict-xfail markers for known gaps (config not yet wired
+to runtime, etc.), so they fail loudly if they start passing. Skips are the
+flag-gated e2e/real-LLM suites and optional-dependency smoke tests.
 
 ---
 
@@ -46,7 +48,7 @@ tests/
 └── monitoring/                 # Monitoring tests (28 tests)
     ├── test_logger.py
     ├── test_metrics.py
-    └── test_health.py          # Contains 5 skipped tests
+    └── test_health.py          # Health checker tests
 ```
 
 ### Test Categories
@@ -56,7 +58,7 @@ tests/
 | Cache (L1/L2) | 72 | ✅ 100% Pass | Excellent |
 | Optimizer | 38 | ✅ 100% Pass | Excellent |
 | Truncation | 32 | ✅ 100% Pass | Excellent |
-| Monitoring | 28 | ⚠️ 82% Pass (5 skipped) | Good |
+| Monitoring | 28 | ✅ Pass | Good |
 | Integration | 18 | ✅ 100% Pass | Excellent |
 | Performance | 15 | ✅ 100% Pass | Excellent |
 | Batch | 15 | ✅ 100% Pass | Excellent |
@@ -209,22 +211,16 @@ python3 -m pytest tests/monitoring/ -v
 
 ## Test Coverage
 
-### Overall Coverage: 98.4%
+Coverage is enforced by a single gate — `fail_under` in
+`pyproject.toml` (`[tool.coverage.report]`) — **not** by hand-maintained numbers
+in this file. Per-package floors (e.g. `monitoring`, `delegation`) live in
+`scripts/check_coverage_by_package.py`. Measured total was **82.4%** as of
+2026-07-13; regenerate with:
 
-**By Component:**
-
-| Component | Lines | Covered | Coverage |
-|-----------|-------|---------|----------|
-| cache/ | 450 | 445 | 98.9% |
-| optimizer/ | 280 | 275 | 98.2% |
-| truncation/ | 320 | 315 | 98.4% |
-| monitoring/ | 250 | 240 | 96.0% |
-| **Total** | **1,300** | **1,275** | **98.1%** |
-
-**Uncovered Lines:**
-- Error handling edge cases (5 lines)
-- Optional feature branches (10 lines)
-- Debug logging statements (10 lines)
+```bash
+pytest --cov=src --cov-report=term-missing
+python scripts/check_coverage_by_package.py coverage.json
+```
 
 ---
 
@@ -237,7 +233,7 @@ python3 -m pytest tests/monitoring/ -v
 **Characteristics:**
 - Use mocks for dependencies
 - Fast execution (<1s)
-- High coverage (98%+)
+- Contribute to the enforced coverage gate (see Test Coverage above)
 
 **Example:**
 ```python
@@ -359,7 +355,7 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: '3.11'
-      - run: pip install -r requirements.txt
+      - run: pip install -e ".[dev,monitoring]"
       - run: pytest tests/ -v --cov=src
 ```
 
@@ -367,7 +363,7 @@ jobs:
 
 **Minimum:**
 - All tests must pass (excluding intentional skips)
-- Coverage must be >95%
+- Coverage must stay at or above the gate (`fail_under` in `pyproject.toml`, currently >=80%), and per-package floors (`scripts/check_coverage_by_package.py`) must hold
 - No new skipped tests without justification
 
 **Recommended:**
@@ -501,10 +497,10 @@ def test_optional_feature(self):
    - Or convert to integration tests
    - Remove current skips
 
-3. **Property-Based Testing** (P3)
-   - Add `hypothesis` for property tests
-   - Test cache invariants
-   - Test optimization properties
+3. **Property-Based Testing** ✅ DONE
+   - `hypothesis` is wired in (see `tests/property/`)
+   - Cache round-trip invariant: `tests/property/test_cache_roundtrip.py`
+   - Truncation budget invariant: `tests/property/test_truncation.py`
 
 4. **Load Testing** (P3)
    - Add `locust` for load tests
