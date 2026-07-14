@@ -98,11 +98,8 @@ bob --chat-mode=knowledge-manager
 #### Installation
 
 ```bash
-# Install Python dependencies
-pip install -r requirements.txt
-
-# Optional: Install psutil for system monitoring
-pip install psutil
+# Install the package with dev + monitoring extras (single home: pyproject.toml)
+pip install -e ".[dev,monitoring]"
 ```
 
 #### Running Tests

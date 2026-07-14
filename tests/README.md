@@ -2,7 +2,7 @@
 
 **Last Updated:** 2026-07-13  
 **Test Framework:** pytest  
-**Python Version:** 3.8+
+**Python Version:** 3.11+ (CI runs 3.11 and 3.12; see `pyproject.toml`)
 
 ---
 
@@ -355,7 +355,7 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: '3.11'
-      - run: pip install -r requirements.txt
+      - run: pip install -e ".[dev,monitoring]"
       - run: pytest tests/ -v --cov=src
 ```
 

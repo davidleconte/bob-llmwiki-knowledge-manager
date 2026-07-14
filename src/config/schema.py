@@ -4,7 +4,7 @@ Defines typed configuration structures for all system components.
 """
 
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 
 @dataclass
@@ -46,7 +46,7 @@ class OptimizerConfig:
     max_tokens: int = 4096
     target_reduction: float = 0.3
     min_quality_score: float = 0.8
-    strategies: List[str] = None
+    strategies: Optional[List[str]] = None
     
     def __post_init__(self):
         """Initialize default strategies if not provided."""

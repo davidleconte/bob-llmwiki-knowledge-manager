@@ -24,12 +24,12 @@ class CacheEntry:
     response: str
     metadata: Dict[str, Any]
     timestamp: float
-    last_access: float = None
+    last_access: float = 0.0
     access_count: int = 0
-    
+
     def __post_init__(self):
-        """Initialize last_access if not set."""
-        if self.last_access is None:
+        """Default last_access to the creation timestamp when unset."""
+        if not self.last_access:
             self.last_access = self.timestamp
     
     def access(self) -> None:

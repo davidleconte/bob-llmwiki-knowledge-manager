@@ -347,7 +347,7 @@ class SlidingWindowStrategy(TruncationStrategy):
         lines = text.splitlines()
         
         # Start from the end (most recent)
-        result = []
+        result: List[str] = []
         total_tokens = 0
         
         for line in reversed(lines):
