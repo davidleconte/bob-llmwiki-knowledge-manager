@@ -6,8 +6,9 @@ name: CI
 # regression trending, and a CycloneDX SBOM + dependency audit. The coverage gate,
 # per-package floors, and the status "one home per value" validator run in `test`;
 # the layering gate, the manifest-backed-savings guard, the generic
-# "one home per value" value-homes validator, and the API-doc freshness check
-# run in `lint`.
+# "one home per value" value-homes validator, the API-doc freshness check, and the
+# Phase-7 security gates (community-health completeness + bandit SAST at medium+)
+# run in `lint`. Dependabot (.github/dependabot.yml) keeps deps + actions patched.
 
 on:
   push:
@@ -87,6 +88,17 @@ jobs:
         # AST-based generator (stdlib only); fails if docs/api/ drifts from the
         # src/ docstrings. Regenerate with `python scripts/generate_api_docs.py`.
         run: python scripts/generate_api_docs.py --check
+      - name: Enforce community-health set present (governance completeness)
+        # Curated gate (stdlib only): fails if a required governance file
+        # (SECURITY.md, CONTRIBUTING, CODE_OF_CONDUCT, GOVERNANCE, SUPPORT,
+        # CODEOWNERS, THREAT_MODEL, issue/PR templates) is missing or a stub.
+        run: python scripts/check_community_health.py
+      - name: Install bandit (SAST)
+        run: pip install "bandit>=1.7"
+      - name: Bandit security scan (src/, medium+ severity)
+        # SAST gate at medium+ severity (config + benign-low-finding rationale in
+        # pyproject [tool.bandit]); clean today. A new medium+ finding blocks CI.
+        run: bandit -r src/ -ll
 
   typecheck:
     name: typecheck (mypy)

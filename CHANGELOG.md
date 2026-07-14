@@ -71,7 +71,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The repository grew a second system alongside the Bash KB manager: a Python
 **token-optimization library** (~3,500 lines) plus the phased audit remediation
-(Phases 0–6) that hardened it. None of this is cut as a release yet — it is
+(Phases 0–7) that hardened it. None of this is cut as a release yet — it is
 **Beta, Not Production Ready** (see [`STATUS.md`](STATUS.md)).
 
 ### Added
@@ -92,6 +92,10 @@ The repository grew a second system alongside the Bash KB manager: a Python
 - **Documentation** (Phase 6): a single authoritative architecture doc, a
   Diátaxis navigation spine with a getting-started tutorial, complete
   auto-generated API reference with a CI freshness check, and this changelog.
+- **Governance & community-health** (Phase 7): `SECURITY.md` (disclosure policy),
+  `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `GOVERNANCE.md`, `SUPPORT.md`,
+  `.github/CODEOWNERS`, and issue/PR templates, kept present by a
+  `check_community_health.py` CI gate.
 
 ### Changed
 - **Savings are measured, not asserted.** Optimizer compression measures ~20%
@@ -106,14 +110,30 @@ The repository grew a second system alongside the Bash KB manager: a Python
 - Correctness bugs C1–C7 (Phase 1), including the L2 semantic-cache colliding-key
   wrong-content bug (C-5) and an RLock re-entrancy deadlock; single pricing home.
 
+### Security
+- **STRIDE threat model** (Phase 7): [`docs/security/THREAT_MODEL.md`](docs/security/THREAT_MODEL.md)
+  — a real, code-grounded analysis (trust boundaries, honest N/A calls, a
+  residual-risk register) that supersedes the fabricated ADR-012 security stack.
+- **Path-traversal containment** (Phase 7): the `src/tools` read helpers
+  (`ComponentAnalyzer`, `KnowledgeBaseQuery`, `BatchFileReader`) now reject `../`
+  and absolute-path escapes via `src/tools/safe_paths.resolve_within`, with a
+  regression test in `tests/tools/`. Fixes the one concrete Information-Disclosure
+  finding in the threat model.
+- **Security CI**: bandit SAST (medium+, blocking) and Dependabot (weekly
+  `pip` + `github-actions`), alongside the existing CycloneDX SBOM + `pip-audit`.
+
 ### Removed
 - **The fabricated "68.96% / VALIDATED" savings figure is retracted.** The
   simulation that produced it never invoked the optimizer; Phase 5 replaced it
   with the real harness and reduced the old validator to a thin shim. See
   [`evaluation/VALIDATION_DISCLAIMER.md`](evaluation/VALIDATION_DISCLAIMER.md).
+- **The fabricated security architecture in ADR-012 is retracted** (Phase 7). It
+  documented an auth / AES-256 / RBAC / rate-limit / audit-log stack and asserted
+  it had passed a security audit with zero incidents — none of which was ever
+  implemented. The ADR is kept as audit trail with a retraction banner;
+  `docs/security/THREAT_MODEL.md` is now canonical.
 
 ### Planned
-- Phase 7 — Governance: `SECURITY.md`, a STRIDE threat model, the community-health set.
 - Phase 8 — Sign-off: an independent adversarial re-audit.
 
 ---

@@ -77,14 +77,17 @@ Architecture Decision Records document important architectural decisions made du
 - Status: ✅ Accepted
 
 **[012: Security Model](012-security-model.md)**
-- Decision: Defense-in-depth security approach
+- Decision: Defense-in-depth security approach (never implemented)
 - Rationale: Comprehensive protection, compliance
-- Status: ✅ Accepted
+- Status: ⛔ Superseded (2026-07-14) — its implementation/validation claims were
+  fabricated; retracted in Phase 7. Canonical security docs:
+  [STRIDE Threat Model](../security/THREAT_MODEL.md) and
+  [SECURITY.md](../../SECURITY.md).
 
 ## ADR Statistics
 
 - **Total ADRs:** 12
-- **Status:** All accepted
+- **Status:** 11 accepted, 1 superseded (012)
 - **Coverage:** Technology, Architecture, Algorithms, Quality
 - **Lines:** ~4,747 total
 

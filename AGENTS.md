@@ -354,8 +354,8 @@ See: `docs/knowledge-base/research/external-audit-2026-07-12.md` for complete au
 - **Implementation:** Cache/optimizer/truncation/monitoring composed behind a unified `TokenOptimizer` facade + `bob-optimize` CLI (`python -m src`); config is wired to the runtime (Phase 4, done)
 - **Tests / Coverage:** see [`STATUS.md`](STATUS.md) (gate >=80%, enforced by `pyproject.toml`)
 - **Maturity:** Beta — Not Production Ready (≈D- vs the institutional bar; [`STATUS.md`](STATUS.md) is authoritative)
-- **Known Issues:** Phases 0–6 done (correctness incl. the C-5 collision, coverage gate, supply-chain, integration, real manifest-backed validation, and the documentation layer — one architecture doc, Diátaxis spine, drift-checked API docs, and the generic "one home per value" validator). The savings headline is measured (~20% optimizer compression, N=183; see `evaluation/results/validation-2026-07-14/`)
-- **Next:** Phase 7 — Governance (`SECURITY.md`, STRIDE threat model, community-health set)
+- **Known Issues:** Phases 0–7 done (correctness incl. the C-5 collision, coverage gate, supply-chain, integration, real manifest-backed validation, the documentation layer — one architecture doc, Diátaxis spine, drift-checked API docs, and the generic "one home per value" validator — and governance: `SECURITY.md`, a STRIDE threat model that supersedes the fabricated ADR-012, the community-health set, path-traversal containment in `src/tools/`, and bandit + Dependabot security CI). The savings headline is measured (~20% optimizer compression, N=183; see `evaluation/results/validation-2026-07-14/`)
+- **Next:** Phase 8 — Sign-off (independent adversarial re-audit; each dimension A/A+)
 
 ### Delegation Module (Experimental)
 - **Status:** Functional but intentionally not integrated (separate problem domain); layering-clean since Phase 4 (shared utils moved to `src/tools/`)

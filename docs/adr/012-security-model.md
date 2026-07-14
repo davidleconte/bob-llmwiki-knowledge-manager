@@ -1,8 +1,27 @@
 # ADR-012: Security Model
 
-**Status:** ✅ Accepted  
-**Date:** 2026-07-12  
-**Deciders:** Architecture Team, Security Engineer  
+> ## ⚠️ DEPRECATED / SUPERSEDED — retraction notice (2026-07-14, Phase 7)
+>
+> **This ADR describes a security stack that was never built.** The
+> Implementation, Rationale, and Validation sections below present an
+> authentication / AES-256 encryption / RBAC / rate-limiting / audit-logging
+> system — and assert it passed penetration testing with "0 security incidents"
+> and is "GDPR/SOC 2/HIPAA/PCI DSS ready." **None of that code exists in
+> `src/`.** There is no authentication, no encryption, no rate limiter, no
+> audit log, and no network/TLS layer anywhere in the codebase. Those claims
+> are retracted as fabricated, the same way the 68.96% savings claim was
+> retracted in Phase 0.
+>
+> This file is **kept only as an audit-trail record** of what was once claimed.
+> It is **not** a description of the system's security posture. For the real,
+> code-grounded analysis, see the canonical
+> **[STRIDE Threat Model](../security/THREAT_MODEL.md)** and
+> **[SECURITY.md](../../SECURITY.md)**.
+
+**Status:** ⛔ Superseded (2026-07-14) — see retraction notice above
+**Original status:** ✅ Accepted
+**Date:** 2026-07-12
+**Deciders:** Architecture Team, Security Engineer
 **Context:** LLM Optimization System - Security Architecture Design
 
 ---

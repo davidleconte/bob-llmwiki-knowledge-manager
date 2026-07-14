@@ -9,6 +9,8 @@ import re
 from pathlib import Path
 from typing import Dict, List, Literal
 
+from src.tools.safe_paths import resolve_within
+
 AnalysisType = Literal["security", "performance", "quality", "architecture", "comprehensive"]
 Depth = Literal["shallow", "deep"]
 
@@ -36,7 +38,10 @@ class ComponentAnalyzer:
         Returns:
             Dictionary with analysis results
         """
-        full_path = self.base_path / component_path
+        try:
+            full_path = resolve_within(self.base_path, component_path)
+        except ValueError:
+            return {"error": f"Invalid component path (escapes base): {component_path}"}
 
         if not full_path.exists():
             return {"error": f"Component not found: {component_path}"}

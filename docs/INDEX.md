@@ -19,6 +19,8 @@
 - [Project Status](project-management/PROJECT_STATUS.md) - Current project status
 - [API Reference](api/README.md) - Complete API documentation
 - [Monitoring Guide](MONITORING.md) - Observability and metrics
+- [Security Policy](../SECURITY.md) - Vulnerability disclosure
+- [Threat Model](security/THREAT_MODEL.md) - STRIDE analysis (supersedes ADR-012)
 
 ---
 

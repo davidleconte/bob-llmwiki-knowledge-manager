@@ -11,6 +11,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from src.tools.safe_paths import resolve_within
+
 
 class KnowledgeBaseQuery:
     """Query knowledge base with semantic search"""
@@ -245,7 +247,10 @@ class KnowledgeBaseQuery:
 
     def get_cross_references(self, file_path: str) -> Dict:
         """Get cross-references for a document"""
-        full_path = self.kb_path / file_path
+        try:
+            full_path = resolve_within(self.kb_path, file_path)
+        except ValueError:
+            return {"error": f"Invalid file path (escapes knowledge base): {file_path}"}
 
         if not full_path.exists():
             return {"error": f"File not found: {file_path}"}
@@ -279,7 +284,7 @@ class KnowledgeBaseQuery:
                 continue
 
             for md_file in cat_path.glob("*.md"):
-                if md_file == full_path:
+                if md_file.resolve() == full_path:  # full_path is resolved; match self
                     continue
 
                 try:
@@ -427,6 +432,9 @@ def main():
 
         elif args.command == "xref":
             print(f"\n{'=' * 80}")
+            if "error" in result:
+                print(f"Error: {result['error']}")
+                return
             print(f"Cross-References: {result['title']}")
             print("=" * 80)
 

@@ -94,6 +94,16 @@ REGISTRY: tuple[ValueHome, ...] = (
             Mirror("CHANGELOG.md", "extract", r"(?m)^##\s*\[(\d+\.\d+\.\d+)\]"),
         ),
     ),
+    # Supported-version line published in SECURITY.md. Canonical: the pyproject
+    # major.minor -- the "1.0.x" support line tracks the released minor, so this
+    # captures major.minor (not the full patch version) and mirrors it as
+    # "{value}.x". Its own entry precisely because it mirrors major.minor.
+    ValueHome(
+        name="security_supported_line",
+        file="pyproject.toml",
+        pattern=r'(?m)^\s*version\s*=\s*"(\d+\.\d+)',
+        mirrors=(Mirror("SECURITY.md", "contains", "{value}.x", "supported-versions table"),),
+    ),
     # Supported-Python floor. Canonical: pyproject requires-python. The "kept in
     # sync" claims in CI/README/AGENTS were enforced only by hand until now.
     ValueHome(

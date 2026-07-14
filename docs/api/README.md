@@ -61,6 +61,7 @@ Complete API reference for the Token Optimization System.
 - [batch_file_reader](tools/batch_file_reader.md) - `tools/batch_file_reader.py`
 - [component_analyzer](tools/component_analyzer.md) - `tools/component_analyzer.py`
 - [kb_query](tools/kb_query.md) - `tools/kb_query.py`
+- [safe_paths](tools/safe_paths.md) - `tools/safe_paths.py`
 
 ## Truncation
 
