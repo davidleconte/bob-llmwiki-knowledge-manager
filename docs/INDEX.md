@@ -48,11 +48,11 @@
 - **[Test Results Final](../evaluation/TEST_RESULTS_FINAL.md)** - Complete test execution results (317 tests, 310+ passing)
 - **[Honest Assessment](../evaluation/HONEST_ASSESSMENT.md)** - 15-page critical analysis with real measurements
 - **[Token Savings Test Plan](TOKEN_SAVINGS_TEST_PLAN.md)** - Comprehensive validation methodology (390 tests planned)
-- **[Validation Report](../evaluation/results/validation_report.json)** - Statistical results (68.96% token savings)
+- **[Validation Report (Phase 5, measured)](../evaluation/results/validation-2026-07-14/report.json)** - real, manifest-backed run (`report.json` + `manifest.json`); the earlier `validation_report.json` (68.96%) is retracted/fabricated
 
 **Key Findings:**
-- ✅ 310+ tests passing (98.4% coverage)
-- ✅ Token savings validated: 40-60% in production (68.96% on synthetic data)
+- ✅ 310+ tests passing (see [STATUS.md](../STATUS.md) for the current coverage snapshot; the single home for the gate is `pyproject.toml`)
+- ✅ Token savings **measured** (Phase 5): ~20% optimizer compression on real in-repo docs — manifest-backed, see `evaluation/results/validation-2026-07-14/`; the earlier 68.96% is retracted
 - ✅ Production readiness: 7/10 (beta-ready, needs hardening)
 - ⚠️ Phase 4 theoretical only (needs 3-6 months work)
 - ⚠️ Mock-based testing (no real LLM API integration)

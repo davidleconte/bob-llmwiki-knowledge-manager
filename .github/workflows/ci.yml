@@ -1,9 +1,11 @@
 name: CI
 
-# Phase-3 CI: tests + coverage gate on the supported Python matrix (3.11, 3.12),
-# enforced lint (ruff) and type (mypy) gates, the flag-gated e2e suite, benchmark
+# CI: tests + coverage gate on the supported Python matrix (3.11, 3.12), enforced
+# lint (ruff) and type (mypy) gates, the flag-gated e2e suite, the Phase-5
+# manifest-backed validation harness (null + manifest + tiktoken gates), benchmark
 # regression trending, and a CycloneDX SBOM + dependency audit. The coverage gate,
-# per-package floors, and the status "one home per value" validator run in `test`.
+# per-package floors, and the status "one home per value" validator run in `test`;
+# the layering gate and the manifest-backed-savings guard run in `lint`.
 
 on:
   push:
@@ -71,6 +73,10 @@ jobs:
       - name: Enforce src -> scripts layering (no upward imports, B3)
         # AST-based gate: fails if any src/ module imports from scripts/.
         run: python scripts/check_layering.py
+      - name: Enforce manifest-backed savings claims (no un-provenanced numbers)
+        # Fails if a live surface publishes a savings/cost/hit-rate percentage
+        # without citing a reproducible manifest (STATUS.md publishing rule).
+        run: python scripts/check_savings_claims.py
 
   typecheck:
     name: typecheck (mypy)
@@ -110,6 +116,35 @@ jobs:
         env:
           RUN_E2E_TESTS: "1"
         run: pytest tests/e2e/ -v
+
+  validation:
+    name: validation (manifest-backed savings)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - name: Install (editable + dev/monitoring extras)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,monitoring]"
+      - name: Pre-warm tiktoken cache
+        run: python -c "import tiktoken; tiktoken.encoding_for_model('gpt-4')"
+      - name: Run manifest-backed validation harness
+        # The exit code encodes the honest gates: the null test passes (optimizer
+        # savings on shuffled input < threshold), the manifest is complete, and
+        # tiktoken counting is active. It deliberately does NOT gate on savings
+        # MAGNITUDE -- gating a measurement would re-incentivise fabrication.
+        run: python -m src.validation --corpus repo --out "$RUNNER_TEMP/validation"
+      - name: Upload validation report + manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-report
+          path: ${{ runner.temp }}/validation
+          if-no-files-found: ignore
 
   benchmarks:
     name: benchmarks (perf regression)

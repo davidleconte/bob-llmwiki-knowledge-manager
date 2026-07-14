@@ -3,7 +3,9 @@
 **Purpose:** Mathematically prove token savings across all 4 phases using synthetic data and statistical analysis
 
 **Date:** 2026-07-12  
-**Status:** Design Phase
+**Status:** Design Phase — **SUPERSEDED design target**
+
+> **Superseded.** The 55% figure below was a *design target* on synthetic data, never a measured result. Phase 5 shipped a real, manifest-backed harness (`python -m src.validation`); the measured optimizer-compression figure and its provenance live in `evaluation/results/validation-2026-07-14/` and [STATUS.md](../STATUS.md). Treat this document as historical methodology notes.
 
 ---
 

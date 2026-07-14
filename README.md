@@ -95,7 +95,7 @@ guidance has a concrete home in how the modes behave:
 |---|---|---|
 | **Catalog tax** | Every enabled MCP server re-sends its full tool catalog *every turn* | Native Bob mode — **no plugin, no MCP** to load |
 | **Payload tax** | A 2,000-line file attached when 20 lines matter | `repo-analyzer` runs scripts that **summarise**; the KB stores digested reports you *cite*, not raw source |
-| **Compression trap** | Stripping meaning to save input backfires (a study measured **+67% cost**) | Templates **preserve** meaning — rationale, real names, cross-refs — structured, not stripped |
+| **Compression trap** | Stripping meaning to shrink prompts can backfire and *raise* effective cost | Templates **preserve** meaning — rationale, real names, cross-refs — structured, not stripped |
 | **Short threads** | Turn 15 re-pays 14 turns of stale history | Knowledge persists in KB files + `save_memory`; a fresh thread **retrieves** it instead of re-deriving it |
 | **Let caching work** | Reworded prefixes miss the cache | Fixed mode definition + `AGENTS.md` + KB layout = a **cacheable prefix** |
 | **Trim output** | Verbose narration is paid on every reply | Bounded artifacts: templates, `INDEX.md`, reports — not essays |
@@ -194,29 +194,20 @@ The scripts have already filed digested reports into `docs/knowledge-base/`, so 
   consolidated report.
 - **3 worked example knowledge bases** — a software project, a research project, and a personal wiki.
 
-## 9. Token savings: real-world expectations
+## 9. Token savings: measured, manifest-backed (Phase 5)
 
-⚠️ **IMPORTANT DISCLAIMER:** Token savings metrics require validation on real repositories.
+The numbers below are **measured** by the real optimizer over a real in-repo corpus and carry a reproducibility manifest — not simulated. Reproduce them with `python -m src.validation` (harness in `src/validation/`); CI re-runs it on every push.
 
-**E2E Test Results (Controlled Environment):**
-- Prompt optimization: 10-20% measured savings
-- Cache hits: 100% savings when cache matches
-- Combined: 40-60% in ideal conditions
+- **Optimizer compression (the headline):** ~20% mean savings (95% CI ≈ [19%, 21%], N=183 real in-repo docs), token-weighted aggregate ~23%, real `tiktoken` counting — provenance in [`evaluation/results/validation-2026-07-14/`](evaluation/results/validation-2026-07-14/report.json) (`report.json` + `manifest.json`). Near-lossless (whitespace + redundant-phrase removal).
+- **Cache recompute-avoidance (reported separately):** workload-dependent — a cache hit avoids the full recompute, so the number tracks how repetitive *your* workload is, not a system property. The harness discloses the workload's repeat rate.
+- **Truncation (reported separately):** *lossy* budget-fit — it deletes content to hit a token budget with no fidelity guarantee, and is **excluded** from the savings headline.
+- **Null test:** on shuffled/high-entropy input the optimizer's measured reduction collapses to near zero — confirming the headline is genuine compression, not a measurement artifact.
 
-**Synthetic Validation Claims (NOT VALIDATED):**
-- "68.96% token savings" - from hardcoded simulation, not real optimizer
-- "95% CI [66.42, 71.51]" - fabricated precision (std=0.0)
-- "52/73/81% scaling" - artifact of capped baseline
-- **Status:** Awaiting real-world validation (see Phase 5 of the remediation plan)
+⚠️ **Retracted:** the earlier "68.96% / 95% CI [66.42, 71.51] / VALIDATED" figures were fabricated by a simulation that never invoked the optimizer (see [`evaluation/VALIDATION_DISCLAIMER.md`](evaluation/VALIDATION_DISCLAIMER.md)) and are withdrawn.
 
-**Expected Real-World Performance:**
-- First-time analysis: 5-15% savings (cold cache)
-- Repetitive tasks: 20-40% savings (warm cache)
-- Cache hit rate: 10-20% realistic (not 23.33% theoretical)
+**The 0.36 Bobcoin example (§5)** is real but represents an ideal case: structured analysis with script-assisted digestion. Your actual savings will vary with task type, repetition patterns, and cache effectiveness.
 
-**The 0.36 Bobcoin example (§5)** is real but represents an ideal case: structured analysis with script-assisted digestion. Your actual savings will vary significantly based on task type, repetition patterns, and cache effectiveness.
-
-**See:** `docs/knowledge-base/research/external-audit-2026-07-12.md` for complete audit findings.
+**See:** `docs/knowledge-base/research/external-audit-2026-07-12.md` for the audit findings behind this reconciliation.
 
 ## 10. Maturity: what's proven, what's experimental
 
@@ -236,7 +227,7 @@ The scripts have already filed digested reports into `docs/knowledge-base/`, so 
 **Validated Claims:**
 - Token optimization library functional (unit + e2e tested)
 - Caching system tested and working (E2E validated)
-- Script-based analysis reduces manual effort by 70-80%
+- Script-based analysis removes most of the repetitive manual analysis effort
 - **Tests & coverage:** the coverage gate (`>=80%`, `fail_under` in `pyproject.toml`) is the single home for the number; see [STATUS.md](STATUS.md) for the current measured snapshot and [Institutional Audit 2026-07-13](docs/knowledge-base/research/audit-2026-07-13-institutional.md). Test *pass rate* is not the same as *code coverage* — do not conflate them.
 
 ### 🧪 Experimental / Needs Validation
@@ -248,9 +239,9 @@ The scripts have already filed digested reports into `docs/knowledge-base/`, so 
 - Windows support (bash scripts not cross-platform)
 
 **Performance Claims:**
-- Token savings: Measured 10-20% optimization, 40-60% combined (with caching)
-- Cache hit rates: Theoretical 23%, real-world likely 15-25%
-- Cost savings: Depends heavily on workload patterns
+- Token savings: measured ~20% optimizer compression on real in-repo docs — manifest-backed, see §9 and `evaluation/results/validation-2026-07-14/`
+- Cache hit rates: workload-dependent (disclosed per validation run), not a fixed system property
+- Cost savings: depend heavily on workload repetition patterns
 
 ### ⚠️ Known Limitations
 

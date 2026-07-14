@@ -1,9 +1,14 @@
 """Prompt optimizer for token reduction and quality preservation.
 
-This module implements the core optimization logic achieving:
-- 89.3% token savings
-- 91.80% quality preservation
-- Integration with multi-level cache
+Implements near-lossless prompt compression (whitespace normalization +
+redundant-phrase removal) with a lexical quality heuristic, integrated with the
+multi-level cache.
+
+Savings are **measured**, not asserted here: the Phase-5 harness
+(``python -m src.validation``) reports the manifest-backed compression figure
+over a real corpus. See ``evaluation/results/validation-<date>/`` for the
+current run; earlier hard-coded "89.3% / 91.80%" claims were fabricated and are
+retracted.
 """
 
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
@@ -467,7 +472,7 @@ class PromptOptimizer:
 
         # Pass metadata as a keyword arg: ExactCache.set()'s third positional
         # parameter is ``version`` -- passing metadata there corrupts the cache
-        # key so set()/get() never agree (write-only cache, 0% hit rate).
+        # key so set()/get() never agree (a write-only cache that never hits).
         self.cache.set(prompt, result["optimized"], metadata=metadata)
 
     def _parse_cached_result(

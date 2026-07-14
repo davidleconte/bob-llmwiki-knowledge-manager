@@ -34,9 +34,13 @@ import sys
 #   (~18 always-executed, 100%-covered import lines), which mechanically lowered the
 #   ratio from ~54.3% to 52.9% without removing any tested logic. 52.0 tracks the new
 #   honest level with a small margin.
+# validation: Phase-5 harness that produces the *published* savings numbers, so it
+#   must itself be trustworthy — held well above the global bar. Measured 90.5% at
+#   introduction; floor set to 85.0 to lock the gain with a small margin.
 FLOORS = {
     "src/monitoring": 70.0,
     "src/delegation": 52.0,
+    "src/validation": 85.0,
 }
 
 

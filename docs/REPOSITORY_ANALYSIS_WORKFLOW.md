@@ -421,11 +421,13 @@ Update INDEX.md with new documents and findings.
 
 ### Key Savings Mechanisms
 
-1. **L1 Cache (Exact Match):** 85% hit rate on repeated queries
-2. **L2 Cache (Semantic):** 60% hit rate on similar queries
-3. **Documentation References:** 90% reduction vs. re-reading code
-4. **Batch Processing:** 40% reduction through grouped analyses
-5. **Incremental Updates:** 80% reduction vs. full re-analysis
+The **measured** optimizer-compression magnitude is manifest-backed in `evaluation/results/validation-2026-07-14/`; the per-mechanism items below are illustrative of *how* tokens are saved, not measured figures:
+
+1. **L1 Cache (Exact Match):** repeated queries served from cache (recompute avoided)
+2. **L2 Cache (Semantic):** similar queries served from cache
+3. **Documentation References:** cite digested reports instead of re-reading source
+4. **Batch Processing:** group related analyses into one pass
+5. **Incremental Updates:** update the KB, don't re-analyze from scratch
 
 ---
 
@@ -672,6 +674,6 @@ This workflow provides a **systematic, token-efficient approach** to repository 
 4. **Batch processing** - Group similar analyses
 5. **Incremental updates** - Update, don't recreate
 
-**Expected token savings: 77% compared to naive approach**
+**Token savings are workload-dependent; the measured optimizer-compression figure is manifest-backed in `evaluation/results/validation-2026-07-14/`.**
 
 **Key insight:** The knowledge base becomes your cached analysis layer, dramatically reducing tokens for ongoing work.
