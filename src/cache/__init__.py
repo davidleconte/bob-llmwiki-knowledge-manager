@@ -4,10 +4,12 @@ This module implements a two-level cache:
 - L1: Exact match cache (hash-based, O(1) lookup)
 - L2: Semantic similarity cache (embedding-based, cosine similarity)
 
-Target metrics:
-- Cache hit rate: 23.33%+
-- Lookup latency: <100ms (p95)
-- Memory efficiency: LRU eviction
+Characteristics:
+- Cache hit rate: workload-dependent (tracks how often prompts repeat); it is
+  NOT a fixed system property and is excluded from the savings headline. See
+  ``evaluation/results/validation-2026-07-14/`` and ``STATUS.md``.
+- Lookup latency: O(1) L1 exact match; L2 cosine similarity over embeddings.
+- Memory efficiency: bounded LRU eviction.
 """
 
 from src.cache.base import CacheEntry, CacheInterface

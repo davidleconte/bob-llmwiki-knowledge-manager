@@ -1,6 +1,26 @@
 # Bob Shell Knowledge Manager - Complete Design Document
 
-> ⚠️ **Metrics correction (2026-07-14).** Earlier drafts of this document cited fabricated token-savings/quality figures — "68.96%", "89.3%", "91.80%" — produced by a simulation that never invoked the optimizer. **Those figures are retracted.** The honest, measured figure is **~20% mean optimizer compression** on real prose (manifest-backed: `evaluation/results/validation-2026-07-14/`; see `STATUS.md` and `CHANGELOG.md`). Inline numbers below have been corrected where they appeared.
+> ⚠️ **Metrics & claims correction (2026-07-14; expanded).** This design document
+> cited multiple **fabricated** figures and **not-implemented** controls, now
+> **retracted**:
+> - **Token-savings/quality** — "68.96%", "89.3%", "91.80%" (a simulation that never
+>   invoked the optimizer). The honest, measured figure is **~20% mean optimizer
+>   compression** on real prose (manifest-backed: `evaluation/results/validation-2026-07-14/`).
+> - **Test coverage "98.4%"** — the real, gated figure is **87.1%** (gate ≥80%; single
+>   home: `pyproject.toml` `fail_under`; see `STATUS.md`). Corrected inline below.
+> - **Test count "213 tests"** — the suite is **771 passed / 23 skipped**; the "213"
+>   and the "Grade A/A+ (95/97)" self-grades are aspirational drafting, not measured.
+>   The authoritative maturity is `STATUS.md` (Beta — Not Production Ready, ≈D- vs the
+>   institutional bar), **not** the grades below.
+> - **Security controls** — the "✅ implemented" input-validation / defence-in-depth /
+>   process-isolation / audit-logging stack described in §8.4 and the NFR status lists
+>   was **never built** (the same fabrication retracted in `docs/adr/012-security-model.md`).
+>   The **only** implemented control is path-traversal containment
+>   (`src/tools/safe_paths.resolve_within`). The canonical, code-grounded security
+>   reference is **[`docs/security/THREAT_MODEL.md`](security/THREAT_MODEL.md)**;
+>   §8.4 below is a **design aspiration, not a statement of what exists**.
+>
+> See `STATUS.md` and `CHANGELOG.md` for current, provenance-backed numbers.
 
 
 **Document Type:** Comprehensive System Design  
@@ -182,7 +202,7 @@ The project consists of **TWO DISTINCT SYSTEMS**:
 
 **Technology:** Python 3.11+, tiktoken, scikit-learn, numpy
 
-**Complexity:** ~5,000 lines of code, 213 tests
+**Complexity:** ~5,000 lines of code, 771 tests
 
 #### System 2: Knowledge Base Framework (Bash/YAML)
 
@@ -208,11 +228,11 @@ Both systems work independently but complement each other:
 
 **Validated Achievements (Week 19):**
 
-✅ **Implementation:** 100% complete (213/213 tests passing)  
-✅ **Code Quality:** Grade A (95/100)  
-✅ **Test Coverage:** 1.14:1 test-to-code ratio (98.4%)  
+✅ **Implementation:** 771 passed / 23 skipped (see `STATUS.md`)  
+✅ **Code Quality:** see `STATUS.md` (the "95/100" was aspirational, not measured)  
+✅ **Test Coverage:** 87.1% (gate ≥80%; single home `pyproject.toml` `fail_under`)  
 ✅ **Performance:** All latency targets met (<100ms)  
-✅ **Architecture:** Grade A+ (97/100)
+**Architecture:** see `STATUS.md` (the "97/100" was aspirational, not measured)
 
 **Pending Validation (Week 20):**
 
@@ -230,7 +250,7 @@ Both systems work independently but complement each other:
 | L2 Cache Hit Rate | 5-8% | TBD | ⏳ Pending production |
 | L1 Latency | <1ms | <1ms | ✅ Validated |
 | L2 Latency | <100ms | <100ms | ✅ Validated |
-| Test Coverage | 80%+ | 98.4% | ✅ Exceeded |
+| Test Coverage | 80%+ | 87.1% | ✅ Met |
 | Code Quality | Grade B+ | Grade A | ✅ Exceeded |
 
 ---
@@ -380,10 +400,12 @@ Both systems work independently but complement each other:
 4. **NFR-4.4:** Dependency vulnerability scanning
 
 **Current Status:**
-- ✅ Input validation implemented
-- ✅ Sensitive data excluded from logs
+- ✅ Path-traversal containment (`src/tools/safe_paths.resolve_within`) — the one
+  implemented control; see [`security/THREAT_MODEL.md`](security/THREAT_MODEL.md)
 - ✅ In-memory cache (no persistence)
-- ✅ Security scan script available
+- ✅ Security scan in CI (bandit medium+; `pip-audit` on the locked closure)
+- ⚠️ **No** general input-validation layer, auth, RBAC, or audit logging exists
+  (earlier "✅ implemented" claims here were fabricated — see the banner above)
 
 #### NFR-5: Maintainability
 
@@ -396,10 +418,10 @@ Both systems work independently but complement each other:
 4. **NFR-5.4:** Clear architecture and design
 
 **Current Status:**
-- ✅ Code quality: Grade A (95/100)
-- ✅ Test coverage: 98.4%
-- ✅ Documentation: Comprehensive
-- ✅ Architecture: Well-defined
+- ✅ Test coverage: 87.1% (gate ≥80%; see `STATUS.md`)
+- ✅ Documentation: Comprehensive (Diátaxis spine)
+- Code-quality / architecture letter-grades: see `STATUS.md` (authoritative), not
+  the "Grade A" drafting retracted in the banner above
 
 ### 2.3 Constraints
 
@@ -2184,7 +2206,14 @@ class AnalysisPipeline:
 
 ### 8.4 Security
 
-**Security Model:** Defense-in-depth
+> ℹ️ **Design aspiration, not current state.** The layers below describe an *intended*
+> security posture. Most were **never implemented** (see the banner at the top of this
+> file). What actually exists today: path-traversal containment
+> (`src/tools/safe_paths.resolve_within`), no-secrets-in-logs, an in-memory cache with
+> no persistence, and CI security scanning (bandit + `pip-audit`). The canonical,
+> code-grounded reference is **[`security/THREAT_MODEL.md`](security/THREAT_MODEL.md)**.
+
+**Security Model (target):** Defense-in-depth
 
 **Security Layers:**
 
@@ -2234,7 +2263,7 @@ class AnalysisPipeline:
 
 ### 8.5 Maintainability
 
-**Code Quality:** Grade A (95/100)
+**Code Quality:** see `STATUS.md` (the "95/100" was aspirational, not measured)
 
 **Maintainability Strategies:**
 
@@ -2251,9 +2280,9 @@ class AnalysisPipeline:
    - Usage examples
 
 3. **Testing:**
-   - 98.4% test coverage
-   - 213 tests (all passing)
-   - Mock-based testing
+   - 87.1% test coverage (gate ≥80%)
+   - 771 tests passing (23 skipped)
+   - Behavioural tests (real inputs/outputs)
    - Fast test execution
 
 4. **Code Standards:**
@@ -2267,7 +2296,7 @@ class AnalysisPipeline:
 | Metric | Target | Achieved | Status |
 |--------|--------|----------|--------|
 | Code Quality | Grade B+ | Grade A | ✅ |
-| Test Coverage | 80%+ | 98.4% | ✅ |
+| Test Coverage | 80%+ | 87.1% | ✅ |
 | Documentation | Comprehensive | Comprehensive | ✅ |
 | Complexity | Low-Medium | Low-Medium | ✅ |
 

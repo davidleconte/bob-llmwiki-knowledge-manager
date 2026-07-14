@@ -49,12 +49,11 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 # Top-level markdown status surfaces outside docs/.
 TOP_LEVEL_DOCS = ("README.md", "STATUS.md", "AGENTS.md", "CHANGELOG.md")
 
-# The two code files carry claim-bearing docstrings/comments the institutional
-# audit flagged; scanned alongside the markdown tree.
-CODE_SURFACES = (
-    "src/optimizer/prompt_optimizer.py",
-    "src/cache/exact_cache.py",
-)
+# Code is scanned tree-wide (all of ``src/**/*.py``), not via an allowlist: the
+# Phase-8 sign-off found a fabricated "89.3% savings" docstring in
+# ``src/optimizer/__init__.py`` that a hardcoded 2-file list (formerly just
+# prompt_optimizer.py + exact_cache.py) never scanned. A claim-bearing line in any
+# source file must cite a manifest or carry a retraction marker, same as the docs.
 
 # Frozen dated records: not scanned at all (preserved verbatim, reflect what was
 # believed at their date). Everything else under docs/ is scanned; frozen
@@ -165,9 +164,10 @@ def iter_surfaces() -> list[str]:
         rel = md.relative_to(REPO_ROOT).as_posix()
         if not _is_excluded(rel):
             surfaces.append(rel)
-    for code in CODE_SURFACES:
-        if (REPO_ROOT / code).exists():
-            surfaces.append(code)
+    for code in sorted((REPO_ROOT / "src").rglob("*.py")):
+        rel = code.relative_to(REPO_ROOT).as_posix()
+        if not _is_excluded(rel):
+            surfaces.append(rel)
     return surfaces
 
 

@@ -89,7 +89,7 @@ The boundaries that matter — where untrusted data crosses into the process:
 | **S**poofing | No | No identity, authentication, or session exists — single local operator. Nothing to spoof. | N/A |
 | **T**ampering | Low | Library APIs write to caller-supplied paths (`config/manager.py:374`, `monitoring/cost_reporting.py:161-176`); not reachable from the `bob-optimize` CLI. Cache is in-memory (`exact_cache.py:66`) — no on-disk cache to poison, no deserialization anywhere (no `pickle`/`eval`/unsafe-YAML). | Residual (accepted) |
 | **R**epudiation | No | No multi-user actions to attribute. Logging hashes cache keys (`monitoring/logger.py:140`) and records only token counts/latency/strategy — no prompt text or secrets are logged. | N/A |
-| **I**nformation disclosure | **Yes** | **Path-traversal reads** in the tool layer — an unbounded `base / user_path` join let `../` or absolute paths escape the base and read arbitrary files (`component_analyzer.py`, `kb_query.py`, `batch_file_reader.py`). | **FIXED** |
+| **I**nformation disclosure | **Yes** | **Path-traversal reads** in the tool layer — (a) an unbounded `base / user_path` join let `../`/absolute paths escape the base, and (b) `rglob`-discovered leaves (including a symlink planted inside a validated directory) were read without a second containment check (`component_analyzer.py`, `kb_query.py`, `batch_file_reader.py`). | **FIXED** (entry paths + discovered leaves) |
 | **D**enial of service | Low–Med | Unbounded input / cache growth (issues H-19, L-1): the pipeline does not cap prompt length, and the in-memory cache grows with distinct keys. tiktoken's first-use fetch can fail, but degrades gracefully (`token_counter.py:73-74`, falls back to `chars/4`). | Residual (documented) |
 | **E**levation of privilege | No | No privilege model to elevate within. The only subprocess is a hardened, static-argv `git` call (`src/validation/manifest.py:45-58`, list argv, no `shell=True`); no `os.system`/`Popen`/`shell=True` anywhere else. | N/A |
 
@@ -113,12 +113,24 @@ resolved base — raising `ValueError` otherwise. All three join sites now route
 through it and return their existing error dict on refusal. Regression coverage
 is in `tests/tools/test_safe_paths.py` (parent-traversal, deep traversal,
 absolute-path, and symlink-escape cases at both the helper and each tool).
-Committed with the `Phase 7 (A)` change. The delegation `DocumentationAgent`
-(`src/delegation/agents/documentation_agent.py`) additionally routes its
-untrusted `task.target` through `resolve_within` *before* its `rglob("*.py")`
-scan (Phase 8), so a `../` or absolute delegation target cannot enumerate `.py`
-files outside the working directory either; regression coverage in
-`tests/delegation/test_documentation_agent_containment.py`.
+Committed with the `Phase 7 (A)` change.
+
+**Leaf-level containment (Phase 8 follow-up, 2026-07-14).** Validating only the
+*entry* path is not sufficient: `rglob` follows symlinks, so a link planted
+inside an already-validated directory could still point outside the base and be
+read. Two paths needed the second check:
+- `DocumentationAgent` (`src/delegation/agents/documentation_agent.py`) routes
+  its untrusted `task.target` through `resolve_within` *before* its `rglob("*.py")`
+  scan; coverage in `tests/delegation/test_documentation_agent_containment.py`.
+- `ComponentAnalyzer` (`src/tools/component_analyzer.py`) — reached from its own
+  CLI and from the security/quality/performance/architecture delegation agents —
+  now filters every `rglob`ed leaf through `resolve_within` in
+  `_contained_files()`, dropping any whose resolved target escapes the base
+  before it is opened. Coverage in
+  `tests/tools/test_component_analyzer.py::TestSymlinkContainment` (a symlink to a
+  secret outside the base is not enumerated or disclosed; reverting the filter
+  turns the test red). `BatchFileReader` already re-checked each file, so all
+  three tool read paths now contain both the entry path and the discovered leaves.
 
 ## Residual risks (documented and accepted)
 
