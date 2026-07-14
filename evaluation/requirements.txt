@@ -3,7 +3,7 @@
 # Or with conda + uv: conda run -n ENV_NAME uv pip install -r requirements.txt
 
 # Core data analysis
-pandas>=3.0.0
+pandas>=3.0.3
 numpy>=1.24.0
 
 # Statistical analysis
