@@ -166,8 +166,16 @@ class ConfigManager:
                     current[parts[-1]] = value
 
         if env_config:
+            # Build a candidate, validate it, then commit atomically -- the same
+            # compute-validate-commit contract as update()/load_from_file(). The
+            # env path previously merged without validating, so invalid values
+            # (e.g. CONFIG_CACHE__L1__MAX_SIZE=0, CONFIG_OPTIMIZER__MAX_TOKENS=-5)
+            # were accepted silently. On a validation failure self._config is
+            # left unchanged.
             with self._update_lock:
-                self._merge_config(env_config)
+                candidate = self._compute_merge(self._config, env_config)
+                self._validator.validate(candidate)
+                self._config = candidate
                 self._add_version("load_from_env", ["Loaded from environment"])
 
     def _compute_merge(self, base: Dict[str, Any], new_config: Dict[str, Any]) -> Dict[str, Any]:

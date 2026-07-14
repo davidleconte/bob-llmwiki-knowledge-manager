@@ -37,10 +37,16 @@ import sys
 # validation: Phase-5 harness that produces the *published* savings numbers, so it
 #   must itself be trustworthy — held well above the global bar. Measured 90.5% at
 #   introduction; floor set to 85.0 to lock the gain with a small margin.
+# tools: the untrusted-path handlers (kb_query / batch_file_reader / component_analyzer)
+#   reached via each tool's CLI and the delegation task.target. Folded into the gated
+#   denominator in Phase 8 (previously coverage-omitted). Behavioral tests took it from
+#   ~19-45% per module to ~94%; floor pinned at 85.0 to lock that gain, since this is
+#   the most security-relevant code and must not silently regress.
 FLOORS = {
     "src/monitoring": 70.0,
     "src/delegation": 52.0,
     "src/validation": 85.0,
+    "src/tools": 85.0,
 }
 
 

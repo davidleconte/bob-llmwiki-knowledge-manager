@@ -10,6 +10,26 @@ from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
 
+def escape_version(version: str) -> str:
+    """Percent-escape ``version`` so it can never contain the ``:`` delimiter.
+
+    Cache keys are built as ``f"{escape_version(version)}:{key}"``. Escaping the
+    version's ``:`` (and the ``%`` escape char itself) makes that encoding
+    *injective* over ``(version, key)`` pairs. Without it the raw
+    ``f"{version}:{key}"`` collides: ``set('b', version='v1:a')`` and
+    ``set('a:b', version='v1')`` both render ``'v1:a:b'``, so the second write
+    silently overwrites the first and a reader gets the wrong content. Both L1
+    (:class:`ExactCache`) and L2 (:class:`SemanticCache`) use this so their keys
+    stay consistent (``MultiLevelCache.size()`` cross-hashes between them).
+    """
+    return version.replace("%", "%25").replace(":", "%3A")
+
+
+def unescape_version(escaped: str) -> str:
+    """Inverse of :func:`escape_version` (recovers the original version string)."""
+    return escaped.replace("%3A", ":").replace("%25", "%")
+
+
 @dataclass
 class CacheEntry:
     """Cache entry with metadata and access tracking.

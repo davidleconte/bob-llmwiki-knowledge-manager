@@ -9,16 +9,26 @@
 
 Phase 5 replaced the fabricated validator with a real, manifest-backed harness
 (:mod:`src.validation`). This guard stops un-provenanced savings claims from
-creeping back into live surfaces: it scans a curated set of live docs/code for a
-savings/reduction/hit-rate keyword next to a literal percentage, and fails unless
-that line either cites a manifest/validation report or is explicitly describing a
-retracted/fabricated number.
+creeping back into live surfaces.
 
-Scope is deliberately a curated allowlist of the surfaces that actually publish
-these numbers -- the *generic* "one home per value" validator is Phase 6. Dated
-audit snapshots (``docs/knowledge-base/research/**``, ``evaluation/**``,
-``docs/PHASE*_IMPLEMENTATION_COMPLETE.md``) and banner-``DEPRECATED``/``STALE``
-docs are frozen point-in-time records and are not scanned.
+Scope (Phase 8): the scan is now **tree-wide**, not a five-file allowlist. The
+old allowlist could not see the ``docs/BOOK_*`` / ``docs/adr/*`` / guide files
+where the fabricated ``68.96% / 89.3% / 91.80%`` figures survived unretracted, so
+a green gate did not prove a clean tree. It now scans every markdown surface
+under ``docs/`` plus the top-level status docs and the two claim-bearing code
+files, and a file passes only if each savings/cost percentage either cites a
+manifest, is explicitly tagged as retracted/fabricated on its own line, **or**
+the file carries a retraction/deprecation *banner* in its head.
+
+The **banner exception** is how frozen planning/audit-trail docs
+(``docs/project-management/**``, ``docs/architecture/deprecated/**``) stay in the
+tree unedited: a one-line banner that names the numbers as retracted annotates
+the whole file, so historical snapshots are preserved verbatim below the banner
+without re-asserting fabricated results as current fact.
+
+Only genuinely frozen dated records are exempt from scanning entirely:
+``docs/knowledge-base/research/**`` (dated audit snapshots) and
+``PHASE*_IMPLEMENTATION_COMPLETE.md``.
 
 Usage::
 
@@ -36,18 +46,21 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-# Live surfaces that publish savings/cost/hit-rate numbers. Curated (not a glob)
-# so frozen dated snapshots stay out. The two code files carry claim-bearing
-# docstrings/comments the institutional audit flagged.
-LIVE_SURFACES = (
-    "STATUS.md",
-    "README.md",
-    "AGENTS.md",
-    "docs/INDEX.md",
-    "docs/REPOSITORY_ANALYSIS_WORKFLOW.md",
+# Top-level markdown status surfaces outside docs/.
+TOP_LEVEL_DOCS = ("README.md", "STATUS.md", "AGENTS.md", "CHANGELOG.md")
+
+# The two code files carry claim-bearing docstrings/comments the institutional
+# audit flagged; scanned alongside the markdown tree.
+CODE_SURFACES = (
     "src/optimizer/prompt_optimizer.py",
     "src/cache/exact_cache.py",
 )
+
+# Frozen dated records: not scanned at all (preserved verbatim, reflect what was
+# believed at their date). Everything else under docs/ is scanned; frozen
+# planning/audit-trail docs stay clean via the banner exception, not exclusion.
+EXCLUDED_DIR_PARTS = ("knowledge-base/research",)
+EXCLUDED_NAME_RE = re.compile(r"PHASE.*_IMPLEMENTATION_COMPLETE", re.IGNORECASE)
 
 # A line is a savings/cost claim when it pairs one of these keywords with a
 # literal percentage.
@@ -78,15 +91,31 @@ RETRACTION_TOKENS = (
     "do not publish",
     "must cite",
     "superseded",
+    "withdrawn",
+    "manufactured",
 )
 
-DEPRECATION_MARKERS = ("DEPRECATED", "STALE")
-DEPRECATION_SCAN_LINES = 15
+# A file whose head carries one of these markers is treated as fully annotated
+# (the "banner exception"). Uppercased comparison, so "retracted"/"Fabricated"
+# etc. all match. Deprecation markers are included so already-deprecated docs
+# (docs/architecture/deprecated/**) need no second banner.
+BANNER_MARKERS = (
+    "RETRACT",
+    "FABRICAT",
+    "DEPRECATED",
+    "STALE",
+    "SUPERSEDED",
+    "WITHDRAWN",
+    "HISTORICAL SNAPSHOT",
+    "MANUFACTURED",
+)
+BANNER_SCAN_LINES = 20
 
 
-def is_deprecated(text: str) -> bool:
-    head = "\n".join(text.splitlines()[:DEPRECATION_SCAN_LINES]).upper()
-    return any(marker in head for marker in DEPRECATION_MARKERS)
+def has_banner(text: str) -> bool:
+    """True if the file's head carries a retraction/deprecation banner."""
+    head = "\n".join(text.splitlines()[:BANNER_SCAN_LINES]).upper()
+    return any(marker in head for marker in BANNER_MARKERS)
 
 
 def line_is_unbacked_claim(line: str) -> bool:
@@ -104,8 +133,12 @@ def line_is_unbacked_claim(line: str) -> bool:
 
 
 def scan_text(text: str) -> list[tuple[int, str]]:
-    """Return ``(line_no, line)`` for every unbacked savings claim in ``text``."""
-    if is_deprecated(text):
+    """Return ``(line_no, line)`` for every unbacked savings claim in ``text``.
+
+    A file-head retraction/deprecation banner annotates the whole file, so a
+    frozen snapshot preserved verbatim below the banner does not trip the gate.
+    """
+    if has_banner(text):
         return []
     violations: list[tuple[int, str]] = []
     for line_no, line in enumerate(text.splitlines(), start=1):
@@ -114,8 +147,32 @@ def scan_text(text: str) -> list[tuple[int, str]]:
     return violations
 
 
+def _is_excluded(rel: str) -> bool:
+    if any(part in rel for part in EXCLUDED_DIR_PARTS):
+        return True
+    if EXCLUDED_NAME_RE.search(Path(rel).name):
+        return True
+    return False
+
+
+def iter_surfaces() -> list[str]:
+    """Every repo-relative surface to scan: docs/**.md + top-level docs + code."""
+    surfaces: list[str] = []
+    for name in TOP_LEVEL_DOCS:
+        if (REPO_ROOT / name).exists():
+            surfaces.append(name)
+    for md in sorted((REPO_ROOT / "docs").rglob("*.md")):
+        rel = md.relative_to(REPO_ROOT).as_posix()
+        if not _is_excluded(rel):
+            surfaces.append(rel)
+    for code in CODE_SURFACES:
+        if (REPO_ROOT / code).exists():
+            surfaces.append(code)
+    return surfaces
+
+
 def _selftest() -> int:
-    """Verify the detector on planted good/bad strings (Phase-5 verification)."""
+    """Verify the detector on planted good/bad strings (Phase-5/8 verification)."""
     bad = [
         "Combined savings: 40-60% in production.",
         "Token savings: 68.96% (95% CI [66.42, 71.51]).",
@@ -136,12 +193,23 @@ def _selftest() -> int:
     for line in good:
         if line_is_unbacked_claim(line):
             failures.append(f"FALSE POSITIVE (should pass): {line!r}")
+
+    # Banner exception: a fabricated number under a retraction banner passes.
+    bannered = (
+        "> **RETRACTED METRICS.** The 89.3% figure was fabricated.\n\n- 89.3% token savings\n"
+    )
+    if scan_text(bannered):
+        failures.append("BANNER EXCEPTION BROKEN: bannered file still flagged")
+    # ... but the same content WITHOUT a banner must be flagged.
+    if not scan_text("# Results\n\n- 89.3% token savings\n"):
+        failures.append("TREE SCAN BROKEN: un-bannered fabricated number not flagged")
+
     if failures:
         print("SELFTEST FAILED:", file=sys.stderr)
         for failure in failures:
             print(f"  - {failure}", file=sys.stderr)
         return 1
-    print(f"SELFTEST OK: {len(bad)} flagged, {len(good)} passed.")
+    print(f"SELFTEST OK: {len(bad)} flagged, {len(good)} passed, banner exception verified.")
     return 0
 
 
@@ -151,31 +219,29 @@ def main(argv: list[str] | None = None) -> int:
         return _selftest()
 
     failures: list[str] = []
-    print("Checking that published savings/cost numbers cite a manifest:\n")
-    for rel in LIVE_SURFACES:
+    surfaces = iter_surfaces()
+    print(
+        f"Checking that published savings/cost numbers cite a manifest ({len(surfaces)} surfaces):\n"
+    )
+    for rel in surfaces:
         path = REPO_ROOT / rel
-        if not path.exists():
-            print(f"  SKIP {rel}: not found")
-            continue
         violations = scan_text(path.read_text(encoding="utf-8"))
         if violations:
             failures.append(rel)
             print(f"  FAIL {rel}:")
             for line_no, line in violations:
                 print(f"    L{line_no}: unbacked savings/cost claim\n        {line}")
-        else:
-            print(f"  OK   {rel}")
 
     if failures:
         print(
-            f"\nFAILED: {len(failures)} live surface(s) publish a savings/cost number "
-            f"without a manifest citation: {', '.join(sorted(set(failures)))}\n"
+            f"\nFAILED: {len(failures)} surface(s) publish a savings/cost number "
+            f"without a manifest citation:\n  {chr(10).join('  ' + f for f in sorted(set(failures)))}\n"
             "Cite the run's manifest (evaluation/results/validation-<date>/manifest.json), "
-            "or remove the number. See STATUS.md.",
+            "remove the number, or (for a frozen snapshot) add a retraction banner. See STATUS.md.",
             file=sys.stderr,
         )
         return 1
-    print("\nAll live surfaces cite a manifest for every savings/cost number.")
+    print(f"\nAll {len(surfaces)} scanned surfaces cite a manifest for every savings/cost number.")
     return 0
 
 

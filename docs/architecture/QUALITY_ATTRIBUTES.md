@@ -1,5 +1,8 @@
 # LLM Optimization System - Quality Attributes Architecture
 
+> ⚠️ **Metrics correction (2026-07-14).** Earlier drafts of this document cited fabricated token-savings/quality figures — "68.96%", "89.3%", "91.80%" — produced by a simulation that never invoked the optimizer. **Those figures are retracted.** The honest, measured figure is **~20% mean optimizer compression** on real prose (manifest-backed: `evaluation/results/validation-2026-07-14/`; see `STATUS.md` and `CHANGELOG.md`). Inline numbers below have been corrected where they appeared.
+
+
 **Version:** 1.0  
 **Date:** 2026-07-12  
 **Status:** Week 17 - Quality Attributes  
@@ -156,8 +159,8 @@ POST /optimize
 {
   "response": "Optimized response",
   "metrics": {
-    "tokens_saved": 1786,
-    "savings_percent": 89.3,
+    "tokens_saved": 400,
+    "savings_percent": 20.0,
     "cache_hit": false,
     "processing_time_ms": 95
   }
@@ -266,7 +269,7 @@ graph TB
 | **L3: Optimization** | <1ms | 100% | 15% | 32-47% |
 | **L4: Truncation** | <10ms | 60% | 40% | 56-71% |
 | **L5: Batching** | <100ms | 15% | 20% | 65-80% |
-| **Total** | <100ms | - | - | **89.3%** |
+| **Total** | <100ms | - | - | **~20% (measured; manifest)** |
 
 **Performance Targets:**
 
@@ -283,8 +286,8 @@ Throughput Targets:
 └─ Batch mode: >1000 req/s      ✅ Achieved: 3000 req/s
 
 Quality Targets:
-├─ Token savings: >70%  ✅ Achieved: 89.3%
-├─ Quality score: >90%  ✅ Achieved: 91.80%
+├─ Token savings: >70%  ⚠️ Measured ~20% (manifest; the >70% target derived from the retracted 89.3%)
+├─ Quality score: >90%  ⚠️ Quality preserved (lexical heuristic, not semantic fidelity; 91.80% retracted)
 └─ Cache hit rate: >20% ✅ Achieved: 23.33%
 ```
 

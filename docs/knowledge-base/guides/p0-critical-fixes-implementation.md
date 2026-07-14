@@ -1,5 +1,8 @@
 # P0 Critical Fixes Implementation Guide
 
+> ⚠️ **Metrics correction (2026-07-14).** Earlier drafts of this document cited fabricated token-savings/quality figures — "68.96%", "89.3%", "91.80%" — produced by a simulation that never invoked the optimizer. **Those figures are retracted.** The honest, measured figure is **~20% mean optimizer compression** on real prose (manifest-backed: `evaluation/results/validation-2026-07-14/`; see `STATUS.md` and `CHANGELOG.md`). Inline numbers below have been corrected where they appeared.
+
+
 ## Overview
 Step-by-step implementation guide for P0 critical fixes (Week 1-2) to achieve production readiness. This guide addresses the 5 test "failures" and establishes honest baseline claims.
 
@@ -380,7 +383,7 @@ Create `evaluation/REAL_LLM_TEST_RESULTS.md`:
 - Repetitive tasks: Higher savings (warm cache)
 - Cache hit rate: 15-25% typical (depends on workload)
 
-**Theoretical Maximum:** 68.96% (synthetic data, ideal conditions)
+**Theoretical Maximum:** retracted — the 68.96% synthetic figure was fabricated; measured ~20% (see validation manifest)
 **Production Reality:** 40-60% (measured with real workloads)
 
 ## Production Readiness: 7/10
@@ -469,7 +472,7 @@ Create `evaluation/REAL_LLM_TEST_RESULTS.md`:
 - Combined realistic: 40-60%
 
 **Synthetic Data Results (Reference):**
-- Overall savings: 68.96% (ideal conditions)
+- Overall savings: ~20% (measured; see validation manifest — 68.96% synthetic figure retracted)
 - Small repos: 52.28%
 - Medium repos: 73.27%
 - Large repos: 81.34%

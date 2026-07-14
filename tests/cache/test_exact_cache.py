@@ -380,6 +380,22 @@ class TestExactCacheTTL:
         clock[0] = 10_000_000.0  # far in the future
         assert cache.get("key1") == "response1"  # no ttl -> no expiry
 
+    def test_versioned_key_no_collision_across_version_key_boundary(self):
+        """A colon inside the version must not collide with the version/key join.
+
+        Regression for the unescaped ``f"{version}:{key}"`` encoding: ('b',
+        version='v1:a') and ('a:b', version='v1') both rendered 'v1:a:b', so the
+        second write clobbered the first and a reader got the wrong content.
+        With version-escaping the two keys are distinct.
+        """
+        cache = ExactCache(max_size=10)
+        cache.set("b", "VALUE_B", version="v1:a")
+        cache.set("a:b", "VALUE_AB", version="v1")
+
+        assert cache.get("b", version="v1:a") == "VALUE_B"
+        assert cache.get("a:b", version="v1") == "VALUE_AB"
+        assert cache.size() == 2  # two distinct entries, no overwrite
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

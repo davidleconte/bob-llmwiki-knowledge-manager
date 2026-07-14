@@ -23,9 +23,11 @@ L2 similarity threshold, and the L1/L2 enabled flags all take effect.
 
 Build a :class:`PromptOptimizer` from an :class:`OptimizerConfig`.
 
-``model``/``use_cache``/``track_costs`` are not part of ``OptimizerConfig``
-and are passed separately; the config's ``max_tokens``/``target_reduction``/
-``min_quality_score`` map 1:1 via :meth:`PromptOptimizer.from_config`.
+``model``/``use_cache``/``track_costs``/``cache`` are not part of
+``OptimizerConfig`` and are passed separately; the config's ``max_tokens``/
+``target_reduction``/``min_quality_score`` map 1:1 via
+:meth:`PromptOptimizer.from_config`. ``cache`` lets the facade share its
+config-built L1 so ``config.cache.l1`` governs the optimize() cache.
 
 
 ### `build_truncator() -> Truncator`

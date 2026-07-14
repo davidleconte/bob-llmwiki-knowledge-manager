@@ -1,5 +1,8 @@
 # ADR-008: Token Counting Method
 
+> ⚠️ **Metrics correction (2026-07-14).** Earlier drafts of this document cited fabricated token-savings/quality figures — "68.96%", "89.3%", "91.80%" — produced by a simulation that never invoked the optimizer. **Those figures are retracted.** The honest, measured figure is **~20% mean optimizer compression** on real prose (manifest-backed: `evaluation/results/validation-2026-07-14/`; see `STATUS.md` and `CHANGELOG.md`). Inline numbers below have been corrected where they appeared.
+
+
 **Status:** ✅ Accepted  
 **Date:** 2026-07-12  
 **Deciders:** Architecture Team, ML Engineer  
@@ -518,7 +521,7 @@ class TokenMetrics:
 - Providers: 3 supported
 
 **Production Validation:**
-- ✅ 89.3% token savings measured
+- ~20% token savings measured on real prose (see validation manifest; 89.3% figure retracted)
 - ✅ Consistent with actual usage
 - ✅ No accuracy complaints
 - ✅ Fast enough for real-time

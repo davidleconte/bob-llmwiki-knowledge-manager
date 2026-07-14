@@ -15,7 +15,7 @@ Two tiers are provided:
   prompts captured from live sessions. Skipped gracefully when absent.
 
 :func:`make_null_corpus` builds the shuffled/high-entropy null on which real
-compression must collapse to ~0% (the "shuffled-labels" analogue).
+compression must collapse to near zero (the "shuffled-labels" analogue).
 
 ## Functions
 
@@ -54,7 +54,7 @@ sha256 over the corpus contents (order-independent), for the manifest.
 Build the null corpus: each document's words shuffled, single-spaced.
 
 Shuffling destroys repeated phrases and collapses whitespace, so a correct
-optimizer should achieve ~0% real reduction here. The ``seed`` (recorded in
+optimizer should achieve near-zero real reduction here. The ``seed`` (recorded in
 the manifest) makes the shuffle reproducible.
 
 

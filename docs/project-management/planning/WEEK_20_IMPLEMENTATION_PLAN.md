@@ -1,5 +1,8 @@
 # Week 20 Implementation Plan - Production Readiness
 
+> ⚠️ **Frozen historical snapshot — retracted metrics.** This is a point-in-time planning/audit-trail document, preserved unedited below for the record. Any token-savings/quality figures it cites — e.g. "68.96%", "89.3%", "91.80%" — were **fabricated** (a simulation that never invoked the optimizer) and are **retracted**; the measured figure is ~20% optimizer compression (manifest-backed: `evaluation/results/validation-2026-07-14/`). See `STATUS.md` and `CHANGELOG.md` for current, provenance-backed numbers.
+
+
 **Planning Date**: July 12, 2026  
 **Status**: READY TO START  
 **Prerequisites**: Week 19 Complete (213/213 tests passing)

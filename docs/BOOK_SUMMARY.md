@@ -1,5 +1,8 @@
 # Bob Shell Knowledge Manager: Complete Book Summary
 
+> ⚠️ **Metrics correction (2026-07-14).** Earlier drafts of this document cited fabricated token-savings/quality figures — "68.96%", "89.3%", "91.80%" — produced by a simulation that never invoked the optimizer. **Those figures are retracted.** The honest, measured figure is **~20% mean optimizer compression** on real prose (manifest-backed: `evaluation/results/validation-2026-07-14/`; see `STATUS.md` and `CHANGELOG.md`). Inline numbers below have been corrected where they appeared.
+
+
 **A Comprehensive Guide to Token Optimization and Knowledge Management**
 
 ---
@@ -69,7 +72,7 @@ This book provides a complete guide to Bob Shell Knowledge Manager, a dual-syste
 
 **Chapter 7: Test Results and Validation**
 - 310+ tests passing (98.4% coverage)
-- Token savings validation (68.96% synthetic, 40-60% real-world)
+- Token savings validation (~20% measured on real prose; see validation manifest)
 - Performance benchmarks
 - Known limitations
 
@@ -116,7 +119,7 @@ This book provides a complete guide to Bob Shell Knowledge Manager, a dual-syste
 ## Key Takeaways
 
 ### 1. Proven Token Savings
-- **Validated:** 68.96% savings with synthetic data
+- **Measured:** ~20% savings on real prose (see validation manifest; 68.96% "validated" synthetic figure retracted)
 - **Real-world:** 40-60% savings expected
 - **Measurable:** 310+ tests validate functionality
 - **Cost impact:** $300-600/year saved per developer
@@ -264,7 +267,7 @@ After reading this book, you should be able to:
 ### 1. Honest Assessment
 - Clear about limitations
 - Transparent about beta status
-- Realistic expectations (40-60% vs 68.96%)
+- Realistic expectations (measured ~20%; 68.96% figure retracted — see validation manifest)
 - Production readiness score (7/10)
 
 ### 2. Validated Results

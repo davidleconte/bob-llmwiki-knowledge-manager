@@ -5,6 +5,27 @@ Base cache interface with version support.
 This module defines the abstract base class for all cache implementations,
 providing a common interface and version support for cache evolution.
 
+## Functions
+
+### `escape_version(version: str) -> str`
+
+Percent-escape ``version`` so it can never contain the ``:`` delimiter.
+
+Cache keys are built as ``f"{escape_version(version)}:{key}"``. Escaping the
+version's ``:`` (and the ``%`` escape char itself) makes that encoding
+*injective* over ``(version, key)`` pairs. Without it the raw
+``f"{version}:{key}"`` collides: ``set('b', version='v1:a')`` and
+``set('a:b', version='v1')`` both render ``'v1:a:b'``, so the second write
+silently overwrites the first and a reader gets the wrong content. Both L1
+(:class:`ExactCache`) and L2 (:class:`SemanticCache`) use this so their keys
+stay consistent (``MultiLevelCache.size()`` cross-hashes between them).
+
+
+### `unescape_version(escaped: str) -> str`
+
+Inverse of :func:`escape_version` (recovers the original version string).
+
+
 ## Classes
 
 ### `CacheEntry`

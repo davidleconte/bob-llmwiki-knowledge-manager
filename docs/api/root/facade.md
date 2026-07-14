@@ -2,11 +2,15 @@
 
 TokenOptimizer: the unified facade over the token-optimization system.
 
-Composes cache + optimizer + truncation + monitoring from a single
-:class:`~src.config.schema.ConfigSchema`, so callers (and the CLI) have one entry
-point instead of wiring each component by hand. Build it from the config
-singleton with :meth:`TokenOptimizer.from_config`, or pass an explicit
-``ConfigSchema``.
+Composes the cache, optimizer and truncator from a single
+:class:`~src.config.schema.ConfigSchema` and registers the monitoring health
+checks, so callers (and the CLI) have one entry point instead of wiring each
+component by hand. Build it from the config singleton with
+:meth:`TokenOptimizer.from_config`, or pass an explicit ``ConfigSchema``.
+
+Note: ``config.monitoring`` fields (``log_level``, ``metrics_enabled``,
+``health_check_interval``) are not yet applied by the facade -- monitoring is
+wired as health-check registration, not configured from ``MonitoringConfig``.
 
 The facade holds no business logic of its own: every operation delegates to an
 already-tested component method. It is the first place cache + optimizer +
@@ -20,8 +24,13 @@ Unified facade composing the optimizer, caches, truncator and monitoring.
 
 Attributes:
     config: The ``ConfigSchema`` the components were built from.
-    cache: A ``MultiLevelCache`` built from ``config.cache``.
-    optimizer: A ``PromptOptimizer`` built from ``config.optimizer``.
+    cache: A ``MultiLevelCache`` built from ``config.cache``. Its L1 (exact)
+        level is the *same* instance the optimizer uses for optimize()
+        caching, so ``config.cache.l1`` governs both and they are not
+        disjoint; L2 (semantic) is exercised only through this ``cache``
+        surface directly (optimize() uses L1 only, by design).
+    optimizer: A ``PromptOptimizer`` built from ``config.optimizer``, sharing
+        this facade's L1 cache.
     truncator: A ``Truncator``.
 
 #### Methods

@@ -43,12 +43,28 @@ class DocumentationAgent(SubAgent):
     def analyze(self, task: SubAgentTask) -> SubAgentResult:
         target = task.target
 
+        # Contain the untrusted task.target within the working directory *before*
+        # any filesystem traversal: a '../' sequence or an absolute path must not
+        # let rglob() walk outside the project tree. This is the delegation-side
+        # enforcement the STRIDE threat model (docs/security/THREAT_MODEL.md)
+        # relies on; BatchFileReader re-checks each resolved file as well.
+        from pathlib import Path
+
+        from src.tools.safe_paths import resolve_within
+
+        try:
+            target_path = resolve_within(Path.cwd(), target)
+        except ValueError:
+            return SubAgentResult(
+                agent_id=self.agent_id,
+                agent_type=self.agent_type,
+                status=SubAgentStatus.FAILED,
+                data={},
+                errors=[f"Invalid target path (escapes working directory): {target}"],
+            )
+
         try:
             # Read files to analyze documentation
-            from pathlib import Path
-
-            target_path = Path(target)
-
             if target_path.is_file():
                 files = [str(target_path)]
             else:

@@ -1,5 +1,8 @@
 # ADR-011: Monitoring and Observability Approach
 
+> ⚠️ **Metrics correction (2026-07-14).** Earlier drafts of this document cited fabricated token-savings/quality figures — "68.96%", "89.3%", "91.80%" — produced by a simulation that never invoked the optimizer. **Those figures are retracted.** The honest, measured figure is **~20% mean optimizer compression** on real prose (manifest-backed: `evaluation/results/validation-2026-07-14/`; see `STATUS.md` and `CHANGELOG.md`). Inline numbers below have been corrected where they appeared.
+
+
 **Status:** ✅ Accepted  
 **Date:** 2026-07-12  
 **Deciders:** Architecture Team, SRE Engineer  
@@ -710,7 +713,7 @@ class AlertManager:
 **Production Validation:**
 - ✅ Detected 5 performance issues
 - ✅ Debugged 12 errors using logs
-- ✅ Tracked 89.3% token savings
+- ✅ Tracked token savings (~20% measured; see validation manifest — 89.3% retracted)
 - ✅ Alerted on 3 incidents
 - ✅ Easy to analyze
 
@@ -718,7 +721,7 @@ class AlertManager:
 ```
 From metrics:
 - 23.33% cache hit rate
-- 89.3% token savings
+- ~20% token savings (measured; see validation manifest — 89.3% retracted)
 - <100ms p95 latency
 - 0.1% error rate
 

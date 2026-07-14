@@ -1,5 +1,8 @@
 # Multi-Level Caching
 
+> ⚠️ **Metrics correction (2026-07-14).** Earlier drafts of this document cited fabricated token-savings/quality figures — "68.96%", "89.3%", "91.80%" — produced by a simulation that never invoked the optimizer. **Those figures are retracted.** The honest, measured figure is **~20% mean optimizer compression** on real prose (manifest-backed: `evaluation/results/validation-2026-07-14/`; see `STATUS.md` and `CHANGELOG.md`). Inline numbers below have been corrected where they appeared.
+
+
 ## Overview
 Multi-level caching is a hierarchical caching strategy that combines multiple cache layers with different performance characteristics to optimize both speed and hit rate. The Token Optimization System implements a two-tier cache (L1 and L2) with automatic promotion to balance exact matching speed with semantic similarity flexibility.
 

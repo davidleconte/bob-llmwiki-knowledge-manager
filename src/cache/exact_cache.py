@@ -15,7 +15,7 @@ import time
 from collections import OrderedDict
 from typing import Any, Callable, Dict, Optional
 
-from src.cache.base import CacheEntry, CacheInterface, CacheStats
+from src.cache.base import CacheEntry, CacheInterface, CacheStats, escape_version
 from src.monitoring import get_logger, get_metrics_collector
 
 
@@ -100,7 +100,9 @@ class ExactCache(CacheInterface):
         """
         if version is None:
             version = self.VERSION
-        return f"{version}:{key}"
+        # Escape the version so a colon inside it cannot be confused with the
+        # version/key delimiter (injective encoding -- see escape_version).
+        return f"{escape_version(version)}:{key}"
 
     def _hash_key(self, key: str) -> str:
         """Generate SHA-256 hash of key.

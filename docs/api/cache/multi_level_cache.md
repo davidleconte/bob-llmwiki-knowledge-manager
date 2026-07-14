@@ -10,9 +10,9 @@ L2 hits are promoted to L1 for future fast access.
 
 Target metrics:
 - Overall lookup latency: <100ms
-- Combined hit rate: 23.33%
-- L1 hit rate: ~15-18%
-- L2 hit rate: ~5-8%
+- Hit rates are workload-dependent, measured per run by the Phase-5 validation
+  harness -- not fixed targets. The old "23.33% combined / 15-18% L1 / 5-8% L2"
+  figures were never validated and are retired.
 
 ## Classes
 

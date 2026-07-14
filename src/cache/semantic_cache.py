@@ -6,7 +6,8 @@ cosine similarity. Provides approximate matches for semantically similar prompts
 Target metrics:
 - Lookup latency: <100ms
 - Similarity threshold: 0.85 (configurable)
-- Hit rate contribution: ~5-8% of total 23.33%
+- Hit rate is workload-dependent, measured per run by the Phase-5 validation
+  harness -- not a fixed target. The old "~5-8% of 23.33%" figure is retired.
 """
 
 import threading
@@ -15,7 +16,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 
-from src.cache.base import CacheEntry, CacheInterface, CacheStats
+from src.cache.base import CacheEntry, CacheInterface, CacheStats, escape_version, unescape_version
 from src.cache.embeddings import EmbeddingGenerator, cosine_similarity_vectors
 from src.monitoring import get_logger, get_metrics_collector
 
@@ -126,7 +127,10 @@ class SemanticCache(CacheInterface):
         """
         if version is None:
             version = self.VERSION
-        return f"{version}:{key}"
+        # Escape the version's colons so the version/key split is unambiguous
+        # and keys stay injective (see escape_version); L1 does the same, which
+        # keeps MultiLevelCache.size()'s cross-cache key hashing consistent.
+        return f"{escape_version(version)}:{key}"
 
     def _extract_base_key(self, versioned_key: str) -> str:
         """Extract base key from versioned key.
@@ -151,7 +155,7 @@ class SemanticCache(CacheInterface):
             Version string
         """
         if ":" in versioned_key:
-            return versioned_key.split(":", 1)[0]
+            return unescape_version(versioned_key.split(":", 1)[0])
         return self.VERSION
 
     def get(self, key: str, version: Optional[str] = None) -> Optional[str]:

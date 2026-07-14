@@ -60,8 +60,19 @@ DEPRECATION_SCAN_LINES = 15
 # live claim (case-insensitive substring match).
 FORBIDDEN_MATURITY = ("All Phases Complete",)
 
+# Assertions that were true pre-remediation but are now false. The code + the
+# CHANGELOG "Fixed" section are the home for what is fixed; a live doc must not
+# contradict them. ("correctness bugs remain open" was STATUS.md's own stale
+# claim -- C1-C7 + the RLock deadlock are fixed with revert-tested regressions.)
+FORBIDDEN_STALE_CLAIMS = ("correctness bugs remain open",)
+
 # The canonical maturity string that STATUS.md must continue to assert.
 CANONICAL_STATUS = "Not Production Ready"
+
+# The delegation per-package coverage floor is cited in prose (AGENTS.md); its
+# single home is scripts/check_coverage_by_package.py. This catches the stale
+# "~54%" that contradicted the real 52.0.
+_FLOOR_CLAIM = re.compile(r"(\d+(?:\.\d+)?)\s*%\s*per-package(?:\s+coverage)?\s+floor")
 
 # Gate-shaped coverage assertions. Deliberately NOT "any % on a coverage line":
 # a measured snapshot ("82.5% coverage as of ...") is legitimate and must not
@@ -83,6 +94,18 @@ def read_fail_under() -> int:
             "in pyproject.toml -- the coverage gate has no single home."
         )
     return int(m.group(1))
+
+
+def read_delegation_floor() -> float:
+    """Read the delegation per-package coverage floor from its single home."""
+    text = (REPO_ROOT / "scripts" / "check_coverage_by_package.py").read_text(encoding="utf-8")
+    m = re.search(r'"src/delegation"\s*:\s*(\d+(?:\.\d+)?)', text)
+    if not m:
+        raise SystemExit(
+            "ERROR: could not find the src/delegation floor in "
+            "scripts/check_coverage_by_package.py -- it has no single home."
+        )
+    return float(m.group(1))
 
 
 def is_deprecated(text: str) -> bool:
@@ -109,8 +132,10 @@ def gate_claims(text: str) -> list[tuple[int, float, str]]:
 
 def main() -> int:
     fail_under = read_fail_under()
+    delegation_floor = read_delegation_floor()
     failures: list[str] = []
     print(f"Single-home coverage gate (pyproject.toml fail_under): {fail_under}%")
+    print(f"Single-home delegation floor (check_coverage_by_package.py): {delegation_floor:g}%")
     print("Checking live status docs:\n")
 
     for rel in LIVE_DOCS:
@@ -140,6 +165,25 @@ def main() -> int:
                 problems.append(
                     f"    forbidden maturity claim present: {phrase!r} (defer to STATUS.md)"
                 )
+
+        # (2b) forbidden stale correctness claims
+        for phrase in FORBIDDEN_STALE_CLAIMS:
+            if phrase.lower() in low:
+                problems.append(
+                    f"    forbidden stale claim present: {phrase!r} "
+                    "(those bugs are fixed -- see CHANGELOG.md -> Fixed)"
+                )
+
+        # (2c) delegation coverage-floor consistency (one home per value)
+        for line_no, line in enumerate(text.splitlines(), start=1):
+            for m in _FLOOR_CLAIM.finditer(line):
+                value = float(m.group(1))
+                if value != delegation_floor:
+                    problems.append(
+                        f"    L{line_no}: cites per-package coverage floor {value:g}% != "
+                        f"{delegation_floor:g}% (scripts/check_coverage_by_package.py)\n"
+                        f"        {line.strip()}"
+                    )
 
         if problems:
             failures.append(rel)

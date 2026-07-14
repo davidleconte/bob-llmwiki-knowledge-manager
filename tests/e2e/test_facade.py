@@ -107,3 +107,35 @@ class TestTokenOptimizerFacade:
         assert facade.cache.l2_cache.max_size == 4567
         assert facade.optimizer.max_tokens == 2048
         assert facade.optimizer.target_reduction == 0.25
+
+    def test_optimizer_shares_facade_l1_cache(self):
+        """optimize() uses the facade's config-built L1, not a disjoint cache.
+
+        Regression: the facade built a config-driven MultiLevelCache while the
+        optimizer built its own separate ExactCache, so ``config.cache.l1`` was
+        inert for the optimize() path. They must now be one shared instance.
+        """
+        schema = ConfigSchema(
+            cache=CacheConfig(l1_max_size=321, l2_max_size=9999),
+            optimizer=OptimizerConfig(),
+            monitoring=MonitoringConfig(),
+        )
+        facade = TokenOptimizer(config=schema)
+
+        # Same instance => config.cache.l1 governs the optimize cache.
+        assert facade.optimizer.cache is facade.cache.get_l1_cache()
+        assert facade.optimizer.cache.max_size == 321
+
+        # A cached optimize() result is visible through the shared L1.
+        facade.optimize("hello   world   hello   world")
+        assert facade.cache.get_l1_cache().size() >= 1
+
+    def test_l1_disabled_disables_optimizer_cache(self):
+        """config.cache.l1_enabled=False turns off the optimize() cache too."""
+        schema = ConfigSchema(
+            cache=CacheConfig(l1_enabled=False),
+            optimizer=OptimizerConfig(),
+            monitoring=MonitoringConfig(),
+        )
+        facade = TokenOptimizer(config=schema)
+        assert facade.optimizer.cache is None

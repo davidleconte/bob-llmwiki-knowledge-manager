@@ -1,6 +1,9 @@
 # Knowledge Base Index
 
-Last Updated: 2026-07-13
+> ⚠️ **Metrics correction (2026-07-14).** Earlier drafts of this document cited fabricated token-savings/quality figures — "68.96%", "89.3%", "91.80%" — produced by a simulation that never invoked the optimizer. **Those figures are retracted.** The honest, measured figure is **~20% mean optimizer compression** on real prose (manifest-backed: `evaluation/results/validation-2026-07-14/`; see `STATUS.md` and `CHANGELOG.md`). Inline numbers below have been corrected where they appeared.
+
+
+Last Updated: 2026-07-14
 
 ## Quick Navigation
 - [Concepts](./concepts/) - Core concepts and definitions
@@ -9,7 +12,8 @@ Last Updated: 2026-07-13
 - [Research](./research/) - Research notes and findings
 
 ## Recent Additions
-- 2026-07-13: [Institutional Software Vendor Evaluation](./research/institutional-vendor-evaluation.md) - Research ⭐ NEW
+- 2026-07-14: [Comprehensive Codebase Analysis](./research/codebase-analysis-2026-07-14.md) - Research ⭐ NEW
+- 2026-07-13: [Institutional Software Vendor Evaluation](./research/institutional-vendor-evaluation.md) - Research
 - 2026-07-13: [Phase 3 Monitoring Lessons Learned](./research/phase3-monitoring-lessons-learned.md) - Research
 - 2026-07-13: [Phase 3 Real-Time Monitoring Implementation](./research/phase3-real-time-monitoring-implementation.md) - Research
 - 2026-07-13: [Phase 3 Day 3-4 Parallel Work](./research/phase3-day3-4-parallel-work.md) - Research
@@ -45,6 +49,7 @@ Last Updated: 2026-07-13
 ### Concepts
 - [Multi-Level Caching](./concepts/multi-level-caching.md) - Hierarchical caching strategy combining L1 (exact match) and L2 (semantic similarity) caches with automatic promotion
 - [Token Optimization](./concepts/token-optimization.md) - Systematic approach to reducing LLM token consumption through caching, optimization, and truncation
+- [Dependency Analysis](./concepts/dependency-analysis.md) - Python dependency inventory with security audit and recommendations for dependency management
 
 ### Guides
 - [Real-Time Monitoring Guide](./guides/real-time-monitoring-guide.md) - Complete guide for real-time session monitoring and quality validation during data collection ⭐ NEW
@@ -74,6 +79,8 @@ Last Updated: 2026-07-13
 - [Cache API Reference](./references/cache-api.md) - Complete API documentation for all cache classes, methods, and usage examples
 
 ### Research
+- [Comprehensive Codebase Analysis 2026-07-14](./research/codebase-analysis-2026-07-14.md) - Complete repository analysis: dual system architecture, code quality metrics, testing analysis, documentation assessment, known issues, and production readiness evaluation
+- [Institutional Codebase & Documentation Audit 2026-07-13](./research/audit-2026-07-13-institutional.md) - MECE 7-dimension audit against institutional standards: product integrity, architecture, correctness, testing, supply-chain, documentation, governance with weighted D- grade and remediation roadmap
 - [Phase 3 Additional Work Lessons Learned](./research/phase3-additional-work-lessons-learned.md) - Lessons from additional work: user guide creation, pragmatic testing approach, template-driven reporting, 6 hours investment, 2,800+ lines delivered
 - [Phase 3 Day 3-4 Parallel Work](./research/phase3-day3-4-parallel-work.md) - Analysis & reporting tools: statistical analysis (600+ lines), visualization (530+ lines), automated testing (330+ lines), workflow automation (300+ lines), ready for real-world data
 - [Phase 3 Day 1-2 Validation Framework](./research/phase3-day1-2-validation-framework.md) - Complete validation framework implementation: session tracker (18KB), savings measurement demo (14KB), automated scripts, ready for baseline measurements

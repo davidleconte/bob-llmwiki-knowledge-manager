@@ -18,6 +18,7 @@ from src.pricing import DEFAULT_MODEL
 from src.truncation.truncator import Truncator
 
 if TYPE_CHECKING:
+    from src.cache.exact_cache import ExactCache
     from src.config.schema import CacheConfig, OptimizerConfig
 
 
@@ -44,15 +45,18 @@ def build_optimizer(
     model: str = DEFAULT_MODEL,
     use_cache: bool = True,
     track_costs: bool = False,
+    cache: "ExactCache | None" = None,
 ) -> PromptOptimizer:
     """Build a :class:`PromptOptimizer` from an :class:`OptimizerConfig`.
 
-    ``model``/``use_cache``/``track_costs`` are not part of ``OptimizerConfig``
-    and are passed separately; the config's ``max_tokens``/``target_reduction``/
-    ``min_quality_score`` map 1:1 via :meth:`PromptOptimizer.from_config`.
+    ``model``/``use_cache``/``track_costs``/``cache`` are not part of
+    ``OptimizerConfig`` and are passed separately; the config's ``max_tokens``/
+    ``target_reduction``/``min_quality_score`` map 1:1 via
+    :meth:`PromptOptimizer.from_config`. ``cache`` lets the facade share its
+    config-built L1 so ``config.cache.l1`` governs the optimize() cache.
     """
     return PromptOptimizer.from_config(
-        config, model=model, use_cache=use_cache, track_costs=track_costs
+        config, model=model, use_cache=use_cache, track_costs=track_costs, cache=cache
     )
 
 

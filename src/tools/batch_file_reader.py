@@ -6,7 +6,7 @@ Efficiently reads multiple files with different strategies
 
 import json
 from pathlib import Path
-from typing import Dict, List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from src.tools.safe_paths import resolve_within
 
@@ -25,7 +25,7 @@ class BatchFileReader:
         strategy: Strategy = "full",
         search_pattern: Optional[str] = None,
         max_lines_per_file: int = 1000,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Read multiple files with specified strategy
 
