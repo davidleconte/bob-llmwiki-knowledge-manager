@@ -1,5 +1,10 @@
 # Token Optimization System - Documentation Index
 
+> **Looking for the docs?** The primary entry point is now the Diátaxis-organized
+> **[documentation home](README.md)** (Tutorials · How-to · Reference · Explanation).
+> This page is the older exhaustive index, kept for completeness; some figures
+> below are dated — the canonical status is always [`STATUS.md`](../STATUS.md).
+
 **Version:** 2.0  
 **Last Updated:** 2026-07-12  
 **Status:** Beta — Not Production Ready (remediation in progress; see [Institutional Audit 2026-07-13](knowledge-base/research/audit-2026-07-13-institutional.md))
@@ -260,7 +265,7 @@ See [API Reference](api/README.md) for details.
 
 1. **Installation**
    ```bash
-   pip install -r requirements.txt
+   pip install -e ".[dev,monitoring]"
    ```
 
 2. **Basic Usage**
