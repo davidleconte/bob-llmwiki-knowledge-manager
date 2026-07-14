@@ -102,9 +102,7 @@ REGISTRY: tuple[ValueHome, ...] = (
         name="security_supported_line",
         file="pyproject.toml",
         pattern=r'(?m)^\s*version\s*=\s*"(\d+\.\d+)',
-        mirrors=(
-            Mirror("SECURITY.md", "contains", "{value}.x", "supported-versions table"),
-        ),
+        mirrors=(Mirror("SECURITY.md", "contains", "{value}.x", "supported-versions table"),),
     ),
     # Supported-Python floor. Canonical: pyproject requires-python. The "kept in
     # sync" claims in CI/README/AGENTS were enforced only by hand until now.

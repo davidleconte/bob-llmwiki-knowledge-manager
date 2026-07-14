@@ -41,7 +41,5 @@ def resolve_within(base: Path, untrusted: str) -> Path:
     base_resolved = base.resolve()
     candidate = (base_resolved / untrusted).resolve()
     if not candidate.is_relative_to(base_resolved):
-        raise ValueError(
-            f"Path escapes the base directory {base_resolved}: {untrusted!r}"
-        )
+        raise ValueError(f"Path escapes the base directory {base_resolved}: {untrusted!r}")
     return candidate
