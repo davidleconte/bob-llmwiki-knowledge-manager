@@ -1,9 +1,15 @@
 # Unified System Architecture
 
-**Document Type:** Master Architecture Reference  
+> **⚠️ SUPERSEDED / DEPRECATED (2026-07-14).** This document predates the Phase-4
+> facade and no longer describes the running system — it still asserts the two
+> systems are "NOT integrated" and cites ~49% coverage. The single authoritative
+> architecture document is now [`ARCHITECTURE.md`](ARCHITECTURE.md). This file is
+> kept as a point-in-time record; do not treat it as current.
+
+**Document Type:** Master Architecture Reference (superseded)  
 **Version:** 2.0  
 **Last Updated:** July 13, 2026  
-**Status:** Current - Post Phase 5 Reconciliation  
+**Status:** DEPRECATED — superseded by [ARCHITECTURE.md](ARCHITECTURE.md)  
 **Owner:** Architecture Team
 
 ---

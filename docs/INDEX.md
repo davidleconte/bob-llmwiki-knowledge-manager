@@ -10,7 +10,7 @@
 
 - [README](../README.md) - Project overview and getting started
 - [CHANGELOG](../CHANGELOG.md) - Version history and changes
-- [Actual System Architecture](architecture/ACTUAL_SYSTEM_ARCHITECTURE.md) - Current implementation details
+- [Architecture](architecture/ARCHITECTURE.md) - Authoritative system architecture
 - [Project Status](project-management/PROJECT_STATUS.md) - Current project status
 - [API Reference](api/README.md) - Complete API documentation
 - [Monitoring Guide](MONITORING.md) - Observability and metrics
@@ -64,19 +64,19 @@
 
 #### Current Architecture
 
-- **[Actual System Architecture](architecture/ACTUAL_SYSTEM_ARCHITECTURE.md)** ⭐
-  - Current implementation details
-  - Component specifications
-  - Technology stack
-  - Performance characteristics
+- **[Architecture](architecture/ARCHITECTURE.md)** ⭐ — the single authoritative
+  architecture document: components, runtime dataflow, config→runtime, and the
+  validation harness, with mermaid diagrams.
 
-#### Legacy Architecture (Deprecated)
+#### Superseded / Deprecated
 
+- **[Actual System Architecture](architecture/ACTUAL_SYSTEM_ARCHITECTURE.md)** — v1.0, superseded by ARCHITECTURE.md
+- **[Unified Architecture](architecture/UNIFIED_ARCHITECTURE.md)** — v2.0, superseded (predates the Phase-4 facade)
 - **[Master Architecture](architecture/MASTER.md)** - Original design (deprecated)
 - **[Quality Attributes](architecture/QUALITY_ATTRIBUTES.md)** - Quality goals (deprecated)
 - **[Documentation Plan](architecture/DOCUMENTATION_PLAN.md)** - Planning doc (deprecated)
 
-**Note:** Legacy architecture documents describe a different system. Refer to ACTUAL_SYSTEM_ARCHITECTURE.md for current implementation.
+**Note:** the deprecated documents describe an earlier or planned system. Refer to [ARCHITECTURE.md](architecture/ARCHITECTURE.md) for the current implementation.
 
 ### 3. API Reference
 
@@ -235,7 +235,7 @@ See [API Reference](api/README.md) for details.
 ### Developers
 1. Start with [Quick Start](QUICK_START.md)
 2. Review [API Reference](api/README.md)
-3. Check [Actual Architecture](architecture/ACTUAL_SYSTEM_ARCHITECTURE.md)
+3. Check the [Architecture](architecture/ARCHITECTURE.md)
 4. See [Usage Guide](USAGE.md) for examples
 
 ### DevOps/SRE
@@ -245,7 +245,7 @@ See [API Reference](api/README.md) for details.
 4. Review metrics in [Metrics API](api/monitoring/metrics.md)
 
 ### Architects
-1. Read [Actual Architecture](architecture/ACTUAL_SYSTEM_ARCHITECTURE.md)
+1. Read the [Architecture](architecture/ARCHITECTURE.md)
 2. Review [ADRs](adr/README.md)
 3. Check component specifications in [API docs](api/README.md)
 
