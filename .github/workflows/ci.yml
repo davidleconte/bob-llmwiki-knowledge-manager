@@ -212,11 +212,13 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
-      - name: Install project + SBOM/audit tools
+      - name: Install project + SBOM/audit tools (incl. uv for lock ops)
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev,monitoring]"
-          pip install cyclonedx-bom pip-audit
+          pip install cyclonedx-bom pip-audit uv
+      - name: Verify uv.lock is in sync with pyproject (reproducible closure)
+        run: uv lock --check
       - name: Generate CycloneDX SBOM (installed environment)
         run: cyclonedx-py environment -o sbom.cdx.json
       - name: Upload SBOM artifact
@@ -224,7 +226,12 @@ jobs:
         with:
           name: sbom-cyclonedx
           path: sbom.cdx.json
-      - name: Dependency vulnerability audit (non-blocking during Phase 3)
-        # Report-only for now; flip to blocking once the environment is clean.
-        continue-on-error: true
-        run: pip-audit
+      - name: Export the locked dependency closure
+        # Audit the deterministic uv.lock closure, not the '>=' floors the jobs
+        # install on -- so the CVE gate is reproducible and lock-pinned (Phase 8,
+        # closing the "CI never installs from uv.lock" supply-chain residual).
+        run: uv export --frozen --no-emit-project --format requirements-txt --output-file requirements.lock.txt
+      - name: Dependency vulnerability audit (BLOCKING, against the locked closure)
+        # Was continue-on-error in Phase 3; the locked closure is clean (0 CVEs),
+        # so this is now a blocking gate that fails the build on any new CVE.
+        run: pip-audit --requirement requirements.lock.txt

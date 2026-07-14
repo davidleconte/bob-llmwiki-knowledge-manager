@@ -96,12 +96,12 @@ omit = [
     "*/test_*.py",
     "*/__pycache__/*",
     "*/site-packages/*",
-    # src/tools/ holds operational CLI utilities relocated out of scripts/ in
-    # Phase 4 to kill the src->scripts layering violation (B3). They are tooling,
-    # not runtime library code, and were never under the coverage gate while they
-    # lived in scripts/; excluding them preserves that honest status quo rather
-    # than adding ~1.3k LOC of untested CLI code to the denominator.
-    "*/tools/*",
+    # src/tools/ is now IN the gated denominator (Phase 8). It was excluded while
+    # its handlers were shallowly tested, but src/tools holds the untrusted-path
+    # handlers (kb_query / batch_file_reader / component_analyzer) reached via each
+    # tool's CLI and the delegation task.target -- the most security-relevant code
+    # to leave unmeasured. Behavioral tests (tests/tools/) brought it to ~94%, and
+    # scripts/check_coverage_by_package.py pins a per-package floor so it can't rot.
 ]
 
 [tool.coverage.report]

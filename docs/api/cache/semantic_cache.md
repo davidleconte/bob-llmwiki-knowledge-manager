@@ -8,7 +8,8 @@ cosine similarity. Provides approximate matches for semantically similar prompts
 Target metrics:
 - Lookup latency: <100ms
 - Similarity threshold: 0.85 (configurable)
-- Hit rate contribution: ~5-8% of total 23.33%
+- Hit rate is workload-dependent, measured per run by the Phase-5 validation
+  harness -- not a fixed target. The old "~5-8% of 23.33%" figure is retired.
 
 ## Classes
 

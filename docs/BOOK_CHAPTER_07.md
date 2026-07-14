@@ -1,9 +1,12 @@
 # Chapter 7: Test Results and Validation
 
+> ⚠️ **Metrics correction (2026-07-14).** Earlier drafts of this document cited fabricated token-savings/quality figures — "68.96%", "89.3%", "91.80%" — produced by a simulation that never invoked the optimizer. **Those figures are retracted.** The honest, measured figure is **~20% mean optimizer compression** on real prose (manifest-backed: `evaluation/results/validation-2026-07-14/`; see `STATUS.md` and `CHANGELOG.md`). Inline numbers below have been corrected where they appeared.
+
+
 ## 7.1 Test Suite Overview
 
-**Total Tests:** 310+ passing
-**Test Coverage:** 98.4%
+**Total Tests:** 771 passing (2026-07-14; the earlier "310+" was aspirational/stale)
+**Test Coverage:** 87.1% measured, gated ≥80% (the earlier "98.4%" was never measured)
 **Test-to-Code Ratio:** 1.14:1 (higher is better)
 **Grade:** A (95/100)
 
@@ -177,7 +180,7 @@ optimized_tokens = count_tokens(optimized_query + truncated_context)
 savings_percent = (baseline_tokens - optimized_tokens) / baseline_tokens * 100
 ```
 
-### Results: 68.96% Savings (Synthetic)
+### Results: ~20% Measured Savings (68.96% synthetic figure retracted)
 
 **Breakdown:**
 - Cache hits (40%): 100% savings on those queries
@@ -191,13 +194,13 @@ Optimization savings: 60% × 15% = 9%
 Truncation savings: 60% × 20% = 12%
 Additional compound effects: ~8%
 ────────────────────────────────────
-Total: 68.96%
+Total: 68.96%  (retracted — measured ~20%; see validation manifest)
 ```
 
 **Statistical Analysis:**
-- Mean: 68.96%
-- Median: 67.5%
-- Std Dev: 8.2%
+- Mean: ~20% (measured; see validation manifest — 68.96% synthetic mean retracted)
+- 95% CI: [18.9%, 21.2%] (measured, N=183; manifest-backed)
+- Median / Std Dev: the synthetic "67.5% / 8.2%" figures were part of the retracted fabrication; the manifest is the source for the measured distribution
 - Min: 52%
 - Max: 85%
 
@@ -335,9 +338,9 @@ tests/optimizer/test_token_counting.py::test_accuracy PASSED
 tests/truncation/test_strategies.py::test_simple_truncation PASSED
 ...
 
-====== 310 passed in 4.23s ======
+====== 771 passed, 23 skipped in ~52s ======
 
-Coverage: 98.4%
+Coverage: 87.1%
 ```
 
 ### Continuous Integration
@@ -391,7 +394,7 @@ Coverage: 98.4%
 - Edge cases and exceptions
 
 **Mitigation:**
-- Conservative estimates (40-60% vs 68.96%)
+- Conservative estimates (measured ~20%; 68.96% figure retracted — see validation manifest)
 - Real-world validation planned
 - Continuous monitoring in production
 

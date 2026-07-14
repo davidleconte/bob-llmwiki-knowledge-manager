@@ -430,16 +430,18 @@ def main():
     if args.output == "json":
         print(json.dumps(result, indent=2))
     else:
+        # Error dicts (missing component, path-escape) carry only "error" -- check
+        # for it before printing the header, which reads component/type/etc.
+        if "error" in result:
+            print(f"\nError: {result['error']}")
+            return
+
         print(f"\n{'=' * 80}")
         print(f"Component Analysis: {result['component']}")
         print(
             f"Type: {result['type']} | Analysis: {result['analysis_type']} | Depth: {result['depth']}"
         )
         print("=" * 80)
-
-        if "error" in result:
-            print(f"\nError: {result['error']}")
-            return
 
         # Print security results
         if "security" in result:

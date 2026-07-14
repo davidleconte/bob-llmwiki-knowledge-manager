@@ -98,10 +98,11 @@ The repository grew a second system alongside the Bash KB manager: a Python
   `check_community_health.py` CI gate.
 
 ### Changed
-- **Savings are measured, not asserted.** Optimizer compression measures ~20%
-  mean savings on real in-repo prose (95% CI ≈ [19%, 21%], N=183; manifest:
-  `evaluation/results/validation-2026-07-14/`); cache recompute-avoidance and
-  lossy truncation are reported **separately**, never blended into one headline.
+- **Savings are measured, not asserted.** Optimizer compression measures a
+  manifest-backed ~20% mean savings on real in-repo prose (95% CI ≈ [19%, 21%],
+  N=183; manifest: `evaluation/results/validation-2026-07-14/`); cache
+  recompute-avoidance and lossy truncation are reported **separately**, never
+  blended into one headline.
 - **One home per value.** Model pricing, the coverage gate, the package version,
   the supported-Python floor, and the maturity status each have one canonical
   source, enforced in CI.

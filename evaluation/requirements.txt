@@ -1,3 +1,10 @@
+# NOTE (single-home discipline): this is NOT the project's dependency source.
+# The package's runtime/dev dependencies live once in pyproject.toml and are
+# pinned in uv.lock (the reproducible closure CI audits). This file lists only
+# the OPTIONAL, analysis-only tooling for the ad-hoc adversarial-review scripts
+# under evaluation/; it is intentionally separate, and is not installed by CI,
+# by the test suite, or by the package.
+#
 # Adversarial Review Framework Dependencies
 # Install with: pip install -r requirements.txt
 # Or with conda + uv: conda run -n ENV_NAME uv pip install -r requirements.txt

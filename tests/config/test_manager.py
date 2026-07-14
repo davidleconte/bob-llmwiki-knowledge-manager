@@ -158,6 +158,28 @@ class TestConfigManager:
         assert config_manager.get("optimizer.max_tokens") == 16384
         assert config_manager.get("monitoring.log_level") == "WARNING"
 
+    def test_load_from_env_rejects_invalid_values(self, config_manager):
+        """Env loading must validate like update()/load_from_file().
+
+        Regression: load_from_env() previously merged without validating, so an
+        out-of-range value was accepted silently. It must now raise and leave the
+        existing config untouched.
+        """
+        original = config_manager.get("cache.l1.max_size")
+
+        with patch.dict(os.environ, {"CONFIG_CACHE__L1__MAX_SIZE": "0"}):
+            with pytest.raises(ValidationError):
+                config_manager.load_from_env()
+
+        # Rejected atomically: the bad value did not leak into the live config.
+        assert config_manager.get("cache.l1.max_size") == original
+
+    def test_load_from_env_rejects_negative_max_tokens(self, config_manager):
+        """A negative optimizer.max_tokens from the environment is rejected."""
+        with patch.dict(os.environ, {"CONFIG_OPTIMIZER__MAX_TOKENS": "-5"}):
+            with pytest.raises(ValidationError):
+                config_manager.load_from_env()
+
     def test_update_configuration(self, config_manager):
         """Test runtime configuration updates."""
         updates = {

@@ -1,5 +1,8 @@
 # Bob Shell Knowledge Manager - Complete Design Document
 
+> ⚠️ **Metrics correction (2026-07-14).** Earlier drafts of this document cited fabricated token-savings/quality figures — "68.96%", "89.3%", "91.80%" — produced by a simulation that never invoked the optimizer. **Those figures are retracted.** The honest, measured figure is **~20% mean optimizer compression** on real prose (manifest-backed: `evaluation/results/validation-2026-07-14/`; see `STATUS.md` and `CHANGELOG.md`). Inline numbers below have been corrected where they appeared.
+
+
 **Document Type:** Comprehensive System Design  
 **Framework:** McKinsey MECE (Mutually Exclusive, Collectively Exhaustive)  
 **Version:** 1.0  
@@ -213,7 +216,7 @@ Both systems work independently but complement each other:
 
 **Pending Validation (Week 20):**
 
-⏳ **Token Savings:** 40-60% (target, validated 68.96% on synthetic data)  
+⏳ **Token Savings:** ~20% measured on real prose (see validation manifest; 68.96% "validated synthetic" figure retracted)  
 ⏳ **Quality Preservation:** 90%+ (target)  
 ⏳ **Cache Hit Rate:** 23.33% (target: L1 15-18%, L2 5-8%)  
 ⏳ **Production Readiness:** 7/10 → 9/10 (after hardening)
@@ -222,7 +225,7 @@ Both systems work independently but complement each other:
 
 | Metric | Target | Achieved | Status |
 |--------|--------|----------|--------|
-| Token Savings | 40-60% | 68.96% (synthetic) | ⏳ Pending real-world |
+| Token Savings | 40-60% | ~20% (measured; manifest) | ⏳ Pending real-world |
 | L1 Cache Hit Rate | 15-18% | TBD | ⏳ Pending production |
 | L2 Cache Hit Rate | 5-8% | TBD | ⏳ Pending production |
 | L1 Latency | <1ms | <1ms | ✅ Validated |

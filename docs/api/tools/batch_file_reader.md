@@ -21,7 +21,7 @@ Reads multiple files efficiently with different strategies
 ##### `__init__(base_path: str)`
 
 
-##### `read_files(file_paths: List[str], strategy: Strategy, search_pattern: Optional[str], max_lines_per_file: int) -> Dict[str, any]`
+##### `read_files(file_paths: List[str], strategy: Strategy, search_pattern: Optional[str], max_lines_per_file: int) -> Dict[str, Any]`
 
 Read multiple files with specified strategy
 

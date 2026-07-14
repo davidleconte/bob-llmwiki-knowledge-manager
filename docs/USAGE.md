@@ -480,5 +480,5 @@ What do we know about containerization?
 
 For issues or questions:
 
-- [GitHub Issues](https://github.com/yourusername/bob-llmwiki-knowledge-manager/issues)
-- [Documentation](https://github.com/yourusername/bob-llmwiki-knowledge-manager/tree/main/docs)
+- [GitHub Issues](https://github.com/davidleconte/bob-llmwiki-knowledge-manager/issues)
+- [Documentation](https://github.com/davidleconte/bob-llmwiki-knowledge-manager/tree/main/docs)

@@ -50,6 +50,7 @@ class PromptOptimizer:
         use_cache: bool = True,
         track_costs: bool = False,
         *,
+        cache: Optional["ExactCache"] = None,
         target_savings: Optional[float] = None,
         min_quality: Optional[float] = None,
     ):
@@ -70,6 +71,11 @@ class PromptOptimizer:
                 on-target (0-1).
             use_cache: Whether to use caching.
             track_costs: Whether to track costs with CostTracker.
+            cache: Optional pre-built L1 :class:`~src.cache.exact_cache.ExactCache`
+                to use instead of constructing a default one. The facade injects
+                its ``MultiLevelCache``'s L1 here so ``config.cache.l1`` (size/TTL)
+                actually governs the optimize() cache and the two are one shared
+                instance rather than disjoint. Ignored when ``use_cache`` is False.
             target_savings: Deprecated alias for ``target_reduction`` (same
                 concept: fraction of tokens saved). Overrides it if given.
             min_quality: Deprecated alias for ``min_quality_score``.
@@ -81,12 +87,18 @@ class PromptOptimizer:
             min_quality_score = min_quality
 
         self.token_counter = TokenCounter(model=model, track_costs=track_costs)
-        # Use only L1 (exact) cache to avoid semantic matches returning wrong prompt's optimization
+        # Use only L1 (exact) cache to avoid semantic matches returning a wrong
+        # prompt's optimization. When an ExactCache is injected (by the facade,
+        # built from config.cache.l1), share it so config-driven sizing/TTL
+        # governs this path and the facade's cache is not a second, disjoint L1.
         self.cache: Optional["ExactCache"] = None
         if use_cache:
-            from src.cache.exact_cache import ExactCache
+            if cache is not None:
+                self.cache = cache
+            else:
+                from src.cache.exact_cache import ExactCache
 
-            self.cache = ExactCache(max_size=1000, track_costs=track_costs)
+                self.cache = ExactCache(max_size=1000, track_costs=track_costs)
         self.max_tokens = max_tokens
         self.target_reduction = target_reduction
         self.min_quality_score = min_quality_score
@@ -129,13 +141,15 @@ class PromptOptimizer:
         model: str = DEFAULT_MODEL,
         use_cache: bool = True,
         track_costs: bool = False,
+        cache: Optional["ExactCache"] = None,
     ) -> "PromptOptimizer":
         """Build an optimizer from an :class:`~src.config.schema.OptimizerConfig`.
 
         The canonical config->runtime path: the config's ``max_tokens``,
         ``target_reduction`` and ``min_quality_score`` map 1:1 onto the
-        constructor. ``model``/``use_cache``/``track_costs`` are not part of
-        ``OptimizerConfig`` and are passed separately.
+        constructor. ``model``/``use_cache``/``track_costs``/``cache`` are not
+        part of ``OptimizerConfig`` and are passed separately; ``cache`` lets the
+        facade share its config-built L1 (see :meth:`__init__`).
         """
         return cls(
             model=model,
@@ -144,6 +158,7 @@ class PromptOptimizer:
             min_quality_score=config.min_quality_score,
             use_cache=use_cache,
             track_costs=track_costs,
+            cache=cache,
         )
 
     @property

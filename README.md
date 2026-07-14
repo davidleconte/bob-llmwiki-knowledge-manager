@@ -106,7 +106,7 @@ guidance has a concrete home in how the modes behave:
 **So what:** the mode makes the cheap path the *default* path. You don't have to remember the discipline —
 the mode **is** the discipline.
 
-## 5. Proof point: a 94-module platform, documented for 0.36 coins
+## 5. Illustrative example: a 94-module platform, analysed in six tool calls
 
 A real run on **HCD At Its Core** — IBM's Hyper-Converged Database teaching platform: 94 interactive demo
 modules, a decorator-based Python engine, an adversarial "Audit Arena" test framework. The prompt: *act as
@@ -118,10 +118,11 @@ Bob's answer, in **six tool calls**:
   the Audit Arena tribunal.
 - Proposed **five targeted, correctly-typed documents** (two concepts, two guides, one API reference) —
   each with a rationale and a content outline.
-- **Cost: 0.36 Bobcoins** — under 1% of a session budget. ~2 minutes. No retries.
+- **Cost: 0.36 Bobcoins** — a *single unverified anecdote* (no token counts, tokenizer, model, or manifest; not reproducible), reportedly under 1% of a session budget, ~2 minutes, no retries.
 
 One run is one data point, not a benchmark — but it's the *shape* of the value: **structured, accurate, and
-cheap enough to run on every repo you touch.** Full transcript: `evaluation/LIVE_EXAMPLE_HCD_ANALYSIS.md`.
+cheap enough to run on every repo you touch.** Write-up (carrying a provenance/retraction notice — the cost
+figure is a single unverifiable anecdote, not manifest-backed): `evaluation/LIVE_EXAMPLE_HCD_ANALYSIS.md`.
 
 ## 6. How it compares: the thesis, the engine, and the native port
 

@@ -113,7 +113,12 @@ resolved base — raising `ValueError` otherwise. All three join sites now route
 through it and return their existing error dict on refusal. Regression coverage
 is in `tests/tools/test_safe_paths.py` (parent-traversal, deep traversal,
 absolute-path, and symlink-escape cases at both the helper and each tool).
-Committed with the `Phase 7 (A)` change.
+Committed with the `Phase 7 (A)` change. The delegation `DocumentationAgent`
+(`src/delegation/agents/documentation_agent.py`) additionally routes its
+untrusted `task.target` through `resolve_within` *before* its `rglob("*.py")`
+scan (Phase 8), so a `../` or absolute delegation target cannot enumerate `.py`
+files outside the working directory either; regression coverage in
+`tests/delegation/test_documentation_agent_containment.py`.
 
 ## Residual risks (documented and accepted)
 

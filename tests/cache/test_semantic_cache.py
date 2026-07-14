@@ -432,6 +432,26 @@ class TestSemanticCacheTTL:
         clock[0] = 10_000_000.0
         assert cache.get("what is python") == "a language"
 
+    def test_colon_in_version_roundtrips_and_isolates(self):
+        """A colon in the version must not corrupt version parsing or filtering.
+
+        Regression for the unescaped versioned-key encoding: with escaping, a
+        version like 'v1:a' round-trips through _extract_version and stays
+        isolated from a different (version, key) pair that used to collide.
+        """
+        cache = SemanticCache(max_size=10)
+        cache.set("b", "VALUE_B", version="v1:a")
+        cache.set("a:b", "VALUE_AB", version="v1")
+
+        # Exact-key fast-path returns each key's own value (no collision).
+        assert cache.get("b", version="v1:a") == "VALUE_B"
+        assert cache.get("a:b", version="v1") == "VALUE_AB"
+
+        # The colon-bearing version is recovered intact (not truncated at ':').
+        stored = cache._make_versioned_key("b", "v1:a")
+        assert cache._extract_version(stored) == "v1:a"
+        assert cache._extract_base_key(stored) == "b"
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -52,6 +52,11 @@ Args:
         on-target (0-1).
     use_cache: Whether to use caching.
     track_costs: Whether to track costs with CostTracker.
+    cache: Optional pre-built L1 :class:`~src.cache.exact_cache.ExactCache`
+        to use instead of constructing a default one. The facade injects
+        its ``MultiLevelCache``'s L1 here so ``config.cache.l1`` (size/TTL)
+        actually governs the optimize() cache and the two are one shared
+        instance rather than disjoint. Ignored when ``use_cache`` is False.
     target_savings: Deprecated alias for ``target_reduction`` (same
         concept: fraction of tokens saved). Overrides it if given.
     min_quality: Deprecated alias for ``min_quality_score``.
@@ -63,8 +68,9 @@ Build an optimizer from an :class:`~src.config.schema.OptimizerConfig`.
 
 The canonical config->runtime path: the config's ``max_tokens``,
 ``target_reduction`` and ``min_quality_score`` map 1:1 onto the
-constructor. ``model``/``use_cache``/``track_costs`` are not part of
-``OptimizerConfig`` and are passed separately.
+constructor. ``model``/``use_cache``/``track_costs``/``cache`` are not
+part of ``OptimizerConfig`` and are passed separately; ``cache`` lets the
+facade share its config-built L1 (see :meth:`__init__`).
 
 
 ##### `target_savings() -> float`
