@@ -39,6 +39,7 @@ dev = [
     "PyYAML>=6.0",
     "ruff>=0.6.0",
     "mypy>=1.11.0",
+    "bandit>=1.7",
 ]
 monitoring = [
     "psutil>=5.9.0",
@@ -126,6 +127,18 @@ exclude_lines = [
     "class .*\\bProtocol\\):",
     "@(abc\\.)?abstractmethod",
 ]
+
+[tool.bandit]
+# SAST config. CI runs `bandit -r src/ -ll` (medium+ severity) as a blocking
+# lint step. That threshold is clean today. The remaining low-severity hits are
+# known-benign and deliberately below the gate: the hardened static-argv `git`
+# subprocess in src/validation/manifest.py (B404/B603/B607 — list argv, no
+# shell=True), non-crypto `random` in the measurement harness (B311), and
+# defensive try/except/continue in the file-scan tools (B112). None is a real
+# vulnerability; see docs/security/THREAT_MODEL.md. Any *new* medium+ finding
+# must be fixed or carry a scoped `# nosec BXXX` with a justification — never a
+# blanket disable. exclude_dirs applies to full-repo runs (`bandit -c pyproject.toml -r .`).
+exclude_dirs = [".venv", "tests", "build", "dist"]
 
 [tool.ruff]
 # Single home for lint + format config. CI runs `ruff check` and
