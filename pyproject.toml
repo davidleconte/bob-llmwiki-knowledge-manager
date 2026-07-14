@@ -44,6 +44,11 @@ monitoring = [
     "psutil>=5.9.0",
 ]
 
+[project.scripts]
+# Unified CLI over the TokenOptimizer facade (src/cli.py). Also runnable as
+# `python -m src` via src/__main__.py.
+bob-optimize = "src.cli:main"
+
 [project.urls]
 Homepage = "https://github.com/yourusername/bob-llmwiki-knowledge-manager"
 Documentation = "https://github.com/yourusername/bob-llmwiki-knowledge-manager/tree/main/docs"
