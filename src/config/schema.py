@@ -47,7 +47,7 @@ class OptimizerConfig:
     target_reduction: float = 0.3
     min_quality_score: float = 0.8
     strategies: Optional[List[str]] = None
-    
+
     def __post_init__(self):
         """Initialize default strategies if not provided."""
         if self.strategies is None:

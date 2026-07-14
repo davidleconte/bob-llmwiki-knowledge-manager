@@ -6,11 +6,11 @@ Integrates with the existing metrics system to provide comprehensive cost visibi
 """
 
 import time
+from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Tuple
 from threading import RLock
-from collections import defaultdict, deque
+from typing import Any, Dict, List, Optional, Tuple
 
 from src import pricing
 
@@ -28,14 +28,14 @@ class CostMetrics:
     total_bobcoins_spent: float = 0.0
     total_bobcoins_saved: float = 0.0
     operations_count: int = 0
-    
+
     # Cost breakdown by operation type
     cost_by_operation: Dict[str, float] = field(default_factory=lambda: defaultdict(float))
     tokens_by_operation: Dict[str, int] = field(default_factory=lambda: defaultdict(int))
-    
+
     # Savings breakdown
     savings_by_source: Dict[str, float] = field(default_factory=lambda: defaultdict(float))
-    
+
     def record_cost(
         self,
         operation: str,
@@ -55,37 +55,37 @@ class CostMetrics:
         """
         bobcoins_spent = tokens_used / TOKENS_PER_BOBCOIN
         bobcoins_saved = tokens_saved / TOKENS_PER_BOBCOIN
-        
+
         self.total_tokens_used += tokens_used
         self.total_tokens_saved += tokens_saved
         self.total_bobcoins_spent += bobcoins_spent
         self.total_bobcoins_saved += bobcoins_saved
         self.operations_count += 1
-        
+
         self.cost_by_operation[operation] += bobcoins_spent
         self.tokens_by_operation[operation] += tokens_used
-        
+
         if tokens_saved > 0:
             self.savings_by_source[operation] += bobcoins_saved
-        
+
         return bobcoins_spent, bobcoins_saved
-    
+
     def get_net_cost(self) -> float:
         """Calculate net cost (spent - saved)."""
         return self.total_bobcoins_spent - self.total_bobcoins_saved
-    
+
     def get_roi_percent(self) -> float:
         """Calculate ROI percentage."""
         if self.total_bobcoins_spent == 0:
             return 0.0
         return (self.total_bobcoins_saved / self.total_bobcoins_spent) * 100
-    
+
     def get_average_cost_per_operation(self) -> float:
         """Calculate average cost per operation."""
         if self.operations_count == 0:
             return 0.0
         return self.total_bobcoins_spent / self.operations_count
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         return {
@@ -113,7 +113,7 @@ class BudgetAlert:
     threshold_percent: float
     triggered: bool = False
     triggered_at: Optional[datetime] = None
-    
+
     def check(self, spent: float, budget: float) -> bool:
         """
         Check if alert should trigger.
@@ -127,16 +127,16 @@ class BudgetAlert:
         """
         if budget <= 0:
             return False
-        
+
         percent_used = (spent / budget) * 100
         should_trigger = percent_used >= self.threshold_percent and not self.triggered
-        
+
         if should_trigger:
             self.triggered = True
             self.triggered_at = datetime.now(timezone.utc)
-        
+
         return should_trigger
-    
+
     def reset(self) -> None:
         """Reset alert state."""
         self.triggered = False
@@ -162,7 +162,7 @@ class CostTracker:
         >>> print(tracker.get_budget_status())
         {'spent': 1.5, 'saved': 1.0, 'remaining': 98.5, 'percent_used': 1.5}
     """
-    
+
     def __init__(
         self,
         budget_bobcoins: float = DEFAULT_BUDGET_BOBCOINS,
@@ -181,18 +181,18 @@ class CostTracker:
         self._lock = RLock()
         self.budget_bobcoins = budget_bobcoins
         self.metrics = CostMetrics()
-        
+
         # Budget alerts
         if alert_thresholds is None:
             alert_thresholds = [50.0, 75.0, 90.0]
         self.alerts = [BudgetAlert(threshold) for threshold in alert_thresholds]
-        
+
         # Recent costs for trend analysis
         self.recent_costs: deque = deque(maxlen=100)
-        
+
         # Start time for rate calculations
         self._start_time = time.time()
-    
+
     def record_token_counting(self, tokens: int) -> float:
         """
         Record token counting operation cost.
@@ -208,7 +208,7 @@ class CostTracker:
             self.recent_costs.append(("token_counting", spent, time.time()))
             self._check_alerts()
             return spent
-    
+
     def record_optimization(
         self,
         original_tokens: int,
@@ -234,7 +234,7 @@ class CostTracker:
             self.recent_costs.append(("optimization", spent, time.time()))
             self._check_alerts()
             return spent, saved
-    
+
     def record_cache_hit(self, tokens_saved: int) -> float:
         """
         Record cache hit (pure savings, no cost).
@@ -248,7 +248,7 @@ class CostTracker:
         with self._lock:
             _, saved = self.metrics.record_cost("cache_hit", 0, tokens_saved)
             return saved
-    
+
     def record_cache_miss(self, tokens_used: int) -> float:
         """
         Record cache miss (cost with no savings).
@@ -264,7 +264,7 @@ class CostTracker:
             self.recent_costs.append(("cache_miss", spent, time.time()))
             self._check_alerts()
             return spent
-    
+
     def record_truncation(
         self,
         original_tokens: int,
@@ -290,7 +290,7 @@ class CostTracker:
             self.recent_costs.append(("truncation", spent, time.time()))
             self._check_alerts()
             return spent, saved
-    
+
     def record_custom_operation(
         self,
         operation: str,
@@ -317,7 +317,7 @@ class CostTracker:
             self.recent_costs.append((operation, spent, time.time()))
             self._check_alerts()
             return spent, saved
-    
+
     def get_budget_status(self) -> Dict[str, Any]:
         """
         Get current budget status.
@@ -331,7 +331,7 @@ class CostTracker:
             net_spent = spent - saved
             remaining = self.budget_bobcoins - net_spent
             percent_used = (net_spent / self.budget_bobcoins * 100) if self.budget_bobcoins > 0 else 0
-            
+
             return {
                 "budget_bobcoins": self.budget_bobcoins,
                 "spent_bobcoins": round(spent, 4),
@@ -341,7 +341,7 @@ class CostTracker:
                 "percent_used": round(percent_used, 2),
                 "is_over_budget": net_spent > self.budget_bobcoins
             }
-    
+
     def get_cost_metrics(self) -> Dict[str, Any]:
         """
         Get detailed cost metrics.
@@ -351,7 +351,7 @@ class CostTracker:
         """
         with self._lock:
             return self.metrics.to_dict()
-    
+
     def get_cost_rate(self) -> Dict[str, float]:
         """
         Get cost rate (Bobcoins per second).
@@ -367,14 +367,14 @@ class CostTracker:
                     "bobcoins_per_minute": 0.0,
                     "bobcoins_per_hour": 0.0
                 }
-            
+
             rate = self.metrics.total_bobcoins_spent / elapsed
             return {
                 "bobcoins_per_second": round(rate, 6),
                 "bobcoins_per_minute": round(rate * 60, 4),
                 "bobcoins_per_hour": round(rate * 3600, 2)
             }
-    
+
     def get_active_alerts(self) -> List[Dict[str, Any]]:
         """
         Get list of active budget alerts.
@@ -391,7 +391,7 @@ class CostTracker:
                 for alert in self.alerts
                 if alert.triggered
             ]
-    
+
     def _check_alerts(self) -> None:
         """Check and trigger budget alerts (internal)."""
         spent = self.metrics.total_bobcoins_spent
@@ -399,13 +399,13 @@ class CostTracker:
             if alert.check(spent, self.budget_bobcoins):
                 # Alert triggered - could log or notify here
                 pass
-    
+
     def reset_alerts(self) -> None:
         """Reset all budget alerts."""
         with self._lock:
             for alert in self.alerts:
                 alert.reset()
-    
+
     def set_budget(self, budget_bobcoins: float) -> None:
         """
         Set new budget.
@@ -416,7 +416,7 @@ class CostTracker:
         with self._lock:
             self.budget_bobcoins = budget_bobcoins
             self.reset_alerts()
-    
+
     def reset(self) -> None:
         """Reset all cost tracking."""
         with self._lock:
@@ -424,7 +424,7 @@ class CostTracker:
             self.recent_costs.clear()
             self.reset_alerts()
             self._start_time = time.time()
-    
+
     def get_summary(self) -> Dict[str, Any]:
         """
         Get cost tracking summary.
@@ -436,7 +436,7 @@ class CostTracker:
         cost_metrics = self.get_cost_metrics()
         cost_rate = self.get_cost_rate()
         active_alerts = self.get_active_alerts()
-        
+
         return {
             "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             "budget": budget_status,

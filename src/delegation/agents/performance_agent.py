@@ -3,14 +3,14 @@ Performance Analysis Sub-Agent
 Specialized agent for performance optimization and bottleneck detection
 """
 
-from typing import List, Dict, Any
 import sys
 from pathlib import Path
+from typing import Dict, List
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from src.delegation.base import SubAgent, SubAgentTask, SubAgentResult, SubAgentStatus
 from scripts.utils.component_analyzer import ComponentAnalyzer
+from src.delegation.base import SubAgent, SubAgentResult, SubAgentStatus, SubAgentTask
 
 
 class PerformanceAgent(SubAgent):
@@ -24,7 +24,7 @@ class PerformanceAgent(SubAgent):
     - Memory usage analysis
     - Concurrency issues
     """
-    
+
     def __init__(self, agent_id: str, cache_enabled: bool = True):
         super().__init__(
             agent_id=agent_id,
@@ -33,7 +33,7 @@ class PerformanceAgent(SubAgent):
             max_cache_size=500
         )
         self.analyzer = ComponentAnalyzer()
-    
+
     def get_capabilities(self) -> List[str]:
         return [
             "bottleneck_detection",
@@ -44,18 +44,18 @@ class PerformanceAgent(SubAgent):
             "caching_opportunities",
             "n_plus_one_detection"
         ]
-    
+
     def analyze(self, task: SubAgentTask) -> SubAgentResult:
         target = task.target
         depth = task.parameters.get("depth", "shallow")
-        
+
         try:
             analysis = self.analyzer.analyze_component(
                 target,
                 analysis_type="performance",
                 depth=depth
             )
-            
+
             if "error" in analysis:
                 return SubAgentResult(
                     agent_id=self.agent_id,
@@ -64,9 +64,9 @@ class PerformanceAgent(SubAgent):
                     data={},
                     errors=[analysis["error"]]
                 )
-            
+
             perf_data = analysis.get("performance", {})
-            
+
             result_data = {
                 "target": target,
                 "total_issues": perf_data.get("total_issues", 0),
@@ -75,11 +75,11 @@ class PerformanceAgent(SubAgent):
                 "recommendations": self._generate_recommendations(perf_data),
                 "analysis_depth": depth
             }
-            
+
             warnings = []
             if perf_data.get("total_issues", 0) > 10:
                 warnings.append(f"Found {perf_data['total_issues']} performance issues")
-            
+
             return SubAgentResult(
                 agent_id=self.agent_id,
                 agent_type=self.agent_type,
@@ -88,7 +88,7 @@ class PerformanceAgent(SubAgent):
                 warnings=warnings,
                 token_count=len(str(result_data)) // 4
             )
-            
+
         except Exception as e:
             return SubAgentResult(
                 agent_id=self.agent_id,
@@ -97,24 +97,24 @@ class PerformanceAgent(SubAgent):
                 data={},
                 errors=[f"Performance analysis failed: {str(e)}"]
             )
-    
+
     def _calculate_optimization_score(self, perf_data: Dict) -> float:
         """Calculate optimization score (0-100, higher is better)"""
         issues = perf_data.get("total_issues", 0)
         # Inverse scoring - fewer issues = higher score
         return max(0, 100 - (issues * 5))
-    
+
     def _generate_recommendations(self, perf_data: Dict) -> List[str]:
         recommendations = []
         issues = perf_data.get("total_issues", 0)
-        
+
         if issues > 0:
             recommendations.append("Profile application to identify hotspots")
             recommendations.append("Consider caching frequently accessed data")
             recommendations.append("Optimize database queries and add indexes")
             recommendations.append("Review algorithm complexity")
-        
+
         recommendations.append("Implement performance monitoring")
         recommendations.append("Set performance budgets")
-        
+
         return recommendations

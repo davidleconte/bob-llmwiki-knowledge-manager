@@ -17,7 +17,7 @@ __version__ = "1.0.0-dev"
 __author__ = "Bob Shell Team"
 
 # Only import implemented components
-from src.cache import MultiLevelCache, ExactCache, SemanticCache
+from src.cache import ExactCache, MultiLevelCache, SemanticCache
 
 __all__ = [
     "MultiLevelCache",

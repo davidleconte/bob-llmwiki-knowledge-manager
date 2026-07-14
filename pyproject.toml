@@ -127,6 +127,13 @@ target-version = "py311"
 select = ["E", "F", "W", "I"]
 ignore = ["E501"]
 
+[tool.ruff.lint.per-file-ignores]
+# Tests legitimately bind intermediate values for readability/asserts elsewhere,
+# bootstrap sys.path before importing, and import optional deps to probe them.
+"tests/**" = ["F841"]
+"tests/conftest.py" = ["E402"]
+"tests/monitoring/test_health.py" = ["F401"]
+
 [tool.mypy]
 # First type-gate: non-strict baseline, ratchet toward strict later. Runs once on
 # 3.12 in CI (the numpy stubs use 3.12 syntax, so an older --python-version can't

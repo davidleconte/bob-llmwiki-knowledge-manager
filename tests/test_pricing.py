@@ -8,8 +8,8 @@ These tests pin the invariant that both now resolve through ``src.pricing``.
 import pytest
 
 from src import pricing
-from src.optimizer.token_counter import TokenCounter
 from src.monitoring import cost_tracker
+from src.optimizer.token_counter import TokenCounter
 
 
 def test_default_model_has_one_home():

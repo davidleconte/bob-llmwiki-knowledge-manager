@@ -5,7 +5,7 @@ settings, runtime updates, and versioning support.
 """
 
 from .manager import ConfigManager, get_config
-from .schema import ConfigSchema, CacheConfig, OptimizerConfig, MonitoringConfig
+from .schema import CacheConfig, ConfigSchema, MonitoringConfig, OptimizerConfig
 from .validator import ConfigValidator, ValidationError
 
 __all__ = [

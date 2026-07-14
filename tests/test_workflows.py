@@ -1,7 +1,8 @@
 """Tests for workflow scripts and integration."""
-import pytest
 import subprocess
 from pathlib import Path
+
+import pytest
 
 
 @pytest.fixture
@@ -32,7 +33,7 @@ def test_required_scripts_exist(scripts_dir):
         "validate-kb.sh",
         "export-kb.sh"
     ]
-    
+
     for script in required_scripts:
         script_path = scripts_dir / script
         assert script_path.exists(), f"Script {script} should exist"
@@ -42,7 +43,7 @@ def test_required_scripts_exist(scripts_dir):
 def test_scripts_are_executable(scripts_dir):
     """Test that scripts are executable."""
     scripts = ["install.sh", "init-project.sh", "validate-kb.sh", "export-kb.sh"]
-    
+
     for script in scripts:
         script_path = scripts_dir / script
         assert script_path.stat().st_mode & 0o111, f"{script} should be executable"
@@ -52,7 +53,7 @@ def test_scripts_are_executable(scripts_dir):
 def test_scripts_have_shebang(scripts_dir):
     """Test that scripts have proper shebang."""
     scripts = ["install.sh", "init-project.sh", "validate-kb.sh", "export-kb.sh"]
-    
+
     for script in scripts:
         script_path = scripts_dir / script
         with open(script_path, 'r') as f:
@@ -65,7 +66,7 @@ def test_install_script_checks_bob_shell(scripts_dir):
     """Test that install script checks for Bob Shell."""
     script_path = scripts_dir / "install.sh"
     content = script_path.read_text()
-    
+
     assert '.bob' in content or 'bob' in content.lower(), \
         "Install script should check for Bob Shell"
 
@@ -75,7 +76,7 @@ def test_init_project_script_creates_structure(scripts_dir):
     """Test that init-project script creates KB structure."""
     script_path = scripts_dir / "init-project.sh"
     content = script_path.read_text()
-    
+
     required_dirs = ['concepts', 'guides', 'references', 'research']
     for dir_name in required_dirs:
         assert dir_name in content, f"Init script should create {dir_name} directory"
@@ -86,7 +87,7 @@ def test_validate_script_checks_structure(scripts_dir):
     """Test that validate script checks KB structure."""
     script_path = scripts_dir / "validate-kb.sh"
     content = script_path.read_text()
-    
+
     assert 'INDEX.md' in content, "Validate script should check for INDEX.md"
     assert 'concepts' in content, "Validate script should check concepts directory"
 
@@ -96,7 +97,7 @@ def test_export_script_supports_formats(scripts_dir):
     """Test that export script supports multiple formats."""
     script_path = scripts_dir / "export-kb.sh"
     content = script_path.read_text()
-    
+
     formats = ['markdown', 'obsidian', 'html', 'pdf']
     for fmt in formats:
         assert fmt in content, f"Export script should support {fmt} format"
@@ -166,7 +167,7 @@ def test_required_examples_exist(project_root):
         "research-project",
         "personal-wiki"
     ]
-    
+
     for example in required_examples:
         example_path = examples_dir / example
         assert example_path.exists(), f"Example {example} should exist"
@@ -177,7 +178,7 @@ def test_examples_have_readme(project_root):
     """Test that each example has a README."""
     examples_dir = project_root / "examples"
     examples = ["software-project", "research-project", "personal-wiki"]
-    
+
     for example in examples:
         readme_path = examples_dir / example / "README.md"
         assert readme_path.exists(), f"Example {example} should have README.md"
@@ -188,17 +189,17 @@ def test_examples_have_kb_structure(project_root):
     """Test that each example has proper KB structure."""
     examples_dir = project_root / "examples"
     examples = ["software-project", "research-project", "personal-wiki"]
-    
+
     for example in examples:
         kb_path = examples_dir / example / "docs" / "knowledge-base"
         assert kb_path.exists(), f"Example {example} should have knowledge-base directory"
-        
+
         # Check for required subdirectories
         for subdir in ["concepts", "guides", "references", "research"]:
             subdir_path = kb_path / subdir
             assert subdir_path.exists(), \
                 f"Example {example} should have {subdir} directory"
-        
+
         # Check for INDEX.md
         index_path = kb_path / "INDEX.md"
         assert index_path.exists(), f"Example {example} should have INDEX.md"
@@ -216,7 +217,7 @@ def test_documentation_files_exist(project_root):
         "COMPARISON.md",
         "ARCHITECTURE.md"
     ]
-    
+
     for doc in required_docs:
         doc_path = docs_dir / doc
         assert doc_path.exists(), f"Documentation {doc} should exist"
@@ -231,7 +232,7 @@ def test_core_files_exist(project_root):
         "CHANGELOG.md",
         ".gitignore"
     ]
-    
+
     for file in core_files:
         file_path = project_root / file
         assert file_path.exists(), f"Core file {file} should exist"
@@ -245,7 +246,7 @@ def test_config_files_exist(project_root):
         "custom_modes.yaml",
         "settings.json"
     ]
-    
+
     for file in config_files:
         file_path = config_dir / file
         assert file_path.exists(), f"Config file {file} should exist"

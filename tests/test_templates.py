@@ -1,6 +1,7 @@
 """Tests for document templates."""
-import pytest
 from pathlib import Path
+
+import pytest
 
 
 @pytest.fixture
@@ -31,7 +32,7 @@ def test_required_templates_exist(templates_dir):
         "reference.md",
         "research.md"
     ]
-    
+
     for template in required_templates:
         template_path = templates_dir / template
         assert template_path.exists(), f"Template {template} should exist"
@@ -58,7 +59,7 @@ def test_concept_template_structure():
     """Test concept template has required sections."""
     template_path = Path(__file__).parent.parent / "config" / "templates" / "concept.md"
     content = template_path.read_text()
-    
+
     required_sections = [
         "## Overview",
         "## Key Points",
@@ -66,7 +67,7 @@ def test_concept_template_structure():
         "## Related Documents",
         "## References"
     ]
-    
+
     for section in required_sections:
         assert section in content, f"Concept template should have '{section}' section"
 
@@ -76,7 +77,7 @@ def test_guide_template_structure():
     """Test guide template has required sections."""
     template_path = Path(__file__).parent.parent / "config" / "templates" / "guide.md"
     content = template_path.read_text()
-    
+
     required_sections = [
         "## Overview",
         "## Prerequisites",
@@ -84,7 +85,7 @@ def test_guide_template_structure():
         "## Troubleshooting",
         "## Related Documents"
     ]
-    
+
     for section in required_sections:
         assert section in content, f"Guide template should have '{section}' section"
 
@@ -94,13 +95,13 @@ def test_reference_template_structure():
     """Test reference template has required sections."""
     template_path = Path(__file__).parent.parent / "config" / "templates" / "reference.md"
     content = template_path.read_text()
-    
+
     required_sections = [
         "## Overview",
         "## Related Documents",
         "## References"
     ]
-    
+
     for section in required_sections:
         assert section in content, f"Reference template should have '{section}' section"
 
@@ -110,7 +111,7 @@ def test_research_template_structure():
     """Test research template has required sections."""
     template_path = Path(__file__).parent.parent / "config" / "templates" / "research.md"
     content = template_path.read_text()
-    
+
     required_sections = [
         "## Objective",
         "## Methodology",
@@ -118,7 +119,7 @@ def test_research_template_structure():
         "## Conclusions",
         "## Related Documents"
     ]
-    
+
     for section in required_sections:
         assert section in content, f"Research template should have '{section}' section"
 
@@ -155,7 +156,7 @@ def test_research_template_has_metadata():
     """Test that research template has metadata in footer."""
     template_path = Path(__file__).parent.parent / "config" / "templates" / "research.md"
     content = template_path.read_text()
-    
+
     # Check for metadata in footer
     assert "*Last Updated:" in content, "Research template should have Last Updated field"
     assert "*Category:" in content, "Research template should have Category field"

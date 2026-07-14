@@ -8,15 +8,15 @@ Provides centralized configuration management with:
 - Thread-safe operations
 """
 
-import os
 import json
+import os
 import threading
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Dict, Any, Optional, List
-from dataclasses import dataclass, asdict
+from typing import Any, Dict, List, Optional
 
-from .schema import ConfigSchema, CacheConfig, OptimizerConfig, MonitoringConfig
-from .validator import ConfigValidator, ValidationError
+from .schema import CacheConfig, ConfigSchema, MonitoringConfig, OptimizerConfig
+from .validator import ConfigValidator
 
 
 @dataclass
@@ -43,10 +43,10 @@ class ConfigManager:
         >>> cache_config = config.get_cache_config()
         >>> config.update({'cache.l1.max_size': 2000})
     """
-    
+
     _instance: Optional['ConfigManager'] = None
     _lock = threading.Lock()
-    
+
     def __init__(self, environment: str = 'dev'):
         """Initialize configuration manager.
         
@@ -58,10 +58,10 @@ class ConfigManager:
         self._validator = ConfigValidator()
         self._versions: List[ConfigVersion] = []
         self._update_lock = threading.Lock()
-        
+
         # Load default configuration
         self._load_defaults()
-    
+
     @classmethod
     def get_instance(cls, environment: str = 'dev') -> 'ConfigManager':
         """Get singleton instance of ConfigManager.
@@ -77,7 +77,7 @@ class ConfigManager:
                 if cls._instance is None:
                     cls._instance = cls(environment)
         return cls._instance
-    
+
     def _load_defaults(self) -> None:
         """Load default configuration values."""
         self._config = {
@@ -111,7 +111,7 @@ class ConfigManager:
                 'health_check_interval': 60,
             },
         }
-    
+
     def load_from_file(self, filepath: str) -> None:
         """Load configuration from JSON file.
         
@@ -125,18 +125,18 @@ class ConfigManager:
         path = Path(filepath)
         if not path.exists():
             raise FileNotFoundError(f"Configuration file not found: {filepath}")
-        
+
         with open(path, 'r') as f:
             config_data = json.load(f)
-        
+
         # Validate configuration
         self._validator.validate(config_data)
-        
+
         # Merge with defaults
         with self._update_lock:
             self._merge_config(config_data)
             self._add_version('load_from_file', [f'Loaded from {filepath}'])
-    
+
     def load_from_env(self) -> None:
         """Load configuration from environment variables.
         
@@ -144,31 +144,31 @@ class ConfigManager:
         double underscores for nesting (e.g., CONFIG_CACHE__L1__MAX_SIZE).
         """
         env_config: Dict[str, Any] = {}
-        
+
         for key, value in os.environ.items():
             if key.startswith('CONFIG_'):
                 # Remove prefix and convert to nested dict
                 config_key = key[7:].lower()  # Remove 'CONFIG_'
                 parts = config_key.split('__')
-                
+
                 # Build nested structure
                 current = env_config
                 for part in parts[:-1]:
                     if part not in current:
                         current[part] = {}
                     current = current[part]
-                
+
                 # Convert value to appropriate type
                 try:
                     current[parts[-1]] = json.loads(value)
                 except json.JSONDecodeError:
                     current[parts[-1]] = value
-        
+
         if env_config:
             with self._update_lock:
                 self._merge_config(env_config)
                 self._add_version('load_from_env', ['Loaded from environment'])
-    
+
     def _compute_merge(self, base: Dict[str, Any], new_config: Dict[str, Any]) -> Dict[str, Any]:
         """Return ``base`` with ``new_config`` recursively merged in.
 
@@ -198,7 +198,7 @@ class ConfigManager:
             new_config: New configuration to merge
         """
         self._config = self._compute_merge(self._config, new_config)
-    
+
     def update(self, updates: Dict[str, Any]) -> None:
         """Update configuration at runtime.
         
@@ -216,19 +216,19 @@ class ConfigManager:
         # Convert dot notation to nested dict
         nested_updates: Dict[str, Any] = {}
         changes: List[str] = []
-        
+
         for key, value in updates.items():
             parts = key.split('.')
             current = nested_updates
-            
+
             for part in parts[:-1]:
                 if part not in current:
                     current[part] = {}
                 current = current[part]
-            
+
             current[parts[-1]] = value
             changes.append(f'{key}={value}')
-        
+
         # Build a candidate, validate it, then commit atomically. On a
         # validation failure self._config is left unchanged (no partial state),
         # and the whole compute-validate-commit runs under the update lock.
@@ -237,7 +237,7 @@ class ConfigManager:
             self._validator.validate(candidate)
             self._config = candidate
             self._add_version('runtime_update', changes)
-    
+
     def get(self, key: str, default: Any = None) -> Any:
         """Get configuration value using dot notation.
         
@@ -254,15 +254,15 @@ class ConfigManager:
         """
         parts = key.split('.')
         current = self._config
-        
+
         for part in parts:
             if isinstance(current, dict) and part in current:
                 current = current[part]
             else:
                 return default
-        
+
         return current
-    
+
     def get_cache_config(self) -> CacheConfig:
         """Get cache configuration.
         
@@ -281,7 +281,7 @@ class ConfigManager:
             version_support_enabled=cache_data.get('version_support', {}).get('enabled', True),
             max_versions=cache_data.get('version_support', {}).get('max_versions', 5),
         )
-    
+
     def get_optimizer_config(self) -> OptimizerConfig:
         """Get optimizer configuration.
         
@@ -295,7 +295,7 @@ class ConfigManager:
             min_quality_score=opt_data.get('min_quality_score', 0.8),
             strategies=opt_data.get('strategies', ['remove_whitespace', 'compress_repeated']),
         )
-    
+
     def get_monitoring_config(self) -> MonitoringConfig:
         """Get monitoring configuration.
         
@@ -309,7 +309,7 @@ class ConfigManager:
             metrics_enabled=mon_data.get('metrics_enabled', True),
             health_check_interval=mon_data.get('health_check_interval', 60),
         )
-    
+
     def get_all(self) -> Dict[str, Any]:
         """Get complete configuration.
         
@@ -318,7 +318,7 @@ class ConfigManager:
         """
         with self._update_lock:
             return self._config.copy()
-    
+
     def get_schema(self) -> ConfigSchema:
         """Get configuration as schema object.
         
@@ -330,7 +330,7 @@ class ConfigManager:
             optimizer=self.get_optimizer_config(),
             monitoring=self.get_monitoring_config(),
         )
-    
+
     def _add_version(self, source: str, changes: List[str]) -> None:
         """Add configuration version.
         
@@ -339,18 +339,18 @@ class ConfigManager:
             changes: List of changes made
         """
         import time
-        
+
         version = ConfigVersion(
             version=f'v{len(self._versions) + 1}',
             timestamp=time.time(),
             changes=changes,
         )
         self._versions.append(version)
-        
+
         # Keep only last 10 versions
         if len(self._versions) > 10:
             self._versions = self._versions[-10:]
-    
+
     def get_version_history(self) -> List[Dict[str, Any]]:
         """Get configuration version history.
         
@@ -358,7 +358,7 @@ class ConfigManager:
             List of version information dictionaries
         """
         return [asdict(v) for v in self._versions]
-    
+
     def save_to_file(self, filepath: str) -> None:
         """Save current configuration to file.
         
@@ -367,10 +367,10 @@ class ConfigManager:
         """
         path = Path(filepath)
         path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         with open(path, 'w') as f:
             json.dump(self._config, f, indent=2)
-    
+
     def reset(self) -> None:
         """Reset configuration to defaults."""
         with self._update_lock:

@@ -9,9 +9,9 @@ import json
 import logging
 import sys
 from datetime import datetime, timezone
+from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, Optional
-from enum import Enum
 
 
 class LogLevel(Enum):
@@ -39,7 +39,7 @@ class StructuredLogger:
         >>> logger.info("cache_hit", key="abc123", latency_ms=0.5)
         {"timestamp": "2026-07-12T13:30:00.000Z", "level": "INFO", ...}
     """
-    
+
     def __init__(
         self,
         component: str,
@@ -58,22 +58,22 @@ class StructuredLogger:
         """
         self.component = component
         self.log_level = getattr(logging, log_level.upper())
-        
+
         # Create logger
         self.logger = logging.getLogger(f"token_optimizer.{component}")
         self.logger.setLevel(self.log_level)
         self.logger.handlers.clear()  # Clear any existing handlers
-        
+
         # JSON formatter
         formatter = logging.Formatter('%(message)s')
-        
+
         # Console handler
         if enable_console:
             console_handler = logging.StreamHandler(sys.stdout)
             console_handler.setLevel(self.log_level)
             console_handler.setFormatter(formatter)
             self.logger.addHandler(console_handler)
-        
+
         # File handler
         if log_file:
             log_file.parent.mkdir(parents=True, exist_ok=True)
@@ -81,7 +81,7 @@ class StructuredLogger:
             file_handler.setLevel(self.log_level)
             file_handler.setFormatter(formatter)
             self.logger.addHandler(file_handler)
-    
+
     def _format_message(
         self,
         level: str,
@@ -107,27 +107,27 @@ class StructuredLogger:
             **kwargs
         }
         return json.dumps(log_entry)
-    
+
     def debug(self, event: str, **kwargs: Any) -> None:
         """Log debug message."""
         self.logger.debug(self._format_message("DEBUG", event, **kwargs))
-    
+
     def info(self, event: str, **kwargs: Any) -> None:
         """Log info message."""
         self.logger.info(self._format_message("INFO", event, **kwargs))
-    
+
     def warning(self, event: str, **kwargs: Any) -> None:
         """Log warning message."""
         self.logger.warning(self._format_message("WARNING", event, **kwargs))
-    
+
     def error(self, event: str, **kwargs: Any) -> None:
         """Log error message."""
         self.logger.error(self._format_message("ERROR", event, **kwargs))
-    
+
     def critical(self, event: str, **kwargs: Any) -> None:
         """Log critical message."""
         self.logger.critical(self._format_message("CRITICAL", event, **kwargs))
-    
+
     def log_cache_hit(
         self,
         cache_level: str,
@@ -148,7 +148,7 @@ class StructuredLogger:
             key_hash=hash(key) % 10000,  # Hash for privacy
             latency_ms=round(latency_ms, 2)
         )
-    
+
     def log_cache_miss(
         self,
         cache_level: str,
@@ -166,7 +166,7 @@ class StructuredLogger:
             cache_level=cache_level,
             key_hash=hash(key) % 10000
         )
-    
+
     def log_optimization(
         self,
         original_tokens: int,
@@ -190,7 +190,7 @@ class StructuredLogger:
             savings_percent=round(savings_percent, 2),
             latency_ms=round(latency_ms, 2)
         )
-    
+
     def log_truncation(
         self,
         strategy: str,
@@ -215,7 +215,7 @@ class StructuredLogger:
             reduction_percent=round((1 - truncated_length/original_length) * 100, 2),
             latency_ms=round(latency_ms, 2)
         )
-    
+
     def log_error(
         self,
         error_type: str,
@@ -244,11 +244,11 @@ class LoggerFactory:
     
     Ensures consistent logging configuration across all components.
     """
-    
+
     _loggers: Dict[str, StructuredLogger] = {}
     _default_log_level = "INFO"
     _default_log_dir: Optional[Path] = None
-    
+
     @classmethod
     def configure(
         cls,
@@ -264,7 +264,7 @@ class LoggerFactory:
         """
         cls._default_log_level = log_level
         cls._default_log_dir = log_dir
-    
+
     @classmethod
     def get_logger(
         cls,
@@ -286,15 +286,15 @@ class LoggerFactory:
             log_file = None
             if cls._default_log_dir:
                 log_file = cls._default_log_dir / f"{component}.log"
-            
+
             cls._loggers[component] = StructuredLogger(
                 component=component,
                 log_level=level,
                 log_file=log_file
             )
-        
+
         return cls._loggers[component]
-    
+
     @classmethod
     def clear_loggers(cls) -> None:
         """Clear all cached loggers."""

@@ -1,8 +1,8 @@
 """Tests for mode configuration."""
-import os
-import yaml
-import pytest
 from pathlib import Path
+
+import pytest
+import yaml
 
 
 @pytest.fixture
@@ -53,12 +53,12 @@ def test_knowledge_manager_mode_structure(mode_config):
     """Test that knowledge-manager mode has required fields."""
     modes = mode_config['customModes']
     km_mode = next((m for m in modes if m.get('slug') == 'knowledge-manager'), None)
-    
+
     assert 'slug' in km_mode, "Mode should have slug"
     assert 'name' in km_mode, "Mode should have name"
     assert 'roleDefinition' in km_mode, "Mode should have roleDefinition"
     assert 'customInstructions' in km_mode, "Mode should have customInstructions"
-    
+
     assert km_mode['slug'] == 'knowledge-manager', "Slug should be knowledge-manager"
     assert '📚' in km_mode['name'], "Name should include emoji"
 
@@ -68,7 +68,7 @@ def test_mode_role_definition_content(mode_config):
     """Test that role definition contains expected content."""
     modes = mode_config['customModes']
     km_mode = next((m for m in modes if m.get('slug') == 'knowledge-manager'), None)
-    
+
     role_def = km_mode['roleDefinition']
     assert 'knowledge' in role_def.lower(), "Should mention knowledge"
     assert 'document' in role_def.lower(), "Should mention documentation"
@@ -79,9 +79,9 @@ def test_mode_custom_instructions_content(mode_config):
     """Test that custom instructions contain expected sections."""
     modes = mode_config['customModes']
     km_mode = next((m for m in modes if m.get('slug') == 'knowledge-manager'), None)
-    
+
     instructions = km_mode['customInstructions']
-    
+
     # Check for key sections (flexible matching)
     assert 'concept' in instructions.lower(), "Should mention concepts"
     assert 'guide' in instructions.lower(), "Should mention guides"
@@ -94,7 +94,7 @@ def test_mode_mentions_templates(mode_config):
     """Test that mode mentions document templates."""
     modes = mode_config['customModes']
     km_mode = next((m for m in modes if m.get('slug') == 'knowledge-manager'), None)
-    
+
     instructions = km_mode['customInstructions']
     assert 'template' in instructions.lower(), "Should mention templates"
 
@@ -104,7 +104,7 @@ def test_mode_mentions_save_memory(mode_config):
     """Test that mode mentions save_memory tool."""
     modes = mode_config['customModes']
     km_mode = next((m for m in modes if m.get('slug') == 'knowledge-manager'), None)
-    
+
     instructions = km_mode['customInstructions']
     assert 'save_memory' in instructions or 'memory' in instructions.lower(), \
         "Should mention memory persistence"
@@ -115,11 +115,11 @@ def test_mode_has_file_groups(mode_config):
     """Test that mode has file access groups."""
     modes = mode_config['customModes']
     km_mode = next((m for m in modes if m.get('slug') == 'knowledge-manager'), None)
-    
+
     assert 'groups' in km_mode, "Mode should have groups"
     groups = km_mode['groups']
     assert isinstance(groups, list), "Groups should be a list"
-    
+
     # Check for markdown file editing capability
     has_edit = any('edit' in str(g).lower() for g in groups)
     assert has_edit, "Should have edit capability"

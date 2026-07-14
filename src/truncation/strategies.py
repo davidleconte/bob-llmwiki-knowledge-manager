@@ -4,14 +4,14 @@ This module provides various strategies for truncating prompts
 while preserving quality and meaning.
 """
 
-from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Optional
 import re
+from abc import ABC, abstractmethod
+from typing import List
 
 
 class TruncationStrategy(ABC):
     """Base class for truncation strategies."""
-    
+
     @abstractmethod
     def truncate(self, text: str, max_tokens: int, token_counter) -> str:
         """Truncate text to fit within token limit.
@@ -25,7 +25,7 @@ class TruncationStrategy(ABC):
             Truncated text
         """
         pass
-    
+
     @abstractmethod
     def get_name(self) -> str:
         """Get strategy name."""
@@ -38,7 +38,7 @@ class SimpleTruncationStrategy(TruncationStrategy):
     Truncates text at approximate character position based on
     token-to-character ratio. Fast but may cut mid-sentence.
     """
-    
+
     def truncate(self, text: str, max_tokens: int, token_counter) -> str:
         """Truncate text to a token-accurate prefix with an ellipsis marker.
 
@@ -110,7 +110,7 @@ class PriorityTruncationStrategy(TruncationStrategy):
     - Numbered/bulleted lists
     - Code blocks
     """
-    
+
     def __init__(self, preserve_headers: bool = True,
                  preserve_first_last: bool = True):
         """Initialize priority truncation strategy.
@@ -121,7 +121,7 @@ class PriorityTruncationStrategy(TruncationStrategy):
         """
         self.preserve_headers = preserve_headers
         self.preserve_first_last = preserve_first_last
-    
+
     def truncate(self, text: str, max_tokens: int, token_counter) -> str:
         """Truncate text preserving high-priority sections.
         
@@ -134,13 +134,13 @@ class PriorityTruncationStrategy(TruncationStrategy):
             Truncated text
         """
         current_tokens = token_counter.count_tokens(text)
-        
+
         if current_tokens <= max_tokens:
             return text
-        
+
         # Split into sections
         sections = self._split_sections(text)
-        
+
         # Prioritize sections (each carries its original index)
         prioritized = self._prioritize_sections(sections)
 
@@ -171,7 +171,7 @@ class PriorityTruncationStrategy(TruncationStrategy):
         # Restore original document order before joining.
         selected.sort(key=lambda item: item[0])
         return "\n\n".join(text for _, text in selected)
-    
+
     def _split_sections(self, text: str) -> List[str]:
         """Split text into sections.
         
@@ -184,7 +184,7 @@ class PriorityTruncationStrategy(TruncationStrategy):
         # Split by double newlines (paragraphs)
         sections = re.split(r'\n\n+', text)
         return [s.strip() for s in sections if s.strip()]
-    
+
     def _prioritize_sections(self, sections: List[str]) -> List[tuple]:
         """Prioritize sections by importance.
         
@@ -204,9 +204,9 @@ class PriorityTruncationStrategy(TruncationStrategy):
 
         # Sort by priority (higher first)
         prioritized.sort(key=lambda x: x[2], reverse=True)
-        
+
         return prioritized
-    
+
     def _calculate_priority(self, section: str, index: int, total: int) -> float:
         """Calculate section priority.
         
@@ -219,32 +219,32 @@ class PriorityTruncationStrategy(TruncationStrategy):
             Priority score (higher is more important)
         """
         priority = 0.0
-        
+
         # Headers (markdown style)
         if self.preserve_headers and re.match(r'^#+\s', section):
             priority += 10.0
-        
+
         # First paragraph
         if self.preserve_first_last and index == 0:
             priority += 8.0
-        
+
         # Last paragraph
         if self.preserve_first_last and index == total - 1:
             priority += 7.0
-        
+
         # Lists
         if re.match(r'^[\*\-\d]+[\.\)]\s', section):
             priority += 5.0
-        
+
         # Code blocks
         if '```' in section or section.startswith('    '):
             priority += 6.0
-        
+
         # Length bonus (longer sections may be more important)
         priority += min(len(section) / 1000, 2.0)
-        
+
         return priority
-    
+
     def get_name(self) -> str:
         """Get strategy name."""
         return "priority"
@@ -255,7 +255,7 @@ class SemanticTruncationStrategy(TruncationStrategy):
     
     Truncates at sentence boundaries and preserves semantic coherence.
     """
-    
+
     def truncate(self, text: str, max_tokens: int, token_counter) -> str:
         """Truncate text at sentence boundaries.
         
@@ -268,32 +268,32 @@ class SemanticTruncationStrategy(TruncationStrategy):
             Truncated text
         """
         current_tokens = token_counter.count_tokens(text)
-        
+
         if current_tokens <= max_tokens:
             return text
-        
+
         # Split into sentences
         sentences = self._split_sentences(text)
-        
+
         # Build truncated text sentence by sentence
         result = []
         total_tokens = 0
-        
+
         for sentence in sentences:
             sentence_tokens = token_counter.count_tokens(sentence)
-            
+
             if total_tokens + sentence_tokens <= max_tokens:
                 result.append(sentence)
                 total_tokens += sentence_tokens
             else:
                 break
-        
+
         if result:
             return " ".join(result)
         else:
             # Fallback to simple truncation if first sentence is too long
             return SimpleTruncationStrategy().truncate(text, max_tokens, token_counter)
-    
+
     def _split_sentences(self, text: str) -> List[str]:
         """Split text into sentences.
         
@@ -306,7 +306,7 @@ class SemanticTruncationStrategy(TruncationStrategy):
         # Simple sentence splitting (can be improved with NLTK)
         sentences = re.split(r'(?<=[.!?])\s+', text)
         return [s.strip() for s in sentences if s.strip()]
-    
+
     def get_name(self) -> str:
         """Get strategy name."""
         return "semantic"
@@ -318,7 +318,7 @@ class SlidingWindowStrategy(TruncationStrategy):
     Maintains a sliding window of recent content, useful for
     conversational contexts where recent information is most relevant.
     """
-    
+
     def __init__(self, window_overlap: float = 0.1):
         """Initialize sliding window strategy.
         
@@ -326,7 +326,7 @@ class SlidingWindowStrategy(TruncationStrategy):
             window_overlap: Overlap ratio between windows (0-1)
         """
         self.window_overlap = window_overlap
-    
+
     def truncate(self, text: str, max_tokens: int, token_counter) -> str:
         """Truncate text using sliding window.
         
@@ -339,38 +339,38 @@ class SlidingWindowStrategy(TruncationStrategy):
             Truncated text (most recent content)
         """
         current_tokens = token_counter.count_tokens(text)
-        
+
         if current_tokens <= max_tokens:
             return text
-        
+
         # Split into lines for granular control
         lines = text.splitlines()
-        
+
         # Start from the end (most recent)
         result: List[str] = []
         total_tokens = 0
-        
+
         for line in reversed(lines):
             line_tokens = token_counter.count_tokens(line)
-            
+
             if total_tokens + line_tokens <= max_tokens:
                 result.insert(0, line)
                 total_tokens += line_tokens
             else:
                 break
-        
+
         if result:
             truncated = "\n".join(result)
-            
+
             # Add indicator that content was truncated
             if len(result) < len(lines):
                 truncated = "[...earlier content truncated...]\n" + truncated
-            
+
             return truncated
         else:
             # Fallback if first line is too long
             return SimpleTruncationStrategy().truncate(text, max_tokens, token_counter)
-    
+
     def get_name(self) -> str:
         """Get strategy name."""
         return "sliding_window"

@@ -3,7 +3,7 @@ Sub-Agent Delegation Framework
 Enables parallel analysis through specialized sub-agents
 """
 
-from .base import SubAgent, SubAgentResult, SubAgentTask, SubAgentPriority, SubAgentStatus
+from .base import SubAgent, SubAgentPriority, SubAgentResult, SubAgentStatus, SubAgentTask
 from .coordinator import DelegationCoordinator
 from .registry import SubAgentRegistry
 

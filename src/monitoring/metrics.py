@@ -5,13 +5,13 @@ Provides comprehensive performance metrics tracking including cache hit rates,
 latency percentiles, token savings, and system health indicators.
 """
 
+import statistics
 import time
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Deque
 from threading import RLock
-import statistics
+from typing import Any, Deque, Dict, Optional
 
 
 @dataclass
@@ -25,7 +25,7 @@ class LatencyStats:
     p95: float = 0.0
     p99: float = 0.0
     recent: Deque[float] = field(default_factory=lambda: deque(maxlen=1000))
-    
+
     def record(self, latency: float) -> None:
         """Record a latency measurement."""
         self.count += 1
@@ -33,18 +33,18 @@ class LatencyStats:
         self.min = min(self.min, latency)
         self.max = max(self.max, latency)
         self.recent.append(latency)
-        
+
         # Update percentiles
         if len(self.recent) > 0:
             sorted_recent = sorted(self.recent)
             self.p50 = statistics.median(sorted_recent)
             self.p95 = sorted_recent[int(len(sorted_recent) * 0.95)]
             self.p99 = sorted_recent[int(len(sorted_recent) * 0.99)]
-    
+
     def get_average(self) -> float:
         """Get average latency."""
         return self.total / self.count if self.count > 0 else 0.0
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         return {
@@ -67,29 +67,29 @@ class CacheMetrics:
     evictions: int = 0
     size: int = 0
     latency: LatencyStats = field(default_factory=LatencyStats)
-    
+
     def record_hit(self, latency_ms: float) -> None:
         """Record cache hit."""
         self.hits += 1
         self.latency.record(latency_ms)
-    
+
     def record_miss(self) -> None:
         """Record cache miss."""
         self.misses += 1
-    
+
     def record_promotion(self) -> None:
         """Record cache promotion."""
         self.promotions += 1
-    
+
     def record_eviction(self) -> None:
         """Record cache eviction."""
         self.evictions += 1
-    
+
     def get_hit_rate(self) -> float:
         """Calculate hit rate."""
         total = self.hits + self.misses
         return (self.hits / total * 100) if total > 0 else 0.0
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         return {
@@ -112,7 +112,7 @@ class OptimizationMetrics:
     total_optimized_tokens: int = 0
     total_savings: int = 0
     latency: LatencyStats = field(default_factory=LatencyStats)
-    
+
     def record_optimization(
         self,
         original_tokens: int,
@@ -125,13 +125,13 @@ class OptimizationMetrics:
         self.total_optimized_tokens += optimized_tokens
         self.total_savings += (original_tokens - optimized_tokens)
         self.latency.record(latency_ms)
-    
+
     def get_average_savings_percent(self) -> float:
         """Calculate average savings percentage."""
         if self.total_original_tokens == 0:
             return 0.0
         return (self.total_savings / self.total_original_tokens * 100)
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         return {
@@ -152,7 +152,7 @@ class TruncationMetrics:
     total_original_length: int = 0
     total_truncated_length: int = 0
     latency: LatencyStats = field(default_factory=LatencyStats)
-    
+
     def record_truncation(
         self,
         strategy: str,
@@ -166,14 +166,14 @@ class TruncationMetrics:
         self.total_original_length += original_length
         self.total_truncated_length += truncated_length
         self.latency.record(latency_ms)
-    
+
     def get_average_reduction_percent(self) -> float:
         """Calculate average reduction percentage."""
         if self.total_original_length == 0:
             return 0.0
         reduction = self.total_original_length - self.total_truncated_length
         return (reduction / self.total_original_length * 100)
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         return {
@@ -203,7 +203,7 @@ class MetricsCollector:
         >>> print(metrics["cache"]["L1"]["hit_rate_percent"])
         75.0
     """
-    
+
     def __init__(self):
         """Initialize metrics collector."""
         # Reentrant: get_metrics()/get_summary() hold the lock and then call
@@ -212,24 +212,24 @@ class MetricsCollector:
         # as a "Python 3.14" issue and the tests were skipped).
         self._lock = RLock()
         self._start_time = time.time()
-        
+
         # Cache metrics
         self.l1_cache = CacheMetrics()
         self.l2_cache = CacheMetrics()
-        
+
         # Optimization metrics
         self.optimization = OptimizationMetrics()
-        
+
         # Truncation metrics
         self.truncation = TruncationMetrics()
-        
+
         # Error tracking
         self.errors: Dict[str, int] = defaultdict(int)
-        
+
         # Request tracking
         self.total_requests = 0
         self.request_latency = LatencyStats()
-    
+
     def record_cache_hit(
         self,
         cache_level: str,
@@ -247,7 +247,7 @@ class MetricsCollector:
                 self.l1_cache.record_hit(latency_ms)
             elif cache_level == "L2":
                 self.l2_cache.record_hit(latency_ms)
-    
+
     def record_cache_miss(self, cache_level: str) -> None:
         """
         Record cache miss.
@@ -260,12 +260,12 @@ class MetricsCollector:
                 self.l1_cache.record_miss()
             elif cache_level == "L2":
                 self.l2_cache.record_miss()
-    
+
     def record_cache_promotion(self) -> None:
         """Record L2 to L1 cache promotion."""
         with self._lock:
             self.l1_cache.record_promotion()
-    
+
     def record_cache_eviction(self, cache_level: str) -> None:
         """
         Record cache eviction.
@@ -278,7 +278,7 @@ class MetricsCollector:
                 self.l1_cache.record_eviction()
             elif cache_level == "L2":
                 self.l2_cache.record_eviction()
-    
+
     def update_cache_size(self, cache_level: str, size: int) -> None:
         """
         Update cache size.
@@ -292,7 +292,7 @@ class MetricsCollector:
                 self.l1_cache.size = size
             elif cache_level == "L2":
                 self.l2_cache.size = size
-    
+
     def record_optimization(
         self,
         original_tokens: int,
@@ -313,7 +313,7 @@ class MetricsCollector:
                 optimized_tokens,
                 latency_ms
             )
-    
+
     def record_truncation(
         self,
         strategy: str,
@@ -337,7 +337,7 @@ class MetricsCollector:
                 truncated_length,
                 latency_ms
             )
-    
+
     def record_request(self, latency_ms: float) -> None:
         """
         Record request completion.
@@ -348,7 +348,7 @@ class MetricsCollector:
         with self._lock:
             self.total_requests += 1
             self.request_latency.record(latency_ms)
-    
+
     def record_error(self, error_type: str) -> None:
         """
         Record error occurrence.
@@ -358,7 +358,7 @@ class MetricsCollector:
         """
         with self._lock:
             self.errors[error_type] += 1
-    
+
     def get_combined_cache_hit_rate(self) -> float:
         """
         Calculate combined cache hit rate.
@@ -373,11 +373,11 @@ class MetricsCollector:
                 self.l2_cache.hits + self.l2_cache.misses
             )
             return (total_hits / total_requests * 100) if total_requests > 0 else 0.0
-    
+
     def get_uptime_seconds(self) -> float:
         """Get system uptime in seconds."""
         return time.time() - self._start_time
-    
+
     def get_metrics(self) -> Dict[str, Any]:
         """
         Get all metrics.
@@ -402,7 +402,7 @@ class MetricsCollector:
                 },
                 "errors": dict(self.errors)
             }
-    
+
     def get_summary(self) -> Dict[str, Any]:
         """
         Get summary metrics.
@@ -419,7 +419,7 @@ class MetricsCollector:
             "avg_request_latency_ms": metrics["requests"]["latency"]["avg_ms"],
             "total_errors": sum(metrics["errors"].values())
         }
-    
+
     def reset(self) -> None:
         """Reset all metrics."""
         with self._lock:

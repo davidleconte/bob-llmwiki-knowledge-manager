@@ -3,7 +3,7 @@
 Validates configuration against schema and business rules.
 """
 
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 class ValidationError(Exception):
@@ -24,11 +24,11 @@ class ConfigValidator:
         >>> validator = ConfigValidator()
         >>> validator.validate(config_dict)
     """
-    
+
     def __init__(self):
         """Initialize validator with validation rules."""
         self._rules = self._build_validation_rules()
-    
+
     def _build_validation_rules(self) -> Dict[str, Any]:
         """Build validation rules for configuration.
         
@@ -169,7 +169,7 @@ class ConfigValidator:
                 },
             },
         }
-    
+
     def validate(self, config: Dict[str, Any]) -> None:
         """Validate configuration against rules.
         
@@ -180,17 +180,17 @@ class ConfigValidator:
             ValidationError: If configuration is invalid
         """
         errors: List[str] = []
-        
+
         # Validate against rules
         self._validate_dict(config, self._rules, '', errors)
-        
+
         # Only validate business logic if no type errors
         if not errors:
             self._validate_business_logic(config, errors)
-        
+
         if errors:
             raise ValidationError('\n'.join(errors))
-    
+
     def _validate_dict(
         self,
         data: Dict[str, Any],
@@ -208,17 +208,17 @@ class ConfigValidator:
         """
         for key, rule in rules.items():
             current_path = f'{path}.{key}' if path else key
-            
+
             # Check required fields
             if rule.get('required', False) and key not in data:
                 errors.append(f'Missing required field: {current_path}')
                 continue
-            
+
             if key not in data:
                 continue
-            
+
             value = data[key]
-            
+
             # Check type
             expected_type = rule.get('type')
             if expected_type and not isinstance(value, expected_type):
@@ -227,24 +227,24 @@ class ConfigValidator:
                     f'expected {expected_type.__name__}, got {type(value).__name__}'
                 )
                 continue
-            
+
             # Check nested fields
             if 'fields' in rule and isinstance(value, dict):
                 self._validate_dict(value, rule['fields'], current_path, errors)
-            
+
             # Check numeric ranges
             if 'min' in rule and value < rule['min']:
                 errors.append(
                     f'Value for {current_path} is below minimum: '
                     f'{value} < {rule["min"]}'
                 )
-            
+
             if 'max' in rule and value > rule['max']:
                 errors.append(
                     f'Value for {current_path} exceeds maximum: '
                     f'{value} > {rule["max"]}'
                 )
-            
+
             # Check allowed values
             if 'allowed_values' in rule:
                 if isinstance(value, list):
@@ -259,7 +259,7 @@ class ConfigValidator:
                         f'Invalid value for {current_path}: {value}. '
                         f'Allowed: {rule["allowed_values"]}'
                     )
-            
+
             # Check list length
             if 'min_length' in rule and isinstance(value, list):
                 if len(value) < rule['min_length']:
@@ -267,7 +267,7 @@ class ConfigValidator:
                         f'List {current_path} is too short: '
                         f'{len(value)} < {rule["min_length"]}'
                     )
-    
+
     def _validate_business_logic(
         self,
         config: Dict[str, Any],
@@ -283,34 +283,34 @@ class ConfigValidator:
         cache = config.get('cache', {})
         l1_size = cache.get('l1', {}).get('max_size', 0)
         l2_size = cache.get('l2', {}).get('max_size', 0)
-        
+
         if l2_size <= l1_size:
             errors.append(
                 f'L2 cache size ({l2_size}) must be larger than '
                 f'L1 cache size ({l1_size})'
             )
-        
+
         # L2 TTL should be longer than L1
         l1_ttl = cache.get('l1', {}).get('ttl_seconds', 0)
         l2_ttl = cache.get('l2', {}).get('ttl_seconds', 0)
-        
+
         if l2_ttl <= l1_ttl:
             errors.append(
                 f'L2 cache TTL ({l2_ttl}s) must be longer than '
                 f'L1 cache TTL ({l1_ttl}s)'
             )
-        
+
         # Target reduction should be reasonable
         optimizer = config.get('optimizer', {})
         target_reduction = optimizer.get('target_reduction', 0)
         min_quality = optimizer.get('min_quality_score', 0)
-        
+
         if target_reduction > 0.7 and min_quality > 0.9:
             errors.append(
                 f'Target reduction ({target_reduction}) is too aggressive '
                 f'for high quality requirement ({min_quality})'
             )
-        
+
         # Version support validation
         version_support = cache.get('version_support', {})
         if version_support.get('enabled', False):
@@ -320,7 +320,7 @@ class ConfigValidator:
                     f'max_versions ({max_versions}) must be at least 2 '
                     f'when version support is enabled'
                 )
-    
+
     def validate_partial(
         self,
         config: Dict[str, Any],
@@ -336,28 +336,28 @@ class ConfigValidator:
             ValidationError: If configuration is invalid
         """
         errors: List[str] = []
-        
+
         if path:
             # Validate specific path
             parts = path.split('.')
             rules = self._rules
-            
+
             for part in parts:
                 if part not in rules:
                     errors.append(f'Unknown configuration path: {path}')
                     break
                 rules = rules[part].get('fields', {})
-            
+
             if not errors:
                 # For partial validation, temporarily mark all fields as optional
                 self._validate_dict_partial(config, rules, path, errors)
         else:
             # Validate entire config (but don't require all fields)
             self._validate_dict_partial(config, self._rules, '', errors)
-        
+
         if errors:
             raise ValidationError('\n'.join(errors))
-    
+
     def _validate_dict_partial(
         self,
         data: Dict[str, Any],
@@ -376,10 +376,10 @@ class ConfigValidator:
         for key, value in data.items():
             if key not in rules:
                 continue
-            
+
             rule = rules[key]
             current_path = f'{path}.{key}' if path else key
-            
+
             # Check type
             expected_type = rule.get('type')
             if expected_type and not isinstance(value, expected_type):
@@ -388,24 +388,24 @@ class ConfigValidator:
                     f'expected {expected_type.__name__}, got {type(value).__name__}'
                 )
                 continue
-            
+
             # Check nested fields
             if 'fields' in rule and isinstance(value, dict):
                 self._validate_dict_partial(value, rule['fields'], current_path, errors)
-            
+
             # Check numeric ranges
             if 'min' in rule and value < rule['min']:
                 errors.append(
                     f'Value for {current_path} is below minimum: '
                     f'{value} < {rule["min"]}'
                 )
-            
+
             if 'max' in rule and value > rule['max']:
                 errors.append(
                     f'Value for {current_path} exceeds maximum: '
                     f'{value} > {rule["max"]}'
                 )
-            
+
             # Check allowed values
             if 'allowed_values' in rule:
                 if isinstance(value, list):
@@ -420,7 +420,7 @@ class ConfigValidator:
                         f'Invalid value for {current_path}: {value}. '
                         f'Allowed: {rule["allowed_values"]}'
                     )
-            
+
             # Check list length
             if 'min_length' in rule and isinstance(value, list):
                 if len(value) < rule['min_length']:

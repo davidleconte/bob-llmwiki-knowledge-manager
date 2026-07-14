@@ -4,13 +4,13 @@ Provides health checks for cache systems, monitoring components, and system reso
 Supports readiness and liveness probes for production deployments.
 """
 
-import time
 import threading
-from typing import Dict, Any, List, Optional, Callable
+import time
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Any, Callable, Dict, List, Optional
 
-from src.monitoring import get_logger
+from src.monitoring.logger import get_logger
 
 
 class HealthStatus(Enum):
@@ -39,11 +39,11 @@ class HealthCheckResult:
     details: Dict[str, Any] = field(default_factory=dict)
     timestamp: float = field(default_factory=time.time)
     duration_ms: float = 0.0
-    
+
     def is_healthy(self) -> bool:
         """Check if status is healthy."""
         return self.status == HealthStatus.HEALTHY
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         return {
@@ -70,11 +70,11 @@ class SystemHealth:
     checks: List[HealthCheckResult]
     timestamp: float = field(default_factory=time.time)
     version: str = "v1"
-    
+
     def is_healthy(self) -> bool:
         """Check if system is healthy."""
         return self.status == HealthStatus.HEALTHY
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         return {
@@ -96,7 +96,7 @@ class HealthChecker:
         check_interval: Interval for background checks (seconds)
         background_enabled: Whether background checking is enabled
     """
-    
+
     def __init__(self, check_interval: float = 60.0):
         """Initialize health checker.
         
@@ -110,12 +110,12 @@ class HealthChecker:
         self._stop_event = threading.Event()
         self._last_results: Dict[str, HealthCheckResult] = {}
         self._lock = threading.Lock()
-        
+
         self._logger = get_logger("monitoring.health")
-        
+
         self._logger.info("health_checker_initialized",
                          check_interval=check_interval)
-    
+
     def register_check(self, name: str, check_func: Callable[[], HealthCheckResult]) -> None:
         """Register a health check function.
         
@@ -126,7 +126,7 @@ class HealthChecker:
         with self._lock:
             self.checks[name] = check_func
             self._logger.debug("health_check_registered", name=name)
-    
+
     def unregister_check(self, name: str) -> None:
         """Unregister a health check.
         
@@ -139,7 +139,7 @@ class HealthChecker:
                 if name in self._last_results:
                     del self._last_results[name]
                 self._logger.debug("health_check_unregistered", name=name)
-    
+
     def check(self, name: Optional[str] = None) -> SystemHealth:
         """Perform health checks.
         
@@ -151,10 +151,10 @@ class HealthChecker:
         """
         start_time = time.time()
         results: List[HealthCheckResult] = []
-        
+
         with self._lock:
             checks_to_run = {name: self.checks[name]} if name and name in self.checks else self.checks.copy()
-        
+
         # Run checks
         for check_name, check_func in checks_to_run.items():
             try:
@@ -162,11 +162,11 @@ class HealthChecker:
                 result = check_func()
                 result.duration_ms = (time.time() - check_start) * 1000
                 results.append(result)
-                
+
                 # Cache result
                 with self._lock:
                     self._last_results[check_name] = result
-                
+
             except Exception as e:
                 self._logger.error("health_check_failed",
                                  check_name=check_name,
@@ -177,7 +177,7 @@ class HealthChecker:
                     message=f"Check failed: {str(e)}",
                     duration_ms=(time.time() - check_start) * 1000
                 ))
-        
+
         # Determine overall status
         if not results:
             overall_status = HealthStatus.UNKNOWN
@@ -187,20 +187,20 @@ class HealthChecker:
             overall_status = HealthStatus.UNHEALTHY
         else:
             overall_status = HealthStatus.DEGRADED
-        
+
         duration_ms = (time.time() - start_time) * 1000
-        
+
         self._logger.debug("health_check_complete",
                          status=overall_status.value,
                          checks_run=len(results),
                          duration_ms=duration_ms)
-        
+
         return SystemHealth(
             status=overall_status,
             checks=results,
             timestamp=time.time()
         )
-    
+
     def get_last_results(self) -> Dict[str, HealthCheckResult]:
         """Get cached results from last check.
         
@@ -209,13 +209,13 @@ class HealthChecker:
         """
         with self._lock:
             return self._last_results.copy()
-    
+
     def start_background_checks(self) -> None:
         """Start background health checking."""
         if self.background_enabled:
             self._logger.warning("background_checks_already_running")
             return
-        
+
         self.background_enabled = True
         self._stop_event.clear()
         self._background_thread = threading.Thread(
@@ -224,31 +224,31 @@ class HealthChecker:
             name="health-checker"
         )
         self._background_thread.start()
-        
+
         self._logger.info("background_checks_started",
                          interval=self.check_interval)
-    
+
     def stop_background_checks(self) -> None:
         """Stop background health checking."""
         if not self.background_enabled:
             return
-        
+
         self.background_enabled = False
         self._stop_event.set()
-        
+
         if self._background_thread:
             self._background_thread.join(timeout=5.0)
             self._background_thread = None
-        
+
         self._logger.info("background_checks_stopped")
-    
+
     def _background_check_loop(self) -> None:
         """Background check loop."""
         while not self._stop_event.is_set():
             try:
                 # Run all checks
                 health = self.check()
-                
+
                 # Log if unhealthy
                 if not health.is_healthy():
                     self._logger.warning("system_unhealthy",
@@ -257,10 +257,10 @@ class HealthChecker:
                                            c.name for c in health.checks
                                            if c.status != HealthStatus.HEALTHY
                                        ])
-                
+
             except Exception as e:
                 self._logger.error("background_check_error", error=str(e))
-            
+
             # Wait for next interval
             self._stop_event.wait(self.check_interval)
 
@@ -277,7 +277,7 @@ def get_health_checker() -> HealthChecker:
         Global HealthChecker instance
     """
     global _health_checker
-    
+
     if _health_checker is None:
         with _health_checker_lock:
             if _health_checker is None:
@@ -312,12 +312,12 @@ def register_cache_health_check(cache_name: str, cache_instance: Any) -> None:
         """Check cache health."""
         try:
             stats = cache_instance.stats()
-            
+
             # Check if cache is responsive
             size = stats.get('size', 0)
             max_size = stats.get('max_size', 1)
             utilization = (size / max_size) * 100 if max_size > 0 else 0
-            
+
             # Determine status based on utilization
             if utilization < 80:
                 status = HealthStatus.HEALTHY
@@ -328,7 +328,7 @@ def register_cache_health_check(cache_name: str, cache_instance: Any) -> None:
             else:
                 status = HealthStatus.DEGRADED
                 message = f"Cache nearly full ({utilization:.1f}% full)"
-            
+
             return HealthCheckResult(
                 name=f"cache_{cache_name}",
                 status=status,
@@ -340,14 +340,14 @@ def register_cache_health_check(cache_name: str, cache_instance: Any) -> None:
                     "hit_rate": stats.get('hit_rate', 0),
                 }
             )
-            
+
         except Exception as e:
             return HealthCheckResult(
                 name=f"cache_{cache_name}",
                 status=HealthStatus.UNHEALTHY,
                 message=f"Cache check failed: {str(e)}"
             )
-    
+
     checker = get_health_checker()
     checker.register_check(f"cache_{cache_name}", check_cache_health)
 
@@ -360,14 +360,14 @@ def register_system_health_check() -> None:
             # Try to import psutil for system metrics
             try:
                 import psutil
-                
+
                 # Check memory
                 memory = psutil.virtual_memory()
                 memory_percent = memory.percent
-                
+
                 # Check CPU
                 cpu_percent = psutil.cpu_percent(interval=0.1)
-                
+
                 # Determine status
                 if memory_percent < 80 and cpu_percent < 80:
                     status = HealthStatus.HEALTHY
@@ -378,7 +378,7 @@ def register_system_health_check() -> None:
                 else:
                     status = HealthStatus.DEGRADED
                     message = "System resources high"
-                
+
                 return HealthCheckResult(
                     name="system_resources",
                     status=status,
@@ -389,7 +389,7 @@ def register_system_health_check() -> None:
                         "memory_available_mb": memory.available / (1024 * 1024),
                     }
                 )
-                
+
             except ImportError:
                 # psutil not available, return healthy with limited info
                 return HealthCheckResult(
@@ -398,14 +398,14 @@ def register_system_health_check() -> None:
                     message="System monitoring unavailable (psutil not installed)",
                     details={"psutil_available": False}
                 )
-                
+
         except Exception as e:
             return HealthCheckResult(
                 name="system_resources",
                 status=HealthStatus.UNKNOWN,
                 message=f"System check failed: {str(e)}"
             )
-    
+
     checker = get_health_checker()
     checker.register_check("system_resources", check_system_health)
 
@@ -415,11 +415,11 @@ def register_monitoring_health_check() -> None:
     def check_monitoring_health() -> HealthCheckResult:
         """Check monitoring system."""
         try:
-            from src.monitoring import get_metrics_collector
-            
+            from src.monitoring.metrics import get_metrics_collector
+
             metrics = get_metrics_collector()
             metrics_data = metrics.get_metrics()
-            
+
             # Check if metrics are being collected. The real hit/miss counts
             # live nested under cache.L1/L2 (see MetricsCollector.get_metrics /
             # CacheMetrics.to_dict); the old flat 'cache_hits'/'cache_misses'
@@ -431,14 +431,14 @@ def register_monitoring_health_check() -> None:
                 l1.get('hits', 0) + l1.get('misses', 0) +
                 l2.get('hits', 0) + l2.get('misses', 0)
             )
-            
+
             if total_operations > 0:
                 status = HealthStatus.HEALTHY
                 message = "Monitoring system operational"
             else:
                 status = HealthStatus.HEALTHY
                 message = "Monitoring system ready (no operations yet)"
-            
+
             return HealthCheckResult(
                 name="monitoring",
                 status=status,
@@ -448,13 +448,13 @@ def register_monitoring_health_check() -> None:
                     "metrics_available": True,
                 }
             )
-            
+
         except Exception as e:
             return HealthCheckResult(
                 name="monitoring",
                 status=HealthStatus.DEGRADED,
                 message=f"Monitoring check failed: {str(e)}"
             )
-    
+
     checker = get_health_checker()
     checker.register_check("monitoring", check_monitoring_health)

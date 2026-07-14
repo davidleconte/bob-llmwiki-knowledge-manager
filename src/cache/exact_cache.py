@@ -12,9 +12,9 @@ Target metrics:
 import hashlib
 import time
 from collections import OrderedDict
-from typing import Optional, Dict, Any, Callable
+from typing import Any, Callable, Dict, Optional
 
-from src.cache.base import CacheInterface, CacheEntry, CacheStats
+from src.cache.base import CacheEntry, CacheInterface, CacheStats
 from src.monitoring import get_logger, get_metrics_collector
 
 
@@ -32,9 +32,9 @@ class ExactCache(CacheInterface):
         stats: Cache statistics tracker
         track_costs: Whether to track costs with CostTracker
     """
-    
+
     VERSION: str = "v1"  # Current cache version
-    
+
     def __init__(self, max_size: int = 1000, track_costs: bool = False,
                  ttl_seconds: Optional[float] = None,
                  clock: Callable[[], float] = time.time):
@@ -61,11 +61,11 @@ class ExactCache(CacheInterface):
         self.cache: OrderedDict[str, CacheEntry] = OrderedDict()
         self._stats = CacheStats()
         self.track_costs = track_costs
-        
+
         # Initialize monitoring
         self._logger = get_logger("cache.exact")
         self._metrics = get_metrics_collector()
-        
+
         # Initialize cost tracker if enabled
         self._cost_tracker = None
         if self.track_costs:
@@ -74,12 +74,12 @@ class ExactCache(CacheInterface):
                 self._cost_tracker = get_cost_tracker()
             except ImportError:
                 self.track_costs = False
-        
-        self._logger.info("exact_cache_initialized", 
-                         max_size=max_size, 
+
+        self._logger.info("exact_cache_initialized",
+                         max_size=max_size,
                          track_costs=track_costs,
                          version=self.VERSION)
-    
+
     def _make_versioned_key(self, key: str, version: Optional[str] = None) -> str:
         """Create versioned cache key.
         
@@ -93,7 +93,7 @@ class ExactCache(CacheInterface):
         if version is None:
             version = self.VERSION
         return f"{version}:{key}"
-    
+
     def _hash_key(self, key: str) -> str:
         """Generate SHA-256 hash of key.
         
@@ -104,7 +104,7 @@ class ExactCache(CacheInterface):
             Hexadecimal hash string
         """
         return hashlib.sha256(key.encode('utf-8')).hexdigest()
-    
+
     def get(self, key: str, version: Optional[str] = None) -> Optional[str]:
         """Retrieve cached response for exact key match.
         
@@ -118,7 +118,7 @@ class ExactCache(CacheInterface):
         start_time = time.time()
         versioned_key = self._make_versioned_key(key, version)
         hashed_key = self._hash_key(versioned_key)
-        
+
         if hashed_key in self.cache:
             entry = self.cache[hashed_key]
 
@@ -145,43 +145,43 @@ class ExactCache(CacheInterface):
             # Record hit
             self._stats.record_hit()
             latency_ms = (time.time() - start_time) * 1000
-            
+
             # Record metrics
             self._metrics.record_cache_hit("L1", latency_ms)
-            
+
             # Log hit
-            self._logger.debug("cache_hit", 
+            self._logger.debug("cache_hit",
                              cache_level="L1",
                              key_hash=hashed_key[:8],
                              version=version or self.VERSION,
                              latency_ms=latency_ms,
                              access_count=entry.access_count)
-            
+
             # Track cost savings if enabled
             if self.track_costs and self._cost_tracker:
                 # Estimate tokens saved (from metadata if available)
                 tokens_saved = entry.metadata.get('tokens', 0)
                 if tokens_saved > 0:
                     self._cost_tracker.record_cache_hit(tokens_saved)
-            
+
             return entry.response
-        
+
         # Record miss
         self._stats.record_miss()
         latency_ms = (time.time() - start_time) * 1000
-        
+
         # Record metrics
         self._metrics.record_cache_miss("L1")
-        
+
         # Log miss
         self._logger.debug("cache_miss",
                          cache_level="L1",
                          key_hash=hashed_key[:8],
                          version=version or self.VERSION,
                          latency_ms=latency_ms)
-        
+
         return None
-    
+
     def set(self, key: str, value: str, version: Optional[str] = None,
             metadata: Optional[Dict[str, Any]] = None) -> None:
         """Store response in cache.
@@ -195,18 +195,18 @@ class ExactCache(CacheInterface):
         versioned_key = self._make_versioned_key(key, version)
         hashed_key = self._hash_key(versioned_key)
         is_update = hashed_key in self.cache
-        
+
         # Check if we need to evict
         if not is_update and len(self.cache) >= self.max_size:
             self._evict_lru()
-        
+
         # Create cache entry
         if metadata is None:
             metadata = {}
-        
+
         # Add version to metadata
         metadata['version'] = version or self.VERSION
-        
+
         entry = CacheEntry(
             response=value,
             metadata=metadata,
@@ -216,10 +216,10 @@ class ExactCache(CacheInterface):
         # Store and move to end (most recently used)
         self.cache[hashed_key] = entry
         self.cache.move_to_end(hashed_key)
-        
+
         # Update cache size metric
         self._metrics.update_cache_size("L1", len(self.cache))
-        
+
         # Log cache set
         self._logger.debug("cache_set",
                          cache_level="L1",
@@ -228,17 +228,17 @@ class ExactCache(CacheInterface):
                          is_update=is_update,
                          cache_size=len(self.cache),
                          response_length=len(value))
-    
+
     def _evict_lru(self) -> None:
         """Evict least recently used entry."""
         if self.cache:
             # Remove first item (least recently used)
             evicted_key, evicted_entry = self.cache.popitem(last=False)
             self._stats.record_eviction()
-            
+
             # Record metrics
             self._metrics.record_cache_eviction("L1")
-            
+
             # Log eviction
             self._logger.debug("cache_eviction",
                              cache_level="L1",
@@ -246,18 +246,18 @@ class ExactCache(CacheInterface):
                              version=evicted_entry.metadata.get('version', 'unknown'),
                              cache_size=len(self.cache),
                              access_count=evicted_entry.access_count)
-    
+
     def clear(self) -> None:
         """Clear all entries from cache."""
         entries_cleared = len(self.cache)
         self.cache.clear()
         self._stats.reset()
-        
+
         # Log clear
         self._logger.info("cache_cleared",
                         cache_level="L1",
                         entries_cleared=entries_cleared)
-    
+
     def size(self) -> int:
         """Get number of entries in cache.
         
@@ -265,7 +265,7 @@ class ExactCache(CacheInterface):
             Number of cached entries
         """
         return len(self.cache)
-    
+
     def hit_rate(self) -> float:
         """Calculate cache hit rate.
         
@@ -273,7 +273,7 @@ class ExactCache(CacheInterface):
             Hit rate as percentage (0-100)
         """
         return self._stats.hit_rate()
-    
+
     def stats(self) -> Dict[str, Any]:
         """Get cache statistics.
         
@@ -287,7 +287,7 @@ class ExactCache(CacheInterface):
             "utilization": (self.size() / self.max_size) * 100,
             "version": self.VERSION,
         }
-    
+
     def get_entry(self, key: str, version: Optional[str] = None) -> Optional[CacheEntry]:
         """Get full cache entry (for testing/debugging).
         
@@ -301,7 +301,7 @@ class ExactCache(CacheInterface):
         versioned_key = self._make_versioned_key(key, version)
         hashed_key = self._hash_key(versioned_key)
         return self.cache.get(hashed_key)
-    
+
     def contains(self, key: str, version: Optional[str] = None) -> bool:
         """Check if key exists in cache.
         
@@ -315,7 +315,7 @@ class ExactCache(CacheInterface):
         versioned_key = self._make_versioned_key(key, version)
         hashed_key = self._hash_key(versioned_key)
         return hashed_key in self.cache
-    
+
     def evict(self, key: str, version: Optional[str] = None) -> bool:
         """Manually evict a specific key.
         
@@ -333,7 +333,7 @@ class ExactCache(CacheInterface):
             self._stats.record_eviction()
             return True
         return False
-    
+
     def get_oldest_entry(self) -> Optional[tuple[str, CacheEntry]]:
         """Get the oldest (LRU) entry without removing it.
         
@@ -342,11 +342,11 @@ class ExactCache(CacheInterface):
         """
         if not self.cache:
             return None
-        
+
         # First item is oldest (LRU)
         key = next(iter(self.cache))
         return (key, self.cache[key])
-    
+
     def get_newest_entry(self) -> Optional[tuple[str, CacheEntry]]:
         """Get the newest (MRU) entry without removing it.
         
@@ -355,11 +355,11 @@ class ExactCache(CacheInterface):
         """
         if not self.cache:
             return None
-        
+
         # Last item is newest (MRU)
         key = next(reversed(self.cache))
         return (key, self.cache[key])
-    
+
     def migrate(self, from_version: str, to_version: str) -> int:
         """Migrate entries from one version to another.
         
@@ -375,26 +375,26 @@ class ExactCache(CacheInterface):
         """
         migrated = 0
         entries_to_migrate = []
-        
+
         # Collect entries to migrate
         for hashed_key, entry in self.cache.items():
             if entry.metadata.get('version') == from_version:
                 entries_to_migrate.append((hashed_key, entry))
-        
+
         # Migrate entries
         for hashed_key, entry in entries_to_migrate:
             # Extract original key from metadata if available
             # For now, we can't reverse the hash, so we skip migration
             # This is a limitation of the hash-based approach
             pass
-        
+
         self._logger.info("cache_migration",
                         from_version=from_version,
                         to_version=to_version,
                         migrated=migrated)
-        
+
         return migrated
-    
+
     def cleanup_version(self, version: str) -> int:
         """Remove all entries for a specific version.
         
@@ -406,23 +406,23 @@ class ExactCache(CacheInterface):
         """
         removed = 0
         keys_to_remove = []
-        
+
         # Collect keys to remove
         for hashed_key, entry in self.cache.items():
             if entry.metadata.get('version') == version:
                 keys_to_remove.append(hashed_key)
-        
+
         # Remove entries
         for hashed_key in keys_to_remove:
             del self.cache[hashed_key]
             removed += 1
-        
+
         self._logger.info("version_cleanup",
                         version=version,
                         removed=removed)
-        
+
         return removed
-    
+
     def reset_stats(self) -> None:
         """Reset statistics counters."""
         self._stats.reset()

@@ -4,10 +4,10 @@ This module defines the abstract base class for all cache implementations,
 providing a common interface and version support for cache evolution.
 """
 
-from abc import ABC, abstractmethod
-from typing import Optional, Dict, Any, List
-from dataclasses import dataclass
 import time
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from typing import Any, Dict, Optional
 
 
 @dataclass
@@ -31,12 +31,12 @@ class CacheEntry:
         """Default last_access to the creation timestamp when unset."""
         if not self.last_access:
             self.last_access = self.timestamp
-    
+
     def access(self) -> None:
         """Record an access to this entry."""
         self.last_access = time.time()
         self.access_count += 1
-    
+
     def age_seconds(self) -> float:
         """Calculate age of entry in seconds.
         
@@ -44,7 +44,7 @@ class CacheEntry:
             Age in seconds since creation
         """
         return time.time() - self.timestamp
-    
+
     def idle_seconds(self) -> float:
         """Calculate idle time in seconds.
         
@@ -66,19 +66,19 @@ class CacheStats:
     hits: int = 0
     misses: int = 0
     evictions: int = 0
-    
+
     def record_hit(self) -> None:
         """Record a cache hit."""
         self.hits += 1
-    
+
     def record_miss(self) -> None:
         """Record a cache miss."""
         self.misses += 1
-    
+
     def record_eviction(self) -> None:
         """Record an eviction."""
         self.evictions += 1
-    
+
     def hit_rate(self) -> float:
         """Calculate hit rate as percentage.
         
@@ -89,13 +89,13 @@ class CacheStats:
         if total == 0:
             return 0.0
         return (self.hits / total) * 100
-    
+
     def reset(self) -> None:
         """Reset all statistics."""
         self.hits = 0
         self.misses = 0
         self.evictions = 0
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary.
         
@@ -121,9 +121,9 @@ class CacheInterface(ABC):
     Attributes:
         VERSION: Default cache version (class attribute)
     """
-    
+
     VERSION: str = "v1"  # Default version for all caches
-    
+
     @abstractmethod
     def get(self, key: str, version: Optional[str] = None) -> Optional[str]:
         """Retrieve cached value for key.
@@ -136,9 +136,9 @@ class CacheInterface(ABC):
             Cached value if found, None otherwise
         """
         pass
-    
+
     @abstractmethod
-    def set(self, key: str, value: str, version: Optional[str] = None, 
+    def set(self, key: str, value: str, version: Optional[str] = None,
             metadata: Optional[Dict[str, Any]] = None) -> None:
         """Store key-value pair in cache.
         
@@ -149,12 +149,12 @@ class CacheInterface(ABC):
             metadata: Optional metadata to store with entry
         """
         pass
-    
+
     @abstractmethod
     def clear(self) -> None:
         """Clear all entries from cache."""
         pass
-    
+
     @abstractmethod
     def size(self) -> int:
         """Get number of entries in cache.
@@ -163,7 +163,7 @@ class CacheInterface(ABC):
             Number of cached entries
         """
         pass
-    
+
     @abstractmethod
     def hit_rate(self) -> float:
         """Calculate cache hit rate.
@@ -172,7 +172,7 @@ class CacheInterface(ABC):
             Hit rate as percentage (0-100)
         """
         pass
-    
+
     @abstractmethod
     def stats(self) -> Dict[str, Any]:
         """Get cache statistics.
@@ -181,7 +181,7 @@ class CacheInterface(ABC):
             Dictionary with cache statistics
         """
         pass
-    
+
     def migrate(self, from_version: str, to_version: str) -> int:
         """Migrate entries from one version to another.
         
@@ -202,7 +202,7 @@ class CacheInterface(ABC):
             f"{self.__class__.__name__} does not support migration. "
             "Override this method to enable version migration."
         )
-    
+
     def cleanup_version(self, version: str) -> int:
         """Remove all entries for a specific version.
         
@@ -222,7 +222,7 @@ class CacheInterface(ABC):
             f"{self.__class__.__name__} does not support version cleanup. "
             "Override this method to enable version cleanup."
         )
-    
+
     def get_entry(self, key: str, version: Optional[str] = None) -> Optional[CacheEntry]:
         """Get full cache entry with metadata.
         
@@ -237,7 +237,7 @@ class CacheInterface(ABC):
             CacheEntry if found, None otherwise
         """
         return None
-    
+
     def contains(self, key: str, version: Optional[str] = None) -> bool:
         """Check if key exists in cache.
         
@@ -252,7 +252,7 @@ class CacheInterface(ABC):
             True if key exists, False otherwise
         """
         return self.get(key, version) is not None
-    
+
     def reset_stats(self) -> None:
         """Reset statistics counters.
         

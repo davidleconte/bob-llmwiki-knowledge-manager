@@ -4,13 +4,13 @@ This module provides various truncation strategies to fit prompts
 within token limits while preserving quality and meaning.
 """
 
-from src.truncation.truncator import Truncator
 from src.truncation.strategies import (
-    SimpleTruncationStrategy,
     PriorityTruncationStrategy,
     SemanticTruncationStrategy,
+    SimpleTruncationStrategy,
     SlidingWindowStrategy,
 )
+from src.truncation.truncator import Truncator
 
 __all__ = [
     "Truncator",
