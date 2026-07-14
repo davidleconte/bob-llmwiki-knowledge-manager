@@ -13,7 +13,7 @@ Snapshot from CI, 2026-07-13 (point-in-time; the authoritative status is
 
 ```
 Total Tests:    676 (641 passed, 23 skipped, 12 xfailed)
-Coverage:       82.5%  (gate: >=80%, enforced by pyproject.toml fail_under)
+Coverage:       82.4%  (gate: >=80%, enforced by pyproject.toml fail_under)
 ```
 
 The `xfailed` tests are strict-xfail markers for known gaps (config not yet wired
@@ -214,7 +214,7 @@ python3 -m pytest tests/monitoring/ -v
 Coverage is enforced by a single gate — `fail_under` in
 `pyproject.toml` (`[tool.coverage.report]`) — **not** by hand-maintained numbers
 in this file. Per-package floors (e.g. `monitoring`, `delegation`) live in
-`scripts/check_coverage_by_package.py`. Measured total was **82.5%** as of
+`scripts/check_coverage_by_package.py`. Measured total was **82.4%** as of
 2026-07-13; regenerate with:
 
 ```bash
