@@ -8,6 +8,8 @@ import json
 from pathlib import Path
 from typing import Dict, List, Literal, Optional
 
+from src.tools.safe_paths import resolve_within
+
 Strategy = Literal["full", "summary", "search"]
 
 
@@ -39,7 +41,11 @@ class BatchFileReader:
         results = {}
 
         for file_path in file_paths:
-            full_path = self.base_path / file_path
+            try:
+                full_path = resolve_within(self.base_path, file_path)
+            except ValueError:
+                results[file_path] = {"error": "Invalid file path (escapes base directory)"}
+                continue
 
             if not full_path.exists():
                 results[file_path] = {"error": "File not found"}
