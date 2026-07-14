@@ -17,7 +17,13 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from src.config.manager import get_config
 from src.factory import build_cache, build_optimizer, build_truncator
-from src.monitoring import get_logger, get_metrics_collector
+from src.monitoring import (
+    get_logger,
+    get_metrics_collector,
+    register_cache_health_check,
+    register_monitoring_health_check,
+    register_system_health_check,
+)
 from src.pricing import DEFAULT_MODEL
 
 if TYPE_CHECKING:
@@ -61,6 +67,13 @@ class TokenOptimizer:
 
         self._logger = get_logger("facade.token_optimizer")
         self._metrics = get_metrics_collector()
+
+        # Register health checks so health() reports on the live components
+        # (closes the B4 "health checks defined but never wired" orphan).
+        register_cache_health_check("multi_level", self.cache)
+        register_monitoring_health_check()
+        register_system_health_check()
+
         self._logger.info("token_optimizer_initialized", model=model, track_costs=track_costs)
 
     @classmethod
