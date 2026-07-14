@@ -274,6 +274,19 @@ Before deploying to production:
 
 See `docs/knowledge-base/guides/p0-critical-fixes-implementation.md` for detailed production readiness steps.
 
+## Security
+
+This is a **local** library and CLI — no network service, no stored credentials
+(see the deployment framing in the threat model). Security is documented and
+enforced, not asserted:
+
+- **Report a vulnerability:** privately, via GitHub Private Vulnerability
+  Reporting — see [`SECURITY.md`](SECURITY.md). Do not open a public issue.
+- **Threat model:** [`docs/security/THREAT_MODEL.md`](docs/security/THREAT_MODEL.md)
+  — a code-grounded STRIDE analysis (it supersedes the retracted ADR-012).
+- **In CI:** bandit SAST (medium+, blocking), a CycloneDX SBOM + `pip-audit`,
+  Dependabot, and path-traversal containment in the `src/tools/` file readers.
+
 ## References
 
 - **Andrej Karpathy — the LLM-Wiki pattern** · `https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f`
