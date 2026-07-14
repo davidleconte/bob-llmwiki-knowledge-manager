@@ -337,9 +337,73 @@ class APIDocGenerator:
         return 0
 
 
+def _selftest() -> int:
+    """Verify ``--check`` detects STALE / MISSING / ORPHAN drift.
+
+    Runs entirely inside a temp directory (no side effects on the real
+    ``docs/api/`` -- the bug this replaces was ``--selftest`` silently running the
+    real generator and rewriting committed docs).
+    """
+    import contextlib
+    import io
+    import tempfile
+
+    failures: list[str] = []
+    buf = io.StringIO()
+    with (
+        tempfile.TemporaryDirectory() as d,
+        contextlib.redirect_stdout(buf),
+        contextlib.redirect_stderr(buf),
+    ):
+        root = Path(d)
+        src = root / "src"
+        src.mkdir()
+        (src / "__init__.py").write_text('"""Temp package for selftest."""\n', encoding="utf-8")
+        (src / "mod.py").write_text(
+            '"""A module.\n\nWith a docstring."""\n\n\ndef greet(name):\n'
+            '    """Return a greeting."""\n    return name\n',
+            encoding="utf-8",
+        )
+        out = root / "api"
+        APIDocGenerator(src, out).generate_docs()
+        docs = sorted(out.rglob("*.md"))
+        if not docs:
+            failures.append("generator produced no docs")
+        else:
+            # in sync
+            if APIDocGenerator(src, out).check_docs() != 0:
+                failures.append("fresh docs should be in sync (0)")
+            # STALE: a committed page drifted from source
+            docs[0].write_text(
+                docs[0].read_text(encoding="utf-8") + "\n<!--x-->\n", encoding="utf-8"
+            )
+            if APIDocGenerator(src, out).check_docs() != 1:
+                failures.append("edited page should be STALE (1)")
+            # MISSING: a source page with no committed doc
+            APIDocGenerator(src, out).generate_docs()
+            docs[0].unlink()
+            if APIDocGenerator(src, out).check_docs() != 1:
+                failures.append("deleted page should be MISSING (1)")
+            # ORPHAN: a committed doc with no source
+            APIDocGenerator(src, out).generate_docs()
+            (out / "orphan_ghost.md").write_text("no source\n", encoding="utf-8")
+            if APIDocGenerator(src, out).check_docs() != 1:
+                failures.append("orphan doc should fail (1)")
+
+    if failures:
+        print("SELFTEST FAILED:", file=sys.stderr)
+        for f in failures:
+            print(f"  {f}", file=sys.stderr)
+        return 1
+    print("SELFTEST OK: --check detects STALE / MISSING / ORPHAN drift.")
+    return 0
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     """Generate the API docs, or (with ``--check``) verify they are current."""
     argv = list(sys.argv[1:] if argv is None else argv)
+    if "--selftest" in argv:
+        return _selftest()
     check = "--check" in argv
 
     project_root = Path(__file__).resolve().parent.parent

@@ -66,7 +66,61 @@ def _package_coverage(report: dict, package: str) -> tuple[int, int]:
     return covered, statements
 
 
+def _evaluate(report: dict) -> tuple[list[str], list[str]]:
+    """Compare every package against its floor. Pure (no I/O).
+
+    Returns ``(failures, rows)`` where ``failures`` is the list of packages below
+    floor (or with no measured statements) and ``rows`` are the printable lines.
+    """
+    failures: list[str] = []
+    rows: list[str] = []
+    for package, floor in sorted(FLOORS.items()):
+        covered, statements = _package_coverage(report, package)
+        if statements == 0:
+            rows.append(f"  ERROR {package}: no statements found in report (path mismatch?)")
+            failures.append(package)
+            continue
+        pct = 100.0 * covered / statements
+        status = "OK " if pct >= floor else "FAIL"
+        if pct < floor:
+            failures.append(package)
+        rows.append(
+            f"  {status} {package}: {pct:5.1f}%  (floor {floor:.0f}%, {covered}/{statements} stmts)"
+        )
+    return failures, rows
+
+
+def _selftest() -> int:
+    """Verify the floor comparison flags a below-floor package and passes above-floor."""
+
+    def _report(below=None) -> dict:
+        files = {}
+        for pkg, floor in FLOORS.items():
+            pct = (floor - 10.0) if pkg == below else (floor + 5.0)
+            pct = max(0.0, min(100.0, pct))
+            covered = int(round(pct / 100.0 * 1000))
+            files[f"{pkg}/mod.py"] = {"summary": {"covered_lines": covered, "num_statements": 1000}}
+        return {"files": files}
+
+    failures: list[str] = []
+    if _evaluate(_report())[0]:
+        failures.append("an all-above-floor report should produce no failures")
+    for target in FLOORS:
+        flagged = _evaluate(_report(below=target))[0]
+        if target not in flagged:
+            failures.append(f"{target} below its floor should be flagged (got {flagged})")
+    if failures:
+        print("SELFTEST FAILED:", file=sys.stderr)
+        for f in failures:
+            print(f"  {f}", file=sys.stderr)
+        return 1
+    print(f"SELFTEST OK: floor comparison correct for {len(FLOORS)} packages.")
+    return 0
+
+
 def main(argv: list[str]) -> int:
+    if "--selftest" in argv:
+        return _selftest()
     report_path = argv[1] if len(argv) > 1 else "coverage.json"
     try:
         with open(report_path, encoding="utf-8") as fh:
@@ -79,22 +133,10 @@ def main(argv: list[str]) -> int:
         )
         return 2
 
-    failures = []
+    failures, rows = _evaluate(report)
     print("Per-package coverage floors:")
-    for package, floor in sorted(FLOORS.items()):
-        covered, statements = _package_coverage(report, package)
-        if statements == 0:
-            print(f"  ERROR {package}: no statements found in report (path mismatch?)")
-            failures.append(package)
-            continue
-        pct = 100.0 * covered / statements
-        status = "OK " if pct >= floor else "FAIL"
-        if pct < floor:
-            failures.append(package)
-        print(
-            f"  {status} {package}: {pct:5.1f}%  (floor {floor:.0f}%, {covered}/{statements} stmts)"
-        )
-
+    for row in rows:
+        print(row)
     if failures:
         print(
             f"\nFAILED: {len(failures)} package(s) below floor: {', '.join(sorted(failures))}",

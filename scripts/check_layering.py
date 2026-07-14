@@ -51,7 +51,40 @@ def _violations_in_file(path: Path) -> list[tuple[int, str]]:
     return found
 
 
+def _selftest() -> int:
+    """Verify the AST detector flags upward imports and ignores look-alikes."""
+    import tempfile
+
+    cases: list[tuple[str, bool]] = [
+        ("import scripts.foo\n", True),
+        ("from scripts import foo\n", True),
+        ("from scripts.sub import foo\n", True),
+        ("import src.tools.foo\n", False),
+        ("from src.cache import x\n", False),
+        ("from . import sibling\n", False),  # relative import, never reaches scripts/
+        ("x = 'from scripts import y'  # a string, not an import\n", False),  # AST-immune
+        ("import scripts_helper\n", False),  # prefix look-alike, not the scripts package
+    ]
+    failures: list[str] = []
+    with tempfile.TemporaryDirectory() as d:
+        for i, (source, should_flag) in enumerate(cases):
+            p = Path(d) / f"case_{i}.py"
+            p.write_text(source, encoding="utf-8")
+            flagged = bool(_violations_in_file(p))
+            if flagged != should_flag:
+                failures.append(f"{source!r}: flagged={flagged}, expected={should_flag}")
+    if failures:
+        print("SELFTEST FAILED:", file=sys.stderr)
+        for f in failures:
+            print(f"  {f}", file=sys.stderr)
+        return 1
+    print(f"SELFTEST OK: {len(cases)} layering cases classified correctly.")
+    return 0
+
+
 def main(argv: list[str]) -> int:
+    if "--selftest" in argv:
+        return _selftest()
     src_dir = Path(argv[1] if len(argv) > 1 else "src")
     if not src_dir.is_dir():
         print(f"ERROR: source directory not found: {src_dir}", file=sys.stderr)

@@ -241,5 +241,86 @@ class TestSlidingWindowStrategy:
         assert strategy.get_name() == "sliding_window"
 
 
+class TestBudgetInvariant:
+    """The core promise of a token truncator: ``count_tokens(out) <= max_tokens``.
+
+    Before the Phase-8 fix, Priority/Semantic/SlidingWindow summed per-piece token
+    counts and ignored the separators (and SlidingWindow's marker) added when the
+    pieces are re-joined, so the assembled output overshot the budget (e.g. Priority
+    on 6 sections: budget 25 -> 29). Only ``Simple`` self-verified. These cases fail
+    if any strategy's accounting or the ``_enforce_budget`` clamp is reverted.
+    """
+
+    ALL_STRATEGIES = [
+        SimpleTruncationStrategy,
+        PriorityTruncationStrategy,
+        SemanticTruncationStrategy,
+        SlidingWindowStrategy,
+    ]
+
+    # Multi-section (\n\n), multi-line (\n), and multi-sentence inputs -- the shapes
+    # that exercise each strategy's join separator.
+    SECTIONS = "\n\n".join(f"Section {i}: alpha beta gamma delta epsilon" for i in range(8))
+    LINES = "\n".join(f"line {i} with several words to count" for i in range(30))
+    SENTENCES = " ".join(f"This is sentence number {i} in the document." for i in range(30))
+    INPUTS = [SECTIONS, LINES, SENTENCES]
+
+    @pytest.mark.parametrize("strategy_cls", ALL_STRATEGIES)
+    @pytest.mark.parametrize("max_tokens", [1, 3, 5, 8, 10, 15, 20, 25, 40, 60])
+    @pytest.mark.parametrize("text", INPUTS)
+    def test_never_exceeds_budget(self, strategy_cls, max_tokens, text):
+        counter = TokenCounter()
+        out = strategy_cls().truncate(text, max_tokens, counter)
+        assert counter.count_tokens(out) <= max_tokens, (
+            f"{strategy_cls.__name__} overshoot: budget={max_tokens} "
+            f"got={counter.count_tokens(out)}"
+        )
+
+    def test_priority_multi_section_regression(self):
+        """The exact overshoot the sign-off reproduced: Priority, 6 sections, budget 25."""
+        counter = TokenCounter()
+        text = "\n\n".join(f"Section {i}: alpha beta gamma delta epsilon" for i in range(6))
+        out = PriorityTruncationStrategy().truncate(text, 25, counter)
+        assert counter.count_tokens(out) <= 25
+
+    def test_sliding_multiline_marker_regression(self):
+        """SlidingWindow must fit budget *including* its prepended marker + \\n joins."""
+        counter = TokenCounter()
+        text = "\n".join(f"log line {i} carrying a few tokens each" for i in range(40))
+        out = SlidingWindowStrategy().truncate(text, 20, counter)
+        assert counter.count_tokens(out) <= 20
+
+
+try:
+    from hypothesis import given, settings
+    from hypothesis import strategies as st
+
+    _HAS_HYPOTHESIS = True
+except ImportError:  # pragma: no cover - hypothesis is a dev dependency
+    _HAS_HYPOTHESIS = False
+
+
+@pytest.mark.skipif(not _HAS_HYPOTHESIS, reason="hypothesis not installed")
+class TestBudgetInvariantProperty:
+    """Property test: no strategy exceeds the budget for arbitrary text/limits."""
+
+    if _HAS_HYPOTHESIS:
+
+        @given(
+            text=st.text(
+                alphabet=st.characters(min_codepoint=32, max_codepoint=0x2E7F),
+                min_size=0,
+                max_size=400,
+            ),
+            max_tokens=st.integers(min_value=1, max_value=50),
+            strategy_cls=st.sampled_from(TestBudgetInvariant.ALL_STRATEGIES),
+        )
+        @settings(max_examples=200, deadline=None)
+        def test_invariant_holds(self, text, max_tokens, strategy_cls):
+            counter = TokenCounter()
+            out = strategy_cls().truncate(text, max_tokens, counter)
+            assert counter.count_tokens(out) <= max_tokens
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

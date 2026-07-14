@@ -31,6 +31,39 @@ class TruncationStrategy(ABC):
         """Get strategy name."""
         pass
 
+    # --- shared budget helpers (inherited by every strategy) -------------- #
+    def _token_safe_prefix(self, text: str, max_tokens: int, token_counter) -> str:
+        """Longest character prefix of ``text`` with token count <= ``max_tokens``.
+
+        Binary search on the character index using the real token counter, so the
+        invariant holds for any tokenizer (including multibyte text).
+        """
+        if max_tokens <= 0:
+            return ""
+        lo, hi, best = 0, len(text), 0
+        while lo <= hi:
+            mid = (lo + hi) // 2
+            if token_counter.count_tokens(text[:mid]) <= max_tokens:
+                best = mid
+                lo = mid + 1
+            else:
+                hi = mid - 1
+        return text[:best]
+
+    def _enforce_budget(self, text: str, max_tokens: int, token_counter) -> str:
+        """Final guarantee that assembled output honours ``max_tokens``.
+
+        Strategies that reassemble pieces (priority/semantic/sliding-window) sum
+        the per-piece token counts, which omits the separators (and any marker)
+        added when the pieces are joined -- so the assembled string can exceed the
+        budget by a few tokens even though each piece was counted. Any residual
+        overshoot is trimmed here with a token-accurate prefix, so every strategy
+        honours ``count_tokens(out) <= max_tokens``.
+        """
+        if token_counter.count_tokens(text) <= max_tokens:
+            return text
+        return self._token_safe_prefix(text, max_tokens, token_counter)
+
 
 class SimpleTruncationStrategy(TruncationStrategy):
     """Simple truncation by character count.
@@ -75,24 +108,6 @@ class SimpleTruncationStrategy(TruncationStrategy):
 
         # Fall back to using the full budget for content (no marker).
         return self._token_safe_prefix(text, max_tokens, token_counter)
-
-    def _token_safe_prefix(self, text: str, max_tokens: int, token_counter) -> str:
-        """Longest character prefix of ``text`` with token count <= ``max_tokens``.
-
-        Binary search on the character index using the real token counter, so
-        the invariant holds for any tokenizer (including multibyte text).
-        """
-        if max_tokens <= 0:
-            return ""
-        lo, hi, best = 0, len(text), 0
-        while lo <= hi:
-            mid = (lo + hi) // 2
-            if token_counter.count_tokens(text[:mid]) <= max_tokens:
-                best = mid
-                lo = mid + 1
-            else:
-                hi = mid - 1
-        return text[:best]
 
     def get_name(self) -> str:
         """Get strategy name."""
@@ -145,18 +160,23 @@ class PriorityTruncationStrategy(TruncationStrategy):
         # each one's original position. We choose by priority but must EMIT in
         # original document order -- appending in priority order scrambled the
         # document (e.g. the last section landed before earlier ones) (C-9).
-        selected = []  # list of (original_index, text_to_emit)
+        # Each emitted section after the first is joined with "\n\n"; that
+        # separator costs tokens the per-section sums would otherwise omit -- the
+        # budget overshoot the Phase-8 sign-off found. Charge it during selection.
+        sep_tokens = token_counter.count_tokens("\n\n")
+        selected: list[tuple[int, str]] = []  # (original_index, text_to_emit)
         total_tokens = 0
 
         for index, section, priority in prioritized:
             section_tokens = token_counter.count_tokens(section)
+            join_cost = sep_tokens if selected else 0
 
-            if total_tokens + section_tokens <= max_tokens:
+            if total_tokens + join_cost + section_tokens <= max_tokens:
                 selected.append((index, section))
-                total_tokens += section_tokens
-            elif total_tokens < max_tokens:
+                total_tokens += join_cost + section_tokens
+            elif total_tokens + join_cost < max_tokens:
                 # Partial section
-                remaining = max_tokens - total_tokens
+                remaining = max_tokens - total_tokens - join_cost
                 truncated_section = SimpleTruncationStrategy().truncate(
                     section, remaining, token_counter
                 )
@@ -167,7 +187,8 @@ class PriorityTruncationStrategy(TruncationStrategy):
 
         # Restore original document order before joining.
         selected.sort(key=lambda item: item[0])
-        return "\n\n".join(text for _, text in selected)
+        result = "\n\n".join(text for _, text in selected)
+        return self._enforce_budget(result, max_tokens, token_counter)
 
     def _split_sections(self, text: str) -> List[str]:
         """Split text into sections.
@@ -273,20 +294,24 @@ class SemanticTruncationStrategy(TruncationStrategy):
         sentences = self._split_sentences(text)
 
         # Build truncated text sentence by sentence
-        result = []
+        result: list[str] = []
         total_tokens = 0
 
+        # Sentences are re-joined with a single space; count that separator so the
+        # running total matches the assembled string (Phase-8 overshoot fix).
+        sep_tokens = token_counter.count_tokens(" ")
         for sentence in sentences:
             sentence_tokens = token_counter.count_tokens(sentence)
+            join_cost = sep_tokens if result else 0
 
-            if total_tokens + sentence_tokens <= max_tokens:
+            if total_tokens + join_cost + sentence_tokens <= max_tokens:
                 result.append(sentence)
-                total_tokens += sentence_tokens
+                total_tokens += join_cost + sentence_tokens
             else:
                 break
 
         if result:
-            return " ".join(result)
+            return self._enforce_budget(" ".join(result), max_tokens, token_counter)
         else:
             # Fallback to simple truncation if first sentence is too long
             return SimpleTruncationStrategy().truncate(text, max_tokens, token_counter)
@@ -343,16 +368,26 @@ class SlidingWindowStrategy(TruncationStrategy):
         # Split into lines for granular control
         lines = text.splitlines()
 
+        # We only reach here when the text exceeds the budget, so a truncation
+        # marker WILL be prepended -- reserve its tokens up front. Kept lines are
+        # joined with "\n", so charge that separator too. Both were previously
+        # omitted from the running total, overshooting the budget (Phase-8 fix).
+        marker = "[...earlier content truncated...]\n"
+        marker_tokens = token_counter.count_tokens(marker)
+        newline_tokens = token_counter.count_tokens("\n")
+        budget = max_tokens - marker_tokens
+
         # Start from the end (most recent)
         result: List[str] = []
         total_tokens = 0
 
         for line in reversed(lines):
             line_tokens = token_counter.count_tokens(line)
+            join_cost = newline_tokens if result else 0
 
-            if total_tokens + line_tokens <= max_tokens:
+            if total_tokens + join_cost + line_tokens <= budget:
                 result.insert(0, line)
-                total_tokens += line_tokens
+                total_tokens += join_cost + line_tokens
             else:
                 break
 
@@ -361,11 +396,11 @@ class SlidingWindowStrategy(TruncationStrategy):
 
             # Add indicator that content was truncated
             if len(result) < len(lines):
-                truncated = "[...earlier content truncated...]\n" + truncated
+                truncated = marker + truncated
 
-            return truncated
+            return self._enforce_budget(truncated, max_tokens, token_counter)
         else:
-            # Fallback if first line is too long
+            # Fallback if the first (most recent) line alone overruns the budget
             return SimpleTruncationStrategy().truncate(text, max_tokens, token_counter)
 
     def get_name(self) -> str:
