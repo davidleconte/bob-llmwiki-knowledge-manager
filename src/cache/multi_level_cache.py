@@ -208,16 +208,18 @@ class MultiLevelCache(CacheInterface):
         Returns:
             Number of unique cached entries
         """
-        # Count unique keys across both caches
-        # L1 uses hashed keys, L2 uses versioned keys
-        l1_keys = set(self.l1_cache.cache.keys())
+        # Count unique keys across both caches. L1 uses hashed keys, L2 uses
+        # versioned keys. Take each sub-cache's keys via its lock-protected
+        # snapshot -- never iterate the live dicts here, or a concurrent set/
+        # eviction raises "dictionary changed size during iteration".
+        l1_keys = set(self.l1_cache.snapshot_keys())
         l2_keys = set(
             self.l1_cache._hash_key(
                 self.l2_cache._make_versioned_key(
                     self.l2_cache._extract_base_key(k), self.l2_cache._extract_version(k)
                 )
             )
-            for k in self.l2_cache.embeddings.keys()
+            for k in self.l2_cache.snapshot_keys()
         )
         return len(l1_keys | l2_keys)
 

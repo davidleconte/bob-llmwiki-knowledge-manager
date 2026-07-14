@@ -95,6 +95,15 @@ Returns:
     Number of cached entries
 
 
+##### `snapshot_keys() -> list`
+
+Return a point-in-time copy of the embedding keys, taken under the lock.
+
+Callers (e.g. ``MultiLevelCache.size()``) must iterate this list, never
+``self.embeddings`` directly, so a concurrent ``set``/eviction cannot mutate
+the dict mid-iteration.
+
+
 ##### `hit_rate() -> float`
 
 Calculate cache hit rate.

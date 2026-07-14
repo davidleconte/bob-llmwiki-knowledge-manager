@@ -10,13 +10,35 @@ Target metrics:
 - Memory: Configurable max size with LRU eviction
 """
 
+import functools
 import hashlib
+import threading
 import time
 from collections import OrderedDict
 from typing import Any, Callable, Dict, Optional
 
 from src.cache.base import CacheEntry, CacheInterface, CacheStats, escape_version
 from src.monitoring import get_logger, get_metrics_collector
+
+
+def _synchronized(method):
+    """Run ``method`` while holding ``self._lock`` (a re-entrant ``RLock``).
+
+    ``ExactCache`` relied on CPython GIL-atomicity for single-key ops, which is
+    safe for point mutations but NOT for *iteration*: a thread walking the dict
+    (e.g. ``MultiLevelCache.size()`` snapshotting keys, or ``migrate`` /
+    ``get_oldest_entry``) could see it change size mid-walk and raise
+    ``RuntimeError: dictionary changed size during iteration``. Serialising every
+    dict-touching method on one re-entrant lock closes that race; RLock lets
+    ``set`` call ``_evict_lru`` without self-deadlock.
+    """
+
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        with self._lock:
+            return method(self, *args, **kwargs)
+
+    return wrapper
 
 
 class ExactCache(CacheInterface):
@@ -60,6 +82,8 @@ class ExactCache(CacheInterface):
         if ttl_seconds is not None and ttl_seconds <= 0:
             raise ValueError("ttl_seconds must be positive when set")
 
+        # Re-entrant lock serialising all dict-touching methods (see _synchronized).
+        self._lock = threading.RLock()
         self.max_size = max_size
         self.ttl_seconds = ttl_seconds
         self._clock = clock
@@ -115,6 +139,7 @@ class ExactCache(CacheInterface):
         """
         return hashlib.sha256(key.encode("utf-8")).hexdigest()
 
+    @_synchronized
     def get(self, key: str, version: Optional[str] = None) -> Optional[str]:
         """Retrieve cached response for exact key match.
 
@@ -200,6 +225,7 @@ class ExactCache(CacheInterface):
 
         return None
 
+    @_synchronized
     def set(
         self,
         key: str,
@@ -250,6 +276,7 @@ class ExactCache(CacheInterface):
             response_length=len(value),
         )
 
+    @_synchronized
     def _evict_lru(self) -> None:
         """Evict least recently used entry."""
         if self.cache:
@@ -270,6 +297,7 @@ class ExactCache(CacheInterface):
                 access_count=evicted_entry.access_count,
             )
 
+    @_synchronized
     def clear(self) -> None:
         """Clear all entries from cache."""
         entries_cleared = len(self.cache)
@@ -279,6 +307,7 @@ class ExactCache(CacheInterface):
         # Log clear
         self._logger.info("cache_cleared", cache_level="L1", entries_cleared=entries_cleared)
 
+    @_synchronized
     def size(self) -> int:
         """Get number of entries in cache.
 
@@ -286,6 +315,16 @@ class ExactCache(CacheInterface):
             Number of cached entries
         """
         return len(self.cache)
+
+    @_synchronized
+    def snapshot_keys(self) -> list[str]:
+        """Return a point-in-time copy of the cache keys, taken under the lock.
+
+        Callers (e.g. ``MultiLevelCache.size()``) must iterate this list, never
+        ``self.cache`` directly, so a concurrent ``set``/eviction cannot mutate the
+        dict mid-iteration.
+        """
+        return list(self.cache.keys())
 
     def hit_rate(self) -> float:
         """Calculate cache hit rate.
@@ -309,6 +348,7 @@ class ExactCache(CacheInterface):
             "version": self.VERSION,
         }
 
+    @_synchronized
     def get_entry(self, key: str, version: Optional[str] = None) -> Optional[CacheEntry]:
         """Get full cache entry (for testing/debugging).
 
@@ -323,6 +363,7 @@ class ExactCache(CacheInterface):
         hashed_key = self._hash_key(versioned_key)
         return self.cache.get(hashed_key)
 
+    @_synchronized
     def contains(self, key: str, version: Optional[str] = None) -> bool:
         """Check if key exists in cache.
 
@@ -337,6 +378,7 @@ class ExactCache(CacheInterface):
         hashed_key = self._hash_key(versioned_key)
         return hashed_key in self.cache
 
+    @_synchronized
     def evict(self, key: str, version: Optional[str] = None) -> bool:
         """Manually evict a specific key.
 
@@ -355,6 +397,7 @@ class ExactCache(CacheInterface):
             return True
         return False
 
+    @_synchronized
     def get_oldest_entry(self) -> Optional[tuple[str, CacheEntry]]:
         """Get the oldest (LRU) entry without removing it.
 
@@ -368,6 +411,7 @@ class ExactCache(CacheInterface):
         key = next(iter(self.cache))
         return (key, self.cache[key])
 
+    @_synchronized
     def get_newest_entry(self) -> Optional[tuple[str, CacheEntry]]:
         """Get the newest (MRU) entry without removing it.
 
@@ -381,6 +425,7 @@ class ExactCache(CacheInterface):
         key = next(reversed(self.cache))
         return (key, self.cache[key])
 
+    @_synchronized
     def migrate(self, from_version: str, to_version: str) -> int:
         """Migrate entries from one version to another.
 
@@ -415,6 +460,7 @@ class ExactCache(CacheInterface):
 
         return migrated
 
+    @_synchronized
     def cleanup_version(self, version: str) -> int:
         """Remove all entries for a specific version.
 

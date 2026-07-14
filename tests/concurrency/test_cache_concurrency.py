@@ -4,6 +4,7 @@ Tests validate thread-safety of cache implementations under concurrent access.
 Covers concurrent reads, writes, race conditions, and deadlock scenarios.
 """
 
+import sys
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -364,6 +365,55 @@ class TestMultiLevelCacheConcurrency:
         # Verify cache is still functional
         cache.set("test", "value")
         assert cache.get("test") == "value"
+
+    def test_size_stats_never_race_with_mutation(self):
+        """size()/stats() must not crash while another thread mutates the caches.
+
+        Deterministic regression for "RuntimeError: dictionary changed size during
+        iteration": ``MultiLevelCache.size()`` iterated the L1/L2 dicts directly
+        (``l1_cache.cache.keys()`` / ``l2_cache.embeddings.keys()``) while a
+        concurrent ``set``/eviction changed their size. Readers hammer size()+stats()
+        (the iterating path) while mutators set continuously; tightening the GIL
+        switch interval makes the interleaving reliable, so this fails on the
+        pre-fix code (the lock-protected ``snapshot_keys`` fixes it). ``sys`` state
+        is restored in ``finally``.
+        """
+        old_interval = sys.getswitchinterval()
+        sys.setswitchinterval(1e-7)
+        try:
+            cache = MultiLevelCache(l1_max_size=200, l2_max_size=200)
+            errors: List[str] = []
+            stop = threading.Event()
+
+            def mutator(tid: int) -> None:
+                i = 0
+                while not stop.is_set():
+                    cache.set(f"k{tid}_{i}", f"v{i}")
+                    i += 1
+
+            def reader() -> None:
+                try:
+                    # The pre-fix race crashes on the first overlap, so a few
+                    # hundred iterations reliably trip it; kept modest so the
+                    # (healthy) fixed path stays a few seconds, not tens.
+                    for _ in range(500):
+                        cache.size()  # iterates both sub-caches
+                        cache.stats()  # calls size() again
+                except Exception as exc:  # noqa: BLE001 - the race surfaced here
+                    errors.append(repr(exc))
+
+            with ThreadPoolExecutor(max_workers=8) as executor:
+                mutators = [executor.submit(mutator, t) for t in range(4)]
+                readers = [executor.submit(reader) for _ in range(4)]
+                for f in readers:
+                    f.result()
+                stop.set()
+                for f in mutators:
+                    f.result()
+
+            assert not errors, f"cache iteration raced with mutation: {errors[:3]}"
+        finally:
+            sys.setswitchinterval(old_interval)
 
 
 class TestRaceConditions:

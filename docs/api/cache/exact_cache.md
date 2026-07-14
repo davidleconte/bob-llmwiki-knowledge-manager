@@ -11,6 +11,24 @@ Target metrics:
   harness, not a fixed target; the old "23.33% theoretical" figure is retired)
 - Memory: Configurable max size with LRU eviction
 
+## Functions
+
+### `_synchronized(method)`
+
+Run ``method`` while holding ``self._lock`` (a re-entrant ``RLock``).
+
+``ExactCache`` relied on CPython GIL-atomicity for single-key ops, which is
+safe for point mutations but NOT for *iteration*: a thread walking the dict
+(e.g. ``MultiLevelCache.size()`` snapshotting keys, or ``migrate`` /
+``get_oldest_entry``) could see it change size mid-walk and raise
+``RuntimeError: dictionary changed size during iteration``. Serialising every
+dict-touching method on one re-entrant lock closes that race; RLock lets
+``set`` call ``_evict_lru`` without self-deadlock.
+
+
+### `wrapper(self)`
+
+
 ## Classes
 
 ### `ExactCache(CacheInterface)`
@@ -79,6 +97,15 @@ Get number of entries in cache.
 
 Returns:
     Number of cached entries
+
+
+##### `snapshot_keys() -> list[str]`
+
+Return a point-in-time copy of the cache keys, taken under the lock.
+
+Callers (e.g. ``MultiLevelCache.size()``) must iterate this list, never
+``self.cache`` directly, so a concurrent ``set``/eviction cannot mutate the
+dict mid-iteration.
 
 
 ##### `hit_rate() -> float`

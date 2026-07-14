@@ -466,6 +466,16 @@ class SemanticCache(CacheInterface):
         with self._lock:
             return len(self.embeddings)
 
+    def snapshot_keys(self) -> list:
+        """Return a point-in-time copy of the embedding keys, taken under the lock.
+
+        Callers (e.g. ``MultiLevelCache.size()``) must iterate this list, never
+        ``self.embeddings`` directly, so a concurrent ``set``/eviction cannot mutate
+        the dict mid-iteration.
+        """
+        with self._lock:
+            return list(self.embeddings.keys())
+
     def hit_rate(self) -> float:
         """Calculate cache hit rate.
 
