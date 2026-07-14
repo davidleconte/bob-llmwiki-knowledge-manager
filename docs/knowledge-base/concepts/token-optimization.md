@@ -1,11 +1,11 @@
 # Token Optimization
 
 ## Overview
-Token optimization is a systematic approach to reducing LLM token consumption while preserving output quality. The Token Optimization System achieves up to 89.3% token savings through a three-layer architecture combining intelligent caching, prompt compression, and context-aware truncation strategies.
+Token optimization is a systematic approach to reducing LLM token consumption while preserving output quality. The Token Optimization System combines intelligent caching, prompt compression, and context-aware truncation in a three-layer architecture. Measured optimizer compression is ~20% mean savings on real in-repo prose (95% CI ≈ [19%, 21%], N=183; manifest: `evaluation/results/validation-2026-07-14/`); cache recompute-avoidance and lossy truncation are reported separately, not blended in.
 
 ## Key Points
 - **Three-Layer Architecture**: Cache → Optimizer → Truncator working in sequence
-- **Target Savings**: 89.3% token reduction with 91.80% quality preservation
+- **Measured savings**: optimizer compression ~20% mean on real prose (manifest-backed, see Overview); the earlier "89.3% / 91.80%" figures were fabricated and are retracted
 - **Multi-Strategy Approach**: Combines exact caching, semantic matching, prompt optimization, and smart truncation
 - **Performance First**: All operations complete in <200ms (typically <100ms)
 - **Quality Preservation**: Maintains semantic meaning and critical information
@@ -24,10 +24,10 @@ Large Language Models charge based on token consumption:
 - 1,000 output tokens: $0.06
 - 1M tokens/day: $30-60/day = $900-1,800/month
 
-**Optimization Impact**:
+**Optimization Impact** (illustrative):
 - Before: 2,000 tokens → $0.06-0.12 per request
-- After: 214 tokens (89.3% savings) → $0.006-0.013 per request
-- **10x cost reduction** at scale
+- After: fewer tokens once redundancy is compressed and repeats are served from cache — the realised reduction is workload-dependent and measured separately (see Overview)
+- Cost scales down with the realised token reduction
 
 ### Three-Layer Architecture
 
@@ -43,9 +43,8 @@ The system processes requests through three sequential layers:
 - **MultiLevelCache**: Orchestrates L1/L2 with automatic promotion
 
 **Token Impact**:
-- Cache hit: 100% token savings (0 tokens processed)
-- Target hit rate: 23.33% of requests
-- Average savings from caching: ~23% of total workload
+- Cache hit: 100% recompute avoided (0 tokens processed) for that request
+- Hit rate is **workload-dependent** — it tracks how repetitive the request stream is, not a fixed system property, so it is measured per workload with the repeat rate disclosed (see the validation harness), not stated as a headline number
 
 **Example**:
 ```python
@@ -141,24 +140,29 @@ truncated = truncator.truncate(context, max_length=2000)
 
 ### Combined Token Flow
 
-**Complete Request Processing**:
+**How the layers compose (illustrative — not a blended headline):**
 
 ```
-Input: 2000 tokens (100%)
+Input
     ↓
 Layer 1: Cache Check
-    ├─ Hit (23.33%): 0 tokens → 100% savings
-    └─ Miss (76.67%): Continue to Layer 2
+    ├─ Hit  (workload-dependent): 0 tokens → recompute avoided
+    └─ Miss: continue to Layer 2
         ↓
 Layer 2: Prompt Optimization
-    2000 → 1700 tokens (15% savings)
+    near-lossless compression of redundant text
         ↓
-Layer 3: Context Truncation
-    1700 → 1200 tokens (40% additional savings)
+Layer 3: Context Truncation (only when over budget; lossy)
+    drop lowest-priority content to fit the token budget
         ↓
-Output: ~214 tokens average
-Total Savings: 89.3%
+Output
 ```
+
+The three mechanisms are **not** blended into one "total savings" figure:
+optimizer compression is measured on its own (~20% mean, manifest-backed — see
+Overview), cache recompute-avoidance depends on the workload's repeat rate, and
+truncation is lossy and excluded from the savings figure. Blending them into a
+single total is exactly how the earlier fabricated headline was manufactured.
 
 ### Quality Preservation
 
@@ -171,8 +175,8 @@ The system maintains quality through:
 
 **Quality Metrics**:
 - Semantic similarity: >0.85 (L2 cache threshold)
-- Structure preservation: 100% (headers, code blocks)
-- Information retention: 91.80% (measured)
+- Structure preservation: headers and code blocks preserved by design
+- Information retention: tracked via the optimizer's lexical quality score (a heuristic guardrail, `_estimate_quality`), not a validated semantic-fidelity percentage
 - User satisfaction: High (qualitative)
 
 ### Performance Characteristics
@@ -241,15 +245,18 @@ Daily tokens: 2,000,000
 Monthly cost: ~$1,800 (GPT-4)
 ```
 
-**With Optimization**:
+**With Optimization** (illustrative — the realised numbers depend on the workload):
 ```
-Cache hits (23.33%): 233 requests × 0 tokens = 0
-Cache misses (76.67%): 767 requests × 214 tokens = 164,138
-
-Daily tokens: 164,138
-Monthly cost: ~$148 (GPT-4)
-Savings: $1,652/month (92%)
+Repeated requests → served from cache: 0 tokens (recompute avoided).
+                    How many depends on the stream's repeat rate.
+Unique requests    → compressed by the optimizer (~20% mean, manifest-backed:
+                    evaluation/results/validation-2026-07-14/), then processed.
 ```
+The dollar savings are therefore **workload-dependent**: they scale with the
+cache hit rate (a property of how repetitive the traffic is) and the measured
+optimizer compression. This concept doc does not publish a single blended total —
+see [`STATUS.md`](../../../STATUS.md) and the validation harness for the
+manifest-backed figures.
 
 ### Example 3: Quality Preservation
 

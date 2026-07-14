@@ -109,8 +109,9 @@ omit = [
 # after the Phase 2 triage → 82.5% after Phase 2 hardening (property tests +
 # cost_tracker/cost_reporting driven 34%/11% → 100%, plus the RLock deadlock fix).
 # Floor ratcheted 73 → 80 (the plan's target) with ~2.5pt margin for
-# optional-dependency skip variance (matplotlib/psutil). Per-package floors
-# (monitoring ≥70, delegation ≥54 staged) live in scripts/check_coverage_by_package.py.
+# optional-dependency skip variance (matplotlib/psutil). Per-package floors live
+# in scripts/check_coverage_by_package.py (their single home — not restated here,
+# so the numbers can't drift).
 fail_under = 80
 precision = 1
 show_missing = true

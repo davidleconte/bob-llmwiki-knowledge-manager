@@ -5,7 +5,8 @@ name: CI
 # manifest-backed validation harness (null + manifest + tiktoken gates), benchmark
 # regression trending, and a CycloneDX SBOM + dependency audit. The coverage gate,
 # per-package floors, and the status "one home per value" validator run in `test`;
-# the layering gate and the manifest-backed-savings guard run in `lint`.
+# the layering gate, the manifest-backed-savings guard, and the generic
+# "one home per value" value-homes validator run in `lint`.
 
 on:
   push:
@@ -77,6 +78,10 @@ jobs:
         # Fails if a live surface publishes a savings/cost/hit-rate percentage
         # without citing a reproducible manifest (STATUS.md publishing rule).
         run: python scripts/check_savings_claims.py
+      - name: Enforce "one home per value" (no cross-file value drift)
+        # Generic value-homes guard: a value duplicated across files (version,
+        # python floor, model pricing) must match its single canonical home.
+        run: python scripts/check_value_homes.py
 
   typecheck:
     name: typecheck (mypy)
