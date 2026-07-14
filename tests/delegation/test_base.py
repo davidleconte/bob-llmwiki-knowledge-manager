@@ -7,7 +7,6 @@ Tests cover:
 - SubAgent interface
 """
 
-
 import pytest
 
 from src.delegation.base import (
@@ -29,7 +28,7 @@ class TestSubAgentTask:
             task_type="security_scan",
             target="/path/to/repo",
             parameters={"depth": "full"},
-            priority=SubAgentPriority.HIGH
+            priority=SubAgentPriority.HIGH,
         )
 
         assert task.task_id == "task-123"
@@ -40,31 +39,20 @@ class TestSubAgentTask:
 
     def test_task_default_priority(self):
         """Test that default priority is MEDIUM."""
-        task = SubAgentTask(
-            task_id="task-123",
-            task_type="test",
-            target="/path"
-        )
+        task = SubAgentTask(task_id="task-123", task_type="test", target="/path")
 
         assert task.priority == SubAgentPriority.MEDIUM
 
     def test_task_can_execute_no_dependencies(self):
         """Test can_execute with no dependencies."""
-        task = SubAgentTask(
-            task_id="task-123",
-            task_type="test",
-            target="/path"
-        )
+        task = SubAgentTask(task_id="task-123", task_type="test", target="/path")
 
         assert task.can_execute(set()) is True
 
     def test_task_can_execute_with_dependencies(self):
         """Test can_execute with dependencies."""
         task = SubAgentTask(
-            task_id="task-123",
-            task_type="test",
-            target="/path",
-            dependencies=["task-1", "task-2"]
+            task_id="task-123", task_type="test", target="/path", dependencies=["task-1", "task-2"]
         )
 
         # Not all dependencies met
@@ -75,12 +63,7 @@ class TestSubAgentTask:
 
     def test_task_should_retry(self):
         """Test retry logic."""
-        task = SubAgentTask(
-            task_id="task-123",
-            task_type="test",
-            target="/path",
-            max_retries=3
-        )
+        task = SubAgentTask(task_id="task-123", task_type="test", target="/path", max_retries=3)
 
         assert task.should_retry() is True
 
@@ -98,7 +81,7 @@ class TestSubAgentResult:
             agent_type="security",
             status=SubAgentStatus.SUCCESS,
             data={"findings": ["issue1", "issue2"]},
-            execution_time_ms=1500.0
+            execution_time_ms=1500.0,
         )
 
         assert result.agent_id == "agent-123"
@@ -116,7 +99,7 @@ class TestSubAgentResult:
             status=SubAgentStatus.FAILED,
             data={},
             errors=["Agent execution failed"],
-            execution_time_ms=500.0
+            execution_time_ms=500.0,
         )
 
         assert result.agent_id == "agent-123"
@@ -132,7 +115,7 @@ class TestSubAgentResult:
             agent_type="security",
             status=SubAgentStatus.SUCCESS,
             data={"key": "value"},
-            execution_time_ms=1500.0
+            execution_time_ms=1500.0,
         )
 
         result_dict = result.to_dict()
@@ -175,7 +158,7 @@ class MockAgent(SubAgent):
             agent_type=self.agent_type,
             status=SubAgentStatus.SUCCESS,
             data={"result": "mock"},
-            execution_time_ms=100.0
+            execution_time_ms=100.0,
         )
 
     def get_capabilities(self):
@@ -198,11 +181,7 @@ class TestSubAgent:
         """Test agent execute method."""
         agent = MockAgent()
 
-        task = SubAgentTask(
-            task_id="task-123",
-            task_type="test",
-            target="/path"
-        )
+        task = SubAgentTask(task_id="task-123", task_type="test", target="/path")
 
         result = agent.execute(task)
 
@@ -224,11 +203,7 @@ class TestSubAgent:
         """Test agent statistics tracking."""
         agent = MockAgent()
 
-        task = SubAgentTask(
-            task_id="task-123",
-            task_type="test",
-            target="/path"
-        )
+        task = SubAgentTask(task_id="task-123", task_type="test", target="/path")
 
         agent.execute(task)
 
@@ -242,11 +217,7 @@ class TestSubAgent:
         """Test agent caching."""
         agent = MockAgent()
 
-        task = SubAgentTask(
-            task_id="task-123",
-            task_type="test",
-            target="/path"
-        )
+        task = SubAgentTask(task_id="task-123", task_type="test", target="/path")
 
         # First execution
         result1 = agent.execute(task)
@@ -260,11 +231,7 @@ class TestSubAgent:
         """Test cache clearing."""
         agent = MockAgent()
 
-        task = SubAgentTask(
-            task_id="task-123",
-            task_type="test",
-            target="/path"
-        )
+        task = SubAgentTask(task_id="task-123", task_type="test", target="/path")
 
         agent.execute(task)
         assert len(agent._cache) > 0

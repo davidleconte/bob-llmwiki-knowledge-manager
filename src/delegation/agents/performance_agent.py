@@ -16,7 +16,7 @@ from src.delegation.base import SubAgent, SubAgentResult, SubAgentStatus, SubAge
 class PerformanceAgent(SubAgent):
     """
     Performance analysis specialist
-    
+
     Capabilities:
     - Bottleneck detection
     - Algorithm complexity analysis
@@ -30,7 +30,7 @@ class PerformanceAgent(SubAgent):
             agent_id=agent_id,
             agent_type="performance",
             cache_enabled=cache_enabled,
-            max_cache_size=500
+            max_cache_size=500,
         )
         self.analyzer = ComponentAnalyzer()
 
@@ -42,7 +42,7 @@ class PerformanceAgent(SubAgent):
             "memory_profiling",
             "concurrency_analysis",
             "caching_opportunities",
-            "n_plus_one_detection"
+            "n_plus_one_detection",
         ]
 
     def analyze(self, task: SubAgentTask) -> SubAgentResult:
@@ -51,9 +51,7 @@ class PerformanceAgent(SubAgent):
 
         try:
             analysis = self.analyzer.analyze_component(
-                target,
-                analysis_type="performance",
-                depth=depth
+                target, analysis_type="performance", depth=depth
             )
 
             if "error" in analysis:
@@ -62,7 +60,7 @@ class PerformanceAgent(SubAgent):
                     agent_type=self.agent_type,
                     status=SubAgentStatus.FAILED,
                     data={},
-                    errors=[analysis["error"]]
+                    errors=[analysis["error"]],
                 )
 
             perf_data = analysis.get("performance", {})
@@ -73,7 +71,7 @@ class PerformanceAgent(SubAgent):
                 "issues": perf_data.get("issues", []),
                 "optimization_score": self._calculate_optimization_score(perf_data),
                 "recommendations": self._generate_recommendations(perf_data),
-                "analysis_depth": depth
+                "analysis_depth": depth,
             }
 
             warnings = []
@@ -86,7 +84,7 @@ class PerformanceAgent(SubAgent):
                 status=SubAgentStatus.SUCCESS,
                 data=result_data,
                 warnings=warnings,
-                token_count=len(str(result_data)) // 4
+                token_count=len(str(result_data)) // 4,
             )
 
         except Exception as e:
@@ -95,7 +93,7 @@ class PerformanceAgent(SubAgent):
                 agent_type=self.agent_type,
                 status=SubAgentStatus.FAILED,
                 data={},
-                errors=[f"Performance analysis failed: {str(e)}"]
+                errors=[f"Performance analysis failed: {str(e)}"],
             )
 
     def _calculate_optimization_score(self, perf_data: Dict) -> float:

@@ -252,12 +252,15 @@ Fourth paragraph to complete."""
         assert result["truncated_tokens"] == 0
 
     @pytest.mark.parametrize("strategy", ["simple", "priority", "semantic", "sliding_window"])
-    @pytest.mark.parametrize("text", [
-        "Hello 世界 " * 50,           # CJK / multibyte, no sentence punctuation
-        "word " * 200,                # long, no punctuation (one "sentence")
-        "supercalifragilistic" * 40,  # one long token-dense stream
-        "A. " * 100,                  # many tiny sentences
-    ])
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Hello 世界 " * 50,  # CJK / multibyte, no sentence punctuation
+            "word " * 200,  # long, no punctuation (one "sentence")
+            "supercalifragilistic" * 40,  # one long token-dense stream
+            "A. " * 100,  # many tiny sentences
+        ],
+    )
     def test_truncation_never_exceeds_budget(self, strategy, text):
         """Invariant (audit C-3): truncated tokens must never exceed max_tokens.
 

@@ -27,17 +27,17 @@ class KnowledgeBaseQuery:
         query: str,
         categories: Optional[List[str]] = None,
         max_results: int = 10,
-        include_content: bool = False
+        include_content: bool = False,
     ) -> Dict:
         """
         Query the knowledge base
-        
+
         Args:
             query: Search query
             categories: Categories to search (None = all)
             max_results: Maximum number of results
             include_content: Include full content in results
-            
+
         Returns:
             Dictionary with search results
         """
@@ -62,7 +62,7 @@ class KnowledgeBaseQuery:
 
             for md_file in md_files:
                 try:
-                    with open(md_file, 'r', encoding='utf-8') as f:
+                    with open(md_file, "r", encoding="utf-8") as f:
                         content = f.read()
 
                     # Calculate relevance score
@@ -75,7 +75,9 @@ class KnowledgeBaseQuery:
                             "title": self._extract_title(content),
                             "score": score,
                             "matches": self._find_matches(query, content),
-                            "last_modified": datetime.fromtimestamp(md_file.stat().st_mtime).isoformat()
+                            "last_modified": datetime.fromtimestamp(
+                                md_file.stat().st_mtime
+                            ).isoformat(),
                         }
 
                         if include_content:
@@ -95,7 +97,7 @@ class KnowledgeBaseQuery:
             "query": query,
             "categories_searched": categories,
             "total_results": len(all_results),
-            "results": all_results[:max_results]
+            "results": all_results[:max_results],
         }
 
     def _calculate_relevance(self, query: str, content: str, filename: str) -> float:
@@ -131,12 +133,12 @@ class KnowledgeBaseQuery:
         # Bonus for multiple query words appearing together
         if len(query_words) > 1:
             for i in range(len(query_words) - 1):
-                phrase = f"{query_words[i]} {query_words[i+1]}"
+                phrase = f"{query_words[i]} {query_words[i + 1]}"
                 if phrase in content_lower:
                     score += 2.0
 
         # Bonus for matches in headings
-        headings = re.findall(r'^#+\s+(.+)$', content, re.MULTILINE)
+        headings = re.findall(r"^#+\s+(.+)$", content, re.MULTILINE)
         for heading in headings:
             if query_lower in heading.lower():
                 score += 3.0
@@ -145,11 +147,11 @@ class KnowledgeBaseQuery:
 
     def _extract_title(self, content: str) -> str:
         """Extract title from markdown content"""
-        lines = content.split('\n')
+        lines = content.split("\n")
 
         for line in lines:
             line = line.strip()
-            if line.startswith('# '):
+            if line.startswith("# "):
                 return line[2:].strip()
 
         return "Untitled"
@@ -157,15 +159,17 @@ class KnowledgeBaseQuery:
     def _find_matches(self, query: str, content: str) -> List[Dict]:
         """Find matching lines in content"""
         matches = []
-        lines = content.split('\n')
+        lines = content.split("\n")
         query_lower = query.lower()
 
         for line_num, line in enumerate(lines, 1):
             if query_lower in line.lower():
-                matches.append({
-                    "line": line_num,
-                    "text": line.strip()[:200]  # Truncate long lines
-                })
+                matches.append(
+                    {
+                        "line": line_num,
+                        "text": line.strip()[:200],  # Truncate long lines
+                    }
+                )
 
                 if len(matches) >= 5:  # Limit matches per file
                     break
@@ -174,7 +178,7 @@ class KnowledgeBaseQuery:
 
     def _generate_preview(self, content: str, query: str) -> str:
         """Generate preview snippet around query match"""
-        lines = content.split('\n')
+        lines = content.split("\n")
         query_lower = query.lower()
 
         # Find first match
@@ -185,7 +189,7 @@ class KnowledgeBaseQuery:
                 end = min(len(lines), i + 3)
 
                 preview_lines = lines[start:end]
-                preview = '\n'.join(preview_lines)
+                preview = "\n".join(preview_lines)
 
                 # Truncate if too long
                 if len(preview) > 500:
@@ -194,7 +198,7 @@ class KnowledgeBaseQuery:
                 return preview
 
         # No match found, return first few lines
-        return '\n'.join(lines[:5])
+        return "\n".join(lines[:5])
 
     def list_documents(self, category: Optional[str] = None) -> Dict:
         """List all documents in knowledge base"""
@@ -214,16 +218,20 @@ class KnowledgeBaseQuery:
             docs = []
             for md_file in md_files:
                 try:
-                    with open(md_file, 'r', encoding='utf-8') as f:
+                    with open(md_file, "r", encoding="utf-8") as f:
                         content = f.read()
 
-                    docs.append({
-                        "file": md_file.name,
-                        "title": self._extract_title(content),
-                        "size_bytes": len(content),
-                        "line_count": content.count('\n') + 1,
-                        "last_modified": datetime.fromtimestamp(md_file.stat().st_mtime).isoformat()
-                    })
+                    docs.append(
+                        {
+                            "file": md_file.name,
+                            "title": self._extract_title(content),
+                            "size_bytes": len(content),
+                            "line_count": content.count("\n") + 1,
+                            "last_modified": datetime.fromtimestamp(
+                                md_file.stat().st_mtime
+                            ).isoformat(),
+                        }
+                    )
                 except Exception:
                     continue
 
@@ -232,7 +240,7 @@ class KnowledgeBaseQuery:
         return {
             "categories": categories_to_list,
             "total_documents": sum(len(docs) for docs in documents.values()),
-            "documents": documents
+            "documents": documents,
         }
 
     def get_cross_references(self, file_path: str) -> Dict:
@@ -243,29 +251,23 @@ class KnowledgeBaseQuery:
             return {"error": f"File not found: {file_path}"}
 
         try:
-            with open(full_path, 'r', encoding='utf-8') as f:
+            with open(full_path, "r", encoding="utf-8") as f:
                 content = f.read()
         except Exception as e:
             return {"error": str(e)}
 
         # Find markdown links
-        links = re.findall(r'\[([^\]]+)\]\(([^\)]+)\)', content)
+        links = re.findall(r"\[([^\]]+)\]\(([^\)]+)\)", content)
 
         # Find references to other KB documents
         kb_refs = []
         external_refs = []
 
         for link_text, link_url in links:
-            if link_url.startswith('http'):
-                external_refs.append({
-                    "text": link_text,
-                    "url": link_url
-                })
-            elif link_url.endswith('.md'):
-                kb_refs.append({
-                    "text": link_text,
-                    "file": link_url
-                })
+            if link_url.startswith("http"):
+                external_refs.append({"text": link_text, "url": link_url})
+            elif link_url.endswith(".md"):
+                kb_refs.append({"text": link_text, "file": link_url})
 
         # Find documents that reference this one
         referenced_by = []
@@ -281,14 +283,16 @@ class KnowledgeBaseQuery:
                     continue
 
                 try:
-                    with open(md_file, 'r', encoding='utf-8') as f:
+                    with open(md_file, "r", encoding="utf-8") as f:
                         other_content = f.read()
 
                     if file_name in other_content or file_path in other_content:
-                        referenced_by.append({
-                            "file": str(md_file.relative_to(self.kb_path)),
-                            "title": self._extract_title(other_content)
-                        })
+                        referenced_by.append(
+                            {
+                                "file": str(md_file.relative_to(self.kb_path)),
+                                "title": self._extract_title(other_content),
+                            }
+                        )
                 except Exception:
                     continue
 
@@ -297,17 +301,12 @@ class KnowledgeBaseQuery:
             "title": self._extract_title(content),
             "kb_references": kb_refs,
             "external_references": external_refs,
-            "referenced_by": referenced_by
+            "referenced_by": referenced_by,
         }
 
     def get_statistics(self) -> Dict:
         """Get knowledge base statistics"""
-        stats = {
-            "categories": {},
-            "total_documents": 0,
-            "total_size_bytes": 0,
-            "total_lines": 0
-        }
+        stats = {"categories": {}, "total_documents": 0, "total_size_bytes": 0, "total_lines": 0}
 
         for category in self.categories:
             cat_path = self.kb_path / category
@@ -316,17 +315,13 @@ class KnowledgeBaseQuery:
 
             md_files = list(cat_path.glob("*.md"))
 
-            cat_stats = {
-                "document_count": len(md_files),
-                "total_size": 0,
-                "total_lines": 0
-            }
+            cat_stats = {"document_count": len(md_files), "total_size": 0, "total_lines": 0}
 
             for md_file in md_files:
                 try:
                     size = md_file.stat().st_size
-                    with open(md_file, 'r', encoding='utf-8') as f:
-                        lines = f.read().count('\n') + 1
+                    with open(md_file, "r", encoding="utf-8") as f:
+                        lines = f.read().count("\n") + 1
 
                     cat_stats["total_size"] += size
                     cat_stats["total_lines"] += lines
@@ -385,7 +380,7 @@ def main():
             args.query,
             categories=args.categories,
             max_results=args.max_results,
-            include_content=args.include_content
+            include_content=args.include_content,
         )
     elif args.command == "list":
         result = kb.list_documents(args.category)
@@ -402,62 +397,62 @@ def main():
     else:
         # Text output
         if args.command == "query":
-            print(f"\n{'='*80}")
+            print(f"\n{'=' * 80}")
             print(f"Query: {result['query']}")
             print(f"Results: {result['total_results']}")
-            print('='*80)
+            print("=" * 80)
 
-            for i, res in enumerate(result['results'], 1):
+            for i, res in enumerate(result["results"], 1):
                 print(f"\n{i}. {res['title']}")
                 print(f"   File: {res['file']}")
                 print(f"   Score: {res['score']:.2f}")
                 print(f"   Category: {res['category']}")
 
-                if res.get('matches'):
+                if res.get("matches"):
                     print("   Matches:")
-                    for match in res['matches'][:3]:
+                    for match in res["matches"][:3]:
                         print(f"     Line {match['line']}: {match['text'][:100]}")
 
         elif args.command == "list":
-            print(f"\n{'='*80}")
+            print(f"\n{'=' * 80}")
             print("Knowledge Base Documents")
             print(f"Total: {result['total_documents']}")
-            print('='*80)
+            print("=" * 80)
 
-            for category, docs in result['documents'].items():
+            for category, docs in result["documents"].items():
                 print(f"\n{category.upper()} ({len(docs)} documents):")
                 for doc in docs:
                     print(f"  - {doc['title']}")
                     print(f"    {doc['file']} ({doc['line_count']} lines)")
 
         elif args.command == "xref":
-            print(f"\n{'='*80}")
+            print(f"\n{'=' * 80}")
             print(f"Cross-References: {result['title']}")
-            print('='*80)
+            print("=" * 80)
 
             print(f"\nKB References ({len(result['kb_references'])}):")
-            for ref in result['kb_references']:
+            for ref in result["kb_references"]:
                 print(f"  - {ref['text']} → {ref['file']}")
 
             print(f"\nExternal References ({len(result['external_references'])}):")
-            for ref in result['external_references'][:10]:
+            for ref in result["external_references"][:10]:
                 print(f"  - {ref['text']} → {ref['url']}")
 
             print(f"\nReferenced By ({len(result['referenced_by'])}):")
-            for ref in result['referenced_by']:
+            for ref in result["referenced_by"]:
                 print(f"  - {ref['title']} ({ref['file']})")
 
         elif args.command == "stats":
-            print(f"\n{'='*80}")
+            print(f"\n{'=' * 80}")
             print("Knowledge Base Statistics")
-            print('='*80)
+            print("=" * 80)
 
             print(f"\nTotal Documents: {result['total_documents']}")
             print(f"Total Size: {result['total_size_bytes']:,} bytes")
             print(f"Total Lines: {result['total_lines']:,}")
 
             print("\nBy Category:")
-            for category, stats in result['categories'].items():
+            for category, stats in result["categories"].items():
                 print(f"  {category}:")
                 print(f"    Documents: {stats['document_count']}")
                 print(f"    Size: {stats['total_size']:,} bytes")

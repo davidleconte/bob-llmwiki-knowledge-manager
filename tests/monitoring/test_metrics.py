@@ -26,7 +26,7 @@ class TestLatencyStats:
         stats = LatencyStats()
         assert stats.count == 0
         assert stats.total == 0.0
-        assert stats.min == float('inf')
+        assert stats.min == float("inf")
         assert stats.max == 0.0
 
     def test_record_single(self):
@@ -395,8 +395,15 @@ class TestMetricsCollector:
         )
 
         metrics = box["metrics"]
-        for key in ("timestamp", "uptime_seconds", "cache",
-                    "optimization", "truncation", "requests", "errors"):
+        for key in (
+            "timestamp",
+            "uptime_seconds",
+            "cache",
+            "optimization",
+            "truncation",
+            "requests",
+            "errors",
+        ):
             assert key in metrics
         # The nested cache structure the health check depends on (C-8).
         assert metrics["cache"]["L1"]["hits"] == 2
@@ -423,8 +430,14 @@ class TestMetricsCollector:
         assert done.wait(timeout=5.0), "get_summary() deadlocked via get_metrics()"
 
         summary = box["summary"]
-        for key in ("uptime_seconds", "total_requests", "cache_hit_rate_percent",
-                    "avg_token_savings_percent", "avg_request_latency_ms", "total_errors"):
+        for key in (
+            "uptime_seconds",
+            "total_requests",
+            "cache_hit_rate_percent",
+            "avg_token_savings_percent",
+            "avg_request_latency_ms",
+            "total_errors",
+        ):
             assert key in summary
 
     def test_reset(self):

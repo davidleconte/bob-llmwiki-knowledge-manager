@@ -104,8 +104,7 @@ class TestSemanticCache:
         # O(n) population is ~1 generate per set; the old O(n^2) regeneration
         # would be ~n*(n-1)/2 (~20k for n=200). 3*n is a wide, robust margin.
         assert calls["n"] <= 3 * n, (
-            f"{calls['n']} generate() calls for {n} sets — "
-            "O(n^2) regeneration reintroduced?"
+            f"{calls['n']} generate() calls for {n} sets — O(n^2) regeneration reintroduced?"
         )
 
     def test_semantic_similarity_match(self):
@@ -391,7 +390,7 @@ class TestSemanticCache:
             "Python response 1",
             "Python response 2",
             "Python response 3",
-            None  # Or no match if similarity too low
+            None,  # Or no match if similarity too low
         ]
 
     def test_entry_access_tracking(self):

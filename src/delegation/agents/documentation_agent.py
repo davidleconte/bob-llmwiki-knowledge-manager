@@ -16,7 +16,7 @@ from src.delegation.base import SubAgent, SubAgentResult, SubAgentStatus, SubAge
 class DocumentationAgent(SubAgent):
     """
     Documentation specialist
-    
+
     Capabilities:
     - Documentation coverage analysis
     - API documentation review
@@ -30,7 +30,7 @@ class DocumentationAgent(SubAgent):
             agent_id=agent_id,
             agent_type="documentation",
             cache_enabled=cache_enabled,
-            max_cache_size=500
+            max_cache_size=500,
         )
         self.reader = BatchFileReader()
 
@@ -41,7 +41,7 @@ class DocumentationAgent(SubAgent):
             "comment_quality",
             "readme_review",
             "doc_generation",
-            "example_validation"
+            "example_validation",
         ]
 
     def analyze(self, task: SubAgentTask) -> SubAgentResult:
@@ -50,6 +50,7 @@ class DocumentationAgent(SubAgent):
         try:
             # Read files to analyze documentation
             from pathlib import Path
+
             target_path = Path(target)
 
             if target_path.is_file():
@@ -63,7 +64,7 @@ class DocumentationAgent(SubAgent):
                     agent_type=self.agent_type,
                     status=SubAgentStatus.SUCCESS,
                     data={"target": target, "coverage": 0, "message": "No files found"},
-                    token_count=10
+                    token_count=10,
                 )
 
             # Analyze documentation
@@ -90,7 +91,7 @@ class DocumentationAgent(SubAgent):
                 "documented_functions": documented_functions,
                 "coverage_percentage": coverage,
                 "coverage_grade": self._get_coverage_grade(coverage),
-                "recommendations": self._generate_recommendations(coverage)
+                "recommendations": self._generate_recommendations(coverage),
             }
 
             warnings = []
@@ -103,7 +104,7 @@ class DocumentationAgent(SubAgent):
                 status=SubAgentStatus.SUCCESS,
                 data=result_data,
                 warnings=warnings,
-                token_count=len(str(result_data)) // 4
+                token_count=len(str(result_data)) // 4,
             )
 
         except Exception as e:
@@ -112,7 +113,7 @@ class DocumentationAgent(SubAgent):
                 agent_type=self.agent_type,
                 status=SubAgentStatus.FAILED,
                 data={},
-                errors=[f"Documentation analysis failed: {str(e)}"]
+                errors=[f"Documentation analysis failed: {str(e)}"],
             )
 
     def _get_coverage_grade(self, coverage: float) -> str:

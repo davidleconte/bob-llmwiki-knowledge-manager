@@ -16,7 +16,7 @@ from src.delegation.base import SubAgent, SubAgentResult, SubAgentStatus, SubAge
 class QualityAgent(SubAgent):
     """
     Code quality specialist
-    
+
     Capabilities:
     - Complexity analysis
     - Code duplication detection
@@ -27,10 +27,7 @@ class QualityAgent(SubAgent):
 
     def __init__(self, agent_id: str, cache_enabled: bool = True):
         super().__init__(
-            agent_id=agent_id,
-            agent_type="quality",
-            cache_enabled=cache_enabled,
-            max_cache_size=500
+            agent_id=agent_id, agent_type="quality", cache_enabled=cache_enabled, max_cache_size=500
         )
         self.analyzer = ComponentAnalyzer()
 
@@ -42,7 +39,7 @@ class QualityAgent(SubAgent):
             "function_analysis",
             "code_smell_detection",
             "naming_conventions",
-            "documentation_coverage"
+            "documentation_coverage",
         ]
 
     def analyze(self, task: SubAgentTask) -> SubAgentResult:
@@ -50,11 +47,7 @@ class QualityAgent(SubAgent):
         depth = task.parameters.get("depth", "shallow")
 
         try:
-            analysis = self.analyzer.analyze_component(
-                target,
-                analysis_type="quality",
-                depth=depth
-            )
+            analysis = self.analyzer.analyze_component(target, analysis_type="quality", depth=depth)
 
             if "error" in analysis:
                 return SubAgentResult(
@@ -62,7 +55,7 @@ class QualityAgent(SubAgent):
                     agent_type=self.agent_type,
                     status=SubAgentStatus.FAILED,
                     data={},
-                    errors=[analysis["error"]]
+                    errors=[analysis["error"]],
                 )
 
             quality_data = analysis.get("quality", {})
@@ -73,17 +66,21 @@ class QualityAgent(SubAgent):
             result_data = {
                 "target": target,
                 "line_count": quality_data.get("total_lines", quality_data.get("line_count", 0)),
-                "function_count": quality_data.get("total_functions", quality_data.get("function_count", 0)),
+                "function_count": quality_data.get(
+                    "total_functions", quality_data.get("function_count", 0)
+                ),
                 "long_functions": quality_data.get("long_functions", 0),
                 "quality_score": quality_score,
                 "quality_grade": self._get_quality_grade(quality_score),
                 "recommendations": self._generate_recommendations(quality_data),
-                "analysis_depth": depth
+                "analysis_depth": depth,
             }
 
             warnings = []
             if quality_data.get("long_functions", 0) > 5:
-                warnings.append(f"Found {quality_data['long_functions']} long functions (>50 lines)")
+                warnings.append(
+                    f"Found {quality_data['long_functions']} long functions (>50 lines)"
+                )
 
             return SubAgentResult(
                 agent_id=self.agent_id,
@@ -91,7 +88,7 @@ class QualityAgent(SubAgent):
                 status=SubAgentStatus.SUCCESS,
                 data=result_data,
                 warnings=warnings,
-                token_count=len(str(result_data)) // 4
+                token_count=len(str(result_data)) // 4,
             )
 
         except Exception as e:
@@ -100,7 +97,7 @@ class QualityAgent(SubAgent):
                 agent_type=self.agent_type,
                 status=SubAgentStatus.FAILED,
                 data={},
-                errors=[f"Quality analysis failed: {str(e)}"]
+                errors=[f"Quality analysis failed: {str(e)}"],
             )
 
     def _calculate_quality_score(self, quality_data: Dict) -> float:

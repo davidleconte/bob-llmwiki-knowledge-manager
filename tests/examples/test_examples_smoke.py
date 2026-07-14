@@ -16,15 +16,14 @@ because an *optional* dependency (e.g. matplotlib) is absent is skipped, not
 failed — so this suite is green on a minimal install and gives real coverage on
 a full one.
 """
+
 import importlib
 from pathlib import Path
 
 import pytest
 
 _EXAMPLES_DIR = Path(__file__).resolve().parents[1].parent / "examples"
-_EXAMPLE_MODULES = sorted(
-    p.stem for p in _EXAMPLES_DIR.glob("*.py") if not p.stem.startswith("_")
-)
+_EXAMPLE_MODULES = sorted(p.stem for p in _EXAMPLES_DIR.glob("*.py") if not p.stem.startswith("_"))
 
 
 def test_examples_dir_discovered():
@@ -40,6 +39,5 @@ def test_example_module_imports(module_name):
     except SystemExit as exc:
         # e.g. examples/visualization.py calls sys.exit(1) when matplotlib is absent.
         pytest.skip(
-            f"examples/{module_name}.py exited on import "
-            f"(optional dependency missing): {exc}"
+            f"examples/{module_name}.py exited on import (optional dependency missing): {exc}"
         )

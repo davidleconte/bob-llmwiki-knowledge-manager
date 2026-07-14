@@ -58,9 +58,7 @@ DEPRECATION_SCAN_LINES = 15
 
 # Maturity phrasings that were fabricated/retracted and must never reappear as a
 # live claim (case-insensitive substring match).
-FORBIDDEN_MATURITY = (
-    "All Phases Complete",
-)
+FORBIDDEN_MATURITY = ("All Phases Complete",)
 
 # The canonical maturity string that STATUS.md must continue to assert.
 CANONICAL_STATUS = "Not Production Ready"
@@ -69,9 +67,9 @@ CANONICAL_STATUS = "Not Production Ready"
 # a measured snapshot ("82.5% coverage as of ...") is legitimate and must not
 # trip this -- only these gate token shapes capture a number.
 _GATE_TOKEN = re.compile(
-    r"[>≥]=?\s*(\d+(?:\.\d+)?)\s*%"      # >=80% or  >=80 %  (>= and Unicode >=)
-    r"|(\d+(?:\.\d+)?)\s*%\+"                  # 80%+
-    r"|fail_under\s*[=:]\s*(\d+(?:\.\d+)?)"    # fail_under = 80
+    r"[>≥]=?\s*(\d+(?:\.\d+)?)\s*%"  # >=80% or  >=80 %  (>= and Unicode >=)
+    r"|(\d+(?:\.\d+)?)\s*%\+"  # 80%+
+    r"|fail_under\s*[=:]\s*(\d+(?:\.\d+)?)"  # fail_under = 80
 )
 
 
@@ -80,8 +78,10 @@ def read_fail_under() -> int:
     text = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
     m = re.search(r"^\s*fail_under\s*=\s*(\d+)", text, re.MULTILINE)
     if not m:
-        raise SystemExit("ERROR: could not find [tool.coverage.report] fail_under "
-                         "in pyproject.toml -- the coverage gate has no single home.")
+        raise SystemExit(
+            "ERROR: could not find [tool.coverage.report] fail_under "
+            "in pyproject.toml -- the coverage gate has no single home."
+        )
     return int(m.group(1))
 
 
@@ -130,14 +130,16 @@ def main() -> int:
             if value != fail_under:
                 problems.append(
                     f"    L{line_no}: cites coverage gate {value:g}% != "
-                    f"{fail_under}% (pyproject fail_under)\n        {line}")
+                    f"{fail_under}% (pyproject fail_under)\n        {line}"
+                )
 
         # (2) forbidden maturity phrasing
         low = text.lower()
         for phrase in FORBIDDEN_MATURITY:
             if phrase.lower() in low:
-                problems.append(f"    forbidden maturity claim present: {phrase!r} "
-                                f"(defer to STATUS.md)")
+                problems.append(
+                    f"    forbidden maturity claim present: {phrase!r} (defer to STATUS.md)"
+                )
 
         if problems:
             failures.append(rel)
@@ -148,14 +150,19 @@ def main() -> int:
 
     # (3) STATUS.md must still assert the canonical maturity string.
     status_path = REPO_ROOT / "STATUS.md"
-    if status_path.exists() and CANONICAL_STATUS.lower() not in \
-            status_path.read_text(encoding="utf-8").lower():
+    if (
+        status_path.exists()
+        and CANONICAL_STATUS.lower() not in status_path.read_text(encoding="utf-8").lower()
+    ):
         failures.append("STATUS.md")
         print(f"  FAIL STATUS.md: canonical status {CANONICAL_STATUS!r} not found")
 
     if failures:
-        print(f"\nFAILED: {len(failures)} doc(s) diverge from the single home(s): "
-              f"{', '.join(sorted(set(failures)))}", file=sys.stderr)
+        print(
+            f"\nFAILED: {len(failures)} doc(s) diverge from the single home(s): "
+            f"{', '.join(sorted(set(failures)))}",
+            file=sys.stderr,
+        )
         return 1
     print("\nAll live status docs are consistent with the single homes.")
     return 0

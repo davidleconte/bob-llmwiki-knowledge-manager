@@ -133,6 +133,10 @@ ignore = ["E501"]
 "tests/**" = ["F841"]
 "tests/conftest.py" = ["E402"]
 "tests/monitoring/test_health.py" = ["F401"]
+# These e2e tests embed prompt fixtures whose trailing/blank-line whitespace is
+# intentional string content; the formatter preserves it, so silence the linter.
+"tests/e2e/test_real_llm.py" = ["W291", "W293"]
+"tests/e2e/test_cost_tracking.py" = ["W291", "W293"]
 
 [tool.mypy]
 # First type-gate: non-strict baseline, ratchet toward strict later. Runs once on

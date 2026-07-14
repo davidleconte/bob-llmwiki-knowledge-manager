@@ -17,7 +17,7 @@ from src.delegation.base import SubAgent, SubAgentResult, SubAgentStatus, SubAge
 class SecurityAgent(SubAgent):
     """
     Security analysis specialist
-    
+
     Capabilities:
     - Vulnerability detection
     - Hardcoded secrets scanning
@@ -32,7 +32,7 @@ class SecurityAgent(SubAgent):
             agent_id=agent_id,
             agent_type="security",
             cache_enabled=cache_enabled,
-            max_cache_size=500
+            max_cache_size=500,
         )
         self.analyzer = ComponentAnalyzer()
 
@@ -47,16 +47,16 @@ class SecurityAgent(SubAgent):
             "input_validation",
             "sql_injection_detection",
             "xss_detection",
-            "security_best_practices"
+            "security_best_practices",
         ]
 
     def analyze(self, task: SubAgentTask) -> SubAgentResult:
         """
         Perform security analysis
-        
+
         Args:
             task: Security analysis task
-            
+
         Returns:
             SubAgentResult with security findings
         """
@@ -66,9 +66,7 @@ class SecurityAgent(SubAgent):
         try:
             # Use component analyzer for security analysis
             analysis = self.analyzer.analyze_component(
-                target,
-                analysis_type="security",
-                depth=depth
+                target, analysis_type="security", depth=depth
             )
 
             if "error" in analysis:
@@ -77,19 +75,14 @@ class SecurityAgent(SubAgent):
                     agent_type=self.agent_type,
                     status=SubAgentStatus.FAILED,
                     data={},
-                    errors=[analysis["error"]]
+                    errors=[analysis["error"]],
                 )
 
             # Extract security data
             security_data = analysis.get("security", {})
 
             # Categorize issues by severity
-            issues_by_severity = {
-                "critical": [],
-                "high": [],
-                "medium": [],
-                "low": []
-            }
+            issues_by_severity = {"critical": [], "high": [], "medium": [], "low": []}
 
             for issue in security_data.get("issues", []):
                 severity = issue.get("severity", "low")
@@ -108,13 +101,13 @@ class SecurityAgent(SubAgent):
                     "critical": security_data.get("critical", 0),
                     "high": security_data.get("high", 0),
                     "medium": security_data.get("medium", 0),
-                    "low": security_data.get("low", 0)
+                    "low": security_data.get("low", 0),
                 },
                 "issues": issues_by_severity,
                 "risk_score": risk_score,
                 "risk_level": self._get_risk_level(risk_score),
                 "recommendations": recommendations,
-                "analysis_depth": depth
+                "analysis_depth": depth,
             }
 
             # Add warnings for high-risk findings
@@ -130,7 +123,7 @@ class SecurityAgent(SubAgent):
                 status=SubAgentStatus.SUCCESS,
                 data=result_data,
                 warnings=warnings,
-                token_count=self._estimate_tokens(result_data)
+                token_count=self._estimate_tokens(result_data),
             )
 
         except Exception as e:
@@ -139,7 +132,7 @@ class SecurityAgent(SubAgent):
                 agent_type=self.agent_type,
                 status=SubAgentStatus.FAILED,
                 data={},
-                errors=[f"Security analysis failed: {str(e)}"]
+                errors=[f"Security analysis failed: {str(e)}"],
             )
 
     def _calculate_risk_score(self, security_data: Dict) -> float:
@@ -197,5 +190,6 @@ class SecurityAgent(SubAgent):
     def _estimate_tokens(self, data: Dict) -> int:
         """Estimate token count for result"""
         import json
+
         # Rough estimate: 1 token per 4 characters
         return len(json.dumps(data)) // 4

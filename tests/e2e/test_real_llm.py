@@ -23,8 +23,8 @@ from src.truncation import Truncator
 
 # Skip if not running E2E tests
 pytestmark = pytest.mark.skipif(
-    not os.environ.get('RUN_E2E_TESTS'),
-    reason="E2E tests require RUN_E2E_TESTS=1 environment variable"
+    not os.environ.get("RUN_E2E_TESTS"),
+    reason="E2E tests require RUN_E2E_TESTS=1 environment variable",
 )
 
 
@@ -66,7 +66,7 @@ class TestRealTokenCounting:
 
         # Optimize
         result = optimizer.optimize(prompt)
-        optimized_tokens = result['optimized_tokens']
+        optimized_tokens = result["optimized_tokens"]
 
         # Calculate savings
         savings_pct = (1 - optimized_tokens / original_tokens) * 100
@@ -74,7 +74,7 @@ class TestRealTokenCounting:
         # Assertions
         assert savings_pct >= 0, "Should have non-negative savings"
         assert savings_pct < 50, "Savings should be realistic (<50%)"
-        assert result['optimized'] != prompt, "Text should be modified"
+        assert result["optimized"] != prompt, "Text should be modified"
 
         # Log results
         print("\nSimple Prompt Token Savings:")
@@ -99,7 +99,7 @@ class TestRealTokenCounting:
 
         # Optimize
         result = optimizer.optimize(prompt)
-        optimized_tokens = result['optimized_tokens']
+        optimized_tokens = result["optimized_tokens"]
 
         # Calculate savings
         savings_pct = (1 - optimized_tokens / original_tokens) * 100
@@ -133,14 +133,14 @@ class TestRealTokenCounting:
 
         # Optimize
         result = optimizer.optimize(prompt)
-        optimized_tokens = result['optimized_tokens']
+        optimized_tokens = result["optimized_tokens"]
 
         # Calculate savings
         savings_pct = (1 - optimized_tokens / original_tokens) * 100
 
         # Code should be preserved, so savings might be lower
         assert savings_pct >= 0, "Should have non-negative savings"
-        assert "def calculate_sum" in result['optimized'], "Code should be preserved"
+        assert "def calculate_sum" in result["optimized"], "Code should be preserved"
 
         # Log results
         print("\nCode Prompt Token Savings:")
@@ -155,11 +155,7 @@ class TestRealCachePerformance:
     @pytest.fixture
     def cache_system(self):
         """Initialize complete cache system."""
-        return MultiLevelCache(
-            l1_max_size=100,
-            l2_max_size=50,
-            similarity_threshold=0.85
-        )
+        return MultiLevelCache(l1_max_size=100, l2_max_size=50, similarity_threshold=0.85)
 
     def test_cache_hit_latency(self, cache_system):
         """Test L1 cache hit latency."""
@@ -220,11 +216,7 @@ class TestRealCachePerformance:
         results = []
         for query in similar_queries:
             result = cache_system.get(query)
-            results.append({
-                'query': query,
-                'result': result,
-                'hit': result is not None
-            })
+            results.append({"query": query, "result": result, "hit": result is not None})
 
         # Log results
         print("\nSemantic Cache Similarity Test:")
@@ -232,12 +224,14 @@ class TestRealCachePerformance:
         print(f"Response: '{response}'")
         print("\nSimilar queries:")
         for r in results:
-            status = "✅ HIT" if r['hit'] else "❌ MISS"
+            status = "✅ HIT" if r["hit"] else "❌ MISS"
             print(f"  {status}: '{r['query']}'")
 
         # At least one should hit (depending on threshold)
-        hits = sum(1 for r in results if r['hit'])
-        print(f"\nHit rate: {hits}/{len(similar_queries)} ({hits/len(similar_queries)*100:.1f}%)")
+        hits = sum(1 for r in results if r["hit"])
+        print(
+            f"\nHit rate: {hits}/{len(similar_queries)} ({hits / len(similar_queries) * 100:.1f}%)"
+        )
 
     def test_cache_promotion(self, cache_system):
         """Test L2 to L1 promotion."""
@@ -275,11 +269,7 @@ class TestRealWorldScenarios:
     @pytest.fixture
     def complete_system(self):
         """Initialize complete optimization system."""
-        cache = MultiLevelCache(
-            l1_max_size=100,
-            l2_max_size=50,
-            similarity_threshold=0.85
-        )
+        cache = MultiLevelCache(l1_max_size=100, l2_max_size=50, similarity_threshold=0.85)
         optimizer = PromptOptimizer(model="gpt-4")
         truncator = Truncator()
         return cache, optimizer, truncator
@@ -314,18 +304,18 @@ class TestRealWorldScenarios:
 
         # Step 2: Optimize prompt
         optimized = optimizer.optimize(query)
-        prompt_savings = optimized['savings_percentage']
+        prompt_savings = optimized["savings_percentage"]
 
         # Step 3: Truncate context
         original_context_tokens = optimizer.token_counter.count_tokens(context)
         truncated_result = truncator.truncate(context, max_tokens=100)
-        truncated = truncated_result['truncated']
-        truncated_tokens = truncated_result['truncated_tokens']
+        truncated = truncated_result["truncated"]
+        truncated_tokens = truncated_result["truncated_tokens"]
         context_savings = (1 - truncated_tokens / original_context_tokens) * 100
 
         # Calculate total savings
-        original_total = optimized['original_tokens'] + original_context_tokens
-        optimized_total = optimized['optimized_tokens'] + truncated_tokens
+        original_total = optimized["original_tokens"] + original_context_tokens
+        optimized_total = optimized["optimized_tokens"] + truncated_tokens
         total_savings = (1 - optimized_total / original_total) * 100 if original_total > 0 else 0
 
         # Log results
@@ -378,29 +368,31 @@ class TestRealWorldScenarios:
                 # Cache hit - no tokens used
                 tokens_used = 0
 
-            results.append({
-                'query': query,
-                'hit': result is not None and tokens_used == 0,
-                'latency_ms': latency_ms,
-                'tokens': tokens_used
-            })
+            results.append(
+                {
+                    "query": query,
+                    "hit": result is not None and tokens_used == 0,
+                    "latency_ms": latency_ms,
+                    "tokens": tokens_used,
+                }
+            )
 
         # Calculate statistics
-        total_tokens = sum(r['tokens'] for r in results)
-        hit_rate = sum(1 for r in results if r['hit']) / len(results) * 100
-        avg_latency = sum(r['latency_ms'] for r in results) / len(results)
+        total_tokens = sum(r["tokens"] for r in results)
+        hit_rate = sum(1 for r in results if r["hit"]) / len(results) * 100
+        avg_latency = sum(r["latency_ms"] for r in results) / len(results)
 
         # Log results
         print("\nRepeated Query Pattern Test:")
         print("=" * 50)
         for i, r in enumerate(results, 1):
-            status = "✅ HIT" if r['hit'] else "❌ MISS"
+            status = "✅ HIT" if r["hit"] else "❌ MISS"
             print(f"{i}. {status} ({r['latency_ms']:.3f}ms, {r['tokens']} tokens)")
         print("\nStatistics:")
         print(f"  Hit rate: {hit_rate:.1f}%")
         print(f"  Avg latency: {avg_latency:.3f}ms")
         print(f"  Total tokens: {total_tokens}")
-        print(f"  Tokens saved: {400 - total_tokens} ({(1 - total_tokens/400)*100:.1f}%)")
+        print(f"  Tokens saved: {400 - total_tokens} ({(1 - total_tokens / 400) * 100:.1f}%)")
         print("=" * 50)
 
         # Assertions

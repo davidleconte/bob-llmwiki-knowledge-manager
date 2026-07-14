@@ -15,19 +15,14 @@ from .registry import SubAgentRegistry
 class DelegationCoordinator:
     """
     Coordinates parallel execution of sub-agents
-    
+
     Manages task distribution, dependency resolution, and result aggregation
     """
 
-    def __init__(
-        self,
-        max_workers: int = 5,
-        timeout_seconds: int = 600,
-        enable_retry: bool = True
-    ):
+    def __init__(self, max_workers: int = 5, timeout_seconds: int = 600, enable_retry: bool = True):
         """
         Initialize coordinator
-        
+
         Args:
             max_workers: Maximum number of parallel workers
             timeout_seconds: Global timeout for all tasks
@@ -67,7 +62,7 @@ class DelegationCoordinator:
     def execute_parallel(self) -> Dict[str, SubAgentResult]:
         """
         Execute all tasks in parallel with dependency resolution
-        
+
         Returns:
             Dictionary mapping task IDs to results
         """
@@ -77,11 +72,7 @@ class DelegationCoordinator:
         self._failed_tasks.clear()
 
         # Sort tasks by priority
-        sorted_tasks = sorted(
-            self._tasks.values(),
-            key=lambda t: t.priority.value,
-            reverse=True
-        )
+        sorted_tasks = sorted(self._tasks.values(), key=lambda t: t.priority.value, reverse=True)
 
         # Execute tasks in waves based on dependencies.
         #
@@ -110,15 +101,14 @@ class DelegationCoordinator:
                             agent_type="system",
                             status=SubAgentStatus.FAILED,
                             data={},
-                            errors=["Task dependencies not met or circular dependency detected"]
+                            errors=["Task dependencies not met or circular dependency detected"],
                         )
                         self._failed_tasks.add(task_id)
                     break
 
                 # Submit executable tasks
                 future_to_task = {
-                    executor.submit(self._execute_task, task): task
-                    for task in executable_tasks
+                    executor.submit(self._execute_task, task): task for task in executable_tasks
                 }
 
                 # Collect results with a BOUNDED per-task wait. Iterating the
@@ -160,7 +150,7 @@ class DelegationCoordinator:
                             agent_type="system",
                             status=SubAgentStatus.FAILED,
                             data={},
-                            errors=[f"Task timed out after {task.timeout_seconds}s"]
+                            errors=[f"Task timed out after {task.timeout_seconds}s"],
                         )
                         self._failed_tasks.add(task.task_id)
                         remaining_tasks.discard(task.task_id)
@@ -171,7 +161,7 @@ class DelegationCoordinator:
                             agent_type="system",
                             status=SubAgentStatus.FAILED,
                             data={},
-                            errors=[f"Execution error: {str(e)}"]
+                            errors=[f"Execution error: {str(e)}"],
                         )
                         self._failed_tasks.add(task.task_id)
                         remaining_tasks.discard(task.task_id)
@@ -194,7 +184,7 @@ class DelegationCoordinator:
                 agent_type="system",
                 status=SubAgentStatus.FAILED,
                 data={},
-                errors=[f"No agent available for task type: {task.task_type}"]
+                errors=[f"No agent available for task type: {task.task_type}"],
             )
 
         # Execute task
@@ -206,18 +196,12 @@ class DelegationCoordinator:
 
     def get_successful_results(self) -> Dict[str, SubAgentResult]:
         """Get only successful results"""
-        return {
-            task_id: result
-            for task_id, result in self._results.items()
-            if result.is_success()
-        }
+        return {task_id: result for task_id, result in self._results.items() if result.is_success()}
 
     def get_failed_results(self) -> Dict[str, SubAgentResult]:
         """Get only failed results"""
         return {
-            task_id: result
-            for task_id, result in self._results.items()
-            if not result.is_success()
+            task_id: result for task_id, result in self._results.items() if not result.is_success()
         }
 
     def get_statistics(self) -> Dict:
@@ -233,11 +217,13 @@ class DelegationCoordinator:
             "success_rate": len(self._completed_tasks) / len(self._tasks) if self._tasks else 0,
             "total_execution_time_ms": total_time_ms,
             "parallel_execution_time_ms": self._total_execution_time_ms,
-            "parallelization_factor": self._total_execution_time_ms / total_time_ms if total_time_ms > 0 else 0,
+            "parallelization_factor": self._total_execution_time_ms / total_time_ms
+            if total_time_ms > 0
+            else 0,
             "total_tokens": self._total_tokens,
             "registered_agents": len(self.registry.get_all_agents()),
             "start_time": self._start_time.isoformat() if self._start_time else None,
-            "end_time": self._end_time.isoformat() if self._end_time else None
+            "end_time": self._end_time.isoformat() if self._end_time else None,
         }
 
     def generate_report(self) -> str:

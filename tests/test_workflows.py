@@ -1,4 +1,5 @@
 """Tests for workflow scripts and integration."""
+
 import subprocess
 from pathlib import Path
 
@@ -27,12 +28,7 @@ def test_scripts_directory_exists(scripts_dir):
 @pytest.mark.unit
 def test_required_scripts_exist(scripts_dir):
     """Test that all required scripts exist."""
-    required_scripts = [
-        "install.sh",
-        "init-project.sh",
-        "validate-kb.sh",
-        "export-kb.sh"
-    ]
+    required_scripts = ["install.sh", "init-project.sh", "validate-kb.sh", "export-kb.sh"]
 
     for script in required_scripts:
         script_path = scripts_dir / script
@@ -56,9 +52,9 @@ def test_scripts_have_shebang(scripts_dir):
 
     for script in scripts:
         script_path = scripts_dir / script
-        with open(script_path, 'r') as f:
+        with open(script_path, "r") as f:
             first_line = f.readline()
-        assert first_line.startswith('#!/bin/bash'), f"{script} should have bash shebang"
+        assert first_line.startswith("#!/bin/bash"), f"{script} should have bash shebang"
 
 
 @pytest.mark.unit
@@ -67,8 +63,9 @@ def test_install_script_checks_bob_shell(scripts_dir):
     script_path = scripts_dir / "install.sh"
     content = script_path.read_text()
 
-    assert '.bob' in content or 'bob' in content.lower(), \
+    assert ".bob" in content or "bob" in content.lower(), (
         "Install script should check for Bob Shell"
+    )
 
 
 @pytest.mark.unit
@@ -77,7 +74,7 @@ def test_init_project_script_creates_structure(scripts_dir):
     script_path = scripts_dir / "init-project.sh"
     content = script_path.read_text()
 
-    required_dirs = ['concepts', 'guides', 'references', 'research']
+    required_dirs = ["concepts", "guides", "references", "research"]
     for dir_name in required_dirs:
         assert dir_name in content, f"Init script should create {dir_name} directory"
 
@@ -88,8 +85,8 @@ def test_validate_script_checks_structure(scripts_dir):
     script_path = scripts_dir / "validate-kb.sh"
     content = script_path.read_text()
 
-    assert 'INDEX.md' in content, "Validate script should check for INDEX.md"
-    assert 'concepts' in content, "Validate script should check concepts directory"
+    assert "INDEX.md" in content, "Validate script should check for INDEX.md"
+    assert "concepts" in content, "Validate script should check concepts directory"
 
 
 @pytest.mark.unit
@@ -98,7 +95,7 @@ def test_export_script_supports_formats(scripts_dir):
     script_path = scripts_dir / "export-kb.sh"
     content = script_path.read_text()
 
-    formats = ['markdown', 'obsidian', 'html', 'pdf']
+    formats = ["markdown", "obsidian", "html", "pdf"]
     for fmt in formats:
         assert fmt in content, f"Export script should support {fmt} format"
 
@@ -107,11 +104,7 @@ def test_export_script_supports_formats(scripts_dir):
 def test_install_script_syntax():
     """Test that install script has valid bash syntax."""
     script_path = Path(__file__).parent.parent / "scripts" / "install.sh"
-    result = subprocess.run(
-        ['bash', '-n', str(script_path)],
-        capture_output=True,
-        text=True
-    )
+    result = subprocess.run(["bash", "-n", str(script_path)], capture_output=True, text=True)
     assert result.returncode == 0, f"Install script has syntax errors: {result.stderr}"
 
 
@@ -119,11 +112,7 @@ def test_install_script_syntax():
 def test_init_project_script_syntax():
     """Test that init-project script has valid bash syntax."""
     script_path = Path(__file__).parent.parent / "scripts" / "init-project.sh"
-    result = subprocess.run(
-        ['bash', '-n', str(script_path)],
-        capture_output=True,
-        text=True
-    )
+    result = subprocess.run(["bash", "-n", str(script_path)], capture_output=True, text=True)
     assert result.returncode == 0, f"Init-project script has syntax errors: {result.stderr}"
 
 
@@ -131,11 +120,7 @@ def test_init_project_script_syntax():
 def test_validate_script_syntax():
     """Test that validate script has valid bash syntax."""
     script_path = Path(__file__).parent.parent / "scripts" / "validate-kb.sh"
-    result = subprocess.run(
-        ['bash', '-n', str(script_path)],
-        capture_output=True,
-        text=True
-    )
+    result = subprocess.run(["bash", "-n", str(script_path)], capture_output=True, text=True)
     assert result.returncode == 0, f"Validate script has syntax errors: {result.stderr}"
 
 
@@ -143,11 +128,7 @@ def test_validate_script_syntax():
 def test_export_script_syntax():
     """Test that export script has valid bash syntax."""
     script_path = Path(__file__).parent.parent / "scripts" / "export-kb.sh"
-    result = subprocess.run(
-        ['bash', '-n', str(script_path)],
-        capture_output=True,
-        text=True
-    )
+    result = subprocess.run(["bash", "-n", str(script_path)], capture_output=True, text=True)
     assert result.returncode == 0, f"Export script has syntax errors: {result.stderr}"
 
 
@@ -162,11 +143,7 @@ def test_examples_directory_exists(project_root):
 def test_required_examples_exist(project_root):
     """Test that all required examples exist."""
     examples_dir = project_root / "examples"
-    required_examples = [
-        "software-project",
-        "research-project",
-        "personal-wiki"
-    ]
+    required_examples = ["software-project", "research-project", "personal-wiki"]
 
     for example in required_examples:
         example_path = examples_dir / example
@@ -197,8 +174,7 @@ def test_examples_have_kb_structure(project_root):
         # Check for required subdirectories
         for subdir in ["concepts", "guides", "references", "research"]:
             subdir_path = kb_path / subdir
-            assert subdir_path.exists(), \
-                f"Example {example} should have {subdir} directory"
+            assert subdir_path.exists(), f"Example {example} should have {subdir} directory"
 
         # Check for INDEX.md
         index_path = kb_path / "INDEX.md"
@@ -215,7 +191,7 @@ def test_documentation_files_exist(project_root):
         "CUSTOMIZATION.md",
         "WORKFLOWS.md",
         "COMPARISON.md",
-        "ARCHITECTURE.md"
+        "ARCHITECTURE.md",
     ]
 
     for doc in required_docs:
@@ -226,12 +202,7 @@ def test_documentation_files_exist(project_root):
 @pytest.mark.unit
 def test_core_files_exist(project_root):
     """Test that core project files exist."""
-    core_files = [
-        "README.md",
-        "LICENSE",
-        "CHANGELOG.md",
-        ".gitignore"
-    ]
+    core_files = ["README.md", "LICENSE", "CHANGELOG.md", ".gitignore"]
 
     for file in core_files:
         file_path = project_root / file
@@ -242,10 +213,7 @@ def test_core_files_exist(project_root):
 def test_config_files_exist(project_root):
     """Test that configuration files exist."""
     config_dir = project_root / "config"
-    config_files = [
-        "custom_modes.yaml",
-        "settings.json"
-    ]
+    config_files = ["custom_modes.yaml", "settings.json"]
 
     for file in config_files:
         file_path = config_dir / file

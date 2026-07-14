@@ -20,9 +20,7 @@ class TestHealthCheckResult:
     def test_create_healthy_result(self):
         """Test creating a healthy result."""
         result = HealthCheckResult(
-            name="test_check",
-            status=HealthStatus.HEALTHY,
-            message="All good"
+            name="test_check", status=HealthStatus.HEALTHY, message="All good"
         )
 
         assert result.name == "test_check"
@@ -33,9 +31,7 @@ class TestHealthCheckResult:
     def test_create_unhealthy_result(self):
         """Test creating an unhealthy result."""
         result = HealthCheckResult(
-            name="test_check",
-            status=HealthStatus.UNHEALTHY,
-            message="Something wrong"
+            name="test_check", status=HealthStatus.UNHEALTHY, message="Something wrong"
         )
 
         assert not result.is_healthy()
@@ -43,9 +39,7 @@ class TestHealthCheckResult:
     def test_result_with_details(self):
         """Test result with additional details."""
         result = HealthCheckResult(
-            name="test_check",
-            status=HealthStatus.HEALTHY,
-            details={"metric": 42, "status": "ok"}
+            name="test_check", status=HealthStatus.HEALTHY, details={"metric": 42, "status": "ok"}
         )
 
         assert result.details["metric"] == 42
@@ -54,10 +48,7 @@ class TestHealthCheckResult:
     def test_to_dict(self):
         """Test converting result to dictionary."""
         result = HealthCheckResult(
-            name="test_check",
-            status=HealthStatus.HEALTHY,
-            message="OK",
-            details={"key": "value"}
+            name="test_check", status=HealthStatus.HEALTHY, message="OK", details={"key": "value"}
         )
 
         data = result.to_dict()
@@ -80,10 +71,7 @@ class TestSystemHealth:
             HealthCheckResult("check2", HealthStatus.HEALTHY),
         ]
 
-        health = SystemHealth(
-            status=HealthStatus.HEALTHY,
-            checks=checks
-        )
+        health = SystemHealth(status=HealthStatus.HEALTHY, checks=checks)
 
         assert health.status == HealthStatus.HEALTHY
         assert len(health.checks) == 2
@@ -96,10 +84,7 @@ class TestSystemHealth:
             HealthCheckResult("check2", HealthStatus.UNHEALTHY),
         ]
 
-        health = SystemHealth(
-            status=HealthStatus.UNHEALTHY,
-            checks=checks
-        )
+        health = SystemHealth(status=HealthStatus.UNHEALTHY, checks=checks)
 
         assert not health.is_healthy()
 
@@ -109,10 +94,7 @@ class TestSystemHealth:
             HealthCheckResult("check1", HealthStatus.HEALTHY),
         ]
 
-        health = SystemHealth(
-            status=HealthStatus.HEALTHY,
-            checks=checks
-        )
+        health = SystemHealth(status=HealthStatus.HEALTHY, checks=checks)
 
         data = health.to_dict()
 
@@ -338,9 +320,9 @@ class TestCacheHealthCheck:
         # Create mock cache
         mock_cache = Mock()
         mock_cache.stats.return_value = {
-            'size': 50,
-            'max_size': 100,
-            'hit_rate': 75.0,
+            "size": 50,
+            "max_size": 100,
+            "hit_rate": 75.0,
         }
 
         checker = HealthChecker()
@@ -348,15 +330,15 @@ class TestCacheHealthCheck:
         # Register check
         def check_cache():
             stats = mock_cache.stats()
-            size = stats['size']
-            max_size = stats['max_size']
+            size = stats["size"]
+            max_size = stats["max_size"]
             utilization = (size / max_size) * 100
 
             return HealthCheckResult(
                 name="cache_L1",
                 status=HealthStatus.HEALTHY,
                 message=f"Cache operating normally ({utilization:.1f}% full)",
-                details=stats
+                details=stats,
             )
 
         checker.register_check("cache_L1", check_cache)
@@ -366,24 +348,24 @@ class TestCacheHealthCheck:
 
         assert health.status == HealthStatus.HEALTHY
         assert len(health.checks) == 1
-        assert health.checks[0].details['size'] == 50
-        assert health.checks[0].details['max_size'] == 100
+        assert health.checks[0].details["size"] == 50
+        assert health.checks[0].details["max_size"] == 100
 
     def test_cache_health_degraded_high_utilization(self):
         """Test cache health degraded when utilization high."""
         mock_cache = Mock()
         mock_cache.stats.return_value = {
-            'size': 85,
-            'max_size': 100,
-            'hit_rate': 75.0,
+            "size": 85,
+            "max_size": 100,
+            "hit_rate": 75.0,
         }
 
         checker = HealthChecker()
 
         def check_cache():
             stats = mock_cache.stats()
-            size = stats['size']
-            max_size = stats['max_size']
+            size = stats["size"]
+            max_size = stats["max_size"]
             utilization = (size / max_size) * 100
 
             if utilization >= 80:
@@ -393,12 +375,7 @@ class TestCacheHealthCheck:
                 status = HealthStatus.HEALTHY
                 message = f"Cache operating normally ({utilization:.1f}% full)"
 
-            return HealthCheckResult(
-                name="cache_L1",
-                status=status,
-                message=message,
-                details=stats
-            )
+            return HealthCheckResult(name="cache_L1", status=status, message=message, details=stats)
 
         checker.register_check("cache_L1", check_cache)
 
@@ -422,7 +399,7 @@ class TestCacheHealthCheck:
                 return HealthCheckResult(
                     name="cache_L1",
                     status=HealthStatus.UNHEALTHY,
-                    message=f"Cache check failed: {str(e)}"
+                    message=f"Cache check failed: {str(e)}",
                 )
 
         checker.register_check("cache_L1", check_cache)
@@ -436,14 +413,14 @@ class TestCacheHealthCheck:
 class TestSystemHealthCheck:
     """Tests for system health check."""
 
-    @patch('psutil.virtual_memory')
-    @patch('psutil.cpu_percent')
+    @patch("psutil.virtual_memory")
+    @patch("psutil.cpu_percent")
     def test_system_health_check_with_psutil(self, mock_cpu, mock_memory):
         """Test system health check with psutil available."""
         # Mock system metrics
         mock_memory.return_value = Mock(
             percent=50.0,
-            available=4 * 1024 * 1024 * 1024  # 4GB
+            available=4 * 1024 * 1024 * 1024,  # 4GB
         )
         mock_cpu.return_value = 30.0
 
@@ -452,6 +429,7 @@ class TestSystemHealthCheck:
         def check_system():
             try:
                 import psutil
+
                 memory = psutil.virtual_memory()
                 cpu_percent = psutil.cpu_percent(interval=0.1)
 
@@ -462,13 +440,13 @@ class TestSystemHealthCheck:
                     details={
                         "memory_percent": memory.percent,
                         "cpu_percent": cpu_percent,
-                    }
+                    },
                 )
             except ImportError:
                 return HealthCheckResult(
                     name="system_resources",
                     status=HealthStatus.HEALTHY,
-                    message="System monitoring unavailable"
+                    message="System monitoring unavailable",
                 )
 
         checker.register_check("system_resources", check_system)
@@ -486,13 +464,14 @@ class TestSystemHealthCheck:
         def check_system():
             try:
                 import psutil
+
                 return HealthCheckResult("system_resources", HealthStatus.HEALTHY)
             except ImportError:
                 return HealthCheckResult(
                     name="system_resources",
                     status=HealthStatus.HEALTHY,
                     message="System monitoring unavailable (psutil not installed)",
-                    details={"psutil_available": False}
+                    details={"psutil_available": False},
                 )
 
         checker.register_check("system_resources", check_system)

@@ -22,10 +22,10 @@ from src.truncation.strategies import (
 
 class Truncator:
     """Unified interface for prompt truncation.
-    
+
     Supports multiple truncation strategies and provides
     statistics on truncation operations.
-    
+
     Attributes:
         token_counter: Token counting utility
         default_strategy: Default truncation strategy
@@ -34,7 +34,7 @@ class Truncator:
 
     def __init__(self, model: str = DEFAULT_MODEL, default_strategy: str = "semantic"):
         """Initialize truncator.
-        
+
         Args:
             model: Model name for token counting
             default_strategy: Default strategy name
@@ -60,22 +60,23 @@ class Truncator:
         self.total_tokens_removed = 0
         self.total_original_tokens = 0
 
-        self._logger.info("truncator_initialized",
-                        model=model,
-                        default_strategy=default_strategy,
-                        available_strategies=list(self.strategies.keys()))
+        self._logger.info(
+            "truncator_initialized",
+            model=model,
+            default_strategy=default_strategy,
+            available_strategies=list(self.strategies.keys()),
+        )
 
-    def truncate(self,
-                 text: str,
-                 max_tokens: int,
-                 strategy: Optional[str] = None) -> Dict[str, Any]:
+    def truncate(
+        self, text: str, max_tokens: int, strategy: Optional[str] = None
+    ) -> Dict[str, Any]:
         """Truncate text using specified strategy.
-        
+
         Args:
             text: Text to truncate
             max_tokens: Maximum tokens allowed
             strategy: Strategy name (uses default if not specified)
-            
+
         Returns:
             Dictionary with truncation results
         """
@@ -90,10 +91,12 @@ class Truncator:
 
         # Check if truncation needed
         if original_tokens <= max_tokens:
-            self._logger.debug("truncation_skipped",
-                             original_tokens=original_tokens,
-                             max_tokens=max_tokens,
-                             strategy=strategy_name)
+            self._logger.debug(
+                "truncation_skipped",
+                original_tokens=original_tokens,
+                max_tokens=max_tokens,
+                strategy=strategy_name,
+            )
             return {
                 "original": text,
                 "truncated": text,
@@ -127,16 +130,20 @@ class Truncator:
         self.total_original_tokens += original_tokens
 
         # Record metrics
-        self._metrics.record_truncation(strategy_name, original_tokens, truncated_tokens, latency_ms)
+        self._metrics.record_truncation(
+            strategy_name, original_tokens, truncated_tokens, latency_ms
+        )
 
         # Log truncation
-        self._logger.info("truncation_complete",
-                        strategy=strategy_name,
-                        original_tokens=original_tokens,
-                        truncated_tokens=truncated_tokens,
-                        tokens_removed=tokens_removed,
-                        reduction_pct=(tokens_removed / original_tokens * 100) if original_tokens > 0 else 0,
-                        latency_ms=latency_ms)
+        self._logger.info(
+            "truncation_complete",
+            strategy=strategy_name,
+            original_tokens=original_tokens,
+            truncated_tokens=truncated_tokens,
+            tokens_removed=tokens_removed,
+            reduction_pct=(tokens_removed / original_tokens * 100) if original_tokens > 0 else 0,
+            latency_ms=latency_ms,
+        )
 
         return {
             "original": text,
@@ -144,14 +151,16 @@ class Truncator:
             "original_tokens": original_tokens,
             "truncated_tokens": truncated_tokens,
             "tokens_removed": tokens_removed,
-            "removal_percentage": (tokens_removed / original_tokens * 100) if original_tokens > 0 else 0,
+            "removal_percentage": (tokens_removed / original_tokens * 100)
+            if original_tokens > 0
+            else 0,
             "was_truncated": True,
             "strategy": strategy_name,
         }
 
     def add_strategy(self, name: str, strategy: TruncationStrategy) -> None:
         """Add custom truncation strategy.
-        
+
         Args:
             name: Strategy name
             strategy: TruncationStrategy instance
@@ -160,7 +169,7 @@ class Truncator:
 
     def get_strategies(self) -> list[str]:
         """Get list of available strategy names.
-        
+
         Returns:
             List of strategy names
         """
@@ -168,7 +177,7 @@ class Truncator:
 
     def set_default_strategy(self, strategy: str) -> None:
         """Set default truncation strategy.
-        
+
         Args:
             strategy: Strategy name
         """
@@ -179,13 +188,14 @@ class Truncator:
 
     def get_stats(self) -> Dict[str, Any]:
         """Get truncation statistics.
-        
+
         Returns:
             Dictionary with statistics
         """
         avg_removal = (
             (self.total_tokens_removed / self.total_original_tokens * 100)
-            if self.total_original_tokens > 0 else 0
+            if self.total_original_tokens > 0
+            else 0
         )
 
         return {
@@ -205,11 +215,11 @@ class Truncator:
 
     def compare_strategies(self, text: str, max_tokens: int) -> Dict[str, Dict[str, Any]]:
         """Compare all strategies on given text.
-        
+
         Args:
             text: Text to truncate
             max_tokens: Maximum tokens allowed
-            
+
         Returns:
             Dictionary mapping strategy names to results
         """
@@ -223,19 +233,19 @@ class Truncator:
 
     def auto_select_strategy(self, text: str, max_tokens: int) -> str:
         """Automatically select best strategy for text.
-        
+
         Args:
             text: Text to analyze
             max_tokens: Maximum tokens allowed
-            
+
         Returns:
             Recommended strategy name
         """
         # Heuristics for strategy selection
 
         # Check for structured content (headers, lists)
-        has_headers = bool(re.search(r'^#+\s', text, re.MULTILINE))
-        has_lists = bool(re.search(r'^[\*\-]\s|\d+[\.\)]\s', text, re.MULTILINE))
+        has_headers = bool(re.search(r"^#+\s", text, re.MULTILINE))
+        has_lists = bool(re.search(r"^[\*\-]\s|\d+[\.\)]\s", text, re.MULTILINE))
 
         if has_headers or has_lists:
             return "priority"
@@ -246,7 +256,7 @@ class Truncator:
             return "sliding_window"
 
         # Check for prose/paragraphs
-        paragraphs = text.split('\n\n')
+        paragraphs = text.split("\n\n")
         if len(paragraphs) > 3:
             return "semantic"
 

@@ -43,7 +43,7 @@ class MockAgent(SubAgent):
                 status=SubAgentStatus.FAILED,
                 data={},
                 errors=["Mock failure"],
-                execution_time_ms=100.0
+                execution_time_ms=100.0,
             )
 
         time.sleep(0.01)  # Simulate work
@@ -53,7 +53,7 @@ class MockAgent(SubAgent):
             agent_type=self.agent_type,
             status=SubAgentStatus.SUCCESS,
             data={"result": f"success_{self.execution_count}"},
-            execution_time_ms=10.0
+            execution_time_ms=10.0,
         )
 
     def get_capabilities(self):
@@ -94,11 +94,7 @@ class TestDelegationCoordinator:
         """Test adding a single task."""
         coordinator = DelegationCoordinator()
 
-        task = SubAgentTask(
-            task_id="task-1",
-            task_type="test",
-            target="/path"
-        )
+        task = SubAgentTask(task_id="task-1", task_type="test", target="/path")
 
         coordinator.add_task(task)
 
@@ -109,8 +105,7 @@ class TestDelegationCoordinator:
         coordinator = DelegationCoordinator()
 
         tasks = [
-            SubAgentTask(task_id=f"task-{i}", task_type="test", target="/path")
-            for i in range(3)
+            SubAgentTask(task_id=f"task-{i}", task_type="test", target="/path") for i in range(3)
         ]
 
         coordinator.add_tasks(tasks)
@@ -124,8 +119,7 @@ class TestDelegationCoordinator:
         coordinator.register_agent(agent)
 
         tasks = [
-            SubAgentTask(task_id=f"task-{i}", task_type="test", target="/path")
-            for i in range(3)
+            SubAgentTask(task_id=f"task-{i}", task_type="test", target="/path") for i in range(3)
         ]
 
         coordinator.add_tasks(tasks)
@@ -147,7 +141,7 @@ class TestDelegationCoordinator:
 
         tasks = [
             SubAgentTask(task_id="task-1", task_type="test", target="/path"),
-            SubAgentTask(task_id="task-2", task_type="test", target="/path")
+            SubAgentTask(task_id="task-2", task_type="test", target="/path"),
         ]
 
         coordinator.add_tasks(tasks)
@@ -166,11 +160,8 @@ class TestDelegationCoordinator:
         tasks = [
             SubAgentTask(task_id="task-1", task_type="test", target="/path"),
             SubAgentTask(
-                task_id="task-2",
-                task_type="test",
-                target="/path",
-                dependencies=["task-1"]
-            )
+                task_id="task-2", task_type="test", target="/path", dependencies=["task-1"]
+            ),
         ]
 
         coordinator.add_tasks(tasks)
@@ -187,23 +178,17 @@ class TestDelegationCoordinator:
 
         tasks = [
             SubAgentTask(
-                task_id="low",
-                task_type="test",
-                target="/path",
-                priority=SubAgentPriority.LOW
+                task_id="low", task_type="test", target="/path", priority=SubAgentPriority.LOW
             ),
             SubAgentTask(
-                task_id="high",
-                task_type="test",
-                target="/path",
-                priority=SubAgentPriority.HIGH
+                task_id="high", task_type="test", target="/path", priority=SubAgentPriority.HIGH
             ),
             SubAgentTask(
                 task_id="critical",
                 task_type="test",
                 target="/path",
-                priority=SubAgentPriority.CRITICAL
-            )
+                priority=SubAgentPriority.CRITICAL,
+            ),
         ]
 
         coordinator.add_tasks(tasks)
@@ -224,7 +209,7 @@ class TestDelegationCoordinator:
 
         tasks = [
             SubAgentTask(task_id="task-1", task_type="test", target="/path"),
-            SubAgentTask(task_id="task-2", task_type="test", target="/path")
+            SubAgentTask(task_id="task-2", task_type="test", target="/path"),
         ]
 
         coordinator.add_tasks(tasks)
@@ -254,8 +239,7 @@ class TestDelegationCoordinator:
         coordinator.register_agent(agent)
 
         tasks = [
-            SubAgentTask(task_id=f"task-{i}", task_type="test", target="/path")
-            for i in range(3)
+            SubAgentTask(task_id=f"task-{i}", task_type="test", target="/path") for i in range(3)
         ]
 
         coordinator.add_tasks(tasks)
@@ -310,8 +294,7 @@ class TestDelegationCoordinator:
         coordinator.register_agent(agent)
 
         tasks = [
-            SubAgentTask(task_id=f"task-{i}", task_type="test", target="/path")
-            for i in range(3)
+            SubAgentTask(task_id=f"task-{i}", task_type="test", target="/path") for i in range(3)
         ]
 
         coordinator.add_tasks(tasks)

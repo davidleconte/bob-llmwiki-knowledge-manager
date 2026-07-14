@@ -34,10 +34,7 @@ class TestExactCacheConcurrency:
             return results
 
         with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [
-                executor.submit(read_operation, i)
-                for i in range(10)
-            ]
+            futures = [executor.submit(read_operation, i) for i in range(10)]
 
             results = [f.result() for f in as_completed(futures)]
 
@@ -56,10 +53,7 @@ class TestExactCacheConcurrency:
                 cache.set(f"key_{thread_id}_{i}", f"value_{thread_id}_{i}")
 
         with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [
-                executor.submit(write_operation, i)
-                for i in range(10)
-            ]
+            futures = [executor.submit(write_operation, i) for i in range(10)]
 
             # Wait for completion
             for f in as_completed(futures):
@@ -67,7 +61,7 @@ class TestExactCacheConcurrency:
 
         # Verify all writes succeeded
         stats = cache.stats()
-        assert stats['size'] == 1000  # 10 threads * 100 writes
+        assert stats["size"] == 1000  # 10 threads * 100 writes
 
     def test_mixed_read_write(self):
         """Test mixed read/write workload."""
@@ -87,18 +81,15 @@ class TestExactCacheConcurrency:
                     cache.set(f"key_{thread_id}_{i}", f"value_{thread_id}_{i}")
 
         with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [
-                executor.submit(mixed_operation, i)
-                for i in range(10)
-            ]
+            futures = [executor.submit(mixed_operation, i) for i in range(10)]
 
             for f in as_completed(futures):
                 f.result()
 
         # Verify cache is consistent
         stats = cache.stats()
-        assert stats['size'] > 0
-        assert stats['size'] <= 1000
+        assert stats["size"] > 0
+        assert stats["size"] <= 1000
 
     def test_concurrent_eviction(self):
         """Test concurrent writes triggering eviction."""
@@ -109,18 +100,15 @@ class TestExactCacheConcurrency:
                 cache.set(f"key_{thread_id}_{i}", f"value_{thread_id}_{i}")
 
         with ThreadPoolExecutor(max_workers=5) as executor:
-            futures = [
-                executor.submit(write_many, i)
-                for i in range(5)
-            ]
+            futures = [executor.submit(write_many, i) for i in range(5)]
 
             for f in as_completed(futures):
                 f.result()
 
         # Cache should be at max size
         stats = cache.stats()
-        assert stats['size'] == 100
-        assert stats['evictions'] > 0
+        assert stats["size"] == 100
+        assert stats["evictions"] > 0
 
     def test_read_write_consistency(self):
         """Test that reads see consistent data during concurrent writes."""
@@ -171,10 +159,7 @@ class TestExactCacheConcurrency:
                     cache.stats()
 
         with ThreadPoolExecutor(max_workers=20) as executor:
-            futures = [
-                executor.submit(stress_operation, i)
-                for i in range(20)
-            ]
+            futures = [executor.submit(stress_operation, i) for i in range(20)]
 
             for f in as_completed(futures):
                 f.result()
@@ -203,10 +188,7 @@ class TestSemanticCacheConcurrency:
             return results
 
         with ThreadPoolExecutor(max_workers=5) as executor:
-            futures = [
-                executor.submit(read_operation, i)
-                for i in range(5)
-            ]
+            futures = [executor.submit(read_operation, i) for i in range(5)]
 
             results = [f.result() for f in as_completed(futures)]
 
@@ -224,17 +206,14 @@ class TestSemanticCacheConcurrency:
                 cache.set(f"prompt_{thread_id}_{i}", f"result_{thread_id}_{i}")
 
         with ThreadPoolExecutor(max_workers=5) as executor:
-            futures = [
-                executor.submit(write_operation, i)
-                for i in range(5)
-            ]
+            futures = [executor.submit(write_operation, i) for i in range(5)]
 
             for f in as_completed(futures):
                 f.result()
 
         # Verify writes succeeded
         stats = cache.stats()
-        assert stats['size'] == 100  # 5 threads * 20 writes
+        assert stats["size"] == 100  # 5 threads * 20 writes
 
     def test_concurrent_similarity_search(self):
         """Test concurrent similarity searches."""
@@ -242,7 +221,13 @@ class TestSemanticCacheConcurrency:
 
         # Populate with diverse prompts to avoid TF-IDF pruning
         # Use different topics and vocabulary for each prompt
-        topics = ["machine learning", "data science", "software engineering", "cloud computing", "artificial intelligence"]
+        topics = [
+            "machine learning",
+            "data science",
+            "software engineering",
+            "cloud computing",
+            "artificial intelligence",
+        ]
         actions = ["analyze", "implement", "optimize", "debug", "deploy"]
 
         prompts = []
@@ -258,14 +243,13 @@ class TestSemanticCacheConcurrency:
         def search_operation(thread_id: int) -> List:
             topic = topics[thread_id % len(topics)]
             action = actions[thread_id % len(actions)]
-            query = f"Please {action} the {topic} system for project {thread_id} with advanced features"
+            query = (
+                f"Please {action} the {topic} system for project {thread_id} with advanced features"
+            )
             return cache.find_similar(query, top_k=5)
 
         with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [
-                executor.submit(search_operation, i)
-                for i in range(10)
-            ]
+            futures = [executor.submit(search_operation, i) for i in range(10)]
 
             results = [f.result() for f in as_completed(futures)]
 
@@ -311,10 +295,7 @@ class TestMultiLevelCacheConcurrency:
 
     def test_concurrent_l1_l2_access(self):
         """Test concurrent access to both cache levels."""
-        cache = MultiLevelCache(
-            l1_max_size=100,
-            l2_max_size=500
-        )
+        cache = MultiLevelCache(l1_max_size=100, l2_max_size=500)
 
         # Populate
         for i in range(50):
@@ -327,10 +308,7 @@ class TestMultiLevelCacheConcurrency:
                 cache.get(f"nonexistent_{thread_id}_{i}")
 
         with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [
-                executor.submit(mixed_access, i)
-                for i in range(10)
-            ]
+            futures = [executor.submit(mixed_access, i) for i in range(10)]
 
             for f in as_completed(futures):
                 f.result()
@@ -341,11 +319,7 @@ class TestMultiLevelCacheConcurrency:
 
     def test_concurrent_promotion(self):
         """Test concurrent L2 to L1 promotion."""
-        cache = MultiLevelCache(
-            l1_max_size=10,
-            l2_max_size=500,
-            promote_l2_hits=True
-        )
+        cache = MultiLevelCache(l1_max_size=10, l2_max_size=500, promote_l2_hits=True)
 
         # Populate L2
         for i in range(50):
@@ -360,10 +334,7 @@ class TestMultiLevelCacheConcurrency:
                 cache.get(f"prompt_{i}")
 
         with ThreadPoolExecutor(max_workers=5) as executor:
-            futures = [
-                executor.submit(access_and_promote, i)
-                for i in range(5)
-            ]
+            futures = [executor.submit(access_and_promote, i) for i in range(5)]
 
             for f in as_completed(futures):
                 f.result()
@@ -385,10 +356,7 @@ class TestMultiLevelCacheConcurrency:
                     cache.stats()
 
         with ThreadPoolExecutor(max_workers=20) as executor:
-            futures = [
-                executor.submit(stress_operation, i)
-                for i in range(20)
-            ]
+            futures = [executor.submit(stress_operation, i) for i in range(20)]
 
             for f in as_completed(futures):
                 f.result()
@@ -406,22 +374,19 @@ class TestRaceConditions:
         cache = ExactCache(max_size=1000)
 
         # Shared counter (intentionally racy)
-        counter = {'value': 0}
+        counter = {"value": 0}
 
         def increment_without_lock() -> None:
             """Increment without proper synchronization."""
             for _ in range(1000):
-                current = counter['value']
+                current = counter["value"]
                 # Simulate some work
                 time.sleep(0.00001)
-                counter['value'] = current + 1
+                counter["value"] = current + 1
 
         # Run without lock (should have races)
-        counter['value'] = 0
-        threads = [
-            threading.Thread(target=increment_without_lock)
-            for _ in range(10)
-        ]
+        counter["value"] = 0
+        threads = [threading.Thread(target=increment_without_lock) for _ in range(10)]
 
         for t in threads:
             t.start()
@@ -429,7 +394,7 @@ class TestRaceConditions:
             t.join()
 
         # Verify race condition occurred (value should be less than expected)
-        assert counter['value'] < 10000, "Race condition not detected"
+        assert counter["value"] < 10000, "Race condition not detected"
 
         # Now test with proper locking
         lock = threading.Lock()
@@ -438,15 +403,12 @@ class TestRaceConditions:
             """Increment with proper synchronization."""
             for _ in range(1000):
                 with lock:
-                    current = counter['value']
+                    current = counter["value"]
                     time.sleep(0.00001)
-                    counter['value'] = current + 1
+                    counter["value"] = current + 1
 
-        counter['value'] = 0
-        threads = [
-            threading.Thread(target=increment_with_lock)
-            for _ in range(10)
-        ]
+        counter["value"] = 0
+        threads = [threading.Thread(target=increment_with_lock) for _ in range(10)]
 
         for t in threads:
             t.start()
@@ -454,7 +416,7 @@ class TestRaceConditions:
             t.join()
 
         # With lock, should get exact count
-        assert counter['value'] == 10000, "Lock failed to prevent race condition"
+        assert counter["value"] == 10000, "Lock failed to prevent race condition"
 
     def test_cache_stats_consistency(self):
         """Test that cache stats remain consistent under concurrent access."""
@@ -466,18 +428,15 @@ class TestRaceConditions:
                 cache.get(f"key_{thread_id}_{i}")
 
         with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [
-                executor.submit(concurrent_operations, i)
-                for i in range(10)
-            ]
+            futures = [executor.submit(concurrent_operations, i) for i in range(10)]
 
             for f in as_completed(futures):
                 f.result()
 
         # Stats should be consistent
         stats = cache.stats()
-        assert stats['hits'] + stats['misses'] == stats['hits'] + stats['misses']
-        assert stats['size'] <= cache.max_size
+        assert stats["hits"] + stats["misses"] == stats["hits"] + stats["misses"]
+        assert stats["size"] <= cache.max_size
 
 
 class TestDeadlockDetection:
@@ -524,10 +483,7 @@ class TestDeadlockDetection:
                 cache.stats()
 
         with ThreadPoolExecutor(max_workers=5) as executor:
-            futures = [
-                executor.submit(nested_operations, i)
-                for i in range(5)
-            ]
+            futures = [executor.submit(nested_operations, i) for i in range(5)]
 
             try:
                 for f in futures:
@@ -557,10 +513,7 @@ class TestConcurrencyStress:
                     cache.clear()
 
         with ThreadPoolExecutor(max_workers=50) as executor:
-            futures = [
-                executor.submit(stress_worker, i)
-                for i in range(50)
-            ]
+            futures = [executor.submit(stress_worker, i) for i in range(50)]
 
             for f in as_completed(futures):
                 f.result()
@@ -585,10 +538,7 @@ class TestConcurrencyStress:
             return operations
 
         with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [
-                executor.submit(sustained_worker, i)
-                for i in range(10)
-            ]
+            futures = [executor.submit(sustained_worker, i) for i in range(10)]
 
             results = [f.result() for f in as_completed(futures)]
 

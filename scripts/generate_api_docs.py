@@ -18,7 +18,7 @@ class APIDocGenerator:
     def __init__(self, src_dir: Path, output_dir: Path):
         """
         Initialize API doc generator.
-        
+
         Args:
             src_dir: Source code directory
             output_dir: Output directory for documentation
@@ -30,38 +30,38 @@ class APIDocGenerator:
     def extract_module_info(self, module_path: Path) -> Dict[str, Any]:
         """
         Extract information from a Python module.
-        
+
         Args:
             module_path: Path to Python module
-            
+
         Returns:
             Dictionary containing module information
         """
-        with open(module_path, 'r') as f:
+        with open(module_path, "r") as f:
             source = f.read()
 
         tree = ast.parse(source)
 
         module_info = {
-            'name': module_path.stem,
-            'path': str(module_path.relative_to(self.src_dir)),
-            'docstring': ast.get_docstring(tree),
-            'classes': [],
-            'functions': [],
-            'constants': []
+            "name": module_path.stem,
+            "path": str(module_path.relative_to(self.src_dir)),
+            "docstring": ast.get_docstring(tree),
+            "classes": [],
+            "functions": [],
+            "constants": [],
         }
 
         for node in ast.walk(tree):
             if isinstance(node, ast.ClassDef):
                 class_info = self.extract_class_info(node)
-                module_info['classes'].append(class_info)
+                module_info["classes"].append(class_info)
             elif isinstance(node, ast.FunctionDef) and not self.is_method(node, tree):
                 func_info = self.extract_function_info(node)
-                module_info['functions'].append(func_info)
+                module_info["functions"].append(func_info)
             elif isinstance(node, ast.Assign):
                 for target in node.targets:
                     if isinstance(target, ast.Name) and target.id.isupper():
-                        module_info['constants'].append(target.id)
+                        module_info["constants"].append(target.id)
 
         return module_info
 
@@ -76,39 +76,36 @@ class APIDocGenerator:
     def extract_class_info(self, node: ast.ClassDef) -> Dict[str, Any]:
         """Extract information from a class definition."""
         class_info = {
-            'name': node.name,
-            'docstring': ast.get_docstring(node),
-            'bases': [self.get_name(base) for base in node.bases],
-            'methods': []
+            "name": node.name,
+            "docstring": ast.get_docstring(node),
+            "bases": [self.get_name(base) for base in node.bases],
+            "methods": [],
         }
 
         for item in node.body:
             if isinstance(item, ast.FunctionDef):
                 method_info = self.extract_function_info(item)
-                class_info['methods'].append(method_info)
+                class_info["methods"].append(method_info)
 
         return class_info
 
     def extract_function_info(self, node: ast.FunctionDef) -> Dict[str, Any]:
         """Extract information from a function definition."""
         func_info = {
-            'name': node.name,
-            'docstring': ast.get_docstring(node),
-            'args': [],
-            'returns': None
+            "name": node.name,
+            "docstring": ast.get_docstring(node),
+            "args": [],
+            "returns": None,
         }
 
         # Extract arguments
         for arg in node.args.args:
-            arg_info = {
-                'name': arg.arg,
-                'annotation': self.get_annotation(arg.annotation)
-            }
-            func_info['args'].append(arg_info)
+            arg_info = {"name": arg.arg, "annotation": self.get_annotation(arg.annotation)}
+            func_info["args"].append(arg_info)
 
         # Extract return type
         if node.returns:
-            func_info['returns'] = self.get_annotation(node.returns)
+            func_info["returns"] = self.get_annotation(node.returns)
 
         return func_info
 
@@ -134,31 +131,31 @@ class APIDocGenerator:
         lines.append(f"# {module_info['name']}")
         lines.append("")
 
-        if module_info['docstring']:
-            lines.append(module_info['docstring'])
+        if module_info["docstring"]:
+            lines.append(module_info["docstring"])
             lines.append("")
 
         # Constants
-        if module_info['constants']:
+        if module_info["constants"]:
             lines.append("## Constants")
             lines.append("")
-            for const in module_info['constants']:
+            for const in module_info["constants"]:
                 lines.append(f"- `{const}`")
             lines.append("")
 
         # Functions
-        if module_info['functions']:
+        if module_info["functions"]:
             lines.append("## Functions")
             lines.append("")
-            for func in module_info['functions']:
+            for func in module_info["functions"]:
                 lines.extend(self.format_function(func))
                 lines.append("")
 
         # Classes
-        if module_info['classes']:
+        if module_info["classes"]:
             lines.append("## Classes")
             lines.append("")
-            for cls in module_info['classes']:
+            for cls in module_info["classes"]:
                 lines.extend(self.format_class(cls))
                 lines.append("")
 
@@ -169,17 +166,19 @@ class APIDocGenerator:
         lines = []
 
         # Function signature
-        args_str = ", ".join([
-            f"{arg['name']}: {arg['annotation']}" if arg['annotation'] else arg['name']
-            for arg in func['args']
-        ])
-        returns_str = f" -> {func['returns']}" if func['returns'] else ""
+        args_str = ", ".join(
+            [
+                f"{arg['name']}: {arg['annotation']}" if arg["annotation"] else arg["name"]
+                for arg in func["args"]
+            ]
+        )
+        returns_str = f" -> {func['returns']}" if func["returns"] else ""
 
         lines.append(f"### `{func['name']}({args_str}){returns_str}`")
         lines.append("")
 
-        if func['docstring']:
-            lines.append(func['docstring'])
+        if func["docstring"]:
+            lines.append(func["docstring"])
             lines.append("")
 
         return lines
@@ -189,20 +188,20 @@ class APIDocGenerator:
         lines = []
 
         # Class header
-        bases_str = f"({', '.join(cls['bases'])})" if cls['bases'] else ""
+        bases_str = f"({', '.join(cls['bases'])})" if cls["bases"] else ""
         lines.append(f"### `{cls['name']}{bases_str}`")
         lines.append("")
 
-        if cls['docstring']:
-            lines.append(cls['docstring'])
+        if cls["docstring"]:
+            lines.append(cls["docstring"])
             lines.append("")
 
         # Methods
-        if cls['methods']:
+        if cls["methods"]:
             lines.append("#### Methods")
             lines.append("")
-            for method in cls['methods']:
-                if method['name'].startswith('_') and method['name'] != '__init__':
+            for method in cls["methods"]:
+                if method["name"].startswith("_") and method["name"] != "__init__":
                     continue  # Skip private methods
                 lines.extend(self.format_method(method))
                 lines.append("")
@@ -214,18 +213,21 @@ class APIDocGenerator:
         lines = []
 
         # Method signature
-        args_str = ", ".join([
-            f"{arg['name']}: {arg['annotation']}" if arg['annotation'] else arg['name']
-            for arg in method['args'] if arg['name'] != 'self'
-        ])
-        returns_str = f" -> {method['returns']}" if method['returns'] else ""
+        args_str = ", ".join(
+            [
+                f"{arg['name']}: {arg['annotation']}" if arg["annotation"] else arg["name"]
+                for arg in method["args"]
+                if arg["name"] != "self"
+            ]
+        )
+        returns_str = f" -> {method['returns']}" if method["returns"] else ""
 
         lines.append(f"##### `{method['name']}({args_str}){returns_str}`")
         lines.append("")
 
-        if method['docstring']:
+        if method["docstring"]:
             # Indent docstring
-            for line in method['docstring'].split('\n'):
+            for line in method["docstring"].split("\n"):
                 lines.append(line)
             lines.append("")
 
@@ -251,16 +253,14 @@ class APIDocGenerator:
 
                 # Organize by package
                 rel_path = module_path.relative_to(self.src_dir)
-                package = rel_path.parent.name if rel_path.parent.name != '.' else 'root'
+                package = rel_path.parent.name if rel_path.parent.name != "." else "root"
 
                 if package not in module_docs:
                     module_docs[package] = []
 
-                module_docs[package].append({
-                    'name': module_info['name'],
-                    'content': doc_content,
-                    'path': str(rel_path)
-                })
+                module_docs[package].append(
+                    {"name": module_info["name"], "content": doc_content, "path": str(rel_path)}
+                )
             except Exception as e:
                 print(f"Error processing {module_path}: {e}", file=sys.stderr)
 
@@ -271,8 +271,8 @@ class APIDocGenerator:
 
             for doc in docs:
                 output_file = package_dir / f"{doc['name']}.md"
-                with open(output_file, 'w') as f:
-                    f.write(doc['content'])
+                with open(output_file, "w") as f:
+                    f.write(doc["content"])
                 print(f"Generated: {output_file}")
 
         # Generate index
@@ -290,13 +290,13 @@ class APIDocGenerator:
             lines.append(f"## {package.title()}")
             lines.append("")
 
-            for doc in sorted(module_docs[package], key=lambda x: x['name']):
+            for doc in sorted(module_docs[package], key=lambda x: x["name"]):
                 lines.append(f"- [{doc['name']}]({package}/{doc['name']}.md) - `{doc['path']}`")
 
             lines.append("")
 
         index_file = self.output_dir / "README.md"
-        with open(index_file, 'w') as f:
+        with open(index_file, "w") as f:
             f.write("\n".join(lines))
 
         print(f"Generated index: {index_file}")

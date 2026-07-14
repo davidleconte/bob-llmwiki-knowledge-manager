@@ -29,7 +29,7 @@ class SemanticCache(CacheInterface):
     the similarity search is the fallback for non-exact, semantically-close keys.
     Slower than exact cache but provides fuzzy matching. Supports versioning
     for cache evolution without breaking existing cached data.
-    
+
     Attributes:
         VERSION: Current cache version
         similarity_threshold: Minimum similarity score (0-1) for cache hit
@@ -43,12 +43,14 @@ class SemanticCache(CacheInterface):
 
     VERSION: str = "v1"  # Current cache version
 
-    def __init__(self,
-                 similarity_threshold: float = 0.85,
-                 max_size: int = 500,
-                 track_costs: bool = False,
-                 ttl_seconds: Optional[float] = None,
-                 clock: Callable[[], float] = time.time):
+    def __init__(
+        self,
+        similarity_threshold: float = 0.85,
+        max_size: int = 500,
+        track_costs: bool = False,
+        ttl_seconds: Optional[float] = None,
+        clock: Callable[[], float] = time.time,
+    ):
         """Initialize semantic cache.
 
         Args:
@@ -99,23 +101,26 @@ class SemanticCache(CacheInterface):
         if self.track_costs:
             try:
                 from src.monitoring.cost_tracker import get_cost_tracker
+
                 self._cost_tracker = get_cost_tracker()
             except ImportError:
                 self.track_costs = False
 
-        self._logger.info("semantic_cache_initialized",
-                        similarity_threshold=similarity_threshold,
-                        max_size=max_size,
-                        track_costs=track_costs,
-                        version=self.VERSION)
+        self._logger.info(
+            "semantic_cache_initialized",
+            similarity_threshold=similarity_threshold,
+            max_size=max_size,
+            track_costs=track_costs,
+            version=self.VERSION,
+        )
 
     def _make_versioned_key(self, key: str, version: Optional[str] = None) -> str:
         """Create versioned cache key.
-        
+
         Args:
             key: Base key (prompt)
             version: Version string (defaults to current VERSION)
-            
+
         Returns:
             Versioned key string
         """
@@ -125,39 +130,39 @@ class SemanticCache(CacheInterface):
 
     def _extract_base_key(self, versioned_key: str) -> str:
         """Extract base key from versioned key.
-        
+
         Args:
             versioned_key: Versioned key (format: "version:key")
-            
+
         Returns:
             Base key without version prefix
         """
-        if ':' in versioned_key:
-            return versioned_key.split(':', 1)[1]
+        if ":" in versioned_key:
+            return versioned_key.split(":", 1)[1]
         return versioned_key
 
     def _extract_version(self, versioned_key: str) -> str:
         """Extract version from versioned key.
-        
+
         Args:
             versioned_key: Versioned key (format: "version:key")
-            
+
         Returns:
             Version string
         """
-        if ':' in versioned_key:
-            return versioned_key.split(':', 1)[0]
+        if ":" in versioned_key:
+            return versioned_key.split(":", 1)[0]
         return self.VERSION
 
     def get(self, key: str, version: Optional[str] = None) -> Optional[str]:
         """Retrieve cached response for semantically similar key.
-        
+
         Thread-safe: Uses lock to protect shared state.
-        
+
         Args:
             key: The cache key (prompt)
             version: Optional version (defaults to current VERSION)
-            
+
         Returns:
             Cached response if similar match found, None otherwise
         """
@@ -173,8 +178,9 @@ class SemanticCache(CacheInterface):
             # unambiguous, so short-circuit before embedding + similarity.
             versioned_key = self._make_versioned_key(key, target_version)
             if versioned_key in self.responses:
-                return self._finalize_hit(versioned_key, 1.0, start_time,
-                                          target_version, vocab_changed=False)
+                return self._finalize_hit(
+                    versioned_key, 1.0, start_time, target_version, vocab_changed=False
+                )
 
             # Semantic fallback: embed the query and find the most similar key.
             # Check if query will cause vocabulary change
@@ -204,9 +210,13 @@ class SemanticCache(CacheInterface):
 
             # Check if best match exceeds threshold
             if best_match and best_similarity >= self.similarity_threshold:
-                return self._finalize_hit(best_match, best_similarity, start_time,
-                                          target_version,
-                                          vocab_changed=will_change_vocab)
+                return self._finalize_hit(
+                    best_match,
+                    best_similarity,
+                    start_time,
+                    target_version,
+                    vocab_changed=will_change_vocab,
+                )
 
             # Record miss
             latency_ms = (time.time() - start_time) * 1000
@@ -216,18 +226,26 @@ class SemanticCache(CacheInterface):
             self._metrics.record_cache_miss("L2")
 
             # Log miss
-            self._logger.debug("cache_miss",
-                             cache_level="L2",
-                             version=target_version,
-                             best_similarity=best_similarity,
-                             threshold=self.similarity_threshold,
-                             latency_ms=latency_ms,
-                             vocab_changed=will_change_vocab)
+            self._logger.debug(
+                "cache_miss",
+                cache_level="L2",
+                version=target_version,
+                best_similarity=best_similarity,
+                threshold=self.similarity_threshold,
+                latency_ms=latency_ms,
+                vocab_changed=will_change_vocab,
+            )
 
             return None
 
-    def _finalize_hit(self, matched_key: str, similarity: float, start_time: float,
-                      target_version: str, vocab_changed: bool) -> Optional[str]:
+    def _finalize_hit(
+        self,
+        matched_key: str,
+        similarity: float,
+        start_time: float,
+        target_version: str,
+        vocab_changed: bool,
+    ) -> Optional[str]:
         """Enforce TTL on a candidate match, then record the hit (or a miss).
 
         Shared by the exact-key fast-path and the similarity-search branch so the
@@ -240,15 +258,20 @@ class SemanticCache(CacheInterface):
         latency_ms = (time.time() - start_time) * 1000
 
         # Enforce TTL: a stale match is expired -> evict and miss.
-        if (self.ttl_seconds is not None and matched_key in self.entries and
-                (self._clock() - self.entries[matched_key].timestamp) > self.ttl_seconds):
+        if (
+            self.ttl_seconds is not None
+            and matched_key in self.entries
+            and (self._clock() - self.entries[matched_key].timestamp) > self.ttl_seconds
+        ):
             self._remove_entry(matched_key)
             self._stats.record_miss()
             self._metrics.record_cache_miss("L2")
-            self._logger.debug("cache_expired",
-                             cache_level="L2",
-                             version=target_version,
-                             ttl_seconds=self.ttl_seconds)
+            self._logger.debug(
+                "cache_expired",
+                cache_level="L2",
+                version=target_version,
+                ttl_seconds=self.ttl_seconds,
+            )
             return None
 
         # Update entry access stats
@@ -263,28 +286,35 @@ class SemanticCache(CacheInterface):
         self._metrics.record_cache_hit("L2", latency_ms)
 
         # Log hit
-        self._logger.debug("cache_hit",
-                         cache_level="L2",
-                         version=target_version,
-                         similarity=similarity,
-                         latency_ms=latency_ms,
-                         vocab_changed=vocab_changed)
+        self._logger.debug(
+            "cache_hit",
+            cache_level="L2",
+            version=target_version,
+            similarity=similarity,
+            latency_ms=latency_ms,
+            vocab_changed=vocab_changed,
+        )
 
         # Track cost savings if enabled
         if self.track_costs and self._cost_tracker and matched_key in self.entries:
             # Estimate tokens saved (from metadata if available)
-            tokens_saved = self.entries[matched_key].metadata.get('tokens', 0)
+            tokens_saved = self.entries[matched_key].metadata.get("tokens", 0)
             if tokens_saved > 0:
                 self._cost_tracker.record_cache_hit(tokens_saved)
 
         return self.responses[matched_key]
 
-    def set(self, key: str, value: str, version: Optional[str] = None,
-            metadata: Optional[Dict[str, Any]] = None) -> None:
+    def set(
+        self,
+        key: str,
+        value: str,
+        version: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> None:
         """Store response in cache with embedding.
-        
+
         Thread-safe: Uses lock to protect shared state.
-        
+
         Args:
             key: The cache key (prompt)
             value: The response to cache
@@ -317,28 +347,26 @@ class SemanticCache(CacheInterface):
                 metadata = {}
 
             # Add version to metadata
-            metadata['version'] = version or self.VERSION
+            metadata["version"] = version or self.VERSION
             self.metadata_store[versioned_key] = metadata
 
             # Create cache entry
-            entry = CacheEntry(
-                response=value,
-                metadata=metadata,
-                timestamp=self._clock()
-            )
+            entry = CacheEntry(response=value, metadata=metadata, timestamp=self._clock())
             self.entries[versioned_key] = entry
 
             # Update cache size metric
             self._metrics.update_cache_size("L2", len(self.embeddings))
 
             # Log cache set
-            self._logger.debug("cache_set",
-                             cache_level="L2",
-                             version=version or self.VERSION,
-                             is_update=is_update,
-                             cache_size=len(self.embeddings),
-                             vocab_size=len(self.embedding_generator.corpus),
-                             response_length=len(value))
+            self._logger.debug(
+                "cache_set",
+                cache_level="L2",
+                version=version or self.VERSION,
+                is_update=is_update,
+                cache_size=len(self.embeddings),
+                vocab_size=len(self.embedding_generator.corpus),
+                response_length=len(value),
+            )
 
     def _regenerate_all_embeddings(self) -> None:
         """No-op retained for API/call-site compatibility (see body).
@@ -380,8 +408,7 @@ class SemanticCache(CacheInterface):
             return
 
         # Find entry with oldest last_access time
-        lru_key = min(self.entries.keys(),
-                     key=lambda k: self.entries[k].last_access)
+        lru_key = min(self.entries.keys(), key=lambda k: self.entries[k].last_access)
 
         evicted_entry = self.entries[lru_key]
         evicted_version = self._extract_version(lru_key)
@@ -398,15 +425,17 @@ class SemanticCache(CacheInterface):
         self._metrics.record_cache_eviction("L2")
 
         # Log eviction
-        self._logger.debug("cache_eviction",
-                         cache_level="L2",
-                         version=evicted_version,
-                         cache_size=len(self.embeddings),
-                         access_count=evicted_entry.access_count)
+        self._logger.debug(
+            "cache_eviction",
+            cache_level="L2",
+            version=evicted_version,
+            cache_size=len(self.embeddings),
+            access_count=evicted_entry.access_count,
+        )
 
     def clear(self) -> None:
         """Clear all entries from cache.
-        
+
         Thread-safe: Uses lock to protect shared state.
         """
         with self._lock:
@@ -419,16 +448,14 @@ class SemanticCache(CacheInterface):
             self._similarity_scores.clear()
 
             # Log clear
-            self._logger.info("cache_cleared",
-                            cache_level="L2",
-                            entries_cleared=entries_cleared)
+            self._logger.info("cache_cleared", cache_level="L2", entries_cleared=entries_cleared)
             self.embedding_generator.clear_cache()
 
     def size(self) -> int:
         """Get number of entries in cache.
-        
+
         Thread-safe: Uses lock to protect shared state.
-        
+
         Returns:
             Number of cached entries
         """
@@ -437,7 +464,7 @@ class SemanticCache(CacheInterface):
 
     def hit_rate(self) -> float:
         """Calculate cache hit rate.
-        
+
         Returns:
             Hit rate as percentage (0-100)
         """
@@ -445,16 +472,17 @@ class SemanticCache(CacheInterface):
 
     def stats(self) -> Dict[str, Any]:
         """Get cache statistics.
-        
+
         Thread-safe: Uses lock to protect shared state.
-        
+
         Returns:
             Dictionary with cache statistics
         """
         with self._lock:
             avg_similarity = (
                 sum(self._similarity_scores) / len(self._similarity_scores)
-                if self._similarity_scores else 0.0
+                if self._similarity_scores
+                else 0.0
             )
 
             size = len(self.embeddings)
@@ -470,17 +498,18 @@ class SemanticCache(CacheInterface):
                 "version": self.VERSION,
             }
 
-    def find_similar(self, key: str, top_k: int = 5,
-                    version: Optional[str] = None) -> List[Tuple[str, float, str]]:
+    def find_similar(
+        self, key: str, top_k: int = 5, version: Optional[str] = None
+    ) -> List[Tuple[str, float, str]]:
         """Find top-k most similar cached prompts.
-        
+
         Thread-safe: Uses lock to protect shared state.
-        
+
         Args:
             key: Query prompt
             top_k: Number of results to return
             version: Optional version to search within
-            
+
         Returns:
             List of (prompt, similarity, response) tuples
         """
@@ -516,15 +545,17 @@ class SemanticCache(CacheInterface):
 
             return similarities[:top_k]
 
-    def get_with_similarity(self, key: str, version: Optional[str] = None) -> Optional[Tuple[str, float]]:
+    def get_with_similarity(
+        self, key: str, version: Optional[str] = None
+    ) -> Optional[Tuple[str, float]]:
         """Get cached response with similarity score.
-        
+
         Thread-safe: Uses lock to protect shared state.
-        
+
         Args:
             key: The cache key (prompt)
             version: Optional version
-            
+
         Returns:
             Tuple of (response, similarity_score) if found, None otherwise
         """
@@ -561,11 +592,11 @@ class SemanticCache(CacheInterface):
 
     def contains(self, key: str, version: Optional[str] = None) -> bool:
         """Check if semantically similar key exists in cache.
-        
+
         Args:
             key: The cache key
             version: Optional version
-            
+
         Returns:
             True if similar key exists, False otherwise
         """
@@ -574,7 +605,7 @@ class SemanticCache(CacheInterface):
 
     def update_threshold(self, new_threshold: float) -> None:
         """Update similarity threshold.
-        
+
         Args:
             new_threshold: New threshold value (0-1)
         """
@@ -585,11 +616,11 @@ class SemanticCache(CacheInterface):
 
     def get_entry(self, key: str, version: Optional[str] = None) -> Optional[CacheEntry]:
         """Get full cache entry.
-        
+
         Args:
             key: The cache key
             version: Optional version
-            
+
         Returns:
             CacheEntry if found, None otherwise
         """
@@ -598,7 +629,7 @@ class SemanticCache(CacheInterface):
 
     def average_similarity_score(self) -> float:
         """Get average similarity score for cache hits.
-        
+
         Returns:
             Average similarity score (0-1)
         """
@@ -608,15 +639,15 @@ class SemanticCache(CacheInterface):
 
     def migrate(self, from_version: str, to_version: str) -> int:
         """Migrate entries from one version to another.
-        
+
         Thread-safe: Uses lock to protect shared state.
         Creates new versioned entries for all entries matching from_version.
         Original entries are preserved.
-        
+
         Args:
             from_version: Source version
             to_version: Target version
-            
+
         Returns:
             Number of entries migrated
         """
@@ -636,21 +667,20 @@ class SemanticCache(CacheInterface):
             self.set(base_key, entry.response, to_version, entry.metadata.copy())
             migrated += 1
 
-        self._logger.info("cache_migration",
-                        from_version=from_version,
-                        to_version=to_version,
-                        migrated=migrated)
+        self._logger.info(
+            "cache_migration", from_version=from_version, to_version=to_version, migrated=migrated
+        )
 
         return migrated
 
     def cleanup_version(self, version: str) -> int:
         """Remove all entries for a specific version.
-        
+
         Thread-safe: Uses lock to protect shared state.
-        
+
         Args:
             version: Version to clean up
-            
+
         Returns:
             Number of entries removed
         """
@@ -675,9 +705,7 @@ class SemanticCache(CacheInterface):
                     del self.entries[versioned_key]
                 removed += 1
 
-            self._logger.info("version_cleanup",
-                            version=version,
-                            removed=removed)
+            self._logger.info("version_cleanup", version=version, removed=removed)
 
             return removed
 

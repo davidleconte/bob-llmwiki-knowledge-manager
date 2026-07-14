@@ -40,7 +40,9 @@ class TestTokenCounterPerformance:
         assert result > 0
 
         stats = benchmark.stats
-        assert stats.stats.mean < 0.010, f"Small text counting too slow: {stats.stats.mean*1000:.2f}ms"
+        assert stats.stats.mean < 0.010, (
+            f"Small text counting too slow: {stats.stats.mean * 1000:.2f}ms"
+        )
 
     def test_count_medium_text(self, benchmark, counter, medium_text):
         """Benchmark counting medium text (~1000 tokens) - CRITICAL TEST."""
@@ -50,7 +52,9 @@ class TestTokenCounterPerformance:
 
         stats = benchmark.stats
         # Target: <10ms per 1000 tokens
-        assert stats.stats.mean < 0.010, f"Medium text counting too slow: {stats.stats.mean*1000:.2f}ms"
+        assert stats.stats.mean < 0.010, (
+            f"Medium text counting too slow: {stats.stats.mean * 1000:.2f}ms"
+        )
 
     def test_count_large_text(self, benchmark, counter, large_text):
         """Benchmark counting large text (~10000 tokens)."""
@@ -60,7 +64,9 @@ class TestTokenCounterPerformance:
 
         stats = benchmark.stats
         # Should scale linearly: ~100ms for 10K tokens
-        assert stats.stats.mean < 0.100, f"Large text counting too slow: {stats.stats.mean*1000:.2f}ms"
+        assert stats.stats.mean < 0.100, (
+            f"Large text counting too slow: {stats.stats.mean * 1000:.2f}ms"
+        )
 
     def test_count_empty_text(self, benchmark, counter):
         """Benchmark counting empty text."""
@@ -69,7 +75,9 @@ class TestTokenCounterPerformance:
         assert result == 0
 
         stats = benchmark.stats
-        assert stats.stats.mean < 0.001, f"Empty text counting too slow: {stats.stats.mean*1000:.2f}ms"
+        assert stats.stats.mean < 0.001, (
+            f"Empty text counting too slow: {stats.stats.mean * 1000:.2f}ms"
+        )
 
     def test_count_repeated_text(self, benchmark, counter):
         """Benchmark counting same text multiple times (tests caching potential)."""
@@ -84,7 +92,7 @@ class TestTokenCounterPerformance:
         assert result > 0
 
         stats = benchmark.stats
-        print(f"\nRepeated text counting: {stats.stats.mean*1000:.2f}ms")
+        print(f"\nRepeated text counting: {stats.stats.mean * 1000:.2f}ms")
         print("Note: Could be optimized with caching")
 
     def test_batch_counting(self, benchmark, counter):
@@ -97,7 +105,7 @@ class TestTokenCounterPerformance:
 
         stats = benchmark.stats
         # Should be faster than 100 individual counts
-        assert stats.stats.mean < 0.100, f"Batch counting too slow: {stats.stats.mean*1000:.2f}ms"
+        assert stats.stats.mean < 0.100, f"Batch counting too slow: {stats.stats.mean * 1000:.2f}ms"
 
         # Calculate per-text time
         per_text_ms = (stats.stats.mean * 1000) / 100
@@ -117,7 +125,9 @@ class TestTokenCounterPerformance:
         assert result > 0
 
         stats = benchmark.stats
-        assert stats.stats.mean < 0.020, f"Message counting too slow: {stats.stats.mean*1000:.2f}ms"
+        assert stats.stats.mean < 0.020, (
+            f"Message counting too slow: {stats.stats.mean * 1000:.2f}ms"
+        )
 
 
 @pytest.mark.xfail(
@@ -132,10 +142,7 @@ class TestPromptOptimizerPerformance:
     @pytest.fixture
     def optimizer(self):
         """Create prompt optimizer."""
-        return PromptOptimizer(
-            max_tokens=4096,
-            target_reduction=0.3
-        )
+        return PromptOptimizer(max_tokens=4096, target_reduction=0.3)
 
     @pytest.fixture
     def simple_prompt(self):
@@ -145,32 +152,37 @@ class TestPromptOptimizerPerformance:
     @pytest.fixture
     def complex_prompt(self):
         """Complex prompt with more content."""
-        return """
+        return (
+            """
         This is a more complex prompt that contains multiple sentences.
         It has various types of content including repeated information.
         The prompt also includes some redundant redundant phrases.
         We want to optimize this to reduce token count while maintaining meaning.
-        """ * 20
+        """
+            * 20
+        )
 
     def test_optimize_simple_prompt(self, benchmark, optimizer, simple_prompt):
         """Benchmark optimizing simple prompt."""
         result = benchmark(optimizer.optimize, simple_prompt)
 
-        assert result['optimized_tokens'] < result['original_tokens']
+        assert result["optimized_tokens"] < result["original_tokens"]
 
         stats = benchmark.stats
         # Target: <50ms per optimization
-        assert stats.stats.mean < 0.050, f"Simple optimization too slow: {stats.stats.mean*1000:.2f}ms"
+        assert stats.stats.mean < 0.050, (
+            f"Simple optimization too slow: {stats.stats.mean * 1000:.2f}ms"
+        )
 
     def test_optimize_complex_prompt(self, benchmark, optimizer, complex_prompt):
         """Benchmark optimizing complex prompt - CRITICAL TEST."""
         result = benchmark(optimizer.optimize, complex_prompt)
 
-        assert result['optimized_tokens'] < result['original_tokens']
+        assert result["optimized_tokens"] < result["original_tokens"]
 
         stats = benchmark.stats
         # Target: <50ms per optimization
-        print(f"\nComplex optimization: {stats.stats.mean*1000:.2f}ms")
+        print(f"\nComplex optimization: {stats.stats.mean * 1000:.2f}ms")
         if stats.stats.mean >= 0.050:
             print("⚠️  Exceeds 50ms target - optimization needed")
 
@@ -182,7 +194,9 @@ class TestPromptOptimizerPerformance:
 
         # Should return quickly for already-optimal prompts
         stats = benchmark.stats
-        assert stats.stats.mean < 0.020, f"Optimal prompt check too slow: {stats.stats.mean*1000:.2f}ms"
+        assert stats.stats.mean < 0.020, (
+            f"Optimal prompt check too slow: {stats.stats.mean * 1000:.2f}ms"
+        )
 
     def test_optimize_with_truncation(self, benchmark, optimizer):
         """Benchmark optimization with truncation."""
@@ -191,10 +205,10 @@ class TestPromptOptimizerPerformance:
 
         result = benchmark(optimizer.optimize, prompt)
 
-        assert result['optimized_tokens'] <= optimizer.max_tokens
+        assert result["optimized_tokens"] <= optimizer.max_tokens
 
         stats = benchmark.stats
-        assert stats.stats.mean < 0.100, f"Truncation too slow: {stats.stats.mean*1000:.2f}ms"
+        assert stats.stats.mean < 0.100, f"Truncation too slow: {stats.stats.mean * 1000:.2f}ms"
 
 
 @pytest.mark.benchmark(group="optimizer-end-to-end")
@@ -225,7 +239,7 @@ class TestEndToEndPerformance:
             # Optimize if needed
             if tokens > 1000:
                 result = optimizer.optimize(prompt)
-                optimized = result['optimized_text']
+                optimized = result["optimized_text"]
             else:
                 optimized = prompt
 
@@ -240,7 +254,7 @@ class TestEndToEndPerformance:
 
         stats = benchmark.stats
         # Target: <100ms for full pipeline (p95)
-        print(f"\nFull pipeline: {stats.stats.mean*1000:.2f}ms")
+        print(f"\nFull pipeline: {stats.stats.mean * 1000:.2f}ms")
         if stats.stats.mean >= 0.100:
             print("⚠️  Exceeds 100ms target")
 
@@ -261,7 +275,9 @@ class TestEndToEndPerformance:
 
         stats = benchmark.stats
         # Cache hit should be very fast
-        assert stats.stats.mean < 0.001, f"Cache hit pipeline too slow: {stats.stats.mean*1000:.2f}ms"
+        assert stats.stats.mean < 0.001, (
+            f"Cache hit pipeline too slow: {stats.stats.mean * 1000:.2f}ms"
+        )
 
     def test_concurrent_optimization(self, benchmark):
         """Benchmark concurrent optimization requests."""
@@ -282,7 +298,7 @@ class TestEndToEndPerformance:
         assert len(results) == 10
 
         stats = benchmark.stats
-        print(f"\nConcurrent optimization (10 prompts, 4 workers): {stats.stats.mean*1000:.2f}ms")
+        print(f"\nConcurrent optimization (10 prompts, 4 workers): {stats.stats.mean * 1000:.2f}ms")
 
 
 @pytest.mark.benchmark(group="optimizer-scalability")
@@ -319,9 +335,10 @@ class TestOptimizerScalability:
 
             # Measure lookup
             import time
+
             start = time.time()
-            result = cache.get(f"key_{size//2}")
+            result = cache.get(f"key_{size // 2}")
             elapsed = time.time() - start
 
-            print(f"\nCache size {size}: {elapsed*1000:.2f}ms lookup")
+            print(f"\nCache size {size}: {elapsed * 1000:.2f}ms lookup")
             assert result is not None

@@ -33,10 +33,7 @@ class TestMultiLevelCache:
     def test_initialization_custom_params(self):
         """Test cache initialization with custom parameters."""
         cache = MultiLevelCache(
-            l1_max_size=500,
-            l2_max_size=250,
-            similarity_threshold=0.90,
-            promote_l2_hits=False
+            l1_max_size=500, l2_max_size=250, similarity_threshold=0.90, promote_l2_hits=False
         )
 
         assert cache.l1_cache.max_size == 500

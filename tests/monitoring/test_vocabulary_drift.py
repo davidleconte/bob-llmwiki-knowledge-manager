@@ -25,7 +25,7 @@ class TestVocabularySnapshot:
             vocabulary=vocab,
             vocabulary_size=len(vocab),
             corpus_size=10,
-            top_terms=["word1", "word2"]
+            top_terms=["word1", "word2"],
         )
 
         assert snapshot.vocabulary_size == 3
@@ -40,7 +40,7 @@ class TestVocabularySnapshot:
             vocabulary=vocab,
             vocabulary_size=2,
             corpus_size=5,
-            top_terms=["word1", "word2"]
+            top_terms=["word1", "word2"],
         )
 
         data = snapshot.to_dict()
@@ -57,11 +57,7 @@ class TestDriftMetrics:
     def test_create_drift_metrics(self):
         """Test creating drift metrics."""
         metrics = DriftMetrics(
-            new_terms=5,
-            removed_terms=3,
-            total_change=8,
-            change_rate=0.2,
-            drift_score=0.25
+            new_terms=5, removed_terms=3, total_change=8, change_rate=0.2, drift_score=0.25
         )
 
         assert metrics.new_terms == 5
@@ -73,11 +69,7 @@ class TestDriftMetrics:
     def test_metrics_to_dict(self):
         """Test converting metrics to dictionary."""
         metrics = DriftMetrics(
-            new_terms=5,
-            removed_terms=3,
-            total_change=8,
-            change_rate=0.2,
-            drift_score=0.25
+            new_terms=5, removed_terms=3, total_change=8, change_rate=0.2, drift_score=0.25
         )
 
         data = metrics.to_dict()
@@ -95,9 +87,7 @@ class TestVocabularyDriftMonitor:
     def test_create_monitor(self):
         """Test creating drift monitor."""
         monitor = VocabularyDriftMonitor(
-            drift_threshold=0.3,
-            snapshot_interval=60.0,
-            max_snapshots=50
+            drift_threshold=0.3, snapshot_interval=60.0, max_snapshots=50
         )
 
         assert monitor.drift_threshold == 0.3
@@ -163,16 +153,10 @@ class TestVocabularyDriftMonitor:
 
         vocab = {"word1", "word2", "word3"}
         old_snapshot = VocabularySnapshot(
-            timestamp=100.0,
-            vocabulary=vocab.copy(),
-            vocabulary_size=3,
-            corpus_size=10
+            timestamp=100.0, vocabulary=vocab.copy(), vocabulary_size=3, corpus_size=10
         )
         new_snapshot = VocabularySnapshot(
-            timestamp=200.0,
-            vocabulary=vocab.copy(),
-            vocabulary_size=3,
-            corpus_size=10
+            timestamp=200.0, vocabulary=vocab.copy(), vocabulary_size=3, corpus_size=10
         )
 
         metrics = monitor.calculate_drift(old_snapshot, new_snapshot)
@@ -190,16 +174,10 @@ class TestVocabularyDriftMonitor:
         new_vocab = {"word1", "word2", "word4", "word5"}  # word3 removed, word4/5 added
 
         old_snapshot = VocabularySnapshot(
-            timestamp=100.0,
-            vocabulary=old_vocab,
-            vocabulary_size=3,
-            corpus_size=10
+            timestamp=100.0, vocabulary=old_vocab, vocabulary_size=3, corpus_size=10
         )
         new_snapshot = VocabularySnapshot(
-            timestamp=200.0,
-            vocabulary=new_vocab,
-            vocabulary_size=4,
-            corpus_size=12
+            timestamp=200.0, vocabulary=new_vocab, vocabulary_size=4, corpus_size=12
         )
 
         metrics = monitor.calculate_drift(old_snapshot, new_snapshot)
@@ -224,10 +202,7 @@ class TestVocabularyDriftMonitor:
 
     def test_check_drift_below_threshold(self):
         """Test drift check below threshold."""
-        monitor = VocabularyDriftMonitor(
-            drift_threshold=0.5,
-            snapshot_interval=0.1
-        )
+        monitor = VocabularyDriftMonitor(drift_threshold=0.5, snapshot_interval=0.1)
 
         # First snapshot
         mock_gen = Mock()
@@ -249,10 +224,7 @@ class TestVocabularyDriftMonitor:
 
     def test_check_drift_above_threshold(self):
         """Test drift check above threshold."""
-        monitor = VocabularyDriftMonitor(
-            drift_threshold=0.3,
-            snapshot_interval=0.1
-        )
+        monitor = VocabularyDriftMonitor(drift_threshold=0.3, snapshot_interval=0.1)
 
         # First snapshot
         mock_gen = Mock()
@@ -264,9 +236,7 @@ class TestVocabularyDriftMonitor:
         time.sleep(0.15)
 
         # Second snapshot with large change
-        mock_gen.vectorizer.vocabulary_ = {
-            "word3": 0, "word4": 1, "word5": 2, "word6": 3
-        }
+        mock_gen.vectorizer.vocabulary_ = {"word3": 0, "word4": 1, "word5": 2, "word6": 3}
         mock_gen.corpus = ["doc3", "doc4", "doc5", "doc6"]
 
         result = monitor.check_drift(mock_gen)
@@ -277,10 +247,7 @@ class TestVocabularyDriftMonitor:
 
     def test_drift_event_recording(self):
         """Test that drift events are recorded."""
-        monitor = VocabularyDriftMonitor(
-            drift_threshold=0.3,
-            snapshot_interval=0.1
-        )
+        monitor = VocabularyDriftMonitor(drift_threshold=0.3, snapshot_interval=0.1)
 
         # Create significant drift
         mock_gen = Mock()
@@ -357,10 +324,7 @@ class TestVocabularyDriftMonitor:
 
     def test_max_snapshots_limit(self):
         """Test that max snapshots limit is enforced."""
-        monitor = VocabularyDriftMonitor(
-            max_snapshots=5,
-            snapshot_interval=0.01
-        )
+        monitor = VocabularyDriftMonitor(max_snapshots=5, snapshot_interval=0.01)
 
         mock_gen = Mock()
         mock_gen.corpus = ["doc1"]
@@ -390,9 +354,7 @@ class TestGlobalDriftMonitor:
     def test_configure_drift_monitor(self):
         """Test configuring global drift monitor."""
         monitor = configure_drift_monitor(
-            drift_threshold=0.4,
-            snapshot_interval=120.0,
-            max_snapshots=200
+            drift_threshold=0.4, snapshot_interval=120.0, max_snapshots=200
         )
 
         assert monitor.drift_threshold == 0.4
@@ -411,16 +373,13 @@ class TestDriftScoreCalculation:
         new_vocab = {"word1", "word2", "word5", "word6"}  # 50% change
 
         old_snapshot = VocabularySnapshot(
-            timestamp=100.0,
-            vocabulary=old_vocab,
-            vocabulary_size=4,
-            corpus_size=10
+            timestamp=100.0, vocabulary=old_vocab, vocabulary_size=4, corpus_size=10
         )
         new_snapshot = VocabularySnapshot(
             timestamp=200.0,
             vocabulary=new_vocab,
             vocabulary_size=4,
-            corpus_size=10  # No corpus change
+            corpus_size=10,  # No corpus change
         )
 
         metrics = monitor.calculate_drift(old_snapshot, new_snapshot)
@@ -439,16 +398,13 @@ class TestDriftScoreCalculation:
         new_vocab = {"word1", "word2", "word3"}  # Small vocab change
 
         old_snapshot = VocabularySnapshot(
-            timestamp=100.0,
-            vocabulary=old_vocab,
-            vocabulary_size=2,
-            corpus_size=10
+            timestamp=100.0, vocabulary=old_vocab, vocabulary_size=2, corpus_size=10
         )
         new_snapshot = VocabularySnapshot(
             timestamp=200.0,
             vocabulary=new_vocab,
             vocabulary_size=3,
-            corpus_size=20  # 100% corpus growth
+            corpus_size=20,  # 100% corpus growth
         )
 
         metrics = monitor.calculate_drift(old_snapshot, new_snapshot)

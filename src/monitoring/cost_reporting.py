@@ -14,7 +14,7 @@ from src.monitoring.cost_tracker import get_cost_tracker
 def generate_cost_summary() -> Dict[str, Any]:
     """
     Generate comprehensive cost summary.
-    
+
     Returns:
         Dictionary with cost summary data
     """
@@ -25,17 +25,17 @@ def generate_cost_summary() -> Dict[str, Any]:
 def generate_cost_dashboard() -> str:
     """
     Generate ASCII dashboard for cost tracking.
-    
+
     Returns:
         Formatted dashboard string
     """
     tracker = get_cost_tracker()
     summary = tracker.get_summary()
 
-    budget = summary['budget']
-    costs = summary['costs']
-    rate = summary['rate']
-    alerts = summary['alerts']
+    budget = summary["budget"]
+    costs = summary["costs"]
+    rate = summary["rate"]
+    alerts = summary["alerts"]
 
     # Build dashboard
     lines = []
@@ -56,11 +56,11 @@ def generate_cost_dashboard() -> str:
 
     # Budget bar
     bar_width = 50
-    used_width = int((budget['percent_used'] / 100) * bar_width)
+    used_width = int((budget["percent_used"] / 100) * bar_width)
     bar = "█" * used_width + "░" * (bar_width - used_width)
     lines.append(f"  [{bar}]")
 
-    if budget['is_over_budget']:
+    if budget["is_over_budget"]:
         lines.append("  ⚠️  WARNING: OVER BUDGET!")
     lines.append("")
 
@@ -77,16 +77,18 @@ def generate_cost_dashboard() -> str:
     # Cost breakdown
     lines.append("COST BY OPERATION".center(70))
     lines.append("-" * 70)
-    for op, cost in sorted(costs['cost_by_operation'].items(), key=lambda x: x[1], reverse=True):
-        tokens = costs['tokens_by_operation'].get(op, 0)
+    for op, cost in sorted(costs["cost_by_operation"].items(), key=lambda x: x[1], reverse=True):
+        tokens = costs["tokens_by_operation"].get(op, 0)
         lines.append(f"  {op:<25} {cost:>10.4f} BC  ({tokens:>8,} tokens)")
     lines.append("")
 
     # Savings breakdown
-    if costs['savings_by_source']:
+    if costs["savings_by_source"]:
         lines.append("SAVINGS BY SOURCE".center(70))
         lines.append("-" * 70)
-        for source, savings in sorted(costs['savings_by_source'].items(), key=lambda x: x[1], reverse=True):
+        for source, savings in sorted(
+            costs["savings_by_source"].items(), key=lambda x: x[1], reverse=True
+        ):
             lines.append(f"  {source:<25} {savings:>10.4f} BC")
         lines.append("")
 
@@ -103,7 +105,7 @@ def generate_cost_dashboard() -> str:
         lines.append("ACTIVE ALERTS".center(70))
         lines.append("-" * 70)
         for alert in alerts:
-            triggered_at = alert['triggered_at'] or 'N/A'
+            triggered_at = alert["triggered_at"] or "N/A"
             lines.append(f"  ⚠️  {alert['threshold_percent']}% threshold exceeded at {triggered_at}")
         lines.append("")
 
@@ -116,16 +118,15 @@ def generate_cost_dashboard() -> str:
 
 
 def generate_cost_report(
-    include_breakdown: bool = True,
-    include_trends: bool = False
+    include_breakdown: bool = True, include_trends: bool = False
 ) -> Dict[str, Any]:
     """
     Generate detailed cost report.
-    
+
     Args:
         include_breakdown: Include cost breakdown by operation
         include_trends: Include trend analysis (future feature)
-        
+
     Returns:
         Dictionary with report data
     """
@@ -133,39 +134,34 @@ def generate_cost_report(
     summary = tracker.get_summary()
 
     report = {
-        "timestamp": summary['timestamp'],
+        "timestamp": summary["timestamp"],
         "summary": {
-            "total_spent": summary['budget']['spent_bobcoins'],
-            "total_saved": summary['budget']['saved_bobcoins'],
-            "net_cost": summary['budget']['net_spent_bobcoins'],
-            "roi_percent": summary['costs']['roi_percent'],
-            "operations_count": summary['costs']['operations_count']
-        }
+            "total_spent": summary["budget"]["spent_bobcoins"],
+            "total_saved": summary["budget"]["saved_bobcoins"],
+            "net_cost": summary["budget"]["net_spent_bobcoins"],
+            "roi_percent": summary["costs"]["roi_percent"],
+            "operations_count": summary["costs"]["operations_count"],
+        },
     }
 
     if include_breakdown:
         report["breakdown"] = {
-            "by_operation": summary['costs']['cost_by_operation'],
-            "by_tokens": summary['costs']['tokens_by_operation'],
-            "savings_by_source": summary['costs']['savings_by_source']
+            "by_operation": summary["costs"]["cost_by_operation"],
+            "by_tokens": summary["costs"]["tokens_by_operation"],
+            "savings_by_source": summary["costs"]["savings_by_source"],
         }
 
     if include_trends:
         # Future: Add trend analysis
-        report["trends"] = {
-            "note": "Trend analysis not yet implemented"
-        }
+        report["trends"] = {"note": "Trend analysis not yet implemented"}
 
     return report
 
 
-def export_cost_data(
-    filepath: str,
-    format: str = "json"
-) -> None:
+def export_cost_data(filepath: str, format: str = "json") -> None:
     """
     Export cost data to file.
-    
+
     Args:
         filepath: Path to export file
         format: Export format (json, csv)
@@ -174,7 +170,7 @@ def export_cost_data(
     summary = tracker.get_summary()
 
     if format == "json":
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             json.dump(summary, f, indent=2)
     elif format == "csv":
         # Future: Implement CSV export
@@ -186,7 +182,7 @@ def export_cost_data(
 def get_cost_alerts() -> List[Dict[str, Any]]:
     """
     Get list of active cost alerts.
-    
+
     Returns:
         List of alert dictionaries
     """
@@ -197,14 +193,14 @@ def get_cost_alerts() -> List[Dict[str, Any]]:
 def check_budget_health() -> Dict[str, Any]:
     """
     Check budget health status.
-    
+
     Returns:
         Dictionary with health status
     """
     tracker = get_cost_tracker()
     budget_status = tracker.get_budget_status()
 
-    percent_used = budget_status['percent_used']
+    percent_used = budget_status["percent_used"]
 
     if percent_used >= 90:
         status = "critical"
@@ -223,22 +219,19 @@ def check_budget_health() -> Dict[str, Any]:
         "status": status,
         "message": message,
         "percent_used": percent_used,
-        "remaining_bobcoins": budget_status['remaining_bobcoins'],
-        "is_over_budget": budget_status['is_over_budget']
+        "remaining_bobcoins": budget_status["remaining_bobcoins"],
+        "is_over_budget": budget_status["is_over_budget"],
     }
 
 
-def calculate_projected_costs(
-    operations_per_hour: int,
-    hours: int = 24
-) -> Dict[str, Any]:
+def calculate_projected_costs(operations_per_hour: int, hours: int = 24) -> Dict[str, Any]:
     """
     Calculate projected costs based on current rate.
-    
+
     Args:
         operations_per_hour: Expected operations per hour
         hours: Number of hours to project
-        
+
     Returns:
         Dictionary with projections
     """
@@ -246,7 +239,7 @@ def calculate_projected_costs(
 
     # Get average cost per operation
     cost_metrics = tracker.get_cost_metrics()
-    avg_cost = cost_metrics['avg_cost_per_operation']
+    avg_cost = cost_metrics["avg_cost_per_operation"]
 
     # Calculate projections
     total_operations = operations_per_hour * hours
@@ -254,7 +247,7 @@ def calculate_projected_costs(
 
     # Get current budget status
     budget_status = tracker.get_budget_status()
-    remaining = budget_status['remaining_bobcoins']
+    remaining = budget_status["remaining_bobcoins"]
 
     return {
         "operations_per_hour": operations_per_hour,
@@ -264,17 +257,17 @@ def calculate_projected_costs(
         "projected_cost_bobcoins": round(projected_cost, 4),
         "current_remaining_bobcoins": remaining,
         "will_exceed_budget": projected_cost > remaining,
-        "budget_shortfall": max(0, projected_cost - remaining)
+        "budget_shortfall": max(0, projected_cost - remaining),
     }
 
 
 def get_top_cost_operations(limit: int = 5) -> List[Dict[str, Any]]:
     """
     Get top cost operations.
-    
+
     Args:
         limit: Number of top operations to return
-        
+
     Returns:
         List of operation dictionaries sorted by cost
     """
@@ -282,16 +275,12 @@ def get_top_cost_operations(limit: int = 5) -> List[Dict[str, Any]]:
     cost_metrics = tracker.get_cost_metrics()
 
     operations = []
-    for op, cost in cost_metrics['cost_by_operation'].items():
-        tokens = cost_metrics['tokens_by_operation'].get(op, 0)
-        operations.append({
-            "operation": op,
-            "cost_bobcoins": cost,
-            "tokens": tokens
-        })
+    for op, cost in cost_metrics["cost_by_operation"].items():
+        tokens = cost_metrics["tokens_by_operation"].get(op, 0)
+        operations.append({"operation": op, "cost_bobcoins": cost, "tokens": tokens})
 
     # Sort by cost descending
-    operations.sort(key=lambda x: x['cost_bobcoins'], reverse=True)
+    operations.sort(key=lambda x: x["cost_bobcoins"], reverse=True)
 
     return operations[:limit]
 
@@ -299,7 +288,7 @@ def get_top_cost_operations(limit: int = 5) -> List[Dict[str, Any]]:
 def get_savings_summary() -> Dict[str, Any]:
     """
     Get summary of token savings.
-    
+
     Returns:
         Dictionary with savings summary
     """
@@ -307,10 +296,10 @@ def get_savings_summary() -> Dict[str, Any]:
     cost_metrics = tracker.get_cost_metrics()
 
     return {
-        "total_tokens_saved": cost_metrics['total_tokens_saved'],
-        "total_bobcoins_saved": cost_metrics['total_bobcoins_saved'],
-        "roi_percent": cost_metrics['roi_percent'],
-        "savings_by_source": cost_metrics['savings_by_source']
+        "total_tokens_saved": cost_metrics["total_tokens_saved"],
+        "total_bobcoins_saved": cost_metrics["total_bobcoins_saved"],
+        "roi_percent": cost_metrics["roi_percent"],
+        "savings_by_source": cost_metrics["savings_by_source"],
     }
 
 

@@ -23,6 +23,7 @@ DEFAULT_BUDGET_BOBCOINS = pricing.DEFAULT_BUDGET_BOBCOINS
 @dataclass
 class CostMetrics:
     """Metrics for cost tracking."""
+
     total_tokens_used: int = 0
     total_tokens_saved: int = 0
     total_bobcoins_spent: float = 0.0
@@ -37,19 +38,16 @@ class CostMetrics:
     savings_by_source: Dict[str, float] = field(default_factory=lambda: defaultdict(float))
 
     def record_cost(
-        self,
-        operation: str,
-        tokens_used: int,
-        tokens_saved: int = 0
+        self, operation: str, tokens_used: int, tokens_saved: int = 0
     ) -> Tuple[float, float]:
         """
         Record cost for an operation.
-        
+
         Args:
             operation: Operation type (e.g., "token_counting", "optimization", "cache_hit")
             tokens_used: Number of tokens used
             tokens_saved: Number of tokens saved (if applicable)
-            
+
         Returns:
             Tuple of (bobcoins_spent, bobcoins_saved)
         """
@@ -97,19 +95,16 @@ class CostMetrics:
             "roi_percent": round(self.get_roi_percent(), 2),
             "operations_count": self.operations_count,
             "avg_cost_per_operation": round(self.get_average_cost_per_operation(), 4),
-            "cost_by_operation": {
-                k: round(v, 4) for k, v in self.cost_by_operation.items()
-            },
+            "cost_by_operation": {k: round(v, 4) for k, v in self.cost_by_operation.items()},
             "tokens_by_operation": dict(self.tokens_by_operation),
-            "savings_by_source": {
-                k: round(v, 4) for k, v in self.savings_by_source.items()
-            }
+            "savings_by_source": {k: round(v, 4) for k, v in self.savings_by_source.items()},
         }
 
 
 @dataclass
 class BudgetAlert:
     """Budget alert configuration and state."""
+
     threshold_percent: float
     triggered: bool = False
     triggered_at: Optional[datetime] = None
@@ -117,11 +112,11 @@ class BudgetAlert:
     def check(self, spent: float, budget: float) -> bool:
         """
         Check if alert should trigger.
-        
+
         Args:
             spent: Amount spent
             budget: Total budget
-            
+
         Returns:
             True if alert should trigger
         """
@@ -146,7 +141,7 @@ class BudgetAlert:
 class CostTracker:
     """
     Cost tracking system for Bobcoin monitoring and budget management.
-    
+
     Features:
     - Real-time cost tracking per operation
     - Token-to-Bobcoin conversion
@@ -154,7 +149,7 @@ class CostTracker:
     - ROI calculation
     - Cost breakdown by operation type
     - Savings tracking by source
-    
+
     Example:
         >>> tracker = CostTracker(budget_bobcoins=100.0)
         >>> tracker.record_token_counting(1500)  # 1.5 Bobcoins
@@ -166,11 +161,11 @@ class CostTracker:
     def __init__(
         self,
         budget_bobcoins: float = DEFAULT_BUDGET_BOBCOINS,
-        alert_thresholds: Optional[List[float]] = None
+        alert_thresholds: Optional[List[float]] = None,
     ):
         """
         Initialize cost tracker.
-        
+
         Args:
             budget_bobcoins: Total budget in Bobcoins
             alert_thresholds: List of alert thresholds (e.g., [50, 75, 90])
@@ -196,10 +191,10 @@ class CostTracker:
     def record_token_counting(self, tokens: int) -> float:
         """
         Record token counting operation cost.
-        
+
         Args:
             tokens: Number of tokens counted
-            
+
         Returns:
             Bobcoins spent
         """
@@ -210,27 +205,21 @@ class CostTracker:
             return spent
 
     def record_optimization(
-        self,
-        original_tokens: int,
-        optimized_tokens: int
+        self, original_tokens: int, optimized_tokens: int
     ) -> Tuple[float, float]:
         """
         Record optimization operation cost and savings.
-        
+
         Args:
             original_tokens: Original token count
             optimized_tokens: Optimized token count
-            
+
         Returns:
             Tuple of (bobcoins_spent, bobcoins_saved)
         """
         with self._lock:
             tokens_saved = original_tokens - optimized_tokens
-            spent, saved = self.metrics.record_cost(
-                "optimization",
-                optimized_tokens,
-                tokens_saved
-            )
+            spent, saved = self.metrics.record_cost("optimization", optimized_tokens, tokens_saved)
             self.recent_costs.append(("optimization", spent, time.time()))
             self._check_alerts()
             return spent, saved
@@ -238,10 +227,10 @@ class CostTracker:
     def record_cache_hit(self, tokens_saved: int) -> float:
         """
         Record cache hit (pure savings, no cost).
-        
+
         Args:
             tokens_saved: Number of tokens saved by cache hit
-            
+
         Returns:
             Bobcoins saved
         """
@@ -252,10 +241,10 @@ class CostTracker:
     def record_cache_miss(self, tokens_used: int) -> float:
         """
         Record cache miss (cost with no savings).
-        
+
         Args:
             tokens_used: Number of tokens used
-            
+
         Returns:
             Bobcoins spent
         """
@@ -265,55 +254,40 @@ class CostTracker:
             self._check_alerts()
             return spent
 
-    def record_truncation(
-        self,
-        original_tokens: int,
-        truncated_tokens: int
-    ) -> Tuple[float, float]:
+    def record_truncation(self, original_tokens: int, truncated_tokens: int) -> Tuple[float, float]:
         """
         Record truncation operation cost and savings.
-        
+
         Args:
             original_tokens: Original token count
             truncated_tokens: Truncated token count
-            
+
         Returns:
             Tuple of (bobcoins_spent, bobcoins_saved)
         """
         with self._lock:
             tokens_saved = original_tokens - truncated_tokens
-            spent, saved = self.metrics.record_cost(
-                "truncation",
-                truncated_tokens,
-                tokens_saved
-            )
+            spent, saved = self.metrics.record_cost("truncation", truncated_tokens, tokens_saved)
             self.recent_costs.append(("truncation", spent, time.time()))
             self._check_alerts()
             return spent, saved
 
     def record_custom_operation(
-        self,
-        operation: str,
-        tokens_used: int,
-        tokens_saved: int = 0
+        self, operation: str, tokens_used: int, tokens_saved: int = 0
     ) -> Tuple[float, float]:
         """
         Record custom operation cost.
-        
+
         Args:
             operation: Operation name
             tokens_used: Number of tokens used
             tokens_saved: Number of tokens saved
-            
+
         Returns:
             Tuple of (bobcoins_spent, bobcoins_saved)
         """
         with self._lock:
-            spent, saved = self.metrics.record_cost(
-                operation,
-                tokens_used,
-                tokens_saved
-            )
+            spent, saved = self.metrics.record_cost(operation, tokens_used, tokens_saved)
             self.recent_costs.append((operation, spent, time.time()))
             self._check_alerts()
             return spent, saved
@@ -321,7 +295,7 @@ class CostTracker:
     def get_budget_status(self) -> Dict[str, Any]:
         """
         Get current budget status.
-        
+
         Returns:
             Dictionary with budget information
         """
@@ -330,7 +304,9 @@ class CostTracker:
             saved = self.metrics.total_bobcoins_saved
             net_spent = spent - saved
             remaining = self.budget_bobcoins - net_spent
-            percent_used = (net_spent / self.budget_bobcoins * 100) if self.budget_bobcoins > 0 else 0
+            percent_used = (
+                (net_spent / self.budget_bobcoins * 100) if self.budget_bobcoins > 0 else 0
+            )
 
             return {
                 "budget_bobcoins": self.budget_bobcoins,
@@ -339,13 +315,13 @@ class CostTracker:
                 "net_spent_bobcoins": round(net_spent, 4),
                 "remaining_bobcoins": round(remaining, 4),
                 "percent_used": round(percent_used, 2),
-                "is_over_budget": net_spent > self.budget_bobcoins
+                "is_over_budget": net_spent > self.budget_bobcoins,
             }
 
     def get_cost_metrics(self) -> Dict[str, Any]:
         """
         Get detailed cost metrics.
-        
+
         Returns:
             Dictionary with cost metrics
         """
@@ -355,7 +331,7 @@ class CostTracker:
     def get_cost_rate(self) -> Dict[str, float]:
         """
         Get cost rate (Bobcoins per second).
-        
+
         Returns:
             Dictionary with rate information
         """
@@ -365,20 +341,20 @@ class CostTracker:
                 return {
                     "bobcoins_per_second": 0.0,
                     "bobcoins_per_minute": 0.0,
-                    "bobcoins_per_hour": 0.0
+                    "bobcoins_per_hour": 0.0,
                 }
 
             rate = self.metrics.total_bobcoins_spent / elapsed
             return {
                 "bobcoins_per_second": round(rate, 6),
                 "bobcoins_per_minute": round(rate * 60, 4),
-                "bobcoins_per_hour": round(rate * 3600, 2)
+                "bobcoins_per_hour": round(rate * 3600, 2),
             }
 
     def get_active_alerts(self) -> List[Dict[str, Any]]:
         """
         Get list of active budget alerts.
-        
+
         Returns:
             List of active alerts
         """
@@ -386,7 +362,9 @@ class CostTracker:
             return [
                 {
                     "threshold_percent": alert.threshold_percent,
-                    "triggered_at": alert.triggered_at.isoformat() + "Z" if alert.triggered_at else None
+                    "triggered_at": alert.triggered_at.isoformat() + "Z"
+                    if alert.triggered_at
+                    else None,
                 }
                 for alert in self.alerts
                 if alert.triggered
@@ -409,7 +387,7 @@ class CostTracker:
     def set_budget(self, budget_bobcoins: float) -> None:
         """
         Set new budget.
-        
+
         Args:
             budget_bobcoins: New budget in Bobcoins
         """
@@ -428,7 +406,7 @@ class CostTracker:
     def get_summary(self) -> Dict[str, Any]:
         """
         Get cost tracking summary.
-        
+
         Returns:
             Dictionary with summary information
         """
@@ -442,7 +420,7 @@ class CostTracker:
             "budget": budget_status,
             "costs": cost_metrics,
             "rate": cost_rate,
-            "alerts": active_alerts
+            "alerts": active_alerts,
         }
 
 
@@ -450,15 +428,13 @@ class CostTracker:
 _global_tracker: Optional[CostTracker] = None
 
 
-def get_cost_tracker(
-    budget_bobcoins: float = DEFAULT_BUDGET_BOBCOINS
-) -> CostTracker:
+def get_cost_tracker(budget_bobcoins: float = DEFAULT_BUDGET_BOBCOINS) -> CostTracker:
     """
     Get global cost tracker instance.
-    
+
     Args:
         budget_bobcoins: Budget in Bobcoins (only used on first call)
-        
+
     Returns:
         CostTracker instance
     """
@@ -478,10 +454,10 @@ def reset_cost_tracker() -> None:
 def tokens_to_bobcoins(tokens: int) -> float:
     """
     Convert tokens to Bobcoins.
-    
+
     Args:
         tokens: Number of tokens
-        
+
     Returns:
         Equivalent Bobcoins
     """
@@ -491,10 +467,10 @@ def tokens_to_bobcoins(tokens: int) -> float:
 def bobcoins_to_tokens(bobcoins: float) -> int:
     """
     Convert Bobcoins to tokens.
-    
+
     Args:
         bobcoins: Number of Bobcoins
-        
+
     Returns:
         Equivalent tokens
     """

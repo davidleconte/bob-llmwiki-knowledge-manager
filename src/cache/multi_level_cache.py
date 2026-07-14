@@ -24,11 +24,11 @@ from src.monitoring import get_logger, get_metrics_collector
 
 class MultiLevelCache(CacheInterface):
     """Two-level cache with exact (L1) and semantic (L2) matching with version support.
-    
+
     Provides fast exact matches via L1 and semantic fallback via L2.
     Automatically promotes L2 hits to L1 for improved performance.
     Supports versioning for cache evolution without breaking existing cached data.
-    
+
     Attributes:
         VERSION: Current cache version
         l1_cache: ExactCache for fast exact matches
@@ -41,13 +41,15 @@ class MultiLevelCache(CacheInterface):
 
     VERSION: str = "v1"  # Current cache version
 
-    def __init__(self,
-                 l1_max_size: int = 1000,
-                 l2_max_size: int = 500,
-                 similarity_threshold: float = 0.85,
-                 promote_l2_hits: bool = True,
-                 l1_ttl_seconds: Optional[float] = None,
-                 l2_ttl_seconds: Optional[float] = None):
+    def __init__(
+        self,
+        l1_max_size: int = 1000,
+        l2_max_size: int = 500,
+        similarity_threshold: float = 0.85,
+        promote_l2_hits: bool = True,
+        l1_ttl_seconds: Optional[float] = None,
+        l2_ttl_seconds: Optional[float] = None,
+    ):
         """Initialize multi-level cache.
 
         Args:
@@ -64,7 +66,7 @@ class MultiLevelCache(CacheInterface):
         self.l2_cache = SemanticCache(
             max_size=l2_max_size,
             similarity_threshold=similarity_threshold,
-            ttl_seconds=l2_ttl_seconds
+            ttl_seconds=l2_ttl_seconds,
         )
         self.promote_l2_hits = promote_l2_hits
 
@@ -78,20 +80,22 @@ class MultiLevelCache(CacheInterface):
         self.misses = 0
         self._lookup_times: list[float] = []
 
-        self._logger.info("multi_level_cache_initialized",
-                        l1_max_size=l1_max_size,
-                        l2_max_size=l2_max_size,
-                        similarity_threshold=similarity_threshold,
-                        promote_l2_hits=promote_l2_hits,
-                        version=self.VERSION)
+        self._logger.info(
+            "multi_level_cache_initialized",
+            l1_max_size=l1_max_size,
+            l2_max_size=l2_max_size,
+            similarity_threshold=similarity_threshold,
+            promote_l2_hits=promote_l2_hits,
+            version=self.VERSION,
+        )
 
     def get(self, key: str, version: Optional[str] = None) -> Optional[str]:
         """Retrieve cached response, trying L1 then L2.
-        
+
         Args:
             key: The cache key (prompt)
             version: Optional version (defaults to current VERSION)
-            
+
         Returns:
             Cached response if found in L1 or L2, None otherwise
         """
@@ -104,10 +108,12 @@ class MultiLevelCache(CacheInterface):
             latency_ms = (time.time() - start_time) * 1000
             self._lookup_times.append(time.time() - start_time)
 
-            self._logger.debug("multi_level_hit",
-                             cache_level="L1",
-                             version=version or self.VERSION,
-                             latency_ms=latency_ms)
+            self._logger.debug(
+                "multi_level_hit",
+                cache_level="L1",
+                version=version or self.VERSION,
+                latency_ms=latency_ms,
+            )
             return result
 
         # Try L2 (semantic similarity)
@@ -126,18 +132,22 @@ class MultiLevelCache(CacheInterface):
                 # Record promotion
                 self._metrics.record_cache_promotion()
 
-                self._logger.debug("cache_promotion",
-                                 from_level="L2",
-                                 to_level="L1",
-                                 version=version or self.VERSION)
+                self._logger.debug(
+                    "cache_promotion",
+                    from_level="L2",
+                    to_level="L1",
+                    version=version or self.VERSION,
+                )
 
             self._lookup_times.append(time.time() - start_time)
 
-            self._logger.debug("multi_level_hit",
-                             cache_level="L2",
-                             version=version or self.VERSION,
-                             latency_ms=latency_ms,
-                             promoted=self.promote_l2_hits)
+            self._logger.debug(
+                "multi_level_hit",
+                cache_level="L2",
+                version=version or self.VERSION,
+                latency_ms=latency_ms,
+                promoted=self.promote_l2_hits,
+            )
             return result
 
         # Cache miss
@@ -145,15 +155,20 @@ class MultiLevelCache(CacheInterface):
         latency_ms = (time.time() - start_time) * 1000
         self._lookup_times.append(time.time() - start_time)
 
-        self._logger.debug("multi_level_miss",
-                         version=version or self.VERSION,
-                         latency_ms=latency_ms)
+        self._logger.debug(
+            "multi_level_miss", version=version or self.VERSION, latency_ms=latency_ms
+        )
         return None
 
-    def set(self, key: str, value: str, version: Optional[str] = None,
-            metadata: Optional[Dict[str, Any]] = None) -> None:
+    def set(
+        self,
+        key: str,
+        value: str,
+        version: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> None:
         """Store response in both L1 and L2 caches.
-        
+
         Args:
             key: The cache key (prompt)
             value: The response to cache
@@ -175,22 +190,26 @@ class MultiLevelCache(CacheInterface):
 
     def size(self) -> int:
         """Get total number of unique entries across both caches.
-        
+
         Returns:
             Number of unique cached entries
         """
         # Count unique keys across both caches
         # L1 uses hashed keys, L2 uses versioned keys
         l1_keys = set(self.l1_cache.cache.keys())
-        l2_keys = set(self.l1_cache._hash_key(self.l2_cache._make_versioned_key(
-            self.l2_cache._extract_base_key(k),
-            self.l2_cache._extract_version(k)
-        )) for k in self.l2_cache.embeddings.keys())
+        l2_keys = set(
+            self.l1_cache._hash_key(
+                self.l2_cache._make_versioned_key(
+                    self.l2_cache._extract_base_key(k), self.l2_cache._extract_version(k)
+                )
+            )
+            for k in self.l2_cache.embeddings.keys()
+        )
         return len(l1_keys | l2_keys)
 
     def hit_rate(self) -> float:
         """Calculate overall cache hit rate.
-        
+
         Returns:
             Hit rate as percentage (0-100)
         """
@@ -201,7 +220,7 @@ class MultiLevelCache(CacheInterface):
 
     def l1_hit_rate(self) -> float:
         """Calculate L1 cache hit rate.
-        
+
         Returns:
             L1 hit rate as percentage (0-100)
         """
@@ -212,7 +231,7 @@ class MultiLevelCache(CacheInterface):
 
     def l2_hit_rate(self) -> float:
         """Calculate L2 cache hit rate.
-        
+
         Returns:
             L2 hit rate as percentage (0-100)
         """
@@ -223,14 +242,13 @@ class MultiLevelCache(CacheInterface):
 
     def stats(self) -> Dict[str, Any]:
         """Get comprehensive cache statistics.
-        
+
         Returns:
             Dictionary with cache statistics
         """
         total_requests = self.l1_hits + self.l2_hits + self.misses
         avg_lookup_time = (
-            sum(self._lookup_times) / len(self._lookup_times)
-            if self._lookup_times else 0.0
+            sum(self._lookup_times) / len(self._lookup_times) if self._lookup_times else 0.0
         )
 
         return {
@@ -241,14 +259,12 @@ class MultiLevelCache(CacheInterface):
             "hit_rate": self.hit_rate(),
             "avg_lookup_time_ms": avg_lookup_time * 1000,
             "version": self.VERSION,
-
             # L1 stats
             "l1_hits": self.l1_hits,
             "l1_hit_rate": self.l1_hit_rate(),
             "l1_size": self.l1_cache.size(),
             "l1_max_size": self.l1_cache.max_size,
             "l1_utilization": (self.l1_cache.size() / self.l1_cache.max_size) * 100,
-
             # L2 stats
             "l2_hits": self.l2_hits,
             "l2_hit_rate": self.l2_hit_rate(),
@@ -257,7 +273,6 @@ class MultiLevelCache(CacheInterface):
             "l2_utilization": (self.l2_cache.size() / self.l2_cache.max_size) * 100,
             "l2_similarity_threshold": self.l2_cache.similarity_threshold,
             "l2_avg_similarity": self.l2_cache.average_similarity_score(),
-
             # Configuration
             "promote_l2_hits": self.promote_l2_hits,
             "unique_entries": self.size(),
@@ -265,7 +280,7 @@ class MultiLevelCache(CacheInterface):
 
     def get_l1_cache(self) -> ExactCache:
         """Get L1 cache instance.
-        
+
         Returns:
             ExactCache instance
         """
@@ -273,7 +288,7 @@ class MultiLevelCache(CacheInterface):
 
     def get_l2_cache(self) -> SemanticCache:
         """Get L2 cache instance.
-        
+
         Returns:
             SemanticCache instance
         """
@@ -281,7 +296,7 @@ class MultiLevelCache(CacheInterface):
 
     def update_similarity_threshold(self, threshold: float) -> None:
         """Update L2 similarity threshold.
-        
+
         Args:
             threshold: New threshold value (0-1)
         """
@@ -297,11 +312,11 @@ class MultiLevelCache(CacheInterface):
 
     def get_with_level(self, key: str, version: Optional[str] = None) -> Optional[Tuple[str, str]]:
         """Get cached response with cache level information.
-        
+
         Args:
             key: The cache key (prompt)
             version: Optional version
-            
+
         Returns:
             Tuple of (response, level) where level is 'L1' or 'L2', or None
         """
@@ -319,11 +334,11 @@ class MultiLevelCache(CacheInterface):
 
     def contains(self, key: str, version: Optional[str] = None) -> bool:
         """Check if key exists in either cache.
-        
+
         Args:
             key: The cache key
             version: Optional version
-            
+
         Returns:
             True if key exists in L1 or L2, False otherwise
         """
@@ -331,7 +346,7 @@ class MultiLevelCache(CacheInterface):
 
     def average_lookup_time_ms(self) -> float:
         """Get average lookup time in milliseconds.
-        
+
         Returns:
             Average lookup time in ms
         """
@@ -341,11 +356,11 @@ class MultiLevelCache(CacheInterface):
 
     def migrate(self, from_version: str, to_version: str) -> int:
         """Migrate entries from one version to another in both caches.
-        
+
         Args:
             from_version: Source version
             to_version: Target version
-            
+
         Returns:
             Total number of entries migrated across both caches
         """
@@ -354,21 +369,23 @@ class MultiLevelCache(CacheInterface):
 
         total_migrated = l1_migrated + l2_migrated
 
-        self._logger.info("multi_level_migration",
-                        from_version=from_version,
-                        to_version=to_version,
-                        l1_migrated=l1_migrated,
-                        l2_migrated=l2_migrated,
-                        total_migrated=total_migrated)
+        self._logger.info(
+            "multi_level_migration",
+            from_version=from_version,
+            to_version=to_version,
+            l1_migrated=l1_migrated,
+            l2_migrated=l2_migrated,
+            total_migrated=total_migrated,
+        )
 
         return total_migrated
 
     def cleanup_version(self, version: str) -> int:
         """Remove all entries for a specific version from both caches.
-        
+
         Args:
             version: Version to clean up
-            
+
         Returns:
             Total number of entries removed across both caches
         """
@@ -377,11 +394,13 @@ class MultiLevelCache(CacheInterface):
 
         total_removed = l1_removed + l2_removed
 
-        self._logger.info("multi_level_cleanup",
-                        version=version,
-                        l1_removed=l1_removed,
-                        l2_removed=l2_removed,
-                        total_removed=total_removed)
+        self._logger.info(
+            "multi_level_cleanup",
+            version=version,
+            l1_removed=l1_removed,
+            l2_removed=l2_removed,
+            total_removed=total_removed,
+        )
 
         return total_removed
 

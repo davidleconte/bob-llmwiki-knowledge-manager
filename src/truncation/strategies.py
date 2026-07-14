@@ -15,12 +15,12 @@ class TruncationStrategy(ABC):
     @abstractmethod
     def truncate(self, text: str, max_tokens: int, token_counter) -> str:
         """Truncate text to fit within token limit.
-        
+
         Args:
             text: Text to truncate
             max_tokens: Maximum tokens allowed
             token_counter: TokenCounter instance
-            
+
         Returns:
             Truncated text
         """
@@ -34,7 +34,7 @@ class TruncationStrategy(ABC):
 
 class SimpleTruncationStrategy(TruncationStrategy):
     """Simple truncation by character count.
-    
+
     Truncates text at approximate character position based on
     token-to-character ratio. Fast but may cut mid-sentence.
     """
@@ -68,9 +68,7 @@ class SimpleTruncationStrategy(TruncationStrategy):
         # Reserve room for the ellipsis marker when it fits, then verify the
         # combined result stays within budget (BPE can merge across the join).
         if ellipsis_tokens < max_tokens:
-            prefix = self._token_safe_prefix(
-                text, max_tokens - ellipsis_tokens, token_counter
-            )
+            prefix = self._token_safe_prefix(text, max_tokens - ellipsis_tokens, token_counter)
             candidate = (prefix + ellipsis) if prefix else ellipsis
             if token_counter.count_tokens(candidate) <= max_tokens:
                 return candidate
@@ -103,7 +101,7 @@ class SimpleTruncationStrategy(TruncationStrategy):
 
 class PriorityTruncationStrategy(TruncationStrategy):
     """Priority-based truncation preserving important sections.
-    
+
     Identifies and preserves high-priority content:
     - Headers and titles
     - First and last paragraphs
@@ -111,10 +109,9 @@ class PriorityTruncationStrategy(TruncationStrategy):
     - Code blocks
     """
 
-    def __init__(self, preserve_headers: bool = True,
-                 preserve_first_last: bool = True):
+    def __init__(self, preserve_headers: bool = True, preserve_first_last: bool = True):
         """Initialize priority truncation strategy.
-        
+
         Args:
             preserve_headers: Whether to preserve headers
             preserve_first_last: Whether to preserve first/last paragraphs
@@ -124,12 +121,12 @@ class PriorityTruncationStrategy(TruncationStrategy):
 
     def truncate(self, text: str, max_tokens: int, token_counter) -> str:
         """Truncate text preserving high-priority sections.
-        
+
         Args:
             text: Text to truncate
             max_tokens: Maximum tokens allowed
             token_counter: TokenCounter instance
-            
+
         Returns:
             Truncated text
         """
@@ -174,23 +171,23 @@ class PriorityTruncationStrategy(TruncationStrategy):
 
     def _split_sections(self, text: str) -> List[str]:
         """Split text into sections.
-        
+
         Args:
             text: Text to split
-            
+
         Returns:
             List of sections
         """
         # Split by double newlines (paragraphs)
-        sections = re.split(r'\n\n+', text)
+        sections = re.split(r"\n\n+", text)
         return [s.strip() for s in sections if s.strip()]
 
     def _prioritize_sections(self, sections: List[str]) -> List[tuple]:
         """Prioritize sections by importance.
-        
+
         Args:
             sections: List of sections
-            
+
         Returns:
             List of (original_index, section, priority) tuples, sorted by
             priority (highest first). The index lets the caller restore
@@ -209,19 +206,19 @@ class PriorityTruncationStrategy(TruncationStrategy):
 
     def _calculate_priority(self, section: str, index: int, total: int) -> float:
         """Calculate section priority.
-        
+
         Args:
             section: Section text
             index: Section index
             total: Total number of sections
-            
+
         Returns:
             Priority score (higher is more important)
         """
         priority = 0.0
 
         # Headers (markdown style)
-        if self.preserve_headers and re.match(r'^#+\s', section):
+        if self.preserve_headers and re.match(r"^#+\s", section):
             priority += 10.0
 
         # First paragraph
@@ -233,11 +230,11 @@ class PriorityTruncationStrategy(TruncationStrategy):
             priority += 7.0
 
         # Lists
-        if re.match(r'^[\*\-\d]+[\.\)]\s', section):
+        if re.match(r"^[\*\-\d]+[\.\)]\s", section):
             priority += 5.0
 
         # Code blocks
-        if '```' in section or section.startswith('    '):
+        if "```" in section or section.startswith("    "):
             priority += 6.0
 
         # Length bonus (longer sections may be more important)
@@ -252,18 +249,18 @@ class PriorityTruncationStrategy(TruncationStrategy):
 
 class SemanticTruncationStrategy(TruncationStrategy):
     """Semantic-aware truncation preserving meaning.
-    
+
     Truncates at sentence boundaries and preserves semantic coherence.
     """
 
     def truncate(self, text: str, max_tokens: int, token_counter) -> str:
         """Truncate text at sentence boundaries.
-        
+
         Args:
             text: Text to truncate
             max_tokens: Maximum tokens allowed
             token_counter: TokenCounter instance
-            
+
         Returns:
             Truncated text
         """
@@ -296,15 +293,15 @@ class SemanticTruncationStrategy(TruncationStrategy):
 
     def _split_sentences(self, text: str) -> List[str]:
         """Split text into sentences.
-        
+
         Args:
             text: Text to split
-            
+
         Returns:
             List of sentences
         """
         # Simple sentence splitting (can be improved with NLTK)
-        sentences = re.split(r'(?<=[.!?])\s+', text)
+        sentences = re.split(r"(?<=[.!?])\s+", text)
         return [s.strip() for s in sentences if s.strip()]
 
     def get_name(self) -> str:
@@ -314,14 +311,14 @@ class SemanticTruncationStrategy(TruncationStrategy):
 
 class SlidingWindowStrategy(TruncationStrategy):
     """Sliding window truncation for context preservation.
-    
+
     Maintains a sliding window of recent content, useful for
     conversational contexts where recent information is most relevant.
     """
 
     def __init__(self, window_overlap: float = 0.1):
         """Initialize sliding window strategy.
-        
+
         Args:
             window_overlap: Overlap ratio between windows (0-1)
         """
@@ -329,12 +326,12 @@ class SlidingWindowStrategy(TruncationStrategy):
 
     def truncate(self, text: str, max_tokens: int, token_counter) -> str:
         """Truncate text using sliding window.
-        
+
         Args:
             text: Text to truncate
             max_tokens: Maximum tokens allowed
             token_counter: TokenCounter instance
-            
+
         Returns:
             Truncated text (most recent content)
         """

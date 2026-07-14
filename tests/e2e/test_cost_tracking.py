@@ -23,8 +23,8 @@ from src.optimizer import PromptOptimizer, TokenCounter
 
 # Skip if not running E2E tests
 pytestmark = pytest.mark.skipif(
-    not os.environ.get('RUN_E2E_TESTS'),
-    reason="E2E tests require RUN_E2E_TESTS=1 environment variable"
+    not os.environ.get("RUN_E2E_TESTS"),
+    reason="E2E tests require RUN_E2E_TESTS=1 environment variable",
 )
 
 
@@ -52,13 +52,13 @@ class TestCostTracking:
 
         # Verify cost was recorded
         metrics = tracker.get_cost_metrics()
-        assert metrics['operations_count'] > 0, "Should record operation"
-        assert metrics['total_tokens_used'] == tokens, "Should track tokens used"
-        assert metrics['total_bobcoins_spent'] > 0, "Should calculate Bobcoins spent"
+        assert metrics["operations_count"] > 0, "Should record operation"
+        assert metrics["total_tokens_used"] == tokens, "Should track tokens used"
+        assert metrics["total_bobcoins_spent"] > 0, "Should calculate Bobcoins spent"
 
         # Verify cost calculation
         expected_bobcoins = tokens_to_bobcoins(tokens)
-        assert abs(metrics['total_bobcoins_spent'] - expected_bobcoins) < 0.0001
+        assert abs(metrics["total_bobcoins_spent"] - expected_bobcoins) < 0.0001
 
     def test_cache_hit_cost_tracking(self, tracker):
         """Test that cache hits record savings."""
@@ -70,7 +70,7 @@ class TestCostTracking:
         # Store with token metadata
         counter = TokenCounter(model="gpt-4")
         tokens = counter.count_tokens(prompt)
-        cache.set(prompt, response, metadata={'tokens': tokens})
+        cache.set(prompt, response, metadata={"tokens": tokens})
 
         # Get from cache (should record savings)
         result = cache.get(prompt)
@@ -78,8 +78,8 @@ class TestCostTracking:
 
         # Verify savings were recorded
         metrics = tracker.get_cost_metrics()
-        assert metrics['total_bobcoins_saved'] > 0, "Should record savings"
-        assert metrics['total_tokens_saved'] == tokens, "Should track tokens saved"
+        assert metrics["total_bobcoins_saved"] > 0, "Should record savings"
+        assert metrics["total_tokens_saved"] == tokens, "Should track tokens saved"
 
     def test_optimization_cost_tracking(self, tracker):
         """Test that optimization records costs and savings."""
@@ -95,13 +95,13 @@ class TestCostTracking:
 
         # Verify optimization was tracked
         metrics = tracker.get_cost_metrics()
-        assert metrics['operations_count'] > 0, "Should record optimization"
-        assert metrics['total_tokens_used'] > 0, "Should track optimized tokens"
+        assert metrics["operations_count"] > 0, "Should record optimization"
+        assert metrics["total_tokens_used"] > 0, "Should track optimized tokens"
 
         # If savings occurred, verify they were tracked
-        if result['tokens_saved'] > 0:
-            assert metrics['total_tokens_saved'] > 0, "Should track savings"
-            assert metrics['total_bobcoins_saved'] > 0, "Should calculate Bobcoin savings"
+        if result["tokens_saved"] > 0:
+            assert metrics["total_tokens_saved"] > 0, "Should track savings"
+            assert metrics["total_bobcoins_saved"] > 0, "Should calculate Bobcoin savings"
 
     def test_budget_monitoring(self, tracker):
         """Test budget monitoring and alerts."""
@@ -118,12 +118,12 @@ class TestCostTracking:
 
         # Check budget status
         budget_status = tracker.get_budget_status()
-        assert budget_status['spent_bobcoins'] > 0, "Should have spent Bobcoins"
-        assert budget_status['percent_used'] > 0, "Should show usage percentage"
+        assert budget_status["spent_bobcoins"] > 0, "Should have spent Bobcoins"
+        assert budget_status["percent_used"] > 0, "Should show usage percentage"
 
         # Check health status
         health = check_budget_health()
-        assert health['status'] in ['healthy', 'caution', 'warning', 'critical']
+        assert health["status"] in ["healthy", "caution", "warning", "critical"]
 
     def test_cost_reporting(self, tracker):
         """Test cost reporting utilities."""
@@ -137,30 +137,26 @@ class TestCostTracking:
 
         # Generate summary
         summary = generate_cost_summary()
-        assert 'budget' in summary
-        assert 'costs' in summary
-        assert 'rate' in summary
+        assert "budget" in summary
+        assert "costs" in summary
+        assert "rate" in summary
 
         # Generate dashboard
         dashboard = generate_cost_dashboard()
-        assert 'BOBCOIN COST TRACKING DASHBOARD' in dashboard
-        assert 'BUDGET STATUS' in dashboard
-        assert 'COST METRICS' in dashboard
+        assert "BOBCOIN COST TRACKING DASHBOARD" in dashboard
+        assert "BUDGET STATUS" in dashboard
+        assert "COST METRICS" in dashboard
 
         # Get top operations
         top_ops = get_top_cost_operations(limit=3)
         assert isinstance(top_ops, list)
         if top_ops:
-            assert 'operation' in top_ops[0]
-            assert 'cost_bobcoins' in top_ops[0]
+            assert "operation" in top_ops[0]
+            assert "cost_bobcoins" in top_ops[0]
 
     def test_multi_level_cache_cost_tracking(self, tracker):
         """Test cost tracking with multi-level cache."""
-        cache = MultiLevelCache(
-            l1_max_size=100,
-            l2_max_size=50,
-            similarity_threshold=0.85
-        )
+        cache = MultiLevelCache(l1_max_size=100, l2_max_size=50, similarity_threshold=0.85)
 
         # Enable cost tracking on cache instances
         cache.l1_cache.track_costs = True
@@ -174,12 +170,12 @@ class TestCostTracking:
         prompts = [
             "What is machine learning?",
             "Explain neural networks",
-            "How does deep learning work?"
+            "How does deep learning work?",
         ]
 
         for prompt in prompts:
             tokens = counter.count_tokens(prompt)
-            cache.set(prompt, f"Response to: {prompt}", metadata={'tokens': tokens})
+            cache.set(prompt, f"Response to: {prompt}", metadata={"tokens": tokens})
 
         # Get from cache (should record savings)
         for prompt in prompts:
@@ -188,7 +184,7 @@ class TestCostTracking:
 
         # Verify savings were recorded
         metrics = tracker.get_cost_metrics()
-        assert metrics['total_bobcoins_saved'] > 0, "Should record cache savings"
+        assert metrics["total_bobcoins_saved"] > 0, "Should record cache savings"
 
     def test_cost_rate_calculation(self, tracker):
         """Test cost rate calculations."""
@@ -201,10 +197,10 @@ class TestCostTracking:
 
         # Get cost rate
         rate = tracker.get_cost_rate()
-        assert 'bobcoins_per_second' in rate
-        assert 'bobcoins_per_minute' in rate
-        assert 'bobcoins_per_hour' in rate
-        assert rate['bobcoins_per_second'] >= 0
+        assert "bobcoins_per_second" in rate
+        assert "bobcoins_per_minute" in rate
+        assert "bobcoins_per_hour" in rate
+        assert rate["bobcoins_per_second"] >= 0
 
     def test_cost_breakdown_by_operation(self, tracker):
         """Test cost breakdown by operation type."""
@@ -217,16 +213,16 @@ class TestCostTracking:
         optimizer.optimize("Test prompt for optimization")
 
         tokens = counter.count_tokens("Cache test")
-        cache.set("Cache test", "Response", metadata={'tokens': tokens})
+        cache.set("Cache test", "Response", metadata={"tokens": tokens})
         cache.get("Cache test")
 
         # Get cost breakdown
         metrics = tracker.get_cost_metrics()
-        assert 'cost_by_operation' in metrics
-        assert 'tokens_by_operation' in metrics
+        assert "cost_by_operation" in metrics
+        assert "tokens_by_operation" in metrics
 
         # Should have multiple operation types
-        assert len(metrics['cost_by_operation']) > 0
+        assert len(metrics["cost_by_operation"]) > 0
 
     def test_roi_calculation(self, tracker):
         """Test ROI calculation."""
@@ -240,13 +236,13 @@ class TestCostTracking:
         metrics = tracker.get_cost_metrics()
 
         # If savings occurred, ROI should be positive
-        if metrics['total_bobcoins_saved'] > 0:
-            assert metrics['roi_percent'] > 0, "Should have positive ROI"
+        if metrics["total_bobcoins_saved"] > 0:
+            assert metrics["roi_percent"] > 0, "Should have positive ROI"
 
         # ROI = (saved / spent) * 100
-        if metrics['total_bobcoins_spent'] > 0:
-            expected_roi = (metrics['total_bobcoins_saved'] / metrics['total_bobcoins_spent']) * 100
-            assert abs(metrics['roi_percent'] - expected_roi) < 0.01
+        if metrics["total_bobcoins_spent"] > 0:
+            expected_roi = (metrics["total_bobcoins_saved"] / metrics["total_bobcoins_spent"]) * 100
+            assert abs(metrics["roi_percent"] - expected_roi) < 0.01
 
 
 class TestCostTrackingIntegration:
@@ -272,7 +268,7 @@ class TestCostTrackingIntegration:
         prompts = [
             "Explain the concept of machine learning in detail",
             "What are the key differences between supervised and unsupervised learning?",
-            "How do neural networks process information?"
+            "How do neural networks process information?",
         ]
 
         for prompt in prompts:
@@ -283,7 +279,7 @@ class TestCostTrackingIntegration:
             result = optimizer.optimize(prompt)
 
             # Cache result
-            cache.set(prompt, result['optimized'], metadata={'tokens': result['optimized_tokens']})
+            cache.set(prompt, result["optimized"], metadata={"tokens": result["optimized_tokens"]})
 
             # Retrieve from cache
             cached = cache.get(prompt)
@@ -293,17 +289,17 @@ class TestCostTrackingIntegration:
         metrics = tracker.get_cost_metrics()
         budget_status = tracker.get_budget_status()
 
-        assert metrics['operations_count'] > 0, "Should track all operations"
-        assert metrics['total_tokens_used'] > 0, "Should track tokens used"
-        assert budget_status['spent_bobcoins'] > 0, "Should calculate total cost"
+        assert metrics["operations_count"] > 0, "Should track all operations"
+        assert metrics["total_tokens_used"] > 0, "Should track tokens used"
+        assert budget_status["spent_bobcoins"] > 0, "Should calculate total cost"
 
         # Generate final report
         summary = generate_cost_summary()
-        assert summary['costs']['operations_count'] == metrics['operations_count']
+        assert summary["costs"]["operations_count"] == metrics["operations_count"]
 
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("FULL WORKFLOW COST TRACKING RESULTS")
-        print("="*70)
+        print("=" * 70)
         print(f"Operations: {metrics['operations_count']}")
         print(f"Tokens Used: {metrics['total_tokens_used']:,}")
         print(f"Tokens Saved: {metrics['total_tokens_saved']:,}")
@@ -311,4 +307,4 @@ class TestCostTrackingIntegration:
         print(f"Bobcoins Saved: {budget_status['saved_bobcoins']:.4f}")
         print(f"Net Cost: {budget_status['net_spent_bobcoins']:.4f}")
         print(f"ROI: {metrics['roi_percent']:.2f}%")
-        print("="*70)
+        print("=" * 70)

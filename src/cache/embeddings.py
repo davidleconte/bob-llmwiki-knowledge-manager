@@ -55,9 +55,9 @@ class EmbeddingGenerator:
         self.vectorizer = HashingVectorizer(
             n_features=max_features,
             ngram_range=(1, 2),
-            norm='l2',
+            norm="l2",
             alternate_sign=False,
-            stop_words='english',
+            stop_words="english",
         )
         self.corpus: List[str] = []
         self.embeddings_cache: Dict[str, np.ndarray] = {}
@@ -120,10 +120,10 @@ class EmbeddingGenerator:
 
     def generate_batch(self, texts: List[str]) -> List[np.ndarray]:
         """Generate embeddings for multiple texts.
-        
+
         Args:
             texts: List of texts to generate embeddings for
-            
+
         Returns:
             List of embedding vectors
         """
@@ -135,11 +135,11 @@ class EmbeddingGenerator:
 
     def similarity(self, text1: str, text2: str) -> float:
         """Calculate cosine similarity between two texts.
-        
+
         Args:
             text1: First text
             text2: Second text
-            
+
         Returns:
             Cosine similarity score (0-1)
         """
@@ -152,14 +152,16 @@ class EmbeddingGenerator:
 
         return float(cosine_similarity(emb1, emb2)[0][0])
 
-    def most_similar(self, text: str, candidates: List[str], top_k: int = 5) -> List[tuple[str, float]]:
+    def most_similar(
+        self, text: str, candidates: List[str], top_k: int = 5
+    ) -> List[tuple[str, float]]:
         """Find most similar texts from candidates.
-        
+
         Args:
             text: Query text
             candidates: List of candidate texts
             top_k: Number of top results to return
-            
+
         Returns:
             List of (text, similarity_score) tuples, sorted by similarity
         """
@@ -188,7 +190,7 @@ class EmbeddingGenerator:
 
     def cache_size(self) -> int:
         """Get number of cached embeddings.
-        
+
         Returns:
             Number of cached embeddings
         """
@@ -197,11 +199,11 @@ class EmbeddingGenerator:
 
 def cosine_similarity_vectors(vec1: np.ndarray, vec2: np.ndarray) -> float:
     """Calculate cosine similarity between two vectors.
-    
+
     Args:
         vec1: First vector
         vec2: Second vector
-        
+
     Returns:
         Cosine similarity score (0-1)
     """

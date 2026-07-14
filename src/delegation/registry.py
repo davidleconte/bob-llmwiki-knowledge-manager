@@ -11,7 +11,7 @@ from .base import SubAgent, SubAgentTask
 class SubAgentRegistry:
     """
     Registry for managing sub-agents
-    
+
     Provides agent discovery and task routing
     """
 
@@ -24,7 +24,7 @@ class SubAgentRegistry:
     def register(self, agent: SubAgent):
         """
         Register a sub-agent
-        
+
         Args:
             agent: Sub-agent to register
         """
@@ -42,7 +42,7 @@ class SubAgentRegistry:
     def unregister(self, agent_id: str):
         """
         Unregister a sub-agent
-        
+
         Args:
             agent_id: ID of agent to unregister
         """
@@ -54,8 +54,7 @@ class SubAgentRegistry:
         # Remove from type mapping
         if agent.agent_type in self._agents_by_type:
             self._agents_by_type[agent.agent_type] = [
-                a for a in self._agents_by_type[agent.agent_type]
-                if a.agent_id != agent_id
+                a for a in self._agents_by_type[agent.agent_type] if a.agent_id != agent_id
             ]
 
         # Remove from main registry
@@ -68,10 +67,10 @@ class SubAgentRegistry:
     def get_agent(self, agent_id: str) -> Optional[SubAgent]:
         """
         Get agent by ID
-        
+
         Args:
             agent_id: Agent ID
-            
+
         Returns:
             SubAgent or None if not found
         """
@@ -80,10 +79,10 @@ class SubAgentRegistry:
     def get_agents_by_type(self, agent_type: str) -> List[SubAgent]:
         """
         Get all agents of a specific type
-        
+
         Args:
             agent_type: Agent type
-            
+
         Returns:
             List of agents
         """
@@ -92,10 +91,10 @@ class SubAgentRegistry:
     def get_agent_for_task(self, task: SubAgentTask) -> Optional[SubAgent]:
         """
         Find best agent for a task
-        
+
         Args:
             task: Task to execute
-            
+
         Returns:
             SubAgent or None if no suitable agent found
         """
@@ -129,9 +128,8 @@ class SubAgentRegistry:
             "total_agents": len(self._agents),
             "agent_types": len(self._agents_by_type),
             "agents_by_type": {
-                agent_type: len(agents)
-                for agent_type, agents in self._agents_by_type.items()
-            }
+                agent_type: len(agents) for agent_type, agents in self._agents_by_type.items()
+            },
         }
 
     def clear(self):

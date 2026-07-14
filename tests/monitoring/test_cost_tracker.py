@@ -248,7 +248,9 @@ class TestCostTrackerRecording:
 
     def test_record_custom_operation(self):
         tracker = CostTracker()
-        spent, saved = tracker.record_custom_operation("embedding", tokens_used=800, tokens_saved=200)
+        spent, saved = tracker.record_custom_operation(
+            "embedding", tokens_used=800, tokens_saved=200
+        )
         assert spent == bc(800)
         assert saved == bc(200)
         metrics = tracker.get_cost_metrics()
@@ -262,7 +264,7 @@ class TestBudgetStatus:
     def test_budget_status_within_budget(self):
         tracker = CostTracker(budget_bobcoins=100.0)
         tracker.record_token_counting(30000)  # 30 BC
-        tracker.record_cache_hit(5000)         # save 5 BC
+        tracker.record_cache_hit(5000)  # save 5 BC
         status = tracker.get_budget_status()
         assert status["budget_bobcoins"] == 100.0
         assert status["spent_bobcoins"] == round(bc(30000), 4) == 30.0
@@ -299,9 +301,9 @@ class TestCostRate:
     def test_cost_rate_with_elapsed_time(self, monkeypatch):
         holder = {"t": 1000.0}
         self._freeze_clock(monkeypatch, holder)
-        tracker = CostTracker()          # _start_time captured at t=1000
+        tracker = CostTracker()  # _start_time captured at t=1000
         tracker.record_token_counting(2000)  # 2.0 BC spent (still t=1000)
-        holder["t"] = 1010.0             # 10 seconds later
+        holder["t"] = 1010.0  # 10 seconds later
         rate = tracker.get_cost_rate()
         # 2.0 BC / 10 s
         assert rate["bobcoins_per_second"] == round(2.0 / 10.0, 6) == 0.2
@@ -336,8 +338,8 @@ class TestAlerts:
 
     def test_alerts_escalate_with_more_spend(self):
         tracker = CostTracker(budget_bobcoins=10.0, alert_thresholds=[50.0, 75.0, 90.0])
-        tracker.record_token_counting(6000)   # 60%
-        tracker.record_token_counting(3500)   # cumulative 95%
+        tracker.record_token_counting(6000)  # 60%
+        tracker.record_token_counting(3500)  # cumulative 95%
         thresholds = {a["threshold_percent"] for a in tracker.get_active_alerts()}
         assert thresholds == {50.0, 75.0, 90.0}
 

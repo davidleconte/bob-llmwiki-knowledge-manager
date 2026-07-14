@@ -101,9 +101,7 @@ class TestTokenCounter:
         """Test counting tokens in single message."""
         counter = TokenCounter()
 
-        messages = [
-            {"role": "user", "content": "Hello"}
-        ]
+        messages = [{"role": "user", "content": "Hello"}]
         tokens = counter.count_messages(messages)
 
         # Content + message overhead + conversation overhead
@@ -116,7 +114,7 @@ class TestTokenCounter:
         messages = [
             {"role": "user", "content": "Hello"},
             {"role": "assistant", "content": "Hi there!"},
-            {"role": "user", "content": "How are you?"}
+            {"role": "user", "content": "How are you?"},
         ]
         tokens = counter.count_messages(messages)
 
@@ -301,10 +299,7 @@ class TestTokenCounter:
         """Test handling of messages with empty content."""
         counter = TokenCounter()
 
-        messages = [
-            {"role": "user", "content": ""},
-            {"role": "assistant", "content": "Response"}
-        ]
+        messages = [{"role": "user", "content": ""}, {"role": "assistant", "content": "Response"}]
         tokens = counter.count_messages(messages)
 
         # Should handle gracefully

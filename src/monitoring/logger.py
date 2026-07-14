@@ -16,6 +16,7 @@ from typing import Any, Dict, Optional
 
 class LogLevel(Enum):
     """Log level enumeration."""
+
     DEBUG = "DEBUG"
     INFO = "INFO"
     WARNING = "WARNING"
@@ -26,14 +27,14 @@ class LogLevel(Enum):
 class StructuredLogger:
     """
     Structured logger that outputs JSON-formatted log messages.
-    
+
     Features:
     - JSON-formatted output for easy parsing
     - Automatic timestamp and context enrichment
     - Multiple log levels (DEBUG, INFO, WARNING, ERROR, CRITICAL)
     - Optional file output with rotation
     - Performance tracking
-    
+
     Example:
         >>> logger = StructuredLogger("cache")
         >>> logger.info("cache_hit", key="abc123", latency_ms=0.5)
@@ -45,11 +46,11 @@ class StructuredLogger:
         component: str,
         log_level: str = "INFO",
         log_file: Optional[Path] = None,
-        enable_console: bool = True
+        enable_console: bool = True,
     ):
         """
         Initialize structured logger.
-        
+
         Args:
             component: Component name (e.g., "cache", "optimizer")
             log_level: Minimum log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
@@ -65,7 +66,7 @@ class StructuredLogger:
         self.logger.handlers.clear()  # Clear any existing handlers
 
         # JSON formatter
-        formatter = logging.Formatter('%(message)s')
+        formatter = logging.Formatter("%(message)s")
 
         # Console handler
         if enable_console:
@@ -82,20 +83,15 @@ class StructuredLogger:
             file_handler.setFormatter(formatter)
             self.logger.addHandler(file_handler)
 
-    def _format_message(
-        self,
-        level: str,
-        event: str,
-        **kwargs: Any
-    ) -> str:
+    def _format_message(self, level: str, event: str, **kwargs: Any) -> str:
         """
         Format log message as JSON.
-        
+
         Args:
             level: Log level
             event: Event name
             **kwargs: Additional context fields
-            
+
         Returns:
             JSON-formatted log message
         """
@@ -104,7 +100,7 @@ class StructuredLogger:
             "level": level,
             "component": self.component,
             "event": event,
-            **kwargs
+            **kwargs,
         }
         return json.dumps(log_entry)
 
@@ -128,15 +124,10 @@ class StructuredLogger:
         """Log critical message."""
         self.logger.critical(self._format_message("CRITICAL", event, **kwargs))
 
-    def log_cache_hit(
-        self,
-        cache_level: str,
-        key: str,
-        latency_ms: float
-    ) -> None:
+    def log_cache_hit(self, cache_level: str, key: str, latency_ms: float) -> None:
         """
         Log cache hit event.
-        
+
         Args:
             cache_level: Cache level (L1, L2)
             key: Cache key (hashed for privacy)
@@ -146,37 +137,25 @@ class StructuredLogger:
             "cache_hit",
             cache_level=cache_level,
             key_hash=hash(key) % 10000,  # Hash for privacy
-            latency_ms=round(latency_ms, 2)
+            latency_ms=round(latency_ms, 2),
         )
 
-    def log_cache_miss(
-        self,
-        cache_level: str,
-        key: str
-    ) -> None:
+    def log_cache_miss(self, cache_level: str, key: str) -> None:
         """
         Log cache miss event.
-        
+
         Args:
             cache_level: Cache level (L1, L2)
             key: Cache key (hashed for privacy)
         """
-        self.info(
-            "cache_miss",
-            cache_level=cache_level,
-            key_hash=hash(key) % 10000
-        )
+        self.info("cache_miss", cache_level=cache_level, key_hash=hash(key) % 10000)
 
     def log_optimization(
-        self,
-        original_tokens: int,
-        optimized_tokens: int,
-        savings_percent: float,
-        latency_ms: float
+        self, original_tokens: int, optimized_tokens: int, savings_percent: float, latency_ms: float
     ) -> None:
         """
         Log optimization event.
-        
+
         Args:
             original_tokens: Original token count
             optimized_tokens: Optimized token count
@@ -188,19 +167,15 @@ class StructuredLogger:
             original_tokens=original_tokens,
             optimized_tokens=optimized_tokens,
             savings_percent=round(savings_percent, 2),
-            latency_ms=round(latency_ms, 2)
+            latency_ms=round(latency_ms, 2),
         )
 
     def log_truncation(
-        self,
-        strategy: str,
-        original_length: int,
-        truncated_length: int,
-        latency_ms: float
+        self, strategy: str, original_length: int, truncated_length: int, latency_ms: float
     ) -> None:
         """
         Log truncation event.
-        
+
         Args:
             strategy: Truncation strategy used
             original_length: Original text length
@@ -212,36 +187,26 @@ class StructuredLogger:
             strategy=strategy,
             original_length=original_length,
             truncated_length=truncated_length,
-            reduction_percent=round((1 - truncated_length/original_length) * 100, 2),
-            latency_ms=round(latency_ms, 2)
+            reduction_percent=round((1 - truncated_length / original_length) * 100, 2),
+            latency_ms=round(latency_ms, 2),
         )
 
-    def log_error(
-        self,
-        error_type: str,
-        error_message: str,
-        **kwargs: Any
-    ) -> None:
+    def log_error(self, error_type: str, error_message: str, **kwargs: Any) -> None:
         """
         Log error event.
-        
+
         Args:
             error_type: Type of error
             error_message: Error message
             **kwargs: Additional context
         """
-        self.error(
-            "error_occurred",
-            error_type=error_type,
-            error_message=error_message,
-            **kwargs
-        )
+        self.error("error_occurred", error_type=error_type, error_message=error_message, **kwargs)
 
 
 class LoggerFactory:
     """
     Factory for creating component-specific loggers.
-    
+
     Ensures consistent logging configuration across all components.
     """
 
@@ -250,14 +215,10 @@ class LoggerFactory:
     _default_log_dir: Optional[Path] = None
 
     @classmethod
-    def configure(
-        cls,
-        log_level: str = "INFO",
-        log_dir: Optional[Path] = None
-    ) -> None:
+    def configure(cls, log_level: str = "INFO", log_dir: Optional[Path] = None) -> None:
         """
         Configure global logging settings.
-        
+
         Args:
             log_level: Default log level
             log_dir: Directory for log files
@@ -266,18 +227,14 @@ class LoggerFactory:
         cls._default_log_dir = log_dir
 
     @classmethod
-    def get_logger(
-        cls,
-        component: str,
-        log_level: Optional[str] = None
-    ) -> StructuredLogger:
+    def get_logger(cls, component: str, log_level: Optional[str] = None) -> StructuredLogger:
         """
         Get or create logger for component.
-        
+
         Args:
             component: Component name
             log_level: Optional override for log level
-            
+
         Returns:
             StructuredLogger instance
         """
@@ -288,9 +245,7 @@ class LoggerFactory:
                 log_file = cls._default_log_dir / f"{component}.log"
 
             cls._loggers[component] = StructuredLogger(
-                component=component,
-                log_level=level,
-                log_file=log_file
+                component=component, log_level=level, log_file=log_file
             )
 
         return cls._loggers[component]
@@ -305,10 +260,10 @@ class LoggerFactory:
 def get_logger(component: str) -> StructuredLogger:
     """
     Get logger for component.
-    
+
     Args:
         component: Component name
-        
+
     Returns:
         StructuredLogger instance
     """
@@ -318,7 +273,7 @@ def get_logger(component: str) -> StructuredLogger:
 def configure_logging(log_level: str = "INFO", log_dir: Optional[Path] = None) -> None:
     """
     Configure global logging settings.
-    
+
     Args:
         log_level: Default log level
         log_dir: Directory for log files

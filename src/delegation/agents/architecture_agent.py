@@ -16,7 +16,7 @@ from src.delegation.base import SubAgent, SubAgentResult, SubAgentStatus, SubAge
 class ArchitectureAgent(SubAgent):
     """
     Architecture analysis specialist
-    
+
     Capabilities:
     - Dependency analysis
     - Design pattern detection
@@ -30,7 +30,7 @@ class ArchitectureAgent(SubAgent):
             agent_id=agent_id,
             agent_type="architecture",
             cache_enabled=cache_enabled,
-            max_cache_size=500
+            max_cache_size=500,
         )
         self.analyzer = ComponentAnalyzer()
 
@@ -42,7 +42,7 @@ class ArchitectureAgent(SubAgent):
             "cohesion_analysis",
             "layering_analysis",
             "component_mapping",
-            "architecture_documentation"
+            "architecture_documentation",
         ]
 
     def analyze(self, task: SubAgentTask) -> SubAgentResult:
@@ -51,9 +51,7 @@ class ArchitectureAgent(SubAgent):
 
         try:
             analysis = self.analyzer.analyze_component(
-                target,
-                analysis_type="architecture",
-                depth=depth
+                target, analysis_type="architecture", depth=depth
             )
 
             if "error" in analysis:
@@ -62,7 +60,7 @@ class ArchitectureAgent(SubAgent):
                     agent_type=self.agent_type,
                     status=SubAgentStatus.FAILED,
                     data={},
-                    errors=[analysis["error"]]
+                    errors=[analysis["error"]],
                 )
 
             arch_data = analysis.get("architecture", {})
@@ -75,7 +73,7 @@ class ArchitectureAgent(SubAgent):
                 "dependencies": arch_data.get("dependencies", {}),
                 "architecture_score": self._calculate_architecture_score(arch_data),
                 "recommendations": self._generate_recommendations(arch_data),
-                "analysis_depth": depth
+                "analysis_depth": depth,
             }
 
             return SubAgentResult(
@@ -83,7 +81,7 @@ class ArchitectureAgent(SubAgent):
                 agent_type=self.agent_type,
                 status=SubAgentStatus.SUCCESS,
                 data=result_data,
-                token_count=len(str(result_data)) // 4
+                token_count=len(str(result_data)) // 4,
             )
 
         except Exception as e:
@@ -92,7 +90,7 @@ class ArchitectureAgent(SubAgent):
                 agent_type=self.agent_type,
                 status=SubAgentStatus.FAILED,
                 data={},
-                errors=[f"Architecture analysis failed: {str(e)}"]
+                errors=[f"Architecture analysis failed: {str(e)}"],
             )
 
     def _calculate_architecture_score(self, arch_data: Dict) -> float:

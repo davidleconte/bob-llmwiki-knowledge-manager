@@ -1,6 +1,5 @@
 """Tests for configuration schema."""
 
-
 from src.config.schema import (
     CacheConfig,
     ConfigSchema,
@@ -74,7 +73,7 @@ class TestOptimizerConfig:
         assert config.max_tokens == 4096
         assert config.target_reduction == 0.3
         assert config.min_quality_score == 0.8
-        assert config.strategies == ['remove_whitespace', 'compress_repeated']
+        assert config.strategies == ["remove_whitespace", "compress_repeated"]
 
     def test_custom_values(self):
         """Test OptimizerConfig with custom values."""
@@ -82,13 +81,13 @@ class TestOptimizerConfig:
             max_tokens=8192,
             target_reduction=0.5,
             min_quality_score=0.9,
-            strategies=['remove_whitespace', 'remove_comments'],
+            strategies=["remove_whitespace", "remove_comments"],
         )
 
         assert config.max_tokens == 8192
         assert config.target_reduction == 0.5
         assert config.min_quality_score == 0.9
-        assert config.strategies == ['remove_whitespace', 'remove_comments']
+        assert config.strategies == ["remove_whitespace", "remove_comments"]
 
     def test_strategies_default_initialization(self):
         """Test strategies default initialization in __post_init__."""
@@ -111,7 +110,7 @@ class TestMonitoringConfig:
         config = MonitoringConfig()
 
         assert config.enabled is True
-        assert config.log_level == 'INFO'
+        assert config.log_level == "INFO"
         assert config.metrics_enabled is True
         assert config.health_check_interval == 60
 
@@ -119,19 +118,19 @@ class TestMonitoringConfig:
         """Test MonitoringConfig with custom values."""
         config = MonitoringConfig(
             enabled=False,
-            log_level='DEBUG',
+            log_level="DEBUG",
             metrics_enabled=False,
             health_check_interval=30,
         )
 
         assert config.enabled is False
-        assert config.log_level == 'DEBUG'
+        assert config.log_level == "DEBUG"
         assert config.metrics_enabled is False
         assert config.health_check_interval == 30
 
     def test_log_levels(self):
         """Test different log levels."""
-        for level in ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']:
+        for level in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
             config = MonitoringConfig(log_level=level)
             assert config.log_level == level
 
@@ -159,7 +158,7 @@ class TestConfigSchema:
         """Test ConfigSchema with custom configurations."""
         cache = CacheConfig(l1_max_size=2000)
         optimizer = OptimizerConfig(max_tokens=8192)
-        monitoring = MonitoringConfig(log_level='DEBUG')
+        monitoring = MonitoringConfig(log_level="DEBUG")
 
         schema = ConfigSchema(
             cache=cache,
@@ -169,7 +168,7 @@ class TestConfigSchema:
 
         assert schema.cache.l1_max_size == 2000
         assert schema.optimizer.max_tokens == 8192
-        assert schema.monitoring.log_level == 'DEBUG'
+        assert schema.monitoring.log_level == "DEBUG"
 
     def test_nested_access(self):
         """Test accessing nested configuration values."""

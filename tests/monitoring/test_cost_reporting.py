@@ -84,8 +84,8 @@ class TestGenerateCostSummary:
 
 class TestGenerateCostDashboard:
     def test_dashboard_renders_all_core_sections(self, tracker):
-        tracker.record_token_counting(20000)          # 20 BC spent
-        tracker.record_optimization(4000, 1000)       # spends 1 BC, saves 3 BC
+        tracker.record_token_counting(20000)  # 20 BC spent
+        tracker.record_optimization(4000, 1000)  # spends 1 BC, saves 3 BC
         dashboard = generate_cost_dashboard()
 
         assert "BOBCOIN COST TRACKING DASHBOARD" in dashboard
@@ -246,8 +246,8 @@ class TestCalculateProjectedCosts:
 
 class TestGetTopCostOperations:
     def test_returns_operations_sorted_by_cost_desc(self, tracker):
-        tracker.record_token_counting(5000)               # 5.0 BC
-        tracker.record_cache_miss(3000)                   # 3.0 BC
+        tracker.record_token_counting(5000)  # 5.0 BC
+        tracker.record_cache_miss(3000)  # 3.0 BC
         tracker.record_custom_operation("embedding", 1000)  # 1.0 BC
         top = get_top_cost_operations()
         costs = [op["cost_bobcoins"] for op in top]
@@ -271,7 +271,7 @@ class TestGetTopCostOperations:
 class TestGetSavingsSummary:
     def test_savings_summary(self, tracker):
         tracker.record_optimization(4000, 1000)  # saves 3000 tokens
-        tracker.record_cache_hit(2000)           # saves 2000 tokens
+        tracker.record_cache_hit(2000)  # saves 2000 tokens
         summary = get_savings_summary()
         assert summary["total_tokens_saved"] == 5000
         assert summary["total_bobcoins_saved"] == round(bc(5000), 4) == 5.0

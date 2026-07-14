@@ -21,21 +21,17 @@ class Visualizer:
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
     def generate(
-        self,
-        data: Dict,
-        chart_type: ChartType,
-        title: str,
-        output_file: Optional[str] = None
+        self, data: Dict, chart_type: ChartType, title: str, output_file: Optional[str] = None
     ) -> Dict:
         """
         Generate a visualization
-        
+
         Args:
             data: Data to visualize
             chart_type: Type of chart to generate
             title: Chart title
             output_file: Output filename (auto-generated if None)
-            
+
         Returns:
             Dictionary with generation result
         """
@@ -60,7 +56,7 @@ class Visualizer:
                 return {"error": f"Unknown chart type: {chart_type}"}
 
             # Write to file
-            with open(output_path, 'w', encoding='utf-8') as f:
+            with open(output_path, "w", encoding="utf-8") as f:
                 f.write(content)
 
             return {
@@ -68,7 +64,7 @@ class Visualizer:
                 "chart_type": chart_type,
                 "title": title,
                 "output_file": str(output_path),
-                "preview": content[:500] + "..." if len(content) > 500 else content
+                "preview": content[:500] + "..." if len(content) > 500 else content,
             }
 
         except Exception as e:
@@ -168,10 +164,7 @@ class Visualizer:
         min_value = min(values) if values else 0
         value_range = max_value - min_value if max_value != min_value else 1
 
-        scaled_values = [
-            int((v - min_value) / value_range * (height - 1))
-            for v in values
-        ]
+        scaled_values = [int((v - min_value) / value_range * (height - 1)) for v in values]
 
         lines = []
         lines.append("=" * 80)
@@ -191,11 +184,13 @@ class Visualizer:
             for i, scaled_val in enumerate(scaled_values):
                 if scaled_val == row:
                     line_chars.append("●")
-                elif scaled_val > row and i > 0 and scaled_values[i-1] <= row:
+                elif scaled_val > row and i > 0 and scaled_values[i - 1] <= row:
                     line_chars.append("╱")
-                elif scaled_val < row and i > 0 and scaled_values[i-1] >= row:
+                elif scaled_val < row and i > 0 and scaled_values[i - 1] >= row:
                     line_chars.append("╲")
-                elif i > 0 and min(scaled_val, scaled_values[i-1]) <= row <= max(scaled_val, scaled_values[i-1]):
+                elif i > 0 and min(scaled_val, scaled_values[i - 1]) <= row <= max(
+                    scaled_val, scaled_values[i - 1]
+                ):
                     line_chars.append("│")
                 else:
                     line_chars.append(" ")
@@ -279,7 +274,7 @@ class Visualizer:
             if children:
                 extension = "    " if is_last else "│   "
                 for i, child in enumerate(children):
-                    is_last_child = (i == len(children) - 1)
+                    is_last_child = i == len(children) - 1
                     render_node(child, prefix + extension, is_last_child)
 
         # Render root
@@ -288,7 +283,7 @@ class Visualizer:
 
         children = root.get("children", [])
         for i, child in enumerate(children):
-            is_last_child = (i == len(children) - 1)
+            is_last_child = i == len(children) - 1
             render_node(child, "", is_last_child)
 
         lines.append("")
@@ -306,12 +301,12 @@ class Visualizer:
                     security_data.get("critical", 0),
                     security_data.get("high", 0),
                     security_data.get("medium", 0),
-                    security_data.get("low", 0)
-                ]
+                    security_data.get("low", 0),
+                ],
             },
             "bar",
             "Security Issues by Severity",
-            "security_severity.txt"
+            "security_severity.txt",
         )
 
         return severity_chart
@@ -326,12 +321,12 @@ class Visualizer:
                     quality_data.get("total_lines", 0),
                     quality_data.get("total_functions", 0),
                     quality_data.get("long_functions", 0),
-                    quality_data.get("complex_functions", 0)
-                ]
+                    quality_data.get("complex_functions", 0),
+                ],
             },
             "bar",
             "Code Quality Metrics",
-            "quality_metrics.txt"
+            "quality_metrics.txt",
         )
 
         return metrics_chart
@@ -348,31 +343,21 @@ class Visualizer:
                         "children": [
                             {"name": sub_dep, "children": []}
                             for sub_dep in deps[:5]  # Limit to first 5
-                        ]
+                        ],
                     }
                     for dep, deps in list(dependencies.items())[:10]  # Limit to first 10
-                ]
+                ],
             }
         }
 
-        return self.generate(
-            tree_data,
-            "tree",
-            "Dependency Tree",
-            "dependency_tree.txt"
-        )
+        return self.generate(tree_data, "tree", "Dependency Tree", "dependency_tree.txt")
 
     def generate_progress_timeline(self, milestones: List[Dict]) -> Dict:
         """Generate project progress timeline"""
-        timeline_data = {
-            "events": milestones
-        }
+        timeline_data = {"events": milestones}
 
         return self.generate(
-            timeline_data,
-            "timeline",
-            "Project Progress Timeline",
-            "progress_timeline.txt"
+            timeline_data, "timeline", "Project Progress Timeline", "progress_timeline.txt"
         )
 
 
@@ -387,7 +372,7 @@ def main():
         "--type",
         choices=["bar", "pie", "line", "timeline", "tree"],
         required=True,
-        help="Chart type"
+        help="Chart type",
     )
     parser.add_argument("--title", required=True, help="Chart title")
     parser.add_argument("--output", help="Output filename")
@@ -397,7 +382,7 @@ def main():
     # Load data
     try:
         if Path(args.data).exists():
-            with open(args.data, 'r') as f:
+            with open(args.data, "r") as f:
                 data = json.load(f)
         else:
             data = json.loads(args.data)
@@ -407,12 +392,7 @@ def main():
 
     # Generate visualization
     visualizer = Visualizer(args.output_dir)
-    result = visualizer.generate(
-        data,
-        args.type,
-        args.title,
-        args.output
-    )
+    result = visualizer.generate(data, args.type, args.title, args.output)
 
     if "error" in result:
         print(f"Error: {result['error']}")
@@ -420,7 +400,7 @@ def main():
 
     print(f"\n✓ Visualization generated: {result['output_file']}")
     print("\nPreview:")
-    print(result['preview'])
+    print(result["preview"])
 
 
 if __name__ == "__main__":

@@ -29,7 +29,7 @@ class TestL1CachePerformance:
 
         # Verify performance target
         stats = benchmark.stats
-        assert stats.stats.mean < 0.001, f"L1 lookup too slow: {stats.stats.mean*1000:.2f}ms"
+        assert stats.stats.mean < 0.001, f"L1 lookup too slow: {stats.stats.mean * 1000:.2f}ms"
 
     def test_l1_lookup_miss(self, benchmark, populated_cache):
         """Benchmark L1 cache miss (should be <1ms)."""
@@ -38,7 +38,7 @@ class TestL1CachePerformance:
         assert result is None
 
         stats = benchmark.stats
-        assert stats.stats.mean < 0.001, f"L1 miss too slow: {stats.stats.mean*1000:.2f}ms"
+        assert stats.stats.mean < 0.001, f"L1 miss too slow: {stats.stats.mean * 1000:.2f}ms"
 
     def test_l1_set_new(self, benchmark):
         """Benchmark L1 cache set for new entry."""
@@ -50,17 +50,18 @@ class TestL1CachePerformance:
         benchmark(set_operation)
 
         stats = benchmark.stats
-        assert stats.stats.mean < 0.001, f"L1 set too slow: {stats.stats.mean*1000:.2f}ms"
+        assert stats.stats.mean < 0.001, f"L1 set too slow: {stats.stats.mean * 1000:.2f}ms"
 
     def test_l1_set_update(self, benchmark, populated_cache):
         """Benchmark L1 cache set for existing entry."""
+
         def update_operation():
             populated_cache.set("key_50", "new_value")
 
         benchmark(update_operation)
 
         stats = benchmark.stats
-        assert stats.stats.mean < 0.001, f"L1 update too slow: {stats.stats.mean*1000:.2f}ms"
+        assert stats.stats.mean < 0.001, f"L1 update too slow: {stats.stats.mean * 1000:.2f}ms"
 
     def test_l1_eviction(self, benchmark):
         """Benchmark L1 cache eviction."""
@@ -77,7 +78,7 @@ class TestL1CachePerformance:
         benchmark(trigger_eviction)
 
         stats = benchmark.stats
-        assert stats.stats.mean < 0.002, f"L1 eviction too slow: {stats.stats.mean*1000:.2f}ms"
+        assert stats.stats.mean < 0.002, f"L1 eviction too slow: {stats.stats.mean * 1000:.2f}ms"
 
     def test_l1_scalability_100(self, benchmark):
         """Test L1 performance with 100 entries."""
@@ -143,7 +144,9 @@ class TestL2CachePerformance:
 
         stats = benchmark.stats
         # Should be well under 100ms for small cache
-        assert stats.stats.mean < 0.050, f"L2 small lookup too slow: {stats.stats.mean*1000:.2f}ms"
+        assert stats.stats.mean < 0.050, (
+            f"L2 small lookup too slow: {stats.stats.mean * 1000:.2f}ms"
+        )
 
     def test_l2_lookup_medium(self, benchmark, medium_cache):
         """Benchmark L2 lookup with 200 entries."""
@@ -153,7 +156,9 @@ class TestL2CachePerformance:
 
         stats = benchmark.stats
         # Should be under 100ms for medium cache
-        assert stats.stats.mean < 0.100, f"L2 medium lookup too slow: {stats.stats.mean*1000:.2f}ms"
+        assert stats.stats.mean < 0.100, (
+            f"L2 medium lookup too slow: {stats.stats.mean * 1000:.2f}ms"
+        )
 
     def test_l2_lookup_large(self, benchmark, large_cache):
         """Benchmark L2 lookup with 500 entries (CRITICAL TEST)."""
@@ -172,7 +177,7 @@ class TestL2CachePerformance:
         stats = benchmark.stats
         # This is the critical test - should be <100ms
         # Will likely FAIL with current O(n) implementation
-        print(f"\n⚠️  L2 large cache lookup: {stats.stats.mean*1000:.2f}ms")
+        print(f"\n⚠️  L2 large cache lookup: {stats.stats.mean * 1000:.2f}ms")
         if stats.stats.mean >= 0.100:
             print("❌ FAILED: Exceeds 100ms target - FAISS integration needed")
 
@@ -187,7 +192,7 @@ class TestL2CachePerformance:
 
         stats = benchmark.stats
         # Set can be slower due to embedding generation
-        assert stats.stats.mean < 0.100, f"L2 set too slow: {stats.stats.mean*1000:.2f}ms"
+        assert stats.stats.mean < 0.100, f"L2 set too slow: {stats.stats.mean * 1000:.2f}ms"
 
     def test_l2_similarity_search(self, benchmark, medium_cache):
         """Benchmark similarity search (find_similar)."""
@@ -196,7 +201,9 @@ class TestL2CachePerformance:
         assert len(result) > 0
 
         stats = benchmark.stats
-        assert stats.stats.mean < 0.150, f"L2 similarity search too slow: {stats.stats.mean*1000:.2f}ms"
+        assert stats.stats.mean < 0.150, (
+            f"L2 similarity search too slow: {stats.stats.mean * 1000:.2f}ms"
+        )
 
 
 @pytest.mark.benchmark(group="cache-multilevel")
@@ -206,10 +213,7 @@ class TestMultiLevelCachePerformance:
     @pytest.fixture
     def populated_cache(self):
         """Create multi-level cache with data."""
-        cache = MultiLevelCache(
-            l1_max_size=1000,
-            l2_max_size=500
-        )
+        cache = MultiLevelCache(l1_max_size=1000, l2_max_size=500)
 
         # Add 100 entries
         for i in range(100):
@@ -224,13 +228,15 @@ class TestMultiLevelCachePerformance:
         assert result == "value_50"
 
         stats = benchmark.stats
-        assert stats.stats.mean < 0.001, f"Multi-level L1 hit too slow: {stats.stats.mean*1000:.2f}ms"
+        assert stats.stats.mean < 0.001, (
+            f"Multi-level L1 hit too slow: {stats.stats.mean * 1000:.2f}ms"
+        )
 
     def test_multilevel_l2_hit(self, benchmark):
         """Benchmark multi-level cache L2 hit."""
         cache = MultiLevelCache(
             l1_max_size=10,  # Small L1 to force L2 hits
-            l2_max_size=500
+            l2_max_size=500,
         )
 
         # Add entries
@@ -244,7 +250,9 @@ class TestMultiLevelCachePerformance:
 
         # Should hit L2
         stats = benchmark.stats
-        assert stats.stats.mean < 0.100, f"Multi-level L2 hit too slow: {stats.stats.mean*1000:.2f}ms"
+        assert stats.stats.mean < 0.100, (
+            f"Multi-level L2 hit too slow: {stats.stats.mean * 1000:.2f}ms"
+        )
 
     def test_multilevel_miss(self, benchmark, populated_cache):
         """Benchmark multi-level cache miss."""
@@ -254,7 +262,9 @@ class TestMultiLevelCachePerformance:
 
         stats = benchmark.stats
         # Miss checks both levels
-        assert stats.stats.mean < 0.100, f"Multi-level miss too slow: {stats.stats.mean*1000:.2f}ms"
+        assert stats.stats.mean < 0.100, (
+            f"Multi-level miss too slow: {stats.stats.mean * 1000:.2f}ms"
+        )
 
     def test_multilevel_set(self, benchmark):
         """Benchmark multi-level cache set."""
@@ -267,15 +277,13 @@ class TestMultiLevelCachePerformance:
 
         stats = benchmark.stats
         # Set writes to both levels
-        assert stats.stats.mean < 0.100, f"Multi-level set too slow: {stats.stats.mean*1000:.2f}ms"
+        assert stats.stats.mean < 0.100, (
+            f"Multi-level set too slow: {stats.stats.mean * 1000:.2f}ms"
+        )
 
     def test_multilevel_promotion(self, benchmark):
         """Benchmark L2 to L1 promotion."""
-        cache = MultiLevelCache(
-            l1_max_size=10,
-            l2_max_size=500,
-            promote_l2_hits=True
-        )
+        cache = MultiLevelCache(l1_max_size=10, l2_max_size=500, promote_l2_hits=True)
 
         # Add entries
         for i in range(50):
@@ -335,13 +343,10 @@ class TestCacheStressPerformance:
         def add_diverse_prompts():
             # Add prompts with diverse vocabulary
             for i in range(10):
-                cache.set(
-                    f"unique prompt {i} with different words",
-                    f"result_{i}"
-                )
+                cache.set(f"unique prompt {i} with different words", f"result_{i}")
 
         benchmark(add_diverse_prompts)
 
         stats = benchmark.stats
         # Should handle vocabulary growth
-        print(f"\nVocabulary growth: {stats.stats.mean*1000:.2f}ms per 10 prompts")
+        print(f"\nVocabulary growth: {stats.stats.mean * 1000:.2f}ms per 10 prompts")

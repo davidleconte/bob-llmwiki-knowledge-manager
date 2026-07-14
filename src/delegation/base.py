@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Optional
 
 class SubAgentStatus(Enum):
     """Sub-agent execution status"""
+
     PENDING = "pending"
     RUNNING = "running"
     SUCCESS = "success"
@@ -21,6 +22,7 @@ class SubAgentStatus(Enum):
 
 class SubAgentPriority(Enum):
     """Sub-agent priority levels"""
+
     LOW = 1
     MEDIUM = 2
     HIGH = 3
@@ -66,7 +68,7 @@ class SubAgentResult:
             "execution_time_ms": self.execution_time_ms,
             "token_count": self.token_count,
             "timestamp": self.timestamp,
-            "metadata": self.metadata
+            "metadata": self.metadata,
         }
 
 
@@ -96,21 +98,17 @@ class SubAgentTask:
 class SubAgent(ABC):
     """
     Base class for all sub-agents
-    
+
     Sub-agents are specialized workers that perform specific analysis tasks
     in parallel. Each sub-agent has its own cache and operates independently.
     """
 
     def __init__(
-        self,
-        agent_id: str,
-        agent_type: str,
-        cache_enabled: bool = True,
-        max_cache_size: int = 1000
+        self, agent_id: str, agent_type: str, cache_enabled: bool = True, max_cache_size: int = 1000
     ):
         """
         Initialize sub-agent
-        
+
         Args:
             agent_id: Unique identifier for this agent instance
             agent_type: Type of agent (e.g., "security", "performance")
@@ -137,10 +135,10 @@ class SubAgent(ABC):
     def analyze(self, task: SubAgentTask) -> SubAgentResult:
         """
         Perform analysis task
-        
+
         Args:
             task: Task to execute
-            
+
         Returns:
             SubAgentResult with analysis results
         """
@@ -150,7 +148,7 @@ class SubAgent(ABC):
     def get_capabilities(self) -> List[str]:
         """
         Get list of capabilities this agent provides
-        
+
         Returns:
             List of capability names
         """
@@ -159,10 +157,10 @@ class SubAgent(ABC):
     def execute(self, task: SubAgentTask) -> SubAgentResult:
         """
         Execute a task with error handling and caching
-        
+
         Args:
             task: Task to execute
-            
+
         Returns:
             SubAgentResult with execution results
         """
@@ -208,7 +206,7 @@ class SubAgent(ABC):
                 status=SubAgentStatus.FAILED,
                 data={},
                 errors=[str(e)],
-                execution_time_ms=(datetime.now(timezone.utc) - start_time).total_seconds() * 1000
+                execution_time_ms=(datetime.now(timezone.utc) - start_time).total_seconds() * 1000,
             )
         finally:
             self._current_task = None
@@ -219,11 +217,7 @@ class SubAgent(ABC):
         import json
 
         # Create deterministic key from task
-        key_data = {
-            "type": task.task_type,
-            "target": task.target,
-            "params": task.parameters
-        }
+        key_data = {"type": task.task_type, "target": task.target, "params": task.parameters}
         key_str = json.dumps(key_data, sort_keys=True)
         return hashlib.sha256(key_str.encode()).hexdigest()
 
@@ -258,7 +252,7 @@ class SubAgent(ABC):
             "total_tokens": self._total_tokens,
             "cache_size": len(self._cache),
             "cache_enabled": self.cache_enabled,
-            "current_task": self._current_task.task_id if self._current_task else None
+            "current_task": self._current_task.task_id if self._current_task else None,
         }
 
     def reset(self):

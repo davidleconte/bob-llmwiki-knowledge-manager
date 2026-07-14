@@ -29,10 +29,7 @@ class TestPromptOptimizer:
     def test_initialization_custom(self):
         """Test initialization with custom parameters."""
         optimizer = PromptOptimizer(
-            model="gpt-3.5-turbo",
-            target_savings=0.80,
-            min_quality=0.90,
-            use_cache=False
+            model="gpt-3.5-turbo", target_savings=0.80, min_quality=0.90, use_cache=False
         )
 
         assert optimizer.token_counter.model == "gpt-3.5-turbo"
@@ -163,8 +160,8 @@ More content"""
         assert first.get("from_cache") is not True  # first call computes fresh
 
         second = optimizer.optimize(prompt)
-        assert second.get("from_cache") is True      # second call served from cache
-        assert optimizer.cache.hit_rate() > 0         # a real hit was recorded
+        assert second.get("from_cache") is True  # second call served from cache
+        assert optimizer.cache.hit_rate() > 0  # a real hit was recorded
         # cache hit returns the same optimized text and restored metadata
         assert second["optimized"] == first["optimized"]
         assert second["optimized_tokens"] == first["optimized_tokens"]
@@ -200,11 +197,7 @@ More content"""
         """Test batch optimization."""
         optimizer = PromptOptimizer(use_cache=False)
 
-        prompts = [
-            "First prompt",
-            "Second prompt",
-            "Third prompt"
-        ]
+        prompts = ["First prompt", "Second prompt", "Third prompt"]
 
         results = optimizer.optimize_batch(prompts)
 
@@ -263,8 +256,8 @@ More content"""
         """Test meets_target flag."""
         optimizer = PromptOptimizer(
             target_savings=0.10,  # Low target
-            min_quality=0.50,     # Low quality threshold
-            use_cache=False
+            min_quality=0.50,  # Low quality threshold
+            use_cache=False,
         )
 
         prompt = "This is a test with some extra words that can be optimized."
@@ -284,10 +277,9 @@ More content"""
         optimized_lower = result["optimized"].lower()
 
         # Should remove some filler words
-        filler_count = sum([
-            1 for word in ["actually", "very", "basically", "just"]
-            if word in optimized_lower
-        ])
+        filler_count = sum(
+            [1 for word in ["actually", "very", "basically", "just"] if word in optimized_lower]
+        )
 
         # Should remove at least some fillers
         assert filler_count < 4
@@ -377,7 +369,7 @@ Line 3"""
         prompts = [
             "Short prompt",
             "A longer prompt with more words to optimize",
-            "Another test prompt"
+            "Another test prompt",
         ]
 
         for prompt in prompts:

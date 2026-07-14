@@ -15,7 +15,7 @@ from src.monitoring.logger import get_logger
 @dataclass
 class VocabularySnapshot:
     """Snapshot of vocabulary at a point in time.
-    
+
     Attributes:
         timestamp: When snapshot was taken
         vocabulary: Set of terms in vocabulary
@@ -23,6 +23,7 @@ class VocabularySnapshot:
         corpus_size: Number of documents in corpus
         top_terms: Most common terms (optional)
     """
+
     timestamp: float
     vocabulary: Set[str]
     vocabulary_size: int
@@ -42,7 +43,7 @@ class VocabularySnapshot:
 @dataclass
 class DriftMetrics:
     """Metrics for vocabulary drift.
-    
+
     Attributes:
         new_terms: Number of new terms added
         removed_terms: Number of terms removed
@@ -50,6 +51,7 @@ class DriftMetrics:
         change_rate: Rate of change (0-1)
         drift_score: Overall drift score (0-1)
     """
+
     new_terms: int
     removed_terms: int
     total_change: int
@@ -69,10 +71,10 @@ class DriftMetrics:
 
 class VocabularyDriftMonitor:
     """Monitor vocabulary drift in semantic cache.
-    
+
     Tracks vocabulary changes over time and detects significant drift
     that may require cache invalidation or model retraining.
-    
+
     Attributes:
         drift_threshold: Threshold for significant drift (0-1)
         snapshot_interval: Minimum time between snapshots (seconds)
@@ -80,12 +82,14 @@ class VocabularyDriftMonitor:
         snapshots: Historical vocabulary snapshots
     """
 
-    def __init__(self,
-                 drift_threshold: float = 0.3,
-                 snapshot_interval: float = 300.0,
-                 max_snapshots: int = 100):
+    def __init__(
+        self,
+        drift_threshold: float = 0.3,
+        snapshot_interval: float = 300.0,
+        max_snapshots: int = 100,
+    ):
         """Initialize vocabulary drift monitor.
-        
+
         Args:
             drift_threshold: Threshold for significant drift (0-1)
             snapshot_interval: Minimum time between snapshots (seconds)
@@ -104,17 +108,19 @@ class VocabularyDriftMonitor:
 
         self._logger = get_logger("monitoring.vocabulary_drift")
 
-        self._logger.info("vocabulary_drift_monitor_initialized",
-                         drift_threshold=drift_threshold,
-                         snapshot_interval=snapshot_interval,
-                         max_snapshots=max_snapshots)
+        self._logger.info(
+            "vocabulary_drift_monitor_initialized",
+            drift_threshold=drift_threshold,
+            snapshot_interval=snapshot_interval,
+            max_snapshots=max_snapshots,
+        )
 
     def take_snapshot(self, embedding_generator: Any) -> VocabularySnapshot:
         """Take a snapshot of current vocabulary.
-        
+
         Args:
             embedding_generator: EmbeddingGenerator instance
-            
+
         Returns:
             VocabularySnapshot
         """
@@ -132,13 +138,15 @@ class VocabularyDriftMonitor:
         # enumerable vocabulary to drift.
         vocabulary = set()
         if embedding_generator.vectorizer is not None:
-            vocab = getattr(embedding_generator.vectorizer, 'vocabulary_', None)
+            vocab = getattr(embedding_generator.vectorizer, "vocabulary_", None)
             if vocab is not None:
                 vocabulary = set(vocab.keys())
 
         # Get top terms if available
         top_terms = []
-        if embedding_generator.vectorizer is not None and hasattr(embedding_generator.vectorizer, 'get_feature_names_out'):
+        if embedding_generator.vectorizer is not None and hasattr(
+            embedding_generator.vectorizer, "get_feature_names_out"
+        ):
             try:
                 feature_names = embedding_generator.vectorizer.get_feature_names_out()
                 top_terms = list(feature_names[:20])  # Top 20 terms
@@ -150,27 +158,29 @@ class VocabularyDriftMonitor:
             vocabulary=vocabulary,
             vocabulary_size=len(vocabulary),
             corpus_size=len(embedding_generator.corpus),
-            top_terms=top_terms
+            top_terms=top_terms,
         )
 
         self.snapshots.append(snapshot)
         self._last_snapshot_time = current_time
 
-        self._logger.debug("vocabulary_snapshot_taken",
-                          vocabulary_size=snapshot.vocabulary_size,
-                          corpus_size=snapshot.corpus_size)
+        self._logger.debug(
+            "vocabulary_snapshot_taken",
+            vocabulary_size=snapshot.vocabulary_size,
+            corpus_size=snapshot.corpus_size,
+        )
 
         return snapshot
 
-    def calculate_drift(self,
-                       old_snapshot: VocabularySnapshot,
-                       new_snapshot: VocabularySnapshot) -> DriftMetrics:
+    def calculate_drift(
+        self, old_snapshot: VocabularySnapshot, new_snapshot: VocabularySnapshot
+    ) -> DriftMetrics:
         """Calculate drift between two snapshots.
-        
+
         Args:
             old_snapshot: Earlier snapshot
             new_snapshot: Later snapshot
-            
+
         Returns:
             DriftMetrics
         """
@@ -204,17 +214,17 @@ class VocabularyDriftMonitor:
             removed_terms=removed_terms,
             total_change=total_change,
             change_rate=change_rate,
-            drift_score=drift_score
+            drift_score=drift_score,
         )
 
     def check_drift(self, embedding_generator: Any) -> Optional[DriftMetrics]:
         """Check for vocabulary drift.
-        
+
         Takes a new snapshot and compares with the most recent snapshot.
-        
+
         Args:
             embedding_generator: EmbeddingGenerator instance
-            
+
         Returns:
             DriftMetrics if drift detected, None otherwise
         """
@@ -233,22 +243,26 @@ class VocabularyDriftMonitor:
         if drift_metrics.drift_score >= self.drift_threshold:
             self._record_drift_event(drift_metrics, old_snapshot, new_snapshot)
 
-            self._logger.warning("vocabulary_drift_detected",
-                               drift_score=drift_metrics.drift_score,
-                               threshold=self.drift_threshold,
-                               new_terms=drift_metrics.new_terms,
-                               removed_terms=drift_metrics.removed_terms)
+            self._logger.warning(
+                "vocabulary_drift_detected",
+                drift_score=drift_metrics.drift_score,
+                threshold=self.drift_threshold,
+                new_terms=drift_metrics.new_terms,
+                removed_terms=drift_metrics.removed_terms,
+            )
 
             return drift_metrics
 
         return None
 
-    def _record_drift_event(self,
-                           metrics: DriftMetrics,
-                           old_snapshot: VocabularySnapshot,
-                           new_snapshot: VocabularySnapshot) -> None:
+    def _record_drift_event(
+        self,
+        metrics: DriftMetrics,
+        old_snapshot: VocabularySnapshot,
+        new_snapshot: VocabularySnapshot,
+    ) -> None:
         """Record a drift event.
-        
+
         Args:
             metrics: Drift metrics
             old_snapshot: Old vocabulary snapshot
@@ -271,7 +285,7 @@ class VocabularyDriftMonitor:
 
     def get_drift_history(self) -> List[Dict[str, Any]]:
         """Get history of drift events.
-        
+
         Returns:
             List of drift event dictionaries
         """
@@ -279,10 +293,10 @@ class VocabularyDriftMonitor:
 
     def get_current_drift(self, embedding_generator: Any) -> Optional[DriftMetrics]:
         """Get current drift without triggering snapshot interval.
-        
+
         Args:
             embedding_generator: EmbeddingGenerator instance
-            
+
         Returns:
             DriftMetrics if snapshots available, None otherwise
         """
@@ -305,16 +319,13 @@ class VocabularyDriftMonitor:
 
     def stats(self) -> Dict[str, Any]:
         """Get monitor statistics.
-        
+
         Returns:
             Dictionary with monitor statistics
         """
         current_drift = None
         if len(self.snapshots) >= 2:
-            current_drift = self.calculate_drift(
-                self.snapshots[-2],
-                self.snapshots[-1]
-            ).to_dict()
+            current_drift = self.calculate_drift(self.snapshots[-2], self.snapshots[-1]).to_dict()
 
         return {
             "drift_threshold": self.drift_threshold,
@@ -332,7 +343,7 @@ _drift_monitor: Optional[VocabularyDriftMonitor] = None
 
 def get_drift_monitor() -> VocabularyDriftMonitor:
     """Get global vocabulary drift monitor instance.
-    
+
     Returns:
         Global VocabularyDriftMonitor instance
     """
@@ -344,16 +355,16 @@ def get_drift_monitor() -> VocabularyDriftMonitor:
     return _drift_monitor
 
 
-def configure_drift_monitor(drift_threshold: float = 0.3,
-                           snapshot_interval: float = 300.0,
-                           max_snapshots: int = 100) -> VocabularyDriftMonitor:
+def configure_drift_monitor(
+    drift_threshold: float = 0.3, snapshot_interval: float = 300.0, max_snapshots: int = 100
+) -> VocabularyDriftMonitor:
     """Configure global vocabulary drift monitor.
-    
+
     Args:
         drift_threshold: Threshold for significant drift (0-1)
         snapshot_interval: Minimum time between snapshots (seconds)
         max_snapshots: Maximum number of snapshots to keep
-        
+
     Returns:
         Configured VocabularyDriftMonitor instance
     """
@@ -362,7 +373,7 @@ def configure_drift_monitor(drift_threshold: float = 0.3,
     _drift_monitor = VocabularyDriftMonitor(
         drift_threshold=drift_threshold,
         snapshot_interval=snapshot_interval,
-        max_snapshots=max_snapshots
+        max_snapshots=max_snapshots,
     )
 
     return _drift_monitor
