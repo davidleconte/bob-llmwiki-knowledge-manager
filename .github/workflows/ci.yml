@@ -162,7 +162,7 @@ jobs:
         run: python -m src.validation --corpus repo --out "$RUNNER_TEMP/validation"
       - name: Upload validation report + manifest
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: validation-report
           path: ${{ runner.temp }}/validation
@@ -222,7 +222,7 @@ jobs:
       - name: Generate CycloneDX SBOM (installed environment)
         run: cyclonedx-py environment -o sbom.cdx.json
       - name: Upload SBOM artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sbom-cyclonedx
           path: sbom.cdx.json
