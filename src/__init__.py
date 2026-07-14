@@ -1,26 +1,31 @@
 """Bob Shell LLM-Wiki Knowledge Manager - Token Optimization System.
 
-This package implements a comprehensive token optimization system for Bob Shell,
-achieving 89.3% token savings while maintaining 91.80% quality.
+A token-optimization library: multi-level caching, prompt optimization,
+intelligent truncation, and monitoring, composed behind a single facade.
 
 Components:
-- cache: Multi-level caching (exact + semantic) [IMPLEMENTED]
-- optimizer: Prompt compression and optimization [TODO]
-- formatter: Format detection and enforcement [TODO]
-- truncation: Intelligent content truncation [TODO]
-- batch: Batch processing and scheduling [TODO]
-- integration: Component integration and orchestration [TODO]
-- monitoring: Metrics, logging, and observability [TODO]
+- cache: Multi-level caching (exact + semantic)
+- optimizer: Prompt compression and optimization
+- truncation: Intelligent content truncation
+- monitoring: Metrics, logging, and observability
+- config: Typed configuration wired to the runtime
+- facade: TokenOptimizer, the unified entry point (also exposed via the CLI)
 """
 
 __version__ = "1.0.0-dev"
 __author__ = "Bob Shell Team"
 
-# Only import implemented components
 from src.cache import ExactCache, MultiLevelCache, SemanticCache
+from src.facade import TokenOptimizer
+from src.optimizer import PromptOptimizer, TokenCounter
+from src.truncation import Truncator
 
 __all__ = [
+    "TokenOptimizer",
     "MultiLevelCache",
     "ExactCache",
     "SemanticCache",
+    "PromptOptimizer",
+    "TokenCounter",
+    "Truncator",
 ]
