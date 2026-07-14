@@ -3,14 +3,10 @@ Architecture Analysis Sub-Agent
 Specialized agent for architecture and design pattern analysis
 """
 
-import sys
-from pathlib import Path
 from typing import Dict, List
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
-
-from scripts.utils.component_analyzer import ComponentAnalyzer
 from src.delegation.base import SubAgent, SubAgentResult, SubAgentStatus, SubAgentTask
+from src.tools.component_analyzer import ComponentAnalyzer
 
 
 class ArchitectureAgent(SubAgent):

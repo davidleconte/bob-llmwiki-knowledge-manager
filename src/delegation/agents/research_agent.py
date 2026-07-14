@@ -3,14 +3,10 @@ Research Sub-Agent
 Specialized agent for knowledge base research and information gathering
 """
 
-import sys
-from pathlib import Path
 from typing import Dict, List
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
-
-from scripts.utils.kb_query import KnowledgeBaseQuery
 from src.delegation.base import SubAgent, SubAgentResult, SubAgentStatus, SubAgentTask
+from src.tools.kb_query import KnowledgeBaseQuery
 
 
 class ResearchAgent(SubAgent):

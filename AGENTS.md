@@ -41,7 +41,7 @@ A parallel sub-agent framework for repository analysis. **This is a separate sys
 **Purpose:** Parallel code repository analysis  
 **Technology:** Python 3.11+, ThreadPoolExecutor  
 **Complexity:** ~1,588 lines of Python code  
-**Status:** Experimental, orphaned (not wired into runtime), demo-only. Held at a ~54% per-package coverage floor (`scripts/check_coverage_by_package.py`); a Phase-4 rewrite is planned.  
+**Status:** Experimental, orphaned (not wired into runtime), demo-only. Held at a ~54% per-package coverage floor (`scripts/check_coverage_by_package.py`). Per the Phase-4 decision it stays a **separate, layering-clean subsystem** (not facade-wired — it solves a different problem domain); its only Phase-4 change was the B3 layering fix (shared utilities moved to `src/tools/`).  
 
 **Key Components:**
 - DelegationCoordinator (parallel execution)

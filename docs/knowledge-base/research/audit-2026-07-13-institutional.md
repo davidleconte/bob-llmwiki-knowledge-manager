@@ -183,7 +183,7 @@ Full roadmap: **[Repository Improvement Plan](./repository-improvement-plan.md)*
 2. **Phase 1 — Correctness foundation:** C1–C7 + single pricing source, each with a regression test.
 3. **Phase 2 — Test hardening:** ≥80% coverage with a `--cov-fail-under` gate; claim-level + property tests; deterministic suite.
 4. **Phase 3 — Build/supply-chain:** CI matrix, pinned+locked deps, SBOM, enforced gates, coherent Python support.
-5. **Phase 4 — Integration:** unified facade/CLI; wire monitoring + delegation; connect config; kill the `src/→scripts/` layering violation.
+5. **Phase 4 — Integration:** unified facade/CLI; wire monitoring; connect config; kill the `src/→scripts/` layering violation. *(Delegation: the original "wire delegation" intent was superseded 2026-07-14 — it stays a **separate, layering-clean subsystem** per [delegation-integration-analysis](./delegation-integration-analysis-2026-07-13.md) (different problem domain; integration adds complexity without benefit). Phase 4 fixes only its B3 layering violation, relocating shared utilities to `src/tools/`.)*
 6. **Phase 5 — Real validation:** rewrite the validator to invoke the real product; manifest per run; honest variance + latency.
 7. **Phase 6 — Docs:** one architecture doc, Diátaxis structure, complete API docs, CHANGELOG discipline, a "one home per value" CI validator.
 8. **Phase 7 — Governance:** the full community-health set + STRIDE threat model.
