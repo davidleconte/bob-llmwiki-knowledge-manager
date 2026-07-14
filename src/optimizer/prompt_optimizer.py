@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 if TYPE_CHECKING:
     from src.cache.exact_cache import ExactCache
+    from src.config.schema import OptimizerConfig
 import re
 import time
 
@@ -29,28 +30,51 @@ class PromptOptimizer:
 
     Attributes:
         token_counter: Token counting utility
-        cache: Multi-level cache for optimized prompts
-        target_savings: Target token savings percentage
-        min_quality: Minimum quality threshold
+        cache: Exact (L1) cache for optimized prompts
+        max_tokens: Optional default cap on optimized-output tokens (from config)
+        target_reduction: Target fraction of tokens to remove
+        min_quality_score: Minimum quality threshold
     """
 
     def __init__(
         self,
         model: str = DEFAULT_MODEL,
-        target_savings: float = 0.893,
-        min_quality: float = 0.918,
+        max_tokens: Optional[int] = None,
+        target_reduction: float = 0.3,
+        min_quality_score: float = 0.8,
         use_cache: bool = True,
         track_costs: bool = False,
+        *,
+        target_savings: Optional[float] = None,
+        min_quality: Optional[float] = None,
     ):
         """Initialize prompt optimizer.
 
+        Tunables use the canonical ``OptimizerConfig`` field names
+        (``max_tokens``, ``target_reduction``, ``min_quality_score``) so a config
+        object wires straight through -- see :meth:`from_config`.
+
         Args:
-            model: Model name for token counting
-            target_savings: Target token savings (0-1)
-            min_quality: Minimum quality threshold (0-1)
-            use_cache: Whether to use caching
-            track_costs: Whether to track costs with CostTracker
+            model: Model name for token counting.
+            max_tokens: Optional hard cap on optimized-output tokens; when set it
+                applies on every ``optimize()`` call (a per-call ``max_tokens``
+                still overrides it). ``None`` means no default cap.
+            target_reduction: Target fraction of tokens to remove (0-1); drives
+                the ``meets_target`` flag.
+            min_quality_score: Minimum quality score to treat the optimization as
+                on-target (0-1).
+            use_cache: Whether to use caching.
+            track_costs: Whether to track costs with CostTracker.
+            target_savings: Deprecated alias for ``target_reduction`` (same
+                concept: fraction of tokens saved). Overrides it if given.
+            min_quality: Deprecated alias for ``min_quality_score``.
         """
+        # Reconcile deprecated pre-Phase-4 aliases with the canonical config names.
+        if target_savings is not None:
+            target_reduction = target_savings
+        if min_quality is not None:
+            min_quality_score = min_quality
+
         self.token_counter = TokenCounter(model=model, track_costs=track_costs)
         # Use only L1 (exact) cache to avoid semantic matches returning wrong prompt's optimization
         self.cache: Optional["ExactCache"] = None
@@ -58,8 +82,9 @@ class PromptOptimizer:
             from src.cache.exact_cache import ExactCache
 
             self.cache = ExactCache(max_size=1000, track_costs=track_costs)
-        self.target_savings = target_savings
-        self.min_quality = min_quality
+        self.max_tokens = max_tokens
+        self.target_reduction = target_reduction
+        self.min_quality_score = min_quality_score
         self.track_costs = track_costs
 
         # Statistics
@@ -84,11 +109,47 @@ class PromptOptimizer:
         self._logger.info(
             "prompt_optimizer_initialized",
             model=model,
-            target_savings=target_savings,
-            min_quality=min_quality,
+            max_tokens=max_tokens,
+            target_reduction=target_reduction,
+            min_quality_score=min_quality_score,
             use_cache=use_cache,
             track_costs=track_costs,
         )
+
+    @classmethod
+    def from_config(
+        cls,
+        config: "OptimizerConfig",
+        *,
+        model: str = DEFAULT_MODEL,
+        use_cache: bool = True,
+        track_costs: bool = False,
+    ) -> "PromptOptimizer":
+        """Build an optimizer from an :class:`~src.config.schema.OptimizerConfig`.
+
+        The canonical config->runtime path: the config's ``max_tokens``,
+        ``target_reduction`` and ``min_quality_score`` map 1:1 onto the
+        constructor. ``model``/``use_cache``/``track_costs`` are not part of
+        ``OptimizerConfig`` and are passed separately.
+        """
+        return cls(
+            model=model,
+            max_tokens=config.max_tokens,
+            target_reduction=config.target_reduction,
+            min_quality_score=config.min_quality_score,
+            use_cache=use_cache,
+            track_costs=track_costs,
+        )
+
+    @property
+    def target_savings(self) -> float:
+        """Deprecated alias for :attr:`target_reduction` (fraction of tokens saved)."""
+        return self.target_reduction
+
+    @property
+    def min_quality(self) -> float:
+        """Deprecated alias for :attr:`min_quality_score`."""
+        return self.min_quality_score
 
     def optimize(
         self, prompt: str, max_tokens: Optional[int] = None, preserve_structure: bool = True
@@ -122,9 +183,11 @@ class PromptOptimizer:
         optimized = self._remove_redundancy(optimized)
         optimized = self._compress_content(optimized, preserve_structure)
 
-        # Apply token limit if specified
-        if max_tokens:
-            optimized = self._truncate_to_limit(optimized, max_tokens)
+        # Apply token limit: a per-call max_tokens overrides the instance default
+        # (self.max_tokens, set from config); otherwise fall back to that default.
+        effective_max = max_tokens if max_tokens is not None else self.max_tokens
+        if effective_max:
+            optimized = self._truncate_to_limit(optimized, effective_max)
 
         # Count optimized tokens
         optimized_tokens = self.token_counter.count_tokens(optimized)
@@ -162,6 +225,9 @@ class PromptOptimizer:
         result = {
             "original": prompt,
             "optimized": optimized,
+            # "optimized_text" is the canonical key used by the config-integration
+            # tests and the Phase-4 facade; "optimized" is kept for back-compat.
+            "optimized_text": optimized,
             "original_tokens": original_tokens,
             "optimized_tokens": optimized_tokens,
             "tokens_saved": tokens_saved,
@@ -437,6 +503,7 @@ class PromptOptimizer:
         return {
             "original": None,  # original prompt is not stored in the cache
             "optimized": cached,
+            "optimized_text": cached,
             "original_tokens": original_tokens,
             "optimized_tokens": optimized_tokens,
             "tokens_saved": tokens_saved,

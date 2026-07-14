@@ -44,23 +44,31 @@ class MultiLevelCache(CacheInterface):
     def __init__(
         self,
         l1_max_size: int = 1000,
-        l2_max_size: int = 500,
+        l2_max_size: int = 10000,
         similarity_threshold: float = 0.85,
         promote_l2_hits: bool = True,
         l1_ttl_seconds: Optional[float] = None,
         l2_ttl_seconds: Optional[float] = None,
+        l1_enabled: bool = True,
+        l2_enabled: bool = True,
     ):
         """Initialize multi-level cache.
 
         Args:
             l1_max_size: Maximum size for L1 cache
-            l2_max_size: Maximum size for L2 cache
+            l2_max_size: Maximum size for L2 cache. Default 10000 matches
+                CacheConfig.l2_max_size (and keeps L2 > L1, the config's business
+                rule); the old 500 default contradicted both.
             similarity_threshold: Similarity threshold for L2
             promote_l2_hits: Whether to promote L2 hits to L1
             l1_ttl_seconds: Optional TTL for L1 entries (None disables expiry).
             l2_ttl_seconds: Optional TTL for L2 entries (None disables expiry).
                 Threaded through so CacheConfig's ttl_seconds actually reaches
                 the caches instead of being silently inert.
+            l1_enabled: Whether the L1 (exact) level participates in get/set.
+                When False, L1 is bypassed and no L2->L1 promotion occurs.
+            l2_enabled: Whether the L2 (semantic) level participates in get/set.
+                When False, L2 is bypassed. Both flags come from CacheConfig.
         """
         self.l1_cache = ExactCache(max_size=l1_max_size, ttl_seconds=l1_ttl_seconds)
         self.l2_cache = SemanticCache(
@@ -69,6 +77,8 @@ class MultiLevelCache(CacheInterface):
             ttl_seconds=l2_ttl_seconds,
         )
         self.promote_l2_hits = promote_l2_hits
+        self.l1_enabled = l1_enabled
+        self.l2_enabled = l2_enabled
 
         # Initialize monitoring
         self._logger = get_logger("cache.multi_level")
@@ -86,6 +96,8 @@ class MultiLevelCache(CacheInterface):
             l2_max_size=l2_max_size,
             similarity_threshold=similarity_threshold,
             promote_l2_hits=promote_l2_hits,
+            l1_enabled=l1_enabled,
+            l2_enabled=l2_enabled,
             version=self.VERSION,
         )
 
@@ -101,8 +113,8 @@ class MultiLevelCache(CacheInterface):
         """
         start_time = time.time()
 
-        # Try L1 first (fast exact match)
-        result = self.l1_cache.get(key, version)
+        # Try L1 first (fast exact match), unless L1 is disabled by config.
+        result = self.l1_cache.get(key, version) if self.l1_enabled else None
         if result is not None:
             self.l1_hits += 1
             latency_ms = (time.time() - start_time) * 1000
@@ -116,14 +128,14 @@ class MultiLevelCache(CacheInterface):
             )
             return result
 
-        # Try L2 (semantic similarity)
-        result = self.l2_cache.get(key, version)
+        # Try L2 (semantic similarity), unless L2 is disabled by config.
+        result = self.l2_cache.get(key, version) if self.l2_enabled else None
         if result is not None:
             self.l2_hits += 1
             latency_ms = (time.time() - start_time) * 1000
 
-            # Promote to L1 for future fast access
-            if self.promote_l2_hits:
+            # Promote to L1 for future fast access (only if L1 is enabled).
+            if self.promote_l2_hits and self.l1_enabled:
                 # Get metadata from L2 if available
                 l2_entry = self.l2_cache.get_entry(key, version)
                 metadata = l2_entry.metadata if l2_entry else {}
@@ -175,9 +187,11 @@ class MultiLevelCache(CacheInterface):
             version: Optional version (defaults to current VERSION)
             metadata: Optional metadata
         """
-        # Store in both caches
-        self.l1_cache.set(key, value, version, metadata)
-        self.l2_cache.set(key, value, version, metadata)
+        # Store in each enabled level.
+        if self.l1_enabled:
+            self.l1_cache.set(key, value, version, metadata)
+        if self.l2_enabled:
+            self.l2_cache.set(key, value, version, metadata)
 
     def clear(self) -> None:
         """Clear both L1 and L2 caches."""

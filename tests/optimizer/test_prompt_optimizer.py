@@ -18,12 +18,21 @@ class TestPromptOptimizer:
     """Test suite for PromptOptimizer."""
 
     def test_initialization_default(self):
-        """Test default initialization."""
+        """Test default initialization.
+
+        Phase 4 retired the fabricated-savings-adjacent 0.893/0.918 defaults in
+        favour of the canonical OptimizerConfig defaults (target_reduction=0.3,
+        min_quality_score=0.8). The old names remain as deprecated aliases.
+        """
         optimizer = PromptOptimizer()
 
         assert optimizer.token_counter.model == "gpt-4"
-        assert optimizer.target_savings == 0.893
-        assert optimizer.min_quality == 0.918
+        assert optimizer.max_tokens is None
+        assert optimizer.target_reduction == 0.3
+        assert optimizer.min_quality_score == 0.8
+        # Deprecated aliases still resolve to the canonical values.
+        assert optimizer.target_savings == 0.3
+        assert optimizer.min_quality == 0.8
         assert optimizer.cache is not None
 
     def test_initialization_custom(self):

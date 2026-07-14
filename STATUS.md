@@ -20,7 +20,7 @@
 
 ## Terminology guardrail
 
-- **"Coverage"** = code coverage measured by `pytest --cov`, enforced by the `fail_under` gate in `pyproject.toml` (the single home for the number: **≥80%**). It is **not** the same as **test pass rate**. Do not conflate them. Point-in-time snapshot (from CI, 2026-07-13): 82.4% coverage; 641 passed / 23 skipped / 12 xfailed. Undated maturity claims elsewhere must defer to this file; a CI validator (`scripts/check_status_consistency.py`) enforces that the cited gate matches `pyproject.toml`.
+- **"Coverage"** = code coverage measured by `pytest --cov`, enforced by the `fail_under` gate in `pyproject.toml` (the single home for the number: **≥80%**). It is **not** the same as **test pass rate**. Do not conflate them. Point-in-time snapshot (from CI, 2026-07-14): 82.4% coverage; 653 passed / 23 skipped / 0 xfailed (the config→runtime xfails were wired in Phase 4). Undated maturity claims elsewhere must defer to this file; a CI validator (`scripts/check_status_consistency.py`) enforces that the cited gate matches `pyproject.toml`.
 - **Every published savings/cost number must cite a reproducible run with a manifest** (data hash, code SHA, config, seed, library versions, `git_dirty`). Numbers without provenance are not to be published.
 
 ## Not claimed
