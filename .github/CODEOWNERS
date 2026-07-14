@@ -1,0 +1,13 @@
+# Code owners for bob-llmwiki-knowledge-manager
+# These owners are requested for review on any matching pull request.
+# See https://docs.github.com/en/repositories/managing-your-repositories-permissions-and-collaborations/managing-code-owners
+
+# Default owner for everything in the repo.
+*                       @davidleconte
+
+# Security-sensitive and governance surfaces (explicit for visibility).
+/SECURITY.md            @davidleconte
+/docs/security/         @davidleconte
+/src/tools/safe_paths.py @davidleconte
+/.github/               @davidleconte
+/scripts/check_*.py     @davidleconte
