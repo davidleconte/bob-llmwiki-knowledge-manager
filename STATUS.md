@@ -6,7 +6,7 @@
 |---|---|
 | **Overall status** | **Beta — Not Production Ready** |
 | **Maturity** | Remediation in progress toward production-readiness |
-| **As of** | 2026-07-13 |
+| **As of** | 2026-07-14 |
 | **Basis** | [Institutional Audit 2026-07-13](docs/knowledge-base/research/audit-2026-07-13-institutional.md) · [External Audit 2026-07-12](docs/knowledge-base/research/external-audit-2026-07-12.md) |
 | **Weighted grade vs institutional bar** | ≈ D‑ (target: A+) |
 | **Roadmap** | Phases 0–8 (see the approved remediation plan) |
@@ -14,9 +14,9 @@
 ## What "Beta — Not Production Ready" means here
 
 - **Headline savings metrics are retracted.** The "68.96% / 95% CI / VALIDATED" figures were fabricated by a simulation that never invoked the optimizer (see [VALIDATION_DISCLAIMER.md](evaluation/VALIDATION_DISCLAIMER.md)). Real, reproducible, manifest-backed validation is scheduled in Phase 5.
-- **Two systems are being integrated into one.** The Bash "Bob Shell KB manager" and the Python "token optimizer" were never merged; a unified facade/CLI is scheduled in Phase 4.
+- **The Python token optimizer now has a unified facade/CLI (Phase 4, done).** Its cache/optimizer/truncation/monitoring are composed behind a single `TokenOptimizer` facade and a `bob-optimize` CLI (`python -m src`), with configuration wired to the runtime. The Bash "Bob Shell KB manager" remains a separate product; merging the two is not in scope.
 - **Known Critical/High correctness bugs remain open** (see the institutional audit, Dimension C).
-- **CI runs; supply-chain hardening is in progress.** A minimal CI enforces the coverage gate, the flag-gated e2e suite, and benchmark-regression trending. Dependency locking, lint/type gates, a reconciled Python matrix, and an SBOM are Phase 3 (in progress).
+- **CI enforces the quality gates.** Coverage gate + per-package floors, ruff lint/format, mypy, a 3.11/3.12 matrix, the flag-gated e2e suite, benchmark-regression trending, an SBOM, and a `src→scripts` layering gate all run in CI. Dependency locking, the lint/type gates, and the reconciled Python matrix landed in Phase 3; the facade/CLI + config→runtime wiring in Phase 4.
 
 ## Terminology guardrail
 
