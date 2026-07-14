@@ -21,7 +21,7 @@ Get logger for component.
 
 Args:
     component: Component name
-    
+
 Returns:
     StructuredLogger instance
 
@@ -172,7 +172,7 @@ Get or create logger for component.
 Args:
     component: Component name
     log_level: Optional override for log level
-    
+
 Returns:
     StructuredLogger instance
 

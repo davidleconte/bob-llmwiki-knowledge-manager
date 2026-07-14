@@ -233,99 +233,136 @@ class APIDocGenerator:
 
         return lines
 
-    def generate_docs(self):
-        """Generate documentation for all modules."""
-        # Find all Python modules
-        modules = []
-        for py_file in self.src_dir.rglob("*.py"):
-            if py_file.name == "__init__.py":
-                continue
-            if "__pycache__" in str(py_file):
-                continue
-            modules.append(py_file)
+    def build_all(self) -> Dict[str, str]:
+        """Build every output doc in memory: ``{relative_output_path: content}``.
 
-        # Generate docs for each module
-        module_docs = {}
+        The single source for both writing (:meth:`generate_docs`) and the
+        freshness check (:meth:`check_docs`), so the two can never disagree.
+        Output is deterministic (modules and packages sorted; per-module content
+        is AST-derived), which is what makes ``--check`` a stable CI gate.
+        """
+        modules = [
+            py
+            for py in self.src_dir.rglob("*.py")
+            if py.name != "__init__.py" and "__pycache__" not in str(py)
+        ]
+
+        module_index: Dict[str, List[Dict[str, str]]] = {}
+        outputs: Dict[str, str] = {}
         for module_path in sorted(modules):
             try:
                 module_info = self.extract_module_info(module_path)
-                doc_content = self.generate_module_doc(module_info)
-
-                # Organize by package
-                rel_path = module_path.relative_to(self.src_dir)
-                package = rel_path.parent.name if rel_path.parent.name != "." else "root"
-
-                if package not in module_docs:
-                    module_docs[package] = []
-
-                module_docs[package].append(
-                    {"name": module_info["name"], "content": doc_content, "path": str(rel_path)}
-                )
-            except Exception as e:
+            except Exception as e:  # pragma: no cover - defensive, per-module
                 print(f"Error processing {module_path}: {e}", file=sys.stderr)
+                continue
+            rel_path = module_path.relative_to(self.src_dir)
+            # Hierarchical package = the module's parent dir under src/ ("root"
+            # for top-level modules). Preserves nesting (e.g. delegation/agents)
+            # and avoids the empty-package -> absolute-path bug for top-level
+            # modules like src/facade.py.
+            parent = rel_path.parent
+            package = "root" if parent == Path(".") else str(parent)
+            module_index.setdefault(package, []).append(
+                {"name": module_info["name"], "path": str(rel_path)}
+            )
+            outputs[f"{package}/{module_info['name']}.md"] = self.generate_module_doc(module_info)
 
-        # Write package documentation
-        for package, docs in module_docs.items():
-            package_dir = self.output_dir / package
-            package_dir.mkdir(parents=True, exist_ok=True)
+        outputs["README.md"] = self._index_content(module_index)
+        return outputs
 
-            for doc in docs:
-                output_file = package_dir / f"{doc['name']}.md"
-                with open(output_file, "w") as f:
-                    f.write(doc["content"])
-                print(f"Generated: {output_file}")
-
-        # Generate index
-        self.generate_index(module_docs)
-
-    def generate_index(self, module_docs: Dict[str, List[Dict[str, Any]]]):
-        """Generate API documentation index."""
-        lines = []
-        lines.append("# API Reference")
-        lines.append("")
-        lines.append("Complete API reference for the Token Optimization System.")
-        lines.append("")
-
-        for package in sorted(module_docs.keys()):
+    def _index_content(self, module_index: Dict[str, List[Dict[str, str]]]) -> str:
+        """Render the API index (README.md) from the per-package module list."""
+        lines = [
+            "# API Reference",
+            "",
+            "Complete API reference for the Token Optimization System.",
+            "",
+            "> Generated from source docstrings by `scripts/generate_api_docs.py`.",
+            "> Do not edit by hand — run the generator and commit. CI (`docs-freshness`)",
+            "> fails if this tree drifts from `src/` via `generate_api_docs.py --check`.",
+            "",
+        ]
+        for package in sorted(module_index.keys()):
             lines.append(f"## {package.title()}")
             lines.append("")
-
-            for doc in sorted(module_docs[package], key=lambda x: x["name"]):
+            for doc in sorted(module_index[package], key=lambda x: x["name"]):
                 lines.append(f"- [{doc['name']}]({package}/{doc['name']}.md) - `{doc['path']}`")
-
             lines.append("")
+        return "\n".join(lines)
 
-        index_file = self.output_dir / "README.md"
-        with open(index_file, "w") as f:
-            f.write("\n".join(lines))
+    def generate_docs(self) -> None:
+        """Write every generated doc under ``output_dir``."""
+        for rel, content in self.build_all().items():
+            out = self.output_dir / rel
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(content, encoding="utf-8")
+            print(f"Generated: {out}")
 
-        print(f"Generated index: {index_file}")
+    def check_docs(self) -> int:
+        """Compare committed docs against a fresh build; non-zero on any drift.
+
+        Detects three kinds of drift: a committed page whose content no longer
+        matches the source (STALE), a source module with no committed page
+        (MISSING), and a committed page with no corresponding source module
+        (ORPHAN). This is the drift-resistant API-doc pattern, enforced.
+        """
+        expected = self.build_all()
+        problems: List[str] = []
+
+        for rel, content in sorted(expected.items()):
+            path = self.output_dir / rel
+            if not path.exists():
+                problems.append(f"MISSING: docs/api/{rel} (module added; regenerate)")
+            elif path.read_text(encoding="utf-8") != content:
+                problems.append(
+                    f"STALE:   docs/api/{rel} (docstring/signature changed; regenerate)"
+                )
+
+        expected_paths = {(self.output_dir / rel).resolve() for rel in expected}
+        for existing in self.output_dir.rglob("*.md"):
+            if existing.resolve() not in expected_paths:
+                rel = existing.relative_to(self.output_dir)
+                problems.append(f"ORPHAN:  docs/api/{rel} (module removed; delete the stale doc)")
+
+        if problems:
+            print("API docs are out of date vs src/ docstrings:\n", file=sys.stderr)
+            for problem in sorted(problems):
+                print(f"  {problem}", file=sys.stderr)
+            print(
+                "\nRun `python scripts/generate_api_docs.py` and commit docs/api/.",
+                file=sys.stderr,
+            )
+            return 1
+        print(f"API docs are in sync with src/ ({len(expected)} files).")
+        return 0
 
 
-def main():
-    """Main entry point."""
-    # Get project root
-    script_dir = Path(__file__).parent
-    project_root = script_dir.parent
+def main(argv: Optional[List[str]] = None) -> int:
+    """Generate the API docs, or (with ``--check``) verify they are current."""
+    argv = list(sys.argv[1:] if argv is None else argv)
+    check = "--check" in argv
 
+    project_root = Path(__file__).resolve().parent.parent
     src_dir = project_root / "src"
     output_dir = project_root / "docs" / "api"
 
     if not src_dir.exists():
         print(f"Error: Source directory not found: {src_dir}", file=sys.stderr)
-        sys.exit(1)
+        return 2
+
+    generator = APIDocGenerator(src_dir, output_dir)
+    if check:
+        return generator.check_docs()
 
     print("Generating API documentation...")
     print(f"Source: {src_dir}")
     print(f"Output: {output_dir}")
     print()
-
-    generator = APIDocGenerator(src_dir, output_dir)
     generator.generate_docs()
-
     print()
     print("API documentation generated successfully!")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

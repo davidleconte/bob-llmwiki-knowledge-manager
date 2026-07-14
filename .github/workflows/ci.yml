@@ -5,8 +5,9 @@ name: CI
 # manifest-backed validation harness (null + manifest + tiktoken gates), benchmark
 # regression trending, and a CycloneDX SBOM + dependency audit. The coverage gate,
 # per-package floors, and the status "one home per value" validator run in `test`;
-# the layering gate, the manifest-backed-savings guard, and the generic
-# "one home per value" value-homes validator run in `lint`.
+# the layering gate, the manifest-backed-savings guard, the generic
+# "one home per value" value-homes validator, and the API-doc freshness check
+# run in `lint`.
 
 on:
   push:
@@ -82,6 +83,10 @@ jobs:
         # Generic value-homes guard: a value duplicated across files (version,
         # python floor, model pricing) must match its single canonical home.
         run: python scripts/check_value_homes.py
+      - name: Enforce API-doc freshness (generated == source docstrings)
+        # AST-based generator (stdlib only); fails if docs/api/ drifts from the
+        # src/ docstrings. Regenerate with `python scripts/generate_api_docs.py`.
+        run: python scripts/generate_api_docs.py --check
 
   typecheck:
     name: typecheck (mypy)
