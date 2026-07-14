@@ -63,6 +63,49 @@ class TestErrorBranches:
         assert "Binary file" in result["error"]
 
 
+class TestSymlinkContainment:
+    """The entry path is validated, but ``rglob`` follows symlinks -- a symlink
+    planted *inside* a scanned directory must not leak out-of-base content. This
+    guards the H-1 information-disclosure gap: the fix re-validates every
+    discovered leaf, not just the entry path. Reverting ``_contained_files``
+    turns these RED (the secret is read and surfaced in the security output).
+    """
+
+    def _plant(self, tmp_path):
+        base = tmp_path / "base"
+        scan = base / "scan"
+        scan.mkdir(parents=True)
+        # Secret lives OUTSIDE base; content trips the password detector so it
+        # would surface in the 'code' field if read.
+        secret = tmp_path / "secret_outside.py"
+        secret.write_text('password = "LEAKED_MARKER_zzz"\n')
+        # A legitimate in-base file so normal analysis is still exercised.
+        (scan / "legit.py").write_text('api_key = "in_base_only"\n')
+        try:
+            (scan / "evil.py").symlink_to(secret)
+        except (OSError, NotImplementedError):
+            import pytest
+
+            pytest.skip("filesystem does not support symlinks")
+        return base
+
+    def test_symlink_leaf_not_leaked(self, tmp_path):
+        base = self._plant(tmp_path)
+        result = ComponentAnalyzer(str(base)).analyze_component("scan", "security", "deep")
+        blob = str(result)
+        assert "LEAKED_MARKER_zzz" not in blob  # out-of-base content must not leak
+        assert "legit.py" in blob  # in-base file still analyzed
+        assert result["file_count"] == 1  # escaping symlink dropped from the scan set
+
+    def test_symlink_leaf_dropped_for_comprehensive(self, tmp_path):
+        # Every analysis type consumes the same filtered file list -> the
+        # comprehensive path (security+performance+quality+architecture) is safe too.
+        base = self._plant(tmp_path)
+        result = ComponentAnalyzer(str(base)).analyze_component("scan", "comprehensive", "deep")
+        assert "LEAKED_MARKER_zzz" not in str(result)
+        assert result["file_count"] == 1
+
+
 # --------------------------------------------------------------------------- #
 # single-file analysis
 # --------------------------------------------------------------------------- #

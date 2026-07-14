@@ -66,9 +66,29 @@ class ComponentAnalyzer:
 
         return result
 
+    def _contained_files(self, files: List[Path]) -> List[Path]:
+        """Drop any discovered leaf whose resolved target escapes ``base_path``.
+
+        ``rglob`` follows symlinks, so a symlink planted inside an allowed
+        directory can point outside the base and be read -- the entry path is
+        validated in ``analyze_component`` but its rglob'd contents were not,
+        leaking out-of-base file content into the analysis output. Re-validating
+        every leaf through ``resolve_within`` (which follows symlinks and rejects
+        escapes) applies the same containment to discovered files as to the entry
+        path. ``BatchFileReader`` already re-checks per file; this mirrors it.
+        """
+        contained: List[Path] = []
+        for f in files:
+            try:
+                resolve_within(self.base_path, str(f))
+            except ValueError:
+                continue
+            contained.append(f)
+        return contained
+
     def _analyze_directory(self, dir_path: Path, analysis_type: AnalysisType, depth: Depth) -> Dict:
         """Analyze a directory component"""
-        files = (
+        files = self._contained_files(
             list(dir_path.rglob("*.py"))
             + list(dir_path.rglob("*.js"))
             + list(dir_path.rglob("*.ts"))

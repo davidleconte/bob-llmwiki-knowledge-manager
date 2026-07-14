@@ -130,7 +130,75 @@ def gate_claims(text: str) -> list[tuple[int, float, str]]:
     return claims
 
 
+def _doc_problems(text: str, fail_under: float, delegation_floor: float) -> list[str]:
+    """Every single-home inconsistency in one doc's text. Pure (no I/O)."""
+    problems: list[str] = []
+
+    # (1) coverage-gate consistency
+    for line_no, value, line in gate_claims(text):
+        if value != fail_under:
+            problems.append(
+                f"    L{line_no}: cites coverage gate {value:g}% != "
+                f"{fail_under:g}% (pyproject fail_under)\n        {line}"
+            )
+
+    # (2) forbidden maturity phrasing
+    low = text.lower()
+    for phrase in FORBIDDEN_MATURITY:
+        if phrase.lower() in low:
+            problems.append(
+                f"    forbidden maturity claim present: {phrase!r} (defer to STATUS.md)"
+            )
+
+    # (2b) forbidden stale correctness claims
+    for phrase in FORBIDDEN_STALE_CLAIMS:
+        if phrase.lower() in low:
+            problems.append(
+                f"    forbidden stale claim present: {phrase!r} "
+                "(those bugs are fixed -- see CHANGELOG.md -> Fixed)"
+            )
+
+    # (2c) delegation coverage-floor consistency (one home per value)
+    for line_no, line in enumerate(text.splitlines(), start=1):
+        for m in _FLOOR_CLAIM.finditer(line):
+            value = float(m.group(1))
+            if value != delegation_floor:
+                problems.append(
+                    f"    L{line_no}: cites per-package coverage floor {value:g}% != "
+                    f"{delegation_floor:g}% (scripts/check_coverage_by_package.py)\n"
+                    f"        {line.strip()}"
+                )
+
+    return problems
+
+
+def _selftest() -> int:
+    """Verify the per-doc detectors on planted good/bad text (no filesystem)."""
+    fail_under, floor = 80, 52.0
+    checks = [
+        ("clean gate + floor", "Coverage gate is >= 80% enforced; 52% per-package floor.", False),
+        ("wrong coverage gate", "The coverage gate is >= 95% enforced.", True),
+        ("wrong delegation floor", "delegation held at a 60% per-package floor", True),
+        ("forbidden maturity", "Status: All Phases Complete.", True),
+        ("forbidden stale claim", "Note: correctness bugs remain open.", True),
+    ]
+    failures: list[str] = []
+    for label, text, expect in checks:
+        got = bool(_doc_problems(text, fail_under, floor))
+        if got != expect:
+            failures.append(f"{label}: problems={got}, expected={expect}: {text!r}")
+    if failures:
+        print("SELFTEST FAILED:", file=sys.stderr)
+        for f in failures:
+            print(f"  {f}", file=sys.stderr)
+        return 1
+    print(f"SELFTEST OK: {len(checks)} status-consistency cases classified correctly.")
+    return 0
+
+
 def main() -> int:
+    if "--selftest" in sys.argv:
+        return _selftest()
     fail_under = read_fail_under()
     delegation_floor = read_delegation_floor()
     failures: list[str] = []
@@ -148,42 +216,7 @@ def main() -> int:
             print(f"  SKIP {rel}: banner-marked deprecated/stale")
             continue
 
-        problems: list[str] = []
-
-        # (1) coverage-gate consistency
-        for line_no, value, line in gate_claims(text):
-            if value != fail_under:
-                problems.append(
-                    f"    L{line_no}: cites coverage gate {value:g}% != "
-                    f"{fail_under}% (pyproject fail_under)\n        {line}"
-                )
-
-        # (2) forbidden maturity phrasing
-        low = text.lower()
-        for phrase in FORBIDDEN_MATURITY:
-            if phrase.lower() in low:
-                problems.append(
-                    f"    forbidden maturity claim present: {phrase!r} (defer to STATUS.md)"
-                )
-
-        # (2b) forbidden stale correctness claims
-        for phrase in FORBIDDEN_STALE_CLAIMS:
-            if phrase.lower() in low:
-                problems.append(
-                    f"    forbidden stale claim present: {phrase!r} "
-                    "(those bugs are fixed -- see CHANGELOG.md -> Fixed)"
-                )
-
-        # (2c) delegation coverage-floor consistency (one home per value)
-        for line_no, line in enumerate(text.splitlines(), start=1):
-            for m in _FLOOR_CLAIM.finditer(line):
-                value = float(m.group(1))
-                if value != delegation_floor:
-                    problems.append(
-                        f"    L{line_no}: cites per-package coverage floor {value:g}% != "
-                        f"{delegation_floor:g}% (scripts/check_coverage_by_package.py)\n"
-                        f"        {line.strip()}"
-                    )
+        problems = _doc_problems(text, fail_under, delegation_floor)
 
         if problems:
             failures.append(rel)
