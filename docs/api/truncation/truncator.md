@@ -38,7 +38,7 @@ Args:
     text: Text to truncate
     max_tokens: Maximum tokens allowed
     strategy: Strategy name (uses default if not specified)
-    
+
 Returns:
     Dictionary with truncation results
 
@@ -88,7 +88,7 @@ Compare all strategies on given text.
 Args:
     text: Text to truncate
     max_tokens: Maximum tokens allowed
-    
+
 Returns:
     Dictionary mapping strategy names to results
 
@@ -100,7 +100,7 @@ Automatically select best strategy for text.
 Args:
     text: Text to analyze
     max_tokens: Maximum tokens allowed
-    
+
 Returns:
     Recommended strategy name
 

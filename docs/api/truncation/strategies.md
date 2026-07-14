@@ -21,7 +21,7 @@ Args:
     text: Text to truncate
     max_tokens: Maximum tokens allowed
     token_counter: TokenCounter instance
-    
+
 Returns:
     Truncated text
 
@@ -43,15 +43,19 @@ token-to-character ratio. Fast but may cut mid-sentence.
 
 ##### `truncate(text: str, max_tokens: int, token_counter) -> str`
 
-Truncate text using simple character-based approach.
+Truncate text to a token-accurate prefix with an ellipsis marker.
+
+Uses the token counter directly (binary search) so the result never
+exceeds ``max_tokens``. A fixed chars-per-token ratio undershoots for
+multibyte/CJK text and overshoots the budget.
 
 Args:
     text: Text to truncate
     max_tokens: Maximum tokens allowed
     token_counter: TokenCounter instance
-    
+
 Returns:
-    Truncated text
+    Truncated text whose token count is <= ``max_tokens``
 
 
 ##### `get_name() -> str`
@@ -89,7 +93,7 @@ Args:
     text: Text to truncate
     max_tokens: Maximum tokens allowed
     token_counter: TokenCounter instance
-    
+
 Returns:
     Truncated text
 
@@ -116,7 +120,7 @@ Args:
     text: Text to truncate
     max_tokens: Maximum tokens allowed
     token_counter: TokenCounter instance
-    
+
 Returns:
     Truncated text
 
@@ -152,7 +156,7 @@ Args:
     text: Text to truncate
     max_tokens: Maximum tokens allowed
     token_counter: TokenCounter instance
-    
+
 Returns:
     Truncated text (most recent content)
 

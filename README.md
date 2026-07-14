@@ -25,14 +25,16 @@ A native **IBM Bob Shell** implementation of Andrej Karpathy's **LLM-Wiki** patt
    - Technology: Bash scripts, YAML, Markdown templates
    - Status: Stable (v1.0)
 
-2. **Token Optimization System** (separate codebase) - Python-based LLM optimization (~3,500 lines)
-   - Purpose: Reduce LLM token costs through caching and optimization
+2. **Token Optimization System** (`src/`) - Python-based LLM optimization (~3,500 lines)
+   - Purpose: Reduce LLM token costs through caching, compression, and truncation
    - Technology: Python 3.11+, tiktoken, scikit-learn
-   - Status: Beta (7/10) - Not Production Ready
+   - Entry point: `bob-optimize` / `python -m src` — the `TokenOptimizer` facade + CLI
+   - Getting started: [docs/tutorials/optimize-a-prompt.md](docs/tutorials/optimize-a-prompt.md) · [docs home](docs/README.md)
+   - Status: Beta - Not Production Ready
 
-**These systems are NOT integrated.** They share a repository but serve different purposes.
+**These two products are separate** — they share a repository but are not merged (merging them is out of scope). *Within* the Python system, the cache, optimizer, truncation, and monitoring are composed behind a single `TokenOptimizer` facade and the `bob-optimize` CLI (`python -m src`), as of Phase 4.
 
-**For complete architecture:** See [docs/architecture/UNIFIED_ARCHITECTURE.md](docs/architecture/UNIFIED_ARCHITECTURE.md)
+**For complete architecture:** See [docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md).
 
 ---
 
@@ -235,7 +237,7 @@ The numbers below are **measured** by the real optimizer over a real in-repo cor
 **What Needs Work:**
 - Real LLM API integration (currently mock-based testing)
 - Production validation on diverse repositories
-- Phase 4 delegation framework (theoretical only)
+- Sub-agent delegation framework (`src/delegation/`) — experimental; intentionally not wired into the facade
 - Windows support (bash scripts not cross-platform)
 
 **Performance Claims:**
@@ -252,7 +254,7 @@ The numbers below are **measured** by the real optimizer over a real in-repo cor
 5. **Enterprise:** No SLA guarantees, audit trails, or vendor support
 6. **Documentation Drift:** Two projects (KB manager + token optimization) merged but not fully reconciled
 7. **Correctness Bugs:** 7 known bugs in health checks, caching, and delegation (see audit findings)
-8. **Orphaned Code:** ~27% of src/ (delegation, monitoring) not integrated into main workflows
+8. **Experimental subsystem:** `src/delegation/` is intentionally not wired into the facade (kept layering-clean and separate); monitoring, previously listed here, is now composed via the facade (Phase 4)
 
 ### ⛔ Not Claimed
 

@@ -1,6 +1,7 @@
 # Changelog
 
-All notable changes to Bob Shell Knowledge Manager will be documented in this file.
+All notable changes to this repository — the Bash **Bob Shell Knowledge Manager**
+and the Python **token-optimization system** — are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -68,13 +69,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+The repository grew a second system alongside the Bash KB manager: a Python
+**token-optimization library** (~3,500 lines) plus the phased audit remediation
+(Phases 0–6) that hardened it. None of this is cut as a release yet — it is
+**Beta, Not Production Ready** (see [`STATUS.md`](STATUS.md)).
+
+### Added
+- **Token-optimization system** (`src/`): multi-level cache (L1 exact + L2
+  semantic), prompt optimizer, intelligent truncator, and monitoring.
+- **Unified facade + CLI** (Phase 4): a single `TokenOptimizer` facade composes
+  cache/optimizer/truncation/monitoring; the `bob-optimize` CLI (`python -m src`)
+  drives it; typed configuration is wired to the runtime.
+- **Manifest-backed validation harness** (Phase 5): `python -m src.validation`
+  measures the real product and writes a reproducibility manifest per run (data
+  hash, code SHA, config, seed, library versions, `git_dirty`, `tiktoken_active`)
+  with a null test and honest variance/latency.
+- **CI quality gates**: a 3.11/3.12 matrix, coverage gate + per-package floors,
+  ruff lint/format, mypy, a flag-gated e2e suite, benchmark-regression trending,
+  a CycloneDX SBOM, a `src -> scripts` layering gate, the validation job (null +
+  manifest + tiktoken), and three "one home per value" guards — status, savings,
+  and the generic value-homes validator.
+- **Documentation** (Phase 6): a single authoritative architecture doc, a
+  Diátaxis navigation spine with a getting-started tutorial, complete
+  auto-generated API reference with a CI freshness check, and this changelog.
+
+### Changed
+- **Savings are measured, not asserted.** Optimizer compression measures ~20%
+  mean savings on real in-repo prose (95% CI ≈ [19%, 21%], N=183; manifest:
+  `evaluation/results/validation-2026-07-14/`); cache recompute-avoidance and
+  lossy truncation are reported **separately**, never blended into one headline.
+- **One home per value.** Model pricing, the coverage gate, the package version,
+  the supported-Python floor, and the maturity status each have one canonical
+  source, enforced in CI.
+
+### Fixed
+- Correctness bugs C1–C7 (Phase 1), including the L2 semantic-cache colliding-key
+  wrong-content bug (C-5) and an RLock re-entrancy deadlock; single pricing home.
+
+### Removed
+- **The fabricated "68.96% / VALIDATED" savings figure is retracted.** The
+  simulation that produced it never invoked the optimizer; Phase 5 replaced it
+  with the real harness and reduced the old validator to a thin shim. See
+  [`evaluation/VALIDATION_DISCLAIMER.md`](evaluation/VALIDATION_DISCLAIMER.md).
+
 ### Planned
-- GitHub repository creation
-- v1.0.0 release tag
-- Community sharing and feedback
-- Video tutorial/demo
-- Additional export formats
-- Integration with more Bob Shell features
+- Phase 7 — Governance: `SECURITY.md`, a STRIDE threat model, the community-health set.
+- Phase 8 — Sign-off: an independent adversarial re-audit.
 
 ---
 

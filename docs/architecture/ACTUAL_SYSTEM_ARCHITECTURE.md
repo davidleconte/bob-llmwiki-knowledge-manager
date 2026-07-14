@@ -3,7 +3,7 @@
 **Document Type:** System Architecture (Actual Implementation)  
 **Version:** 1.0  
 **Last Updated:** July 12, 2026  
-**Status:** ⚠️ DEPRECATED / SUPERSEDED — historical; describes a "Production Ready" state that does not exist. Canonical architecture: [UNIFIED_ARCHITECTURE.md](UNIFIED_ARCHITECTURE.md). Actual status: Beta — Not Production Ready (see [Institutional Audit 2026-07-13](../knowledge-base/research/audit-2026-07-13-institutional.md)).  
+**Status:** ⚠️ DEPRECATED / SUPERSEDED — historical; describes a "Production Ready" state that does not exist. Canonical architecture: [ARCHITECTURE.md](ARCHITECTURE.md). Actual status: Beta — Not Production Ready (see [Institutional Audit 2026-07-13](../knowledge-base/research/audit-2026-07-13-institutional.md)).  
 **Owner:** Architecture Team
 
 ---

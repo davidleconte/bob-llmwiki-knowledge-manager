@@ -1,58 +1,119 @@
 # health
 
-Health check module for the Token Optimization System.
+Health check system for monitoring operational status.
 
-Provides system health monitoring and status checks for all components.
+Provides health checks for cache systems, monitoring components, and system resources.
+Supports readiness and liveness probes for production deployments.
 
 ## Constants
 
-- `PSUTIL_AVAILABLE`
 - `HEALTHY`
 - `DEGRADED`
 - `UNHEALTHY`
-- `PSUTIL_AVAILABLE`
+- `UNKNOWN`
 
 ## Functions
-
-### `configure_health_checker(cache_l1, cache_l2, optimizer, truncator) -> None`
-
-Configure global health checker.
-
-Args:
-    cache_l1: L1 cache instance
-    cache_l2: L2 cache instance
-    optimizer: Optimizer instance
-    truncator: Truncator instance
-
 
 ### `get_health_checker() -> HealthChecker`
 
 Get global health checker instance.
 
 Returns:
-    HealthChecker instance
+    Global HealthChecker instance
 
 
-### `check_health() -> Dict[str, Any]`
+### `reset_health_checker() -> None`
 
-Check system health using global checker.
+Reset the global health checker.
 
-Returns:
-    Health status dictionary
+Stops any running background monitoring thread and drops the shared
+instance, so checks registered on it (e.g. by
+``register_monitoring_health_check``) do not leak across callers. Mirrors
+``reset_metrics()`` in ``metrics.py``; primarily used to isolate tests.
+
+
+### `register_cache_health_check(cache_name: str, cache_instance: Any) -> None`
+
+Register health check for a cache instance.
+
+Args:
+    cache_name: Name of the cache (e.g., "L1", "L2")
+    cache_instance: Cache instance with stats() method
+
+
+### `register_system_health_check() -> None`
+
+Register system resource health check.
+
+
+### `register_monitoring_health_check() -> None`
+
+Register monitoring system health check.
+
+
+### `check_cache_health() -> HealthCheckResult`
+
+Check cache health.
+
+
+### `check_system_health() -> HealthCheckResult`
+
+Check system resources.
+
+
+### `check_monitoring_health() -> HealthCheckResult`
+
+Check monitoring system.
 
 
 ## Classes
 
 ### `HealthStatus(Enum)`
 
-Health status enumeration.
+Health check status.
 
 
-### `ComponentHealth`
+### `HealthCheckResult`
 
-Health status for a component.
+Result of a health check.
+
+Attributes:
+    name: Name of the health check
+    status: Health status
+    message: Optional message describing the status
+    details: Optional additional details
+    timestamp: When the check was performed
+    duration_ms: How long the check took
 
 #### Methods
+
+##### `is_healthy() -> bool`
+
+Check if status is healthy.
+
+
+##### `to_dict() -> Dict[str, Any]`
+
+Convert to dictionary.
+
+
+
+### `SystemHealth`
+
+Overall system health status.
+
+Attributes:
+    status: Overall health status
+    checks: Individual health check results
+    timestamp: When the health check was performed
+    version: System version
+
+#### Methods
+
+##### `is_healthy() -> bool`
+
+Check if system is healthy.
+
 
 ##### `to_dict() -> Dict[str, Any]`
 
@@ -62,79 +123,69 @@ Convert to dictionary.
 
 ### `HealthChecker`
 
-System health checker.
+Health check coordinator.
 
-Monitors health of all system components and provides
-overall system health status.
+Manages and executes health checks for various system components.
+Supports both synchronous and background health monitoring.
 
-Example:
-    >>> checker = HealthChecker()
-    >>> health = checker.check_health()
-    >>> print(health["status"])
-    "healthy"
+Attributes:
+    checks: Registered health check functions
+    check_interval: Interval for background checks (seconds)
+    background_enabled: Whether background checking is enabled
 
 #### Methods
 
-##### `__init__(cache_l1, cache_l2, optimizer, truncator)`
+##### `__init__(check_interval: float)`
 
 Initialize health checker.
 
 Args:
-    cache_l1: L1 cache instance
-    cache_l2: L2 cache instance
-    optimizer: Optimizer instance
-    truncator: Truncator instance
+    check_interval: Interval for background checks in seconds
 
 
-##### `check_cache_health(cache, name: str) -> ComponentHealth`
+##### `register_check(name: str, check_func: Callable[[], HealthCheckResult]) -> None`
 
-Check cache health.
+Register a health check function.
 
 Args:
-    cache: Cache instance
-    name: Cache name
-    
-Returns:
-    ComponentHealth instance
+    name: Name of the health check
+    check_func: Function that performs the check
 
 
-##### `check_optimizer_health() -> ComponentHealth`
+##### `unregister_check(name: str) -> None`
 
-Check optimizer health.
+Unregister a health check.
 
-Returns:
-    ComponentHealth instance
-
-
-##### `check_truncator_health() -> ComponentHealth`
-
-Check truncator health.
-
-Returns:
-    ComponentHealth instance
+Args:
+    name: Name of the health check to remove
 
 
-##### `check_system_resources() -> ComponentHealth`
+##### `check(name: Optional[str]) -> SystemHealth`
 
-Check system resource usage.
+Perform health checks.
+
+Args:
+    name: Optional specific check to run. If None, runs all checks.
 
 Returns:
-    ComponentHealth instance
+    SystemHealth with results
 
 
-##### `check_health() -> Dict[str, Any]`
+##### `get_last_results() -> Dict[str, HealthCheckResult]`
 
-Check overall system health.
-
-Returns:
-    Dictionary containing health status for all components
-
-
-##### `is_healthy() -> bool`
-
-Check if system is healthy.
+Get cached results from last check.
 
 Returns:
-    True if system is healthy, False otherwise
+    Dictionary of check name to result
+
+
+##### `start_background_checks() -> None`
+
+Start background health checking.
+
+
+##### `stop_background_checks() -> None`
+
+Stop background health checking.
 
 

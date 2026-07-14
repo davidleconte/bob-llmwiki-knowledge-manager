@@ -12,7 +12,7 @@ Components:
 - facade: TokenOptimizer, the unified entry point (also exposed via the CLI)
 """
 
-__version__ = "1.0.0-dev"
+__version__ = "1.0.0"
 __author__ = "Bob Shell Team"
 
 from src.cache import ExactCache, MultiLevelCache, SemanticCache

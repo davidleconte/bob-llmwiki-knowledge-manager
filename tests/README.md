@@ -8,13 +8,11 @@
 
 ## Test Statistics
 
-Snapshot from CI, 2026-07-13 (point-in-time; the authoritative status is
-[`STATUS.md`](../STATUS.md)):
-
-```
-Total Tests:    676 (653 passed, 23 skipped, 0 xfailed)
-Coverage:       82.4%  (gate: >=80%, enforced by pyproject.toml fail_under)
-```
+The live suite snapshot (pass/skip/xfail counts and measured coverage) has a
+single home in [`STATUS.md`](../STATUS.md) — see its "Terminology guardrail"
+section. It is not restated here so the two can't drift. The durable facts are
+the **coverage gate** (`>=80%`, enforced by `pyproject.toml` `fail_under`) and
+the layout below.
 
 There are currently **0 xfailed** tests: the config→runtime gaps that were
 strict-xfailed are wired as of Phase 4 (`PromptOptimizer`/`MultiLevelCache` now
