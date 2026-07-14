@@ -354,8 +354,8 @@ See: `docs/knowledge-base/research/external-audit-2026-07-12.md` for complete au
 - **Implementation:** Cache/optimizer/truncation/monitoring composed behind a unified `TokenOptimizer` facade + `bob-optimize` CLI (`python -m src`); config is wired to the runtime (Phase 4, done)
 - **Tests / Coverage:** see [`STATUS.md`](STATUS.md) (gate >=80%, enforced by `pyproject.toml`)
 - **Maturity:** Beta — Not Production Ready (≈D- vs the institutional bar; [`STATUS.md`](STATUS.md) is authoritative)
-- **Known Issues:** Phases 0–4 done (correctness incl. the C-5 collision, coverage gate, supply-chain, integration). Unearned savings numbers (Phase 5) and residual documentation drift remain
-- **Next:** Phase 5 real validation (re-earn the retracted savings with per-run manifests), then Phase 6 docs
+- **Known Issues:** Phases 0–5 done (correctness incl. the C-5 collision, coverage gate, supply-chain, integration, and now real manifest-backed validation). The savings headline is measured (~20% optimizer compression, N=183; see `evaluation/results/validation-2026-07-14/`); residual documentation drift (Phase 6) remains
+- **Next:** Phase 6 docs (one architecture doc, Diátaxis structure, complete API docs)
 
 ### Delegation Module (Experimental)
 - **Status:** Functional but intentionally not integrated (separate problem domain); layering-clean since Phase 4 (shared utils moved to `src/tools/`)

@@ -5,7 +5,8 @@ Provides O(1) lookup time for exact prompt matches.
 
 Target metrics:
 - Lookup latency: <1ms
-- Hit rate contribution: ~15-20% of total 23.33%
+- Hit rate: workload-dependent (measured per run by the Phase-5 validation
+  harness, not a fixed target; the old "23.33% theoretical" figure is retired)
 - Memory: Configurable max size with LRU eviction
 """
 
