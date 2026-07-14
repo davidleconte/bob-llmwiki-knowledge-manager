@@ -68,6 +68,9 @@ jobs:
         run: ruff check src tests scripts
       - name: Ruff format check
         run: ruff format --check src tests scripts
+      - name: Enforce src -> scripts layering (no upward imports, B3)
+        # AST-based gate: fails if any src/ module imports from scripts/.
+        run: python scripts/check_layering.py
 
   typecheck:
     name: typecheck (mypy)

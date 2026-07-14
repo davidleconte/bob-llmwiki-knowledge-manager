@@ -41,7 +41,7 @@ A parallel sub-agent framework for repository analysis. **This is a separate sys
 **Purpose:** Parallel code repository analysis  
 **Technology:** Python 3.11+, ThreadPoolExecutor  
 **Complexity:** ~1,588 lines of Python code  
-**Status:** Experimental, orphaned (not wired into runtime), demo-only. Held at a ~54% per-package coverage floor (`scripts/check_coverage_by_package.py`); a Phase-4 rewrite is planned.  
+**Status:** Experimental, orphaned (not wired into runtime), demo-only. Held at a ~54% per-package coverage floor (`scripts/check_coverage_by_package.py`). Per the Phase-4 decision it stays a **separate, layering-clean subsystem** (not facade-wired — it solves a different problem domain); its only Phase-4 change was the B3 layering fix (shared utilities moved to `src/tools/`).  
 
 **Key Components:**
 - DelegationCoordinator (parallel execution)
@@ -351,15 +351,15 @@ See: `docs/knowledge-base/research/external-audit-2026-07-12.md` for complete au
 - **Note:** Original project, well-documented
 
 ### Token Optimization System
-- **Implementation:** Core library in place; unified facade/CLI + config wiring are Phase 4
+- **Implementation:** Cache/optimizer/truncation/monitoring composed behind a unified `TokenOptimizer` facade + `bob-optimize` CLI (`python -m src`); config is wired to the runtime (Phase 4, done)
 - **Tests / Coverage:** see [`STATUS.md`](STATUS.md) (gate >=80%, enforced by `pyproject.toml`)
 - **Maturity:** Beta — Not Production Ready (≈D- vs the institutional bar; [`STATUS.md`](STATUS.md) is authoritative)
-- **Known Issues:** Phase-1 correctness bugs fixed (incl. the C-5 semantic-cache collision); Phase-4 integration gaps and residual documentation drift remain
-- **Next:** Phase 3 supply-chain hardening, then Phase 4 integration and Phase 5 real validation
+- **Known Issues:** Phases 0–4 done (correctness incl. the C-5 collision, coverage gate, supply-chain, integration). Unearned savings numbers (Phase 5) and residual documentation drift remain
+- **Next:** Phase 5 real validation (re-earn the retracted savings with per-run manifests), then Phase 6 docs
 
 ### Delegation Module (Experimental)
-- **Status:** Functional but not integrated with core system
-- **Coverage:** 0% (demo-only, no integration tests)
+- **Status:** Functional but intentionally not integrated (separate problem domain); layering-clean since Phase 4 (shared utils moved to `src/tools/`)
+- **Coverage:** ~53% (unit-tested coordinator/base; `agents/*` intentionally not integration-tested), held at a 52% per-package floor
 - **Purpose:** Parallel repository analysis (separate use case)
 - **Note:** See `src/delegation/EXPERIMENTAL.md` for details
 

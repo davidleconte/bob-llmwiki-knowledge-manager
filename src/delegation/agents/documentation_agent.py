@@ -3,14 +3,10 @@ Documentation Analysis Sub-Agent
 Specialized agent for documentation coverage and quality assessment
 """
 
-import sys
-from pathlib import Path
 from typing import List
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
-
-from scripts.utils.batch_file_reader import BatchFileReader
 from src.delegation.base import SubAgent, SubAgentResult, SubAgentStatus, SubAgentTask
+from src.tools.batch_file_reader import BatchFileReader
 
 
 class DocumentationAgent(SubAgent):

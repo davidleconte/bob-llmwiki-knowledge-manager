@@ -23,7 +23,9 @@ class TestMultiLevelCache:
         cache = MultiLevelCache()
 
         assert cache.l1_cache.max_size == 1000
-        assert cache.l2_cache.max_size == 500
+        # Phase 4: default raised 500 -> 10000 to match CacheConfig.l2_max_size
+        # (and keep L2 > L1, the config's business rule).
+        assert cache.l2_cache.max_size == 10000
         assert cache.l2_cache.similarity_threshold == 0.85
         assert cache.promote_l2_hits is True
         assert cache.l1_hits == 0
@@ -279,7 +281,7 @@ class TestMultiLevelCache:
         l2 = cache.get_l2_cache()
 
         assert l2 is cache.l2_cache
-        assert l2.max_size == 500
+        assert l2.max_size == 10000  # Phase 4: default 500 -> 10000 (matches CacheConfig)
 
     def test_average_lookup_time(self):
         """Test average lookup time calculation."""

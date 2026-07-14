@@ -12,13 +12,16 @@ Snapshot from CI, 2026-07-13 (point-in-time; the authoritative status is
 [`STATUS.md`](../STATUS.md)):
 
 ```
-Total Tests:    676 (641 passed, 23 skipped, 12 xfailed)
+Total Tests:    676 (653 passed, 23 skipped, 0 xfailed)
 Coverage:       82.4%  (gate: >=80%, enforced by pyproject.toml fail_under)
 ```
 
-The `xfailed` tests are strict-xfail markers for known gaps (config not yet wired
-to runtime, etc.), so they fail loudly if they start passing. Skips are the
-flag-gated e2e/real-LLM suites and optional-dependency smoke tests.
+There are currently **0 xfailed** tests: the config→runtime gaps that were
+strict-xfailed are wired as of Phase 4 (`PromptOptimizer`/`MultiLevelCache` now
+accept the config-named kwargs). The strict-xfail convention remains the house
+style for any future known gap — a strict marker fails loudly if the gap
+silently closes. Skips are the flag-gated e2e/real-LLM suites and
+optional-dependency smoke tests.
 
 ---
 

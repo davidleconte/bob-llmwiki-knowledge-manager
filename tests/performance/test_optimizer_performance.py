@@ -130,11 +130,6 @@ class TestTokenCounterPerformance:
         )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Phase 4: PromptOptimizer lacks max_tokens/target_reduction params; "
-    "fixture constructs with unsupported kwargs (same gap as the config→runtime e2e tests)",
-)
 @pytest.mark.benchmark(group="optimizer-optimization")
 class TestPromptOptimizerPerformance:
     """Performance benchmarks for prompt optimization."""

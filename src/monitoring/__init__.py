@@ -25,13 +25,6 @@ from .metrics import (
     get_metrics_collector,
     reset_metrics,
 )
-from .vocabulary_drift import (
-    DriftMetrics,
-    VocabularyDriftMonitor,
-    VocabularySnapshot,
-    configure_drift_monitor,
-    get_drift_monitor,
-)
 
 __all__ = [
     # Logger
@@ -57,10 +50,4 @@ __all__ = [
     "register_cache_health_check",
     "register_system_health_check",
     "register_monitoring_health_check",
-    # Vocabulary Drift
-    "VocabularySnapshot",
-    "DriftMetrics",
-    "VocabularyDriftMonitor",
-    "get_drift_monitor",
-    "configure_drift_monitor",
 ]

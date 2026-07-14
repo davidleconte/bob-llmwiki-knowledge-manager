@@ -45,10 +45,6 @@ class TestFullSystemIntegration:
         assert opt_config.max_tokens == 4096
         assert mon_config.enabled is True
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason="Phase 4: config not wired to runtime — PromptOptimizer rejects config kwarg",
-    )
     def test_cache_and_optimizer_work_together(self, config_manager):
         """Test cache and optimizer can work together."""
         cache_config = config_manager.get_cache_config()

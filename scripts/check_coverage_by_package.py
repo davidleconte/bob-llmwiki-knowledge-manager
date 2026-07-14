@@ -22,13 +22,21 @@ import sys
 # Per-package minimum line coverage (%). One home for these values.
 #
 # monitoring: live runtime code (cost/metrics/health) — held at the 70% bar.
-# delegation: STAGED. It is orphaned (nothing in src/ imports it) and slated for a
-#   Phase-4 rewrite, so testing its agents/* subpackage now would be coverage
-#   theater. Floor is pinned at roughly its current honest level to lock the gain
-#   and catch regressions; ratchet to 70 in Phase 4 once it is wired into runtime.
+# delegation: STAGED. A separate, experimental subsystem (nothing in src/ imports
+#   it) that solves a different problem domain than the optimizer — see
+#   docs/knowledge-base/research/delegation-integration-analysis-2026-07-13.md.
+#   Per the Phase-4 decision it stays separate (NOT facade-wired); its only Phase-4
+#   change was the B3 layering fix (shared utils moved to src/tools/). The floor is
+#   pinned at its current honest level to lock the gain and catch regressions — it
+#   does NOT ratchet to 70, because the subsystem is intentionally not integrated.
+#   Floor moved 54.0 -> 52.0 in Phase 4: the B3 fix deleted the per-agent
+#   sys.path.insert + now-unused `import sys`/`from pathlib import Path` boilerplate
+#   (~18 always-executed, 100%-covered import lines), which mechanically lowered the
+#   ratio from ~54.3% to 52.9% without removing any tested logic. 52.0 tracks the new
+#   honest level with a small margin.
 FLOORS = {
     "src/monitoring": 70.0,
-    "src/delegation": 54.0,
+    "src/delegation": 52.0,
 }
 
 

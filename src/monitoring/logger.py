@@ -68,9 +68,10 @@ class StructuredLogger:
         # JSON formatter
         formatter = logging.Formatter("%(message)s")
 
-        # Console handler
+        # Console handler. Logs go to stderr (diagnostics), keeping stdout free
+        # for program output — required for a clean CLI where stdout is piped/JSON.
         if enable_console:
-            console_handler = logging.StreamHandler(sys.stdout)
+            console_handler = logging.StreamHandler(sys.stderr)
             console_handler.setLevel(self.log_level)
             console_handler.setFormatter(formatter)
             self.logger.addHandler(console_handler)

@@ -3,14 +3,10 @@ Performance Analysis Sub-Agent
 Specialized agent for performance optimization and bottleneck detection
 """
 
-import sys
-from pathlib import Path
 from typing import Dict, List
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
-
-from scripts.utils.component_analyzer import ComponentAnalyzer
 from src.delegation.base import SubAgent, SubAgentResult, SubAgentStatus, SubAgentTask
+from src.tools.component_analyzer import ComponentAnalyzer
 
 
 class PerformanceAgent(SubAgent):

@@ -165,11 +165,12 @@ class TestL2CachePerformance:
         result = benchmark(large_cache.get, "prompt_250")
 
         # Latency benchmark only — do NOT assert exact-value retrieval here.
-        # The L2 SemanticCache stores dense HashingVectorizer embeddings with
-        # n_features=1000, so single-token keys ("prompt_250"/"prompt_173")
-        # collide to identical vectors and get() may return a colliding
-        # neighbour's value at similarity 1.0. Exact-retrieval correctness is
-        # covered (and currently xfailed → Phase 4) by
+        # This measures raw L2 lookup cost. The L2 SemanticCache stores dense
+        # HashingVectorizer embeddings (n_features=1000), so single-token keys
+        # ("prompt_250"/"prompt_173") collide to identical vectors — a *fuzzy*
+        # lookup of a non-stored key could match a neighbour. Exact-key
+        # retrieval is nonetheless correct via SemanticCache's exact-key
+        # fast-path (the C-5 fix), verified by
         # tests/cache/test_semantic_cache.py::
         #   test_exact_key_returns_its_own_value_under_collisions
         assert result is not None

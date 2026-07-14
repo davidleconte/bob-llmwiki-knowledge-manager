@@ -1,0 +1,115 @@
+"""Command-line interface for the token-optimization system.
+
+A thin argparse front end over the :class:`~src.facade.TokenOptimizer` facade:
+every subcommand constructs one facade from config and calls one already-tested
+method, then prints the result. No business logic lives here.
+
+Entry points:
+    bob-optimize <command> ...     (console_scripts; see pyproject [project.scripts])
+    python -m src <command> ...    (via src/__main__.py)
+
+Component logging goes to stderr and is quieted to WARNING by default, so stdout
+stays clean for piped/`--json` output; pass ``--verbose`` to restore INFO logs.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from typing import Any, List, Optional
+
+from src import TokenOptimizer
+from src.config import get_config
+from src.monitoring import configure_logging
+
+
+def _read_text(value: str) -> str:
+    """Return the input text: read stdin when ``value`` is ``"-"``, else literal."""
+    return sys.stdin.read() if value == "-" else value
+
+
+def _emit(data: Any, as_json: bool) -> None:
+    """Print a result either as indented JSON or as flat ``key: value`` lines."""
+    if as_json:
+        print(json.dumps(data, indent=2, default=str))
+    elif isinstance(data, dict):
+        for key, value in data.items():
+            print(f"{key}: {value}")
+    else:
+        print(data)
+
+
+def build_parser() -> argparse.ArgumentParser:
+    """Build the argument parser (also used directly by the tests)."""
+    parser = argparse.ArgumentParser(
+        prog="bob-optimize",
+        description="Token-optimization CLI (cache + optimizer + truncation + monitoring).",
+    )
+    parser.add_argument(
+        "-e", "--environment", default="dev", help="Config environment (default: dev)"
+    )
+    parser.add_argument("--json", action="store_true", help="Emit raw JSON output")
+    parser.add_argument(
+        "--verbose", action="store_true", help="Restore INFO-level component logging"
+    )
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    p_opt = sub.add_parser("optimize", help="Optimize a prompt for token efficiency")
+    p_opt.add_argument("text", help="Prompt text, or '-' to read stdin")
+    p_opt.add_argument(
+        "--max-tokens", type=int, default=None, help="Cap on optimized tokens (overrides config)"
+    )
+
+    p_trunc = sub.add_parser("truncate", help="Truncate text to a token budget")
+    p_trunc.add_argument("text", help="Text, or '-' to read stdin")
+    p_trunc.add_argument("--max-tokens", type=int, required=True, help="Token budget")
+    p_trunc.add_argument(
+        "--strategy", default=None, help="Truncation strategy (default from config)"
+    )
+
+    p_count = sub.add_parser("count", help="Count tokens in text")
+    p_count.add_argument("text", help="Text, or '-' to read stdin")
+
+    sub.add_parser("cache-stats", help="Show multi-level cache statistics")
+    sub.add_parser("cost-report", help="Show a cost report")
+    sub.add_parser("metrics", help="Show the metrics summary")
+    sub.add_parser("health", help="Run health checks")
+    sub.add_parser("config", help="Show the effective configuration")
+
+    return parser
+
+
+def main(argv: Optional[List[str]] = None) -> int:
+    """CLI entry point. Returns a process exit code."""
+    args = build_parser().parse_args(argv)
+    configure_logging(log_level="INFO" if args.verbose else "WARNING")
+
+    facade = TokenOptimizer.from_config(args.environment)
+    as_json = args.json
+
+    if args.command == "optimize":
+        _emit(facade.optimize(_read_text(args.text), max_tokens=args.max_tokens), as_json)
+    elif args.command == "truncate":
+        _emit(
+            facade.truncate(_read_text(args.text), args.max_tokens, strategy=args.strategy),
+            as_json,
+        )
+    elif args.command == "count":
+        _emit({"tokens": facade.count(_read_text(args.text))}, as_json)
+    elif args.command == "cache-stats":
+        _emit(facade.cache_stats(), as_json)
+    elif args.command == "cost-report":
+        _emit(facade.cost_report(), as_json)
+    elif args.command == "metrics":
+        _emit(facade.metrics(), as_json)
+    elif args.command == "health":
+        _emit(facade.health(), as_json)
+    elif args.command == "config":
+        _emit(get_config(args.environment).get_all(), as_json)
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

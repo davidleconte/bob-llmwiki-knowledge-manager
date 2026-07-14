@@ -1,8 +1,8 @@
 # ⚠️ EXPERIMENTAL: Delegation Module
 
-**Status:** Experimental / Not Integrated  
-**Coverage:** 0% (untested in integration)  
-**Last Updated:** 2026-07-13
+**Status:** Experimental / Not Integrated (intentionally — see below)  
+**Coverage:** unit-tested (coordinator + base); held at a ~54% per-package floor in `scripts/check_coverage_by_package.py`. Not integration-tested with the optimizer, by design.  
+**Last Updated:** 2026-07-14
 
 ## Overview
 
@@ -75,9 +75,10 @@ See: `docs/knowledge-base/research/delegation-integration-analysis-2026-07-13.md
 
 - ✅ **Functional:** All agents work correctly
 - ✅ **Documented:** Clear examples and API docs
-- ❌ **Not Tested:** 0% integration test coverage
+- ✅ **Unit-tested:** `tests/delegation/` covers the coordinator + base types (~54% floor); the `agents/*` subpackage is intentionally not integration-tested
+- ✅ **Layering-clean (Phase 4):** the shared analysis utilities the agents use now live in `src/tools/` (imported as `from src.tools.…`); the old `src/ -> scripts/` import (audit finding B3) is gone
 - ❌ **Not Used:** Only in demo script
-- ❌ **Not Integrated:** Separate from core system
+- ❌ **Not Integrated:** Separate from core system, **by design** (Phase-4 decision — not facade-wired)
 
 ## Future Possibilities
 
