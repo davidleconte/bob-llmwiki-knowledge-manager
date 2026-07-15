@@ -9,7 +9,7 @@ import time
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from threading import RLock
+from threading import Lock, RLock
 from typing import Any, Dict, List, Optional, Tuple
 
 from src import pricing
@@ -426,6 +426,11 @@ class CostTracker:
 
 # Global cost tracker instance
 _global_tracker: Optional[CostTracker] = None
+# Lock that serialises first-time singleton initialisation (C8 fix).
+# Double-checked locking: the outer `is None` check avoids lock contention on
+# every hot-path call; the inner check under the lock prevents two threads that
+# both passed the outer check from each creating a separate instance.
+_tracker_init_lock = Lock()
 
 
 def get_cost_tracker(budget_bobcoins: float = DEFAULT_BUDGET_BOBCOINS) -> CostTracker:
@@ -440,7 +445,9 @@ def get_cost_tracker(budget_bobcoins: float = DEFAULT_BUDGET_BOBCOINS) -> CostTr
     """
     global _global_tracker
     if _global_tracker is None:
-        _global_tracker = CostTracker(budget_bobcoins=budget_bobcoins)
+        with _tracker_init_lock:
+            if _global_tracker is None:
+                _global_tracker = CostTracker(budget_bobcoins=budget_bobcoins)
     return _global_tracker
 
 

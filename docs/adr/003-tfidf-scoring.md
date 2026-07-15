@@ -616,3 +616,21 @@ Current accuracy sufficient? (92% > 90%)
 **Document Owner:** Architecture Team  
 **Last Updated:** 2026-07-12  
 **Next Review:** 2027-01-12 (6 months)
+
+---
+
+## Implementation Note (2026-07-14)
+
+The TF-IDF principle described in this ADR is fully implemented. However, the class
+names evolved:
+
+| ADR describes | Actual implementation |
+|---|---|
+| `RelevanceScorer` standalone class | No standalone `RelevanceScorer` class exists |
+| TF-IDF as a separate scoring module | TF-IDF is used internally by `SemanticCache` (`src/cache/semantic_cache.py:24`) via `sklearn.feature_extraction.text.TfidfVectorizer` |
+| `score()` method on `RelevanceScorer` | `SemanticCache._compute_similarity()` — TF-IDF vectorisation + cosine similarity in one step |
+
+The decision to use TF-IDF for semantic matching is in force. The implementation chose
+to embed TF-IDF directly inside `SemanticCache` rather than as a standalone scorer, which
+keeps the similarity computation cohesive with the cache state (the fitted vectorizer
+must match the stored entries). See `src/cache/semantic_cache.py` and ADR-004.

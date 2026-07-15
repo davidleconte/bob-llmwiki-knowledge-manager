@@ -19,10 +19,11 @@ mkdir -p docs/knowledge-base/{concepts,guides,references,research}
 
 # Create INDEX.md
 echo "📝 Creating INDEX.md..."
-cat > docs/knowledge-base/INDEX.md << 'INDEXEOF'
+TODAY=$(date +%Y-%m-%d)
+cat > docs/knowledge-base/INDEX.md << INDEXEOF
 # Knowledge Base Index
 
-Last Updated: $(date +%Y-%m-%d)
+Last Updated: $TODAY
 
 ## Quick Navigation
 - [Concepts](./concepts/) - Core concepts and definitions
@@ -68,7 +69,7 @@ bob --chat-mode=knowledge-manager
 
 ---
 
-*Managed by [Bob Shell Knowledge Manager](https://github.com/yourusername/bob-llmwiki-knowledge-manager)*
+*Managed by [Bob Shell Knowledge Manager](https://github.com/davidleconte/bob-llmwiki-knowledge-manager)*
 INDEXEOF
 
 # Create .bob directory if it doesn't exist
@@ -91,6 +92,57 @@ else
     echo "ℹ️  .bob/settings.json already exists (not overwriting)"
 fi
 
+# Create CONTEXT.md (auto-loaded by Bob at every session start via .bob/settings.json)
+PROJECT_NAME=$(basename "$(pwd)")
+if [ ! -f "CONTEXT.md" ]; then
+    echo "📝 Creating CONTEXT.md..."
+    cat > CONTEXT.md << CTXEOF
+# $PROJECT_NAME — Knowledge Base Context
+
+> Auto-loaded by Bob Shell at session start (declared in \`.bob/settings.json\`).
+> Edit this file to give Bob immediate orientation for every new session.
+
+## Project
+- **Name:** $PROJECT_NAME
+- **KB location:** \`docs/knowledge-base/\`
+- **Initialised:** $TODAY
+
+## Quick-start prompts for new sessions
+
+**Resume previous work:**
+\`\`\`
+What did we document most recently? Summarise the KB and suggest what to work on next.
+\`\`\`
+
+**Research and document a new topic:**
+\`\`\`
+Research [topic] and create a concept document.
+\`\`\`
+
+**Find existing knowledge:**
+\`\`\`
+What do we know about [topic]?
+\`\`\`
+
+**Maintenance:**
+\`\`\`
+Review all documents created this week and ensure proper cross-referencing and INDEX.md is current.
+\`\`\`
+
+## KB summary
+<!-- Update this section as the KB grows -->
+- Concepts: 0 documents
+- Guides: 0 documents
+- References: 0 documents
+- Research: 0 documents
+
+---
+*Last updated: $TODAY — managed by Bob Shell knowledge-manager mode*
+CTXEOF
+else
+    echo "ℹ️  CONTEXT.md already exists (not overwriting)"
+fi
+
 # Add to .gitignore if it exists
 if [ -f ".gitignore" ]; then
     if ! grep -q "docs/knowledge-base/.DS_Store" .gitignore; then
@@ -107,13 +159,22 @@ echo ""
 echo "✅ Knowledge base initialized!"
 echo ""
 echo "Directory structure:"
-echo "  docs/knowledge-base/"
-echo "  ├── INDEX.md"
-echo "  ├── concepts/"
-echo "  ├── guides/"
-echo "  ├── references/"
-echo "  └── research/"
+echo "  ."
+echo "  ├── CONTEXT.md            ← auto-loaded context for every session"
+echo "  ├── .bob/settings.json    ← tells Bob to load CONTEXT.md + INDEX.md"
+echo "  └── docs/knowledge-base/"
+echo "      ├── INDEX.md"
+echo "      ├── concepts/"
+echo "      ├── guides/"
+echo "      ├── references/"
+echo "      └── research/"
 echo ""
 echo "Next steps:"
-echo "1. Start Bob Shell: bob --chat-mode=knowledge-manager"
-echo "2. Try: 'Research [topic] and create a concept document'"
+echo "1. Start a knowledge-manager session (quickest):"
+echo "   ~/Projects/bob-llmwiki-knowledge-manager/scripts/start-kb.sh"
+echo ""
+echo "2. Or start Bob Shell directly:"
+echo "   bob --chat-mode=knowledge-manager"
+echo ""
+echo "3. First prompt to try:"
+echo "   \"Research [topic] and create a concept document\""

@@ -622,3 +622,23 @@ class StreamingBatchProcessor(BatchProcessor):
 **Document Owner:** Architecture Team  
 **Last Updated:** 2026-07-12  
 **Next Review:** 2027-01-12 (6 months)
+
+---
+
+## Implementation Note (2026-07-14)
+
+**Status correction: Accepted / Deferred.**
+
+The `BatchProcessor` class described in this ADR **does not exist in `src/`**. A search
+of the codebase confirms no `BatchProcessor` or `SimilarityBatchProcessor` implementation.
+The decision was accepted in principle but deferred to a future phase that has not been
+started.
+
+The ADR's status should be read as "Accepted / Deferred" rather than simply "Accepted".
+The deferral rationale: the facade/optimizer pipeline introduced in Phase 4 handles
+single-prompt optimization well; batch processing adds complexity that is not yet
+justified by the current workload.
+
+If batch processing is implemented in the future, a new ADR (or an update to this one)
+should document whether the `SimilarityBatchProcessor` design is followed or whether a
+different approach is taken. See ADR-013 for the current single-prompt composition model.

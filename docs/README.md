@@ -65,9 +65,9 @@ Bob Shell KB manager:
 - **Concepts** — [token optimization](knowledge-base/concepts/token-optimization.md) · [multi-level caching](knowledge-base/concepts/multi-level-caching.md) · [dependency analysis](knowledge-base/concepts/dependency-analysis.md)
 - **[Architecture](architecture/ARCHITECTURE.md)** — components, dataflow, config→runtime.
 - **[Security (STRIDE threat model)](security/THREAT_MODEL.md)** — trust boundaries, residual risks; supersedes the retracted ADR-012.
-- **Design** — [Design document](DESIGN_DOCUMENT.md) · [MECE framework](MECE_FRAMEWORK.md) · [Comparison with alternatives](COMPARISON.md)
+- **Design** — [Design document](archive/DESIGN_DOCUMENT.md) · [MECE framework](archive/MECE_FRAMEWORK.md) · [Comparison with alternatives](archive/COMPARISON.md)
 - **Savings methodology** — [KB savings estimation methodology](knowledge-base/references/kb-savings-estimation-methodology.md).
-- **The Complete Guide (book)** — [table of contents](BOOK_TABLE_OF_CONTENTS.md) (long-form narrative).
+- **The Complete Guide (book)** — [table of contents](archive/BOOK_TABLE_OF_CONTENTS.md) (long-form narrative; historical — metrics retracted).
 
 ---
 

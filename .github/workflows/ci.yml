@@ -35,14 +35,17 @@ jobs:
         python-version: ["3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: pip
-      - name: Install (editable + dev/monitoring extras)
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev,monitoring]"
+      - name: Install (locked from uv.lock — test matrix)
+        # uv sync --frozen installs the exact versions pinned in uv.lock, making
+        # builds reproducible. The uv.lock is verified in-sync by the sbom job
+        # (uv lock --check). Replaces the floating ">=" pip install (supply-chain fix).
+        run: uv sync --frozen --extra dev --extra monitoring
       - name: Pre-warm tiktoken cache
         # encoding_for_model downloads the BPE vocab on a cold cache; the
         # TokenCounter constructor only catches (ImportError, KeyError), not a
@@ -105,15 +108,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
-      - name: Install (editable + dev/monitoring extras)
+      - name: Install (locked from uv.lock — typecheck)
         # mypy + the runtime deps it needs to resolve types are in the dev extra.
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev,monitoring]"
+        run: uv sync --frozen --extra dev --extra monitoring
       - name: Run mypy (config + scope in pyproject [tool.mypy])
         run: mypy
 
@@ -122,14 +125,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
-      - name: Install (editable + dev/monitoring extras)
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev,monitoring]"
+      - name: Install (locked from uv.lock — e2e)
+        run: uv sync --frozen --extra dev --extra monitoring
       - name: Pre-warm tiktoken cache
         run: python -c "import tiktoken; tiktoken.encoding_for_model('gpt-4')"
       - name: Run end-to-end suite behind the flag
@@ -144,14 +147,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
-      - name: Install (editable + dev/monitoring extras)
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev,monitoring]"
+      - name: Install (locked from uv.lock — validation)
+        run: uv sync --frozen --extra dev --extra monitoring
       - name: Pre-warm tiktoken cache
         run: python -c "import tiktoken; tiktoken.encoding_for_model('gpt-4')"
       - name: Run manifest-backed validation harness
@@ -173,14 +176,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
-      - name: Install (editable + dev/monitoring extras)
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev,monitoring]"
+      - name: Install (locked from uv.lock — benchmarks)
+        run: uv sync --frozen --extra dev --extra monitoring
       - name: Pre-warm tiktoken cache
         run: python -c "import tiktoken; tiktoken.encoding_for_model('gpt-4')"
       - name: Restore benchmark baseline

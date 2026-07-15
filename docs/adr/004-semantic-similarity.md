@@ -619,3 +619,24 @@ class AdaptiveSemanticCache(SemanticCache):
 **Document Owner:** Architecture Team  
 **Last Updated:** 2026-07-12  
 **Next Review:** 2027-01-12 (6 months)
+
+---
+
+## Implementation Note (2026-07-14)
+
+The cosine similarity + TF-IDF decision described in this ADR is fully implemented.
+However, the class hierarchy evolved:
+
+| ADR describes | Actual implementation |
+|---|---|
+| `SemanticCache(ResponseCache)` — subclass of exact cache | `SemanticCache(CacheInterface)` — standalone, not a subclass of `ExactCache` |
+| `ResponseCache` base class | `CacheInterface` base class (`src/cache/base.py`) |
+| Inheritance-based composition | Composition via `MultiLevelCache` (`src/cache/multi_level_cache.py`) which holds an `ExactCache` (L1) and a `SemanticCache` (L2) as separate peers |
+
+The reason for the standalone design: `SemanticCache` maintains its own TF-IDF vectorizer
+fitted to its stored entries. If it inherited from `ExactCache`, the combined state would
+be harder to reason about and test. Composition via `MultiLevelCache` provides the same
+two-level lookup semantics without the inheritance coupling.
+
+The core decision — cosine similarity over TF-IDF vectors — is in force and correctly
+implemented in `SemanticCache._compute_similarity()` (`src/cache/semantic_cache.py`).

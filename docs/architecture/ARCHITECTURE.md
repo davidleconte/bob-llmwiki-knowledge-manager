@@ -70,8 +70,8 @@ Not shown, deliberately separate:
   not on the request path. See §6.
 - **`src/tools/`** — operational CLI utilities (batch file reader, component
   analyzer, KB query) relocated out of `scripts/` in Phase 4 to keep the
-  `src → scripts` layering clean. Tooling, not library runtime; excluded from the
-  coverage and type gates.
+  `src → scripts` layering clean. Included in the coverage and type gates with a
+  per-package floor of 85% (`scripts/check_coverage_by_package.py`).
 - **`src/delegation/`** — an **experimental**, layering-clean subsystem that is
   *not* wired into the facade (see [`../../src/delegation/EXPERIMENTAL.md`](../../src/delegation/EXPERIMENTAL.md)).
 
@@ -188,6 +188,43 @@ re-incentivise fabrication). See [`../../src/validation/README.md`](../../src/va
 
 ## 8. Where to go next
 
-- Decisions and their rationale: [`../adr/`](../adr/README.md) (ADR 001–012).
+- Decisions and their rationale: [`../adr/`](../adr/README.md) (ADR 001–013).
 - Per-module API: [`../api/`](../api/README.md) (generated, drift-checked).
 - Maturity, coverage, and the measured savings snapshot: [`STATUS.md`](../../STATUS.md).
+
+---
+
+## 9. Deployment
+
+**Runtime context:** Local Python library and CLI. No server, no daemon, no container
+required. Single-user, single-process.
+
+| Constraint | Value | Source |
+|---|---|---|
+| **Python** | ≥ 3.11 (3.11 and 3.12 tested in CI) | `pyproject.toml:requires-python` · `.github/workflows/ci.yml` matrix |
+| **OS** | macOS, Linux | CI matrix (ubuntu-latest, macOS available); Bash scripts are macOS/Linux only |
+| **Core deps** | `numpy ≥ 1.24`, `scikit-learn ≥ 1.3`, `tiktoken ≥ 0.5` | `pyproject.toml:dependencies` |
+| **Optional deps** | `psutil` (system metrics in health checks); gracefully absent if not installed | `pyproject.toml:[optional-dependencies].monitoring` |
+| **Concurrency** | Single-process, synchronous. `ThreadPoolExecutor` used only in `src/delegation/` (experimental, not on the optimise path) | `src/facade.py` — all operations sync |
+| **Persistence** | In-memory only. No disk cache, no database, no external state store | `src/cache/exact_cache.py`, `src/cache/semantic_cache.py` |
+| **Network** | None required at runtime. `tiktoken` downloads its BPE vocabulary on first use (one-time, cacheable offline) | `src/optimizer/token_counter.py` |
+| **Install** | `pip install -e ".[dev,monitoring]"` or `uv sync` | `pyproject.toml` |
+| **CLI** | `python -m src <subcommand>` or `bob-optimize <subcommand>` | `src/__main__.py` |
+
+---
+
+## 10. Glossary
+
+| Term | Definition | Source |
+|---|---|---|
+| **Bobcoin** | Internal unit for estimated LLM cost: `token_count × price_per_token × 1000`. Enables a model-agnostic cost metric. | `src/pricing.py` |
+| **tiktoken_active** | Boolean flag in the validation manifest: `True` when tiktoken's BPE encoder is available and used for token counting; `False` when the character-count fallback is active. A `False` value means token counts are approximate. | `src/optimizer/token_counter.py`, `src/validation/manifest.py` |
+| **manifest-backed** | A savings or cost figure is "manifest-backed" when it is accompanied by a `manifest.json` that records the data hash, code SHA, config, random seed, library versions, and `tiktoken_active`. This makes the measurement reproducible and auditable. | `src/validation/manifest.py:45-58` |
+| **L1 cache** | The exact-match cache layer (`ExactCache`). Uses SHA-256 hashing for O(1) lookup. Governed by `CacheConfig.l1_max_size` and `CacheConfig.l1_ttl_seconds`. | `src/cache/exact_cache.py` |
+| **L2 cache** | The semantic-match cache layer (`SemanticCache`). Uses TF-IDF + cosine similarity for approximate matching. Governed by `CacheConfig.l2_similarity_threshold`. Not used in the `optimize()` path (exact matching only there). | `src/cache/semantic_cache.py` |
+| **Facade** | `TokenOptimizer` (`src/facade.py`). The single public composition point: accepts a `ConfigSchema`, builds all components via the factory, and exposes five high-level operations. Holds no business logic. | `src/facade.py:37` |
+| **Factory** | `src/factory.py`. Three builder functions (`build_cache`, `build_optimizer`, `build_truncator`) that are the single home for the config-field → constructor-kwarg mapping. | `src/factory.py:25-70` |
+| **Null test** | A validation run of the optimizer over shuffled, high-entropy text. A legitimate optimizer should produce ≈0% compression on random input. A failing null test indicates the measurement is an artefact of the test fixture, not the optimizer. | `src/validation/` |
+| **target_reduction** | `OptimizerConfig` field: the optimizer's compression target as a ratio (0.0–1.0). Default 0.3 (30% token reduction). The optimizer uses this as a soft target, not a hard cap. | `src/config/schema.py:49` |
+| **quality_score** | A float (0.0–1.0) returned by `PromptOptimizer.optimize()` representing estimated semantic preservation of the optimized output. Must meet or exceed `OptimizerConfig.min_quality_score` (default 0.8) for the optimization to be accepted. | `src/optimizer/prompt_optimizer.py` |
+| **MECE** | Mutually Exclusive, Collectively Exhaustive. A framework (from McKinsey) for structuring analysis so that categories neither overlap nor have gaps. Used in this project's architecture audit framework. | `docs/knowledge-base/research/architecture-audit-mece-2026-07-14.md` |

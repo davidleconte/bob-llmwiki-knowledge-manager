@@ -10,7 +10,7 @@ import time
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from threading import RLock
+from threading import Lock, RLock
 from typing import Any, Deque, Dict, Optional
 
 
@@ -416,6 +416,11 @@ class MetricsCollector:
 
 # Global metrics collector instance
 _global_collector: Optional[MetricsCollector] = None
+# Lock that serialises first-time singleton initialisation (C8 fix).
+# Double-checked locking: the outer `is None` check avoids lock contention on
+# every hot-path call; the inner check under the lock prevents two threads that
+# both passed the outer check from each creating a separate instance.
+_collector_init_lock = Lock()
 
 
 def get_metrics_collector() -> MetricsCollector:
@@ -427,7 +432,9 @@ def get_metrics_collector() -> MetricsCollector:
     """
     global _global_collector
     if _global_collector is None:
-        _global_collector = MetricsCollector()
+        with _collector_init_lock:
+            if _global_collector is None:
+                _global_collector = MetricsCollector()
     return _global_collector
 
 

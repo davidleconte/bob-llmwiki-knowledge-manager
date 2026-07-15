@@ -7,6 +7,10 @@ updated: 2026-07-13
 audit_date: 2026-07-12
 audit_method: 10-dimension read-only audit with 50 agents
 audit_scope: analysis only - repository unchanged
+related:
+  - audit-2026-07-13-institutional.md
+  - codebase-analysis-2026-07-14.md
+  - coverage-measurement-2026-07-13.md
 ---
 
 # External Codebase & Documentation Audit

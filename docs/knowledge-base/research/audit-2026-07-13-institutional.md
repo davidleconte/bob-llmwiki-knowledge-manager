@@ -203,6 +203,7 @@ Full roadmap: **[Repository Improvement Plan](./repository-improvement-plan.md)*
 ## References
 
 - [External Audit 2026-07-12](./external-audit-2026-07-12.md) — the prior findings-list pass this builds on
+- [Comprehensive Codebase Analysis 2026-07-14](./codebase-analysis-2026-07-14.md) — detailed analysis of current repository state
 - [Repository Improvement Plan](./repository-improvement-plan.md)
 - [Honest Assessment](../../../evaluation/HONEST_ASSESSMENT.md)
 - [Validation Disclaimer](../../../evaluation/VALIDATION_DISCLAIMER.md)

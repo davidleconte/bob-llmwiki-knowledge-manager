@@ -12,6 +12,14 @@ Last Updated: 2026-07-14
 - [Research](./research/) - Research notes and findings
 
 ## Recent Additions
+- 2026-07-14: [Post-Remediation Full Audit](./research/audit-2026-07-14-post-remediation.md) - Research ⭐ NEW
+- 2026-07-14: [Full Codebase & Documentation Review](./research/full-codebase-review-2026-07-14.md) - Research
+- 2026-07-14: [Dual System Use Case Example](./guides/dual-system-use-case-example.md) - Guide ⭐ NEW
+- 2026-07-14: [Using Both Systems Together](./guides/using-both-systems-together.md) - Guide ⭐ NEW
+- 2026-07-14: [Token Optimizer Quick Install](./guides/token-optimizer-quick-install.md) - Guide ⭐ NEW
+- 2026-07-14: [Bobcoin Savings Analysis](./research/bobcoin-savings-analysis-2026-07-14.md) - Research ⭐ NEW
+- 2026-07-14: [README Critical Analysis](./research/readme-critical-analysis-2026-07-14.md) - Research ⭐ NEW
+- 2026-07-14: [Senior Expert Institutional Audit](./research/senior-expert-institutional-audit-2026-07-14.md) - Research ⭐ NEW
 - 2026-07-14: [Comprehensive Codebase Analysis](./research/codebase-analysis-2026-07-14.md) - Research ⭐ NEW
 - 2026-07-13: [Institutional Software Vendor Evaluation](./research/institutional-vendor-evaluation.md) - Research
 - 2026-07-13: [Phase 3 Monitoring Lessons Learned](./research/phase3-monitoring-lessons-learned.md) - Research
@@ -52,6 +60,9 @@ Last Updated: 2026-07-14
 - [Dependency Analysis](./concepts/dependency-analysis.md) - Python dependency inventory with security audit and recommendations for dependency management
 
 ### Guides
+- [Dual System Use Case Example](./guides/dual-system-use-case-example.md) - Real-world example: Enterprise AI Assistant Platform for 200-person engineering team, 12-month implementation, 90.3% cost savings (468,000 BC/year), 2,340% ROI, detailed month-by-month breakdown showing KB Manager (78% savings) + Token Optimizer (12% savings) working together
+- [Using Both Systems Together](./guides/using-both-systems-together.md) - Comprehensive guide for using Token Optimizer and Knowledge Manager simultaneously: integration patterns, use case analysis, workflow examples, cost-benefit analysis, decision matrix, technical limitations, expected combined savings (60-75% in ideal conditions)
+- [Token Optimizer Quick Install](./guides/token-optimizer-quick-install.md) - Fast 5-minute installation and verification guide for Token Optimization System: 3-step install, CLI usage, quick example, troubleshooting, system requirements
 - [Real-Time Monitoring Guide](./guides/real-time-monitoring-guide.md) - Complete guide for real-time session monitoring and quality validation during data collection ⭐ NEW
 - [Phase 3 Validation User Guide](./guides/phase3-validation-user-guide.md) - Comprehensive guide for collecting baseline and optimized measurements: best practices, query examples, troubleshooting, FAQ, and analysis instructions
 - [Phase 3 Validation Testing Plan](./guides/phase3-validation-testing-plan.md) - Comprehensive testing strategy for validation tools: unit tests, integration tests, data validation, performance tests, and quality assurance
@@ -79,6 +90,9 @@ Last Updated: 2026-07-14
 - [Cache API Reference](./references/cache-api.md) - Complete API documentation for all cache classes, methods, and usage examples
 
 ### Research
+- [Bobcoin Savings Analysis 2026-07-14](./research/bobcoin-savings-analysis-2026-07-14.md) - Comprehensive analysis of expected Bobcoin savings from both sub-projects: Token Optimizer (~20% measured compression), KB Manager (40-80% structural savings, workload-dependent), combined savings (60-75% in ideal conditions), honest variance reporting, applicability boundaries, and institutional recommendations
+- [README Critical Analysis 2026-07-14](./research/readme-critical-analysis-2026-07-14.md) - Institutional perspective on root README.md: 70% alignment with audit findings, identifies 4 critical misalignments (prominent unverified anecdote, inflated maturity grade, outdated bug count, missing production blockers), provides detailed recommendations for institutional adoption
+- [Senior Expert Institutional Audit 2026-07-14](./research/senior-expert-institutional-audit-2026-07-14.md) - Expert assessment by Senior Master Principal (LLM-Wiki & Token Management) against Tier 1 institutional standards: C+ grade (2.5/4.0 GPA), 60% production readiness, comprehensive dimension-by-dimension analysis with remediation roadmap
 - [Comprehensive Codebase Analysis 2026-07-14](./research/codebase-analysis-2026-07-14.md) - Complete repository analysis: dual system architecture, code quality metrics, testing analysis, documentation assessment, known issues, and production readiness evaluation
 - [Institutional Codebase & Documentation Audit 2026-07-13](./research/audit-2026-07-13-institutional.md) - MECE 7-dimension audit against institutional standards: product integrity, architecture, correctness, testing, supply-chain, documentation, governance with weighted D- grade and remediation roadmap
 - [Phase 3 Additional Work Lessons Learned](./research/phase3-additional-work-lessons-learned.md) - Lessons from additional work: user guide creation, pragmatic testing approach, template-driven reporting, 6 hours investment, 2,800+ lines delivered
@@ -119,4 +133,4 @@ bob --chat-mode=knowledge-manager
 
 ---
 
-*Managed by [Bob Shell Knowledge Manager](https://github.com/yourusername/bob-llmwiki-knowledge-manager)*
+*Managed by [Bob Shell Knowledge Manager](https://github.com/davidleconte/bob-llmwiki-knowledge-manager)*

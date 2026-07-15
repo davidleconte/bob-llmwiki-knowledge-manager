@@ -1,8 +1,8 @@
 # Deprecated Architecture Documentation
 
-**Status:** Historical Reference Only  
-**Date Deprecated:** July 13, 2026  
-**Reason:** Documentation describes planned system that was not implemented
+**Status:** Historical Reference Only
+**Last Updated:** 2026-07-14
+**Reason:** Documents describe planned system that was not implemented, or have been superseded by `ARCHITECTURE.md` (v3.0)
 
 ---
 
@@ -15,6 +15,26 @@ These documents describe the **original planned architecture** from Week 18, whi
 ---
 
 ## What's Here
+
+### Superseded Architecture Documents (moved 2026-07-14)
+
+**ACTUAL_SYSTEM_ARCHITECTURE.md** — Superseded by `ARCHITECTURE.md` v3.0 (2026-07-14)
+- Was: detailed Token Optimization System architecture with code examples
+- Now: `ARCHITECTURE.md` is the single authoritative document
+
+**UNIFIED_ARCHITECTURE.md** — Superseded by `ARCHITECTURE.md` v3.0 (2026-07-14)
+- Was: "master reference" for the dual system
+- Now: `ARCHITECTURE.md` covers both systems with accurate Phase-4 + facade/factory model
+
+**DOCUMENTATION_PLAN.md** — Planning document for phases now complete
+- Was: documentation strategy for Phases 1–5
+- Retraction: cites fabricated savings figures; see `STATUS.md` for current numbers
+
+**QUALITY_ATTRIBUTES.md** — Retraction banner present; metrics fabricated
+- Was: quality attribute specifications with "68.96%" / "89.3%" savings figures
+- Retraction: those figures were produced by a simulation that never invoked the optimizer; actual measured figure is ~20% compression (see `STATUS.md`)
+
+---
 
 ### Original Architecture Plan (Not Implemented)
 
@@ -88,30 +108,30 @@ These documents describe the **original planned architecture** from Week 18, whi
 
 ### For Current Architecture
 
-**Primary Document:** [ACTUAL_SYSTEM_ARCHITECTURE.md](../ACTUAL_SYSTEM_ARCHITECTURE.md)
+**Primary Document:** [ARCHITECTURE.md](../ARCHITECTURE.md) (v3.0, 2026-07-14)
 
-This document describes the **actual implemented system** with:
-- Accurate component descriptions
-- Real performance metrics
-- Actual code examples
-- Verified test coverage
+This is the **single authoritative architecture document** covering:
+- Facade + factory + config composition model
+- Component breakdown with `path:line` citations
+- Cross-cutting invariants enforced by CI
+- Deployment view and glossary
 
 ### For Specific Components
 
-**Cache System:** See `ACTUAL_SYSTEM_ARCHITECTURE.md` Section 2
-- ExactCache (L1) - SHA-256 hash-based
-- SemanticCache (L2) - TF-IDF similarity
-- MultiLevelCache - L1+L2 orchestration
+**Cache System:** See `ARCHITECTURE.md §2` and `src/cache/`
+- ExactCache (L1) — SHA-256 hash-based
+- SemanticCache (L2) — TF-IDF similarity
+- MultiLevelCache — L1+L2 orchestration
 
-**Optimizer System:** See `ACTUAL_SYSTEM_ARCHITECTURE.md` Section 3
-- TokenCounter - tiktoken + fallback
-- PromptOptimizer - Compression strategies
+**Optimizer System:** See `ARCHITECTURE.md §2` and `src/optimizer/`
+- TokenCounter — tiktoken + fallback
+- PromptOptimizer — compression strategies
 
-**Truncation System:** See `ACTUAL_SYSTEM_ARCHITECTURE.md` Section 4
+**Truncation System:** See `ARCHITECTURE.md §2` and `src/truncation/`
 - 4 truncation strategies
-- Truncator - Auto-selection
+- Truncator — auto-selection
 
-**Monitoring System:** See `docs/MONITORING.md`
+**Monitoring System:** See `docs/MONITORING.md` and `src/monitoring/`
 - Structured logging (JSON)
 - Metrics collection
 - Health checks
@@ -132,13 +152,13 @@ These documents were created during Week 18 planning phase as part of the initia
 
 ## Related Documentation
 
-- **Current Architecture:** [ACTUAL_SYSTEM_ARCHITECTURE.md](../ACTUAL_SYSTEM_ARCHITECTURE.md)
+- **Current Architecture:** [ARCHITECTURE.md](../ARCHITECTURE.md) (authoritative, v3.0)
 - **Architecture Decisions:** [docs/adr/](../../adr/)
-- **Implementation Status:** [docs/project-management/PROJECT_STATUS.md](../../project-management/PROJECT_STATUS.md)
+- **Canonical Status:** [STATUS.md](../../../STATUS.md)
 - **Gap Analysis:** [docs/knowledge-base/research/external-audit-2026-07-12.md](../../knowledge-base/research/external-audit-2026-07-12.md)
 
 ---
 
-**Last Updated:** July 13, 2026  
-**Maintained By:** Architecture Team  
+**Last Updated:** 2026-07-14
+**Maintained By:** Architecture Team
 **Purpose:** Historical reference and lessons learned

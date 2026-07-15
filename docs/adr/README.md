@@ -25,6 +25,11 @@ Architecture Decision Records document important architectural decisions made du
 **[002: Caching Strategy](002-caching-strategy.md)**
 - Decision: Multi-level caching (L1: exact, L2: semantic)
 - Rationale: Balance hit rate and performance
+- Status: ✅ Accepted (see implementation note at end of ADR — class names evolved)
+
+**[013: Facade and Factory Pattern](013-facade-factory-pattern.md)**
+- Decision: `TokenOptimizer` facade + `src/factory.py` builder functions as the single composition point
+- Rationale: Config flows to runtime; single home for config→constructor mapping; shared L1 cache; health checks wired
 - Status: ✅ Accepted
 
 **[006: Cache Strategy](006-cache-strategy.md)**
@@ -86,10 +91,10 @@ Architecture Decision Records document important architectural decisions made du
 
 ## ADR Statistics
 
-- **Total ADRs:** 12
-- **Status:** 11 accepted, 1 superseded (012)
-- **Coverage:** Technology, Architecture, Algorithms, Quality
-- **Lines:** ~4,747 total
+- **Total ADRs:** 13
+- **Status:** 12 accepted, 1 superseded (012)
+- **Coverage:** Technology, Architecture, Algorithms, Quality, Composition patterns
+- **Lines:** ~5,000 total (estimated)
 
 ## ADR Guidelines
 

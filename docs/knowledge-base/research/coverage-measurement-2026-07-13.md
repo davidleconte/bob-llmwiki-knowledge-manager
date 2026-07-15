@@ -6,6 +6,8 @@ status: complete
 tags: [testing, coverage, metrics, audit-remediation]
 related:
   - external-audit-2026-07-12.md
+  - audit-2026-07-13-institutional.md
+  - codebase-analysis-2026-07-14.md
   - ../guides/audit-remediation-action-plan.md
 ---
 

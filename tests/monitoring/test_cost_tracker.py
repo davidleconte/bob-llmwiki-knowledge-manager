@@ -464,3 +464,31 @@ class TestGlobalSingleton:
         monkeypatch.setattr(ct, "_global_tracker", None)
         reset_cost_tracker()  # must not raise
         assert ct._global_tracker is None
+
+    def test_concurrent_first_call_produces_single_instance(self, monkeypatch):
+        """Regression test for the C8 singleton race (fix: double-checked locking).
+
+        50 threads race to call get_cost_tracker() while _global_tracker is None.
+        Every thread must receive the exact same object — no duplicate instances.
+        Reverts to a failing state if the ``_tracker_init_lock`` guard is removed.
+        """
+        monkeypatch.setattr(ct, "_global_tracker", None)
+        barrier = threading.Barrier(50)
+        instances: list = []
+
+        def call_get() -> None:
+            barrier.wait()  # all threads start simultaneously
+            instances.append(get_cost_tracker())
+
+        threads = [threading.Thread(target=call_get) for _ in range(50)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+
+        assert len(instances) == 50
+        first = instances[0]
+        assert all(i is first for i in instances), (
+            "get_cost_tracker() returned different instances under concurrent init — "
+            "C8 singleton race regression"
+        )

@@ -185,18 +185,22 @@ def test_examples_have_kb_structure(project_root):
 def test_documentation_files_exist(project_root):
     """Test that all documentation files exist."""
     docs_dir = project_root / "docs"
+    # Live Diátaxis-spine and reference docs at docs/ root.
     required_docs = [
         "INSTALLATION.md",
         "USAGE.md",
         "CUSTOMIZATION.md",
         "WORKFLOWS.md",
-        "COMPARISON.md",
         "ARCHITECTURE.md",
     ]
-
     for doc in required_docs:
         doc_path = docs_dir / doc
         assert doc_path.exists(), f"Documentation {doc} should exist"
+
+    # COMPARISON.md was moved to docs/archive/ when the docs/ root was curated.
+    assert (docs_dir / "archive" / "COMPARISON.md").exists(), (
+        "COMPARISON.md should exist under docs/archive/"
+    )
 
 
 @pytest.mark.unit

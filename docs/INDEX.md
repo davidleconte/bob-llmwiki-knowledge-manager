@@ -43,10 +43,10 @@
 - **[Workflows Guide](WORKFLOWS.md)** - Common workflows and patterns
 - **[Repository Analysis Workflow](REPOSITORY_ANALYSIS_WORKFLOW.md)** - Token-efficient repo analysis
 - **[Workflow Automation Plan](WORKFLOW_AUTOMATION_PLAN.md)** - Automation strategy
-- **[Phase 1 Implementation Complete](PHASE1_IMPLEMENTATION_COMPLETE.md)** - Automated scripts ready
-- **[Phase 2 Implementation Complete](PHASE2_IMPLEMENTATION_COMPLETE.md)** - repo-analyzer mode ready
-- **[Phase 3 Implementation Complete](PHASE3_IMPLEMENTATION_COMPLETE.md)** - Enhanced utilities ready
-- **[Phase 4 Implementation Complete](PHASE4_IMPLEMENTATION_COMPLETE.md)** ⭐ NEW - Sub-agent delegation ready
+- **[Phase 1 Implementation Complete](archive/PHASE1_IMPLEMENTATION_COMPLETE.md)** - Automated scripts ready
+- **[Phase 2 Implementation Complete](archive/PHASE2_IMPLEMENTATION_COMPLETE.md)** - repo-analyzer mode ready
+- **[Phase 3 Implementation Complete](archive/PHASE3_IMPLEMENTATION_COMPLETE.md)** - Enhanced utilities ready
+- **[Phase 4 Implementation Complete](archive/PHASE4_IMPLEMENTATION_COMPLETE.md)** - Sub-agent delegation ready
 
 ### 3. Testing & Validation ⭐ NEW
 

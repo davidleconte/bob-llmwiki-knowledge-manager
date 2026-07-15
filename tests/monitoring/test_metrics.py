@@ -506,3 +506,33 @@ class TestGlobalFunctions:
         reset_metrics()
 
         assert collector.l1_cache.hits == 0
+
+    def test_concurrent_first_call_produces_single_instance(self, monkeypatch):
+        """Regression test for the C8 singleton race (fix: double-checked locking).
+
+        50 threads race to call get_metrics_collector() while _global_collector is
+        None. Every thread must receive the exact same object — no duplicate instances.
+        Reverts to a failing state if the ``_collector_init_lock`` guard is removed.
+        """
+        import src.monitoring.metrics as metrics_mod
+
+        monkeypatch.setattr(metrics_mod, "_global_collector", None)
+        barrier = threading.Barrier(50)
+        instances: list = []
+
+        def call_get() -> None:
+            barrier.wait()  # all threads start simultaneously
+            instances.append(get_metrics_collector())
+
+        threads = [threading.Thread(target=call_get) for _ in range(50)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+
+        assert len(instances) == 50
+        first = instances[0]
+        assert all(i is first for i in instances), (
+            "get_metrics_collector() returned different instances under concurrent init — "
+            "C8 singleton race regression"
+        )

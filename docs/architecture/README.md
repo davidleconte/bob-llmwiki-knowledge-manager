@@ -1,7 +1,7 @@
 # Architecture Documentation
 
-**Last Updated:** July 13, 2026  
-**Status:** Phase 5 Complete - Documentation Reconciled
+**Last Updated:** July 14, 2026  
+**Status:** A (3.89/4.30) — see [STATUS.md](../../STATUS.md)
 
 ---
 
@@ -9,16 +9,19 @@
 
 ### For Complete System Understanding
 
-**Primary Document:** [UNIFIED_ARCHITECTURE.md](UNIFIED_ARCHITECTURE.md)
+**Primary Document:** [ARCHITECTURE.md](ARCHITECTURE.md)
 
-This is the **master architecture reference** that explains:
+This is the **master architecture reference** (v3.0, 2026-07-14) that explains:
 - The dual system nature (Bob Shell KB Manager + Token Optimization System)
-- Complete architecture for both systems
-- Repository structure and organization
-- Development guidelines
-- Documentation map
+- Complete facade/factory/config architecture
+- Component breakdown with source citations
+- Cross-cutting invariants enforced by CI
+- Quality attributes and performance targets
 
 **Read this first** to understand the complete picture.
+
+> ⚠️ `UNIFIED_ARCHITECTURE.md` and `ACTUAL_SYSTEM_ARCHITECTURE.md` are **deprecated**.
+> They have been moved to [deprecated/](deprecated/) and are retained for historical reference only.
 
 ---
 
@@ -26,29 +29,40 @@ This is the **master architecture reference** that explains:
 
 ### Current Architecture Documentation
 
-1. **[UNIFIED_ARCHITECTURE.md](UNIFIED_ARCHITECTURE.md)** - Master reference for entire repository
-   - Explains dual system architecture
-   - Bob Shell Knowledge Manager overview
-   - Token Optimization System complete architecture
-   - Repository structure and guidelines
+1. **[ARCHITECTURE.md](ARCHITECTURE.md)** ⭐ — Master reference (authoritative, v3.0, 2026-07-14)
+   - Dual system overview
+   - Facade + factory + config architecture
+   - Component breakdown with source citations
+   - Cross-cutting invariants (single-home, layering, manifest-backed)
+   - Deployment view and glossary
 
-2. **[ACTUAL_SYSTEM_ARCHITECTURE.md](ACTUAL_SYSTEM_ARCHITECTURE.md)** - Token Optimization System details
-   - 3-layer architecture (Cache, Optimizer, Truncation)
-   - Component specifications with code examples
-   - Performance characteristics
-   - Testing strategy
-   - Deployment guide
+2. **[docs/adr/](../adr/)** — Architecture Decision Records (13 ADRs)
+   - Key decisions: Python choice, caching strategy, TF-IDF, semantic similarity, monitoring, security
+   - ADR-013: Facade/factory pattern (Phase-4 composition decision)
 
-3. **[QUALITY_ATTRIBUTES.md](QUALITY_ATTRIBUTES.md)** - Quality requirements
-   - Performance targets
-   - Reliability requirements
-   - Security considerations
-   - Maintainability goals
+3. **[docs/security/THREAT_MODEL.md](../security/THREAT_MODEL.md)** — STRIDE threat model
+   - Trust boundaries and data flows
+   - Mitigations with path:line citations
+   - Residual risks and non-risks
 
-4. **[DOCUMENTATION_PLAN.md](DOCUMENTATION_PLAN.md)** - Documentation strategy
-   - Documentation structure
-   - Update procedures
-   - Quality standards
+### Deprecated Documentation
+
+The following documents are in [deprecated/](deprecated/) and should **not** be used for understanding the current system:
+
+| File | Reason deprecated |
+|------|-------------------|
+| `deprecated/UNIFIED_ARCHITECTURE.md` | Superseded by `ARCHITECTURE.md` (v3.0) |
+| `deprecated/ACTUAL_SYSTEM_ARCHITECTURE.md` | Superseded by `ARCHITECTURE.md` (v3.0) |
+| `deprecated/DOCUMENTATION_PLAN.md` | Planning doc for phases now complete |
+| `deprecated/QUALITY_ATTRIBUTES.md` | Metrics fabricated; retraction banner present |
+| `deprecated/MASTER.md` | Original 6-layer plan — not implemented |
+| `deprecated/BATCH.md` | Not implemented |
+| `deprecated/CACHE.md` | Implemented differently |
+| `deprecated/FORMATTER.md` | Not implemented |
+| `deprecated/INTEGRATION.md` | Not implemented |
+| `deprecated/MONITORING.md` | Implemented differently |
+| `deprecated/OPTIMIZER.md` | Implemented differently |
+| `deprecated/TRUNCATION.md` | Implemented differently |
 
 ---
 
@@ -57,14 +71,15 @@ This is the **master architecture reference** that explains:
 ```
 docs/architecture/
 ├── README.md (this file)
-├── UNIFIED_ARCHITECTURE.md          ⭐ START HERE
-├── ACTUAL_SYSTEM_ARCHITECTURE.md    📖 Token Optimization System
-├── QUALITY_ATTRIBUTES.md
-├── DOCUMENTATION_PLAN.md
+├── ARCHITECTURE.md                  ⭐ START HERE (authoritative, v3.0)
 ├── components/
 │   └── README.md                    ↪️  Redirects to deprecated/
 └── deprecated/
-    ├── README.md                    ⚠️  Historical reference
+    ├── README.md                    ⚠️  Historical reference index
+    ├── UNIFIED_ARCHITECTURE.md      ❌ Superseded by ARCHITECTURE.md
+    ├── ACTUAL_SYSTEM_ARCHITECTURE.md ❌ Superseded by ARCHITECTURE.md
+    ├── DOCUMENTATION_PLAN.md        ❌ Planning doc (phases complete)
+    ├── QUALITY_ATTRIBUTES.md        ❌ Metrics retracted
     ├── MASTER.md                    ❌ Original 6-layer plan
     ├── BATCH.md                     ❌ Not implemented
     ├── CACHE.md                     ❌ Implemented differently
@@ -83,26 +98,17 @@ docs/architecture/
 
 **Location:** [deprecated/](deprecated/)
 
-Contains **5,534 lines** of original architecture specifications that describe a planned system that was **NOT implemented**.
+Contains **5,534+ lines** of original architecture specifications and superseded documents that describe planned or earlier system designs **NOT currently in force**.
 
 **Why Deprecated:**
 - Original plan: 8 components, 6 layers
-- Actual implementation: 11 components, 3 layers
-- Documentation accuracy: ~15% (critical mismatch)
+- Actual implementation: 11 components, 3 layers + facade
+- Quality attributes doc: metrics were fabricated (retraction banner present)
+- UNIFIED / ACTUAL docs: superseded by `ARCHITECTURE.md` v3.0
 
 **Do NOT use these documents** for understanding the current system. They are kept for historical reference only.
 
 See [deprecated/README.md](deprecated/README.md) for details.
-
-### Component Documentation
-
-**Location:** [components/](components/)
-
-This directory now contains only a README that redirects to either:
-- Current documentation (ACTUAL_SYSTEM_ARCHITECTURE.md)
-- Deprecated documentation (deprecated/)
-
-All original component specifications have been moved to deprecated/.
 
 ---
 
@@ -110,25 +116,26 @@ All original component specifications have been moved to deprecated/.
 
 ### For New Developers
 
-**Step 1:** Read [UNIFIED_ARCHITECTURE.md](UNIFIED_ARCHITECTURE.md)
+**Step 1:** Read [ARCHITECTURE.md](ARCHITECTURE.md)
 - Understand the dual system nature
-- Choose which system you're working on
+- Review the facade/factory composition model
+- Check the cross-cutting invariants section
 
 **Step 2:** Read system-specific documentation
-- **Bob Shell KB Manager:** See [UNIFIED_ARCHITECTURE.md Section 2](UNIFIED_ARCHITECTURE.md#2-bob-shell-knowledge-manager)
-- **Token Optimization System:** See [ACTUAL_SYSTEM_ARCHITECTURE.md](ACTUAL_SYSTEM_ARCHITECTURE.md)
+- **Bob Shell KB Manager:** See [ARCHITECTURE.md §1](ARCHITECTURE.md#1-system-context)
+- **Token Optimization System:** See [ARCHITECTURE.md §2](ARCHITECTURE.md#2-component-architecture)
 
 **Step 3:** Review Architecture Decision Records
 - See [docs/adr/](../adr/) for design decisions
-- 12 ADRs covering key architectural choices
+- 13 ADRs covering key architectural choices
 
 ### For Maintainers
 
 **Architecture Updates:**
-1. Update [ACTUAL_SYSTEM_ARCHITECTURE.md](ACTUAL_SYSTEM_ARCHITECTURE.md) for Token Optimization System changes
-2. Update [UNIFIED_ARCHITECTURE.md](UNIFIED_ARCHITECTURE.md) for cross-system changes
-3. Create ADR in [docs/adr/](../adr/) for significant decisions
-4. Update this README if structure changes
+1. Update [ARCHITECTURE.md](ARCHITECTURE.md) for any system changes
+2. Create ADR in [docs/adr/](../adr/) for significant decisions
+3. Update this README if directory structure changes
+4. Run `scripts/generate_api_docs.py --check` to verify API doc sync
 
 **Documentation Sync:**
 - Keep code and docs in sync
@@ -153,29 +160,30 @@ All original component specifications have been moved to deprecated/.
 - 4 bash automation scripts
 - Example knowledge bases
 
-**Documentation:** See [UNIFIED_ARCHITECTURE.md Section 2](UNIFIED_ARCHITECTURE.md#2-bob-shell-knowledge-manager)
+**Documentation:** See [ARCHITECTURE.md §1](ARCHITECTURE.md#1-system-context)
 
 ### Token Optimization System
 
 **Purpose:** Reduce LLM token costs through caching and optimization  
 **Technology:** Python 3.11+, tiktoken, scikit-learn, numpy  
-**Complexity:** ~3,500 lines  
-**Status:** Beta (7/10) - Not Production Ready
+**Complexity:** ~5,400 logical lines  
+**Status:** A (3.89/4.30) — see [STATUS.md](../../STATUS.md)
 
 **Key Components:**
 - Multi-level caching (L1: exact, L2: semantic)
 - Prompt optimization and token counting
 - Text truncation strategies
 - Monitoring and observability
+- Unified `TokenOptimizer` facade + `bob-optimize` CLI
 
-**Documentation:** See [ACTUAL_SYSTEM_ARCHITECTURE.md](ACTUAL_SYSTEM_ARCHITECTURE.md)
+**Documentation:** See [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ### Delegation Module (Experimental)
 
 **Purpose:** Parallel code repository analysis  
 **Technology:** Python 3.11+, ThreadPoolExecutor  
 **Complexity:** ~1,588 lines  
-**Status:** Experimental (0% coverage, not integrated)
+**Status:** Experimental (~52.9% coverage, intentionally not integrated — separate problem domain)
 
 **Documentation:** See [src/delegation/EXPERIMENTAL.md](../../src/delegation/EXPERIMENTAL.md)
 
@@ -185,28 +193,28 @@ All original component specifications have been moved to deprecated/.
 
 ### Architecture
 
-- **[UNIFIED_ARCHITECTURE.md](UNIFIED_ARCHITECTURE.md)** - Master reference
-- **[ACTUAL_SYSTEM_ARCHITECTURE.md](ACTUAL_SYSTEM_ARCHITECTURE.md)** - Token Optimization System
-- **[docs/adr/](../adr/)** - Architecture Decision Records (12 ADRs)
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** — Master reference (authoritative)
+- **[docs/adr/](../adr/)** — Architecture Decision Records (13 ADRs)
+- **[docs/security/THREAT_MODEL.md](../security/THREAT_MODEL.md)** — STRIDE threat model
 
 ### Implementation
 
-- **[docs/knowledge-base/guides/](../knowledge-base/guides/)** - Implementation guides
-- **[docs/knowledge-base/research/](../knowledge-base/research/)** - Research notes
-- **[docs/api/README.md](../api/README.md)** - Auto-generated API reference
+- **[docs/knowledge-base/guides/](../knowledge-base/guides/)** — Implementation guides
+- **[docs/knowledge-base/research/](../knowledge-base/research/)** — Research notes
+- **[docs/api/README.md](../api/README.md)** — Auto-generated API reference
 
 ### Project Management
 
-- **[docs/project-management/PROJECT_STATUS.md](../project-management/PROJECT_STATUS.md)** - Current status
-- **[docs/project-management/phases/](../project-management/phases/)** - Phase documentation
-- **[docs/knowledge-base/guides/audit-remediation-status.md](../knowledge-base/guides/audit-remediation-status.md)** - Audit remediation
+- **[STATUS.md](../../STATUS.md)** — Canonical maturity status (single source of truth)
+- **[docs/project-management/PROJECT_STATUS.md](../project-management/PROJECT_STATUS.md)** — Phase tracking
+- **[docs/knowledge-base/guides/audit-remediation-status.md](../knowledge-base/guides/audit-remediation-status.md)** — Audit remediation
 
 ### User Documentation
 
-- **[README.md](../../README.md)** - Project overview
-- **[docs/QUICK_START.md](../QUICK_START.md)** - 5-minute guide
-- **[docs/USAGE.md](../USAGE.md)** - Usage guide
-- **[docs/MONITORING.md](../MONITORING.md)** - Monitoring guide
+- **[README.md](../../README.md)** — Project overview
+- **[docs/QUICK_START.md](../QUICK_START.md)** — 5-minute guide
+- **[docs/USAGE.md](../USAGE.md)** — Usage guide
+- **[docs/MONITORING.md](../MONITORING.md)** — Monitoring guide
 
 ---
 
@@ -214,25 +222,26 @@ All original component specifications have been moved to deprecated/.
 
 ### Current Status
 
-**Accuracy:**
-- UNIFIED_ARCHITECTURE.md: 100% (newly created)
-- ACTUAL_SYSTEM_ARCHITECTURE.md: 95% (verified Week 19)
-- Deprecated docs: ~15% (historical reference only)
+**Accuracy (as of 2026-07-14):**
+- `ARCHITECTURE.md`: authoritative (v3.0, verified against source)
+- `docs/adr/`: 13 ADRs, principles in force; implementation-status notes on ADR-002–005 where class names evolved
+- `THREAT_MODEL.md`: exemplary — STRIDE, grounded in code, path:line citations
+- Deprecated docs: historical reference only
 
 **Coverage:**
-- Bob Shell KB Manager: Complete
-- Token Optimization System: Complete
-- Delegation Module: Documented as experimental
+- Bob Shell KB Manager: complete
+- Token Optimization System: complete
+- Delegation Module: documented as experimental
 
 **Maintenance:**
-- Last major update: July 13, 2026 (Phase 5)
-- Next review: Phase 6 (real-world validation)
+- Last major update: 2026-07-14 (architecture remediation — MECE audit)
+- Next review: when significant architectural change is made (ADR required)
 
 ### Quality Standards
 
 **All architecture documentation must:**
-1. Accurately reflect implemented system
-2. Include code examples from actual source
+1. Accurately reflect the implemented system
+2. Include code examples from actual source with path:line citations
 3. Provide performance metrics (measured, not estimated)
 4. Link to related documentation
 5. Include version history
@@ -241,7 +250,7 @@ All original component specifications have been moved to deprecated/.
 1. Be clearly marked as deprecated
 2. Explain why it was deprecated
 3. Point to current documentation
-4. Be moved to deprecated/ folder
+4. Be moved to `deprecated/` folder
 
 ---
 
@@ -249,7 +258,8 @@ All original component specifications have been moved to deprecated/.
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 3.0 | 2026-07-13 | Phase 5: Created UNIFIED_ARCHITECTURE.md, moved deprecated docs |
+| 4.0 | 2026-07-14 | Architecture remediation: nav hub fixed; deprecated docs moved; ARCHITECTURE.md v3.0 is now authoritative |
+| 3.0 | 2026-07-13 | Phase 5: Created UNIFIED_ARCHITECTURE.md, moved deprecated component specs |
 | 2.0 | 2026-07-12 | Created ACTUAL_SYSTEM_ARCHITECTURE.md, identified gaps |
 | 1.0 | 2026-07-12 | Initial version with deprecation warnings |
 | 0.x | 2026-06-XX | Original planned architecture (now deprecated) |
@@ -260,15 +270,16 @@ All original component specifications have been moved to deprecated/.
 
 ### Questions?
 
-1. **Architecture Questions:** See [UNIFIED_ARCHITECTURE.md](UNIFIED_ARCHITECTURE.md) or [ACTUAL_SYSTEM_ARCHITECTURE.md](ACTUAL_SYSTEM_ARCHITECTURE.md)
+1. **Architecture Questions:** See [ARCHITECTURE.md](ARCHITECTURE.md)
 2. **Implementation Questions:** Check source code in `src/` or tests in `tests/`
 3. **Design Decisions:** See [docs/adr/](../adr/)
-4. **Gap Analysis:** See [docs/knowledge-base/research/external-audit-2026-07-12.md](../knowledge-base/research/external-audit-2026-07-12.md)
+4. **Security:** See [docs/security/THREAT_MODEL.md](../security/THREAT_MODEL.md)
+5. **Status / Grade:** See [STATUS.md](../../STATUS.md)
 
 ### Contributing
 
 When updating architecture documentation:
-1. Update ACTUAL_SYSTEM_ARCHITECTURE.md or UNIFIED_ARCHITECTURE.md first
+1. Update `ARCHITECTURE.md` first
 2. Keep documentation in sync with code
 3. Add examples from actual source code
 4. Update this README if structure changes
@@ -276,6 +287,6 @@ When updating architecture documentation:
 
 ---
 
-**Current Status:** Phase 5 Complete - Documentation Reconciled  
-**Next Update:** Phase 6 - Add real-world validation results  
+**Authoritative architecture document:** [ARCHITECTURE.md](ARCHITECTURE.md) (v3.0)  
+**Canonical status:** [STATUS.md](../../STATUS.md)  
 **Maintainer:** Architecture Team

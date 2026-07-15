@@ -35,7 +35,7 @@
 
 ```bash
 cd ~/Projects
-git clone https://github.com/yourusername/bob-llmwiki-knowledge-manager.git
+git clone https://github.com/davidleconte/bob-llmwiki-knowledge-manager.git
 cd bob-llmwiki-knowledge-manager
 ```
 
@@ -423,9 +423,9 @@ cat README.md
 
 ### Join the Community
 
-- GitHub: https://github.com/yourusername/bob-llmwiki-knowledge-manager
+- GitHub: https://github.com/davidleconte/bob-llmwiki-knowledge-manager
 - Documentation: https://docs.bob-llmwiki-km.dev
-- Issues: https://github.com/yourusername/bob-llmwiki-knowledge-manager/issues
+- Issues: https://github.com/davidleconte/bob-llmwiki-knowledge-manager/issues
 
 ### Contribute
 

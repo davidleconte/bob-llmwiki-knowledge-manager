@@ -500,3 +500,27 @@ class HybridCache(ResponseCache):
 **Document Owner:** Architecture Team  
 **Last Updated:** 2026-07-12  
 **Next Review:** 2027-01-12 (6 months)
+
+---
+
+## Implementation Note (2026-07-14)
+
+The caching principle described in this ADR is fully implemented. However, the specific
+class names and persistence mechanism evolved between the planning phase and implementation:
+
+| ADR describes | Actual implementation |
+|---|---|
+| `ResponseCache` base class | `CacheInterface` base class (`src/cache/base.py`) |
+| `MemoryCache(ResponseCache)` | `ExactCache(CacheInterface)` (`src/cache/exact_cache.py:44`) |
+| `FileCache(ResponseCache)` | Not implemented — in-memory only (see ADR-006) |
+| JSON file storage | `collections.OrderedDict` with SHA-256 key hashing |
+| Redis (future) | Not implemented — deferred indefinitely (see ADR-006) |
+
+The multi-level cache composition (`MultiLevelCache`, `src/cache/multi_level_cache.py`)
+was not in the original design; it was introduced to wire `ExactCache` (L1) and
+`SemanticCache` (L2) under a unified interface. The `TokenOptimizer` facade shares one
+`ExactCache` instance between the multi-level surface and the optimizer's internal cache
+(see ADR-013 and `src/facade.py:73-86`).
+
+The core decision — multi-level caching with exact matching and semantic similarity — is
+in force and correctly implemented.

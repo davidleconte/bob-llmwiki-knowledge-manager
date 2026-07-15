@@ -21,7 +21,7 @@ If you haven't already, get the codebase:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/bob-llmwiki-knowledge-manager.git
+git clone https://github.com/davidleconte/bob-llmwiki-knowledge-manager.git
 cd bob-llmwiki-knowledge-manager
 ```
 
