@@ -25,7 +25,7 @@ Build a :class:`PromptOptimizer` from an :class:`OptimizerConfig`.
 
 ``model``/``use_cache``/``track_costs``/``cache`` are not part of
 ``OptimizerConfig`` and are passed separately; the config's ``max_tokens``/
-``target_reduction``/``min_quality_score`` map 1:1 via
+``target_reduction``/``min_quality_score``/``strategies`` map 1:1 via
 :meth:`PromptOptimizer.from_config`. ``cache`` lets the facade share its
 config-built L1 so ``config.cache.l1`` governs the optimize() cache.
 

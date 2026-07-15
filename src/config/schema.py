@@ -51,9 +51,17 @@ class OptimizerConfig:
     strategies: Optional[List[str]] = None
 
     def __post_init__(self):
-        """Initialize default strategies if not provided."""
+        """Initialize default strategies if not provided.
+
+        The three defaults match the pre-wiring baseline (all three optimizer
+        method calls were unconditional before strategies was wired through):
+        - ``"remove_whitespace"`` → ``_normalize_whitespace``
+        - ``"compress_repeated"`` → ``_remove_redundancy``
+        - ``"remove_comments"`` → ``_compress_content`` (punctuation cleanup +
+          filler/abbreviation removal when ``preserve_structure=False``)
+        """
         if self.strategies is None:
-            self.strategies = ["remove_whitespace", "compress_repeated"]
+            self.strategies = ["remove_whitespace", "compress_repeated", "remove_comments"]
 
 
 @dataclass

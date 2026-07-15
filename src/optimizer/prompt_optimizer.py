@@ -39,6 +39,7 @@ class PromptOptimizer:
         max_tokens: Optional default cap on optimized-output tokens (from config)
         target_reduction: Target fraction of tokens to remove
         min_quality_score: Minimum quality threshold
+        strategies: Active optimization strategy names (from config)
     """
 
     def __init__(
@@ -50,6 +51,7 @@ class PromptOptimizer:
         use_cache: bool = True,
         track_costs: bool = False,
         *,
+        strategies: Optional[List[str]] = None,
         cache: Optional["ExactCache"] = None,
         target_savings: Optional[float] = None,
         min_quality: Optional[float] = None,
@@ -57,7 +59,8 @@ class PromptOptimizer:
         """Initialize prompt optimizer.
 
         Tunables use the canonical ``OptimizerConfig`` field names
-        (``max_tokens``, ``target_reduction``, ``min_quality_score``) so a config
+        (``max_tokens``, ``target_reduction``, ``min_quality_score``,
+        ``strategies``) so a config
         object wires straight through -- see :meth:`from_config`.
 
         Args:
@@ -71,6 +74,11 @@ class PromptOptimizer:
                 on-target (0-1).
             use_cache: Whether to use caching.
             track_costs: Whether to track costs with CostTracker.
+            strategies: List of strategy names to apply. Allowed values:
+                ``"remove_whitespace"``, ``"compress_repeated"``,
+                ``"remove_comments"``, ``"shorten_names"``. ``None`` defaults to
+                ``["remove_whitespace", "compress_repeated"]``, matching the
+                ``OptimizerConfig`` default.
             cache: Optional pre-built L1 :class:`~src.cache.exact_cache.ExactCache`
                 to use instead of constructing a default one. The facade injects
                 its ``MultiLevelCache``'s L1 here so ``config.cache.l1`` (size/TTL)
@@ -85,6 +93,16 @@ class PromptOptimizer:
             target_reduction = target_savings
         if min_quality is not None:
             min_quality_score = min_quality
+        # Default strategies must match the pre-wiring baseline: all three method
+        # calls were unconditional before, so the default includes all three.
+        # "remove_comments" maps to _compress_content (punctuation cleanup +
+        # filler/abbreviation removal). OptimizerConfig.__post_init__ is updated
+        # to match this three-strategy default.
+        self.strategies: List[str] = strategies if strategies is not None else [
+            "remove_whitespace",
+            "compress_repeated",
+            "remove_comments",
+        ]
 
         self.token_counter = TokenCounter(model=model, track_costs=track_costs)
         # Use only L1 (exact) cache to avoid semantic matches returning a wrong
@@ -146,16 +164,17 @@ class PromptOptimizer:
         """Build an optimizer from an :class:`~src.config.schema.OptimizerConfig`.
 
         The canonical config->runtime path: the config's ``max_tokens``,
-        ``target_reduction`` and ``min_quality_score`` map 1:1 onto the
-        constructor. ``model``/``use_cache``/``track_costs``/``cache`` are not
-        part of ``OptimizerConfig`` and are passed separately; ``cache`` lets the
-        facade share its config-built L1 (see :meth:`__init__`).
+        ``target_reduction``, ``min_quality_score``, and ``strategies`` map 1:1
+        onto the constructor. ``model``/``use_cache``/``track_costs``/``cache``
+        are not part of ``OptimizerConfig`` and are passed separately; ``cache``
+        lets the facade share its config-built L1 (see :meth:`__init__`).
         """
         return cls(
             model=model,
             max_tokens=config.max_tokens,
             target_reduction=config.target_reduction,
             min_quality_score=config.min_quality_score,
+            strategies=config.strategies,
             use_cache=use_cache,
             track_costs=track_costs,
             cache=cache,
@@ -197,11 +216,14 @@ class PromptOptimizer:
         # Count original tokens
         original_tokens = self.token_counter.count_tokens(prompt)
 
-        # Apply optimization strategies
+        # Apply optimization strategies (controlled by self.strategies list)
         optimized = prompt
-        optimized = self._normalize_whitespace(optimized, preserve_structure)
-        optimized = self._remove_redundancy(optimized)
-        optimized = self._compress_content(optimized, preserve_structure)
+        if "remove_whitespace" in self.strategies:
+            optimized = self._normalize_whitespace(optimized, preserve_structure)
+        if "compress_repeated" in self.strategies:
+            optimized = self._remove_redundancy(optimized)
+        if "remove_comments" in self.strategies or "shorten_names" in self.strategies:
+            optimized = self._compress_content(optimized, preserve_structure)
 
         # Apply token limit: a per-call max_tokens overrides the instance default
         # (self.max_tokens, set from config); otherwise fall back to that default.

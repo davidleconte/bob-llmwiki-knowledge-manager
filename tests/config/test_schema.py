@@ -73,7 +73,7 @@ class TestOptimizerConfig:
         assert config.max_tokens == 4096
         assert config.target_reduction == 0.3
         assert config.min_quality_score == 0.8
-        assert config.strategies == ["remove_whitespace", "compress_repeated"]
+        assert config.strategies == ["remove_whitespace", "compress_repeated", "remove_comments"]
 
     def test_custom_values(self):
         """Test OptimizerConfig with custom values."""
