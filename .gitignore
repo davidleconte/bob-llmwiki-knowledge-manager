@@ -51,3 +51,4 @@ htmlcov/
 
 # Knowledge Base
 docs/knowledge-base/.DS_Store
+.claude/worktrees/
