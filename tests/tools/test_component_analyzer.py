@@ -49,6 +49,22 @@ class TestErrorBranches:
         result = ComponentAnalyzer(str(tmp_path)).analyze_component("ghost.py")
         assert "Component not found" in result["error"]
 
+    def test_file_deleted_after_resolution_returns_error_not_exception(self, tmp_path):
+        """TOCTOU regression: file exists during resolve but removed before is_dir().
+
+        Previously the code called full_path.exists() then full_path.is_dir(); the
+        exists() guard has been removed and is_dir() is now wrapped in try/except,
+        so a file removed in the TOCTOU window returns an error dict.
+        """
+        p = tmp_path / "transient.py"
+        p.write_text("x = 1\n")
+        analyzer = ComponentAnalyzer(str(tmp_path))
+        p.unlink()
+
+        result = analyzer.analyze_component("transient.py")
+        assert "error" in result
+        assert "Component not found" in result["error"]
+
     def test_escaping_path_refused(self, tmp_path):
         result = ComponentAnalyzer(str(tmp_path)).analyze_component("../outside.py")
         assert "Invalid component path" in result["error"]

@@ -47,10 +47,6 @@ class BatchFileReader:
                 results[file_path] = {"error": "Invalid file path (escapes base directory)"}
                 continue
 
-            if not full_path.exists():
-                results[file_path] = {"error": "File not found"}
-                continue
-
             try:
                 if strategy == "full":
                     results[file_path] = self._read_full(full_path, max_lines_per_file)
@@ -60,6 +56,8 @@ class BatchFileReader:
                     results[file_path] = self._read_search(full_path, search_pattern)
                 else:
                     results[file_path] = {"error": f"Unknown strategy: {strategy}"}
+            except FileNotFoundError:
+                results[file_path] = {"error": "File not found"}
             except Exception as e:
                 results[file_path] = {"error": str(e)}
 

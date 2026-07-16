@@ -252,12 +252,11 @@ class KnowledgeBaseQuery:
         except ValueError:
             return {"error": f"Invalid file path (escapes knowledge base): {file_path}"}
 
-        if not full_path.exists():
-            return {"error": f"File not found: {file_path}"}
-
         try:
             with open(full_path, "r", encoding="utf-8") as f:
                 content = f.read()
+        except FileNotFoundError:
+            return {"error": f"File not found: {file_path}"}
         except Exception as e:
             return {"error": str(e)}
 

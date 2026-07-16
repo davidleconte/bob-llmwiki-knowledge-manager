@@ -155,28 +155,32 @@ the local-CLI deployment context; a hosted deployment must revisit them.
    (`pyproject.toml`), the SBOM + `pip-audit` supply-chain tooling covers it,
    and the call is wrapped so that a failure degrades to a `chars/4` estimate
    rather than crashing. Accepted.
-4. **TOCTOU: check-then-use window in path validation.** `resolve_within()` in
-   `src/tools/safe_paths.py:41-45` validates a path by resolving it and checking
-   containment at the point of the call. The caller then checks existence and
-   subsequently opens the file — three separate OS operations. Between the
-   `resolve_within` return and the `open()` call, a privileged process with write
-   access to the validated directory could atomically replace a valid symlink
-   target with one that points outside the base, causing the later `open()` to
-   read a file the containment check would have rejected. The three-step pattern
-   occurs in all three tools:
-   - `src/tools/batch_file_reader.py:45` (resolve) → `:50` (exists) → `:71` (open)
-   - `src/tools/component_analyzer.py:42` (resolve) → `:46` (exists) → `:120` (open)
-   - `src/tools/kb_query.py:251` (resolve) → `:255` (exists) → `:259` (open)
+4. **TOCTOU: check-then-use window in path validation (narrowed, two-step).**
+   `resolve_within()` in `src/tools/safe_paths.py:41-45` validates a path by
+   resolving it and checking containment at the point of the call. The caller
+   then opens the file — two separate OS operations. Previously all three tools
+   used a three-step pattern (resolve → `exists()` → `open()`); the intermediate
+   `exists()` check has been removed and the `open()` call is now wrapped in
+   `try/except FileNotFoundError`, collapsing the window to two steps
+   (resolve → open). The two-step pattern in all three tools:
+   - `src/tools/batch_file_reader.py:45` (resolve) → `:54` (open inside try/except)
+   - `src/tools/component_analyzer.py:42` (resolve) → `:46` (`is_dir` inside try/except)
+   - `src/tools/kb_query.py:251` (resolve) → `:258` (open inside try/except)
+
+   A residual window remains: between `resolve_within` and `open()`, a privileged
+   process could replace the symlink target. Eliminating this entirely requires
+   `O_NOFOLLOW` / `openat(O_PATH)` semantics — not available via Python's
+   `pathlib`/`open()` portably. The two-step pattern raises the bar: replacing a
+   valid target now requires doing so within a single syscall context (no
+   intermediate `exists` check to race against).
 
    **Severity: Low in the local-CLI context.** The operator already owns the
    filesystem; a race requires a concurrently running process with write access
-   to the same directory subtree. This is self-inflicted in a single-user,
-   single-process deployment. **Severity would rise to Medium–High** if any of
-   these tools were exposed behind a multi-user service — in that context the
-   mitigation is to open the file descriptor immediately after `resolve_within`
-   and pass the `fd` rather than re-opening by path, eliminating the window.
-   Accepted in the local-CLI deployment context; must be revisited if a service
-   wrapper is added.
+   to the same directory subtree. **Severity would rise to Medium–High** if any
+   of these tools were exposed behind a multi-user service — the correct
+   mitigation in that context is `O_NOFOLLOW` or seccomp sandboxing.
+   Accepted-minimal in the local-CLI deployment context; must be revisited if a
+   service wrapper is added.
 
 ## Non-risks worth recording (scoping wins)
 

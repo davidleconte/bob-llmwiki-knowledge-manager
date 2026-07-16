@@ -188,6 +188,29 @@ class TestErrorBranches:
         assert "error" not in results["ok.txt"]
         assert results["missing.txt"]["error"] == "File not found"
 
+    def test_file_deleted_after_resolution_returns_error_not_exception(self, tmp_path):
+        """TOCTOU regression: file exists at call time but is deleted before open().
+
+        Previously the code called full_path.exists() → open(); now it calls
+        open() directly inside try/except FileNotFoundError.  If the file
+        vanishes between resolve_within() and open() the call must return an
+        error dict, not raise an unhandled exception.
+        """
+        # Create the file so resolve_within succeeds (it checks containment,
+        # not existence on older versions).
+        p = tmp_path / "vanishing.txt"
+        p.write_text("hello\n")
+        reader = BatchFileReader(str(tmp_path))
+
+        # Simulate deletion between resolve and open by removing before the call.
+        # Because resolve_within resolves to an absolute path and doesn't re-check
+        # existence, deleting now exercises the FileNotFoundError branch in open().
+        p.unlink()
+
+        result = reader.read_files(["vanishing.txt"])["vanishing.txt"]
+        assert "error" in result
+        assert result["error"] == "File not found"
+
 
 # --------------------------------------------------------------------------- #
 # CLI main()

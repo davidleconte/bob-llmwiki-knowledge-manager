@@ -217,6 +217,24 @@ class TestCrossReferences:
         result = kb.get_cross_references("concepts/ghost.md")
         assert "File not found" in result["error"]
 
+    def test_file_deleted_after_resolution_returns_error_not_exception(self, tmp_path):
+        """TOCTOU regression: file exists during resolve but is removed before open().
+
+        Previously the code called full_path.exists() → open(); removing the
+        exists() check and catching FileNotFoundError on open() means a file
+        deleted in the TOCTOU window returns an error dict rather than an
+        unhandled exception.
+        """
+        kb_root = _make_kb(tmp_path)
+        p = kb_root / "concepts" / "disappearing.md"
+        p.write_text("# Disappearing\n\n[link](other.md)\n")
+        kb = KnowledgeBaseQuery(str(kb_root))
+        p.unlink()
+
+        result = kb.get_cross_references("concepts/disappearing.md")
+        assert "error" in result
+        assert "File not found" in result["error"]
+
 
 # --------------------------------------------------------------------------- #
 # get_statistics()

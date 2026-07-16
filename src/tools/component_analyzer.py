@@ -43,11 +43,13 @@ class ComponentAnalyzer:
         except ValueError:
             return {"error": f"Invalid component path (escapes base): {component_path}"}
 
-        if not full_path.exists():
-            return {"error": f"Component not found: {component_path}"}
-
-        # Determine if it's a file or directory
+        # Check type: is_dir() returns False (not raises) for missing paths, so
+        # fall through to is_file() to distinguish "not a directory" from
+        # "does not exist". Collapses the old exists()→is_dir() two-call pattern
+        # into a single is_dir()+is_file() pair, narrowing the TOCTOU window.
         is_directory = full_path.is_dir()
+        if not is_directory and not full_path.is_file():
+            return {"error": f"Component not found: {component_path}"}
 
         result = {
             "component": component_path,
