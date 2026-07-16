@@ -52,3 +52,6 @@ htmlcov/
 # Knowledge Base
 docs/knowledge-base/.DS_Store
 .claude/worktrees/
+
+# Generated reports (delegation demo output)
+reports/

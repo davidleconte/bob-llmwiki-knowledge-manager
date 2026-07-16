@@ -1,7 +1,7 @@
 # ⚠️ EXPERIMENTAL: Delegation Module
 
-**Status:** Experimental / Not Integrated (intentionally — see below)  
-**Coverage:** unit-tested (coordinator + base); held at a ~54% per-package floor in `scripts/check_coverage_by_package.py`. Not integration-tested with the optimizer, by design.  
+**Status:** Experimental / Not Integrated (intentionally — see below)
+**Coverage:** unit-tested (coordinator + base); held at a **52% per-package floor** in `scripts/check_coverage_by_package.py`. Agents are intentionally not integration-tested. Not integrated with the optimizer, by design.
 **Last Updated:** 2026-07-14
 
 ## Overview
@@ -104,26 +104,31 @@ Run delegation agents in CI/CD pipeline to analyze PRs and generate reports.
 
 If you want to work on this module:
 
-1. **Add Tests First:**
+1. **Run the demo:**
    ```bash
-   # Create tests/delegation/ directory
-   # Add unit tests for coordinator
-   # Add integration tests for agents
-   # Target: 60%+ coverage
+   python3 examples/delegation_example.py
+   # Output written to reports/delegation_report.txt (gitignored)
    ```
 
-2. **Improve Examples:**
+2. **Run existing tests:**
    ```bash
-   # Make delegation_example.py more robust
-   # Add error handling
-   # Show real-world use cases
+   uv run pytest tests/delegation/ -v
+   # Covers: coordinator, base types, documentation-agent containment
+   # Target floor: 52% (scripts/check_coverage_by_package.py)
    ```
 
-3. **Document Integration Points:**
+3. **Add agent tests (if raising the floor):**
    ```bash
-   # If integrating with optimizer
-   # Document the integration pattern
-   # Add integration tests
+   # tests/delegation/ already exists
+   # Add integration tests for individual agents
+   # Raise floor in scripts/check_coverage_by_package.py after measuring
+   ```
+
+4. **Document integration points (if wiring to a service):**
+   ```bash
+   # Re-read docs/knowledge-base/research/delegation-integration-analysis-2026-07-13.md
+   # Document the integration pattern in a new ADR
+   # Add integration tests before raising coverage floor
    ```
 
 ## Maintenance
