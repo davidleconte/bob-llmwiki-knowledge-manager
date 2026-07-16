@@ -35,7 +35,7 @@ Attributes:
 
 #### Methods
 
-##### `__init__(l1_max_size: int, l2_max_size: int, similarity_threshold: float, promote_l2_hits: bool, l1_ttl_seconds: Optional[float], l2_ttl_seconds: Optional[float], l1_enabled: bool, l2_enabled: bool)`
+##### `__init__(l1_max_size: int, l2_max_size: int, similarity_threshold: float, promote_l2_hits: bool, l1_ttl_seconds: Optional[float], l2_ttl_seconds: Optional[float], l1_enabled: bool, l2_enabled: bool, version_support_enabled: bool, max_versions: int)`
 
 Initialize multi-level cache.
 
@@ -54,6 +54,10 @@ Args:
         When False, L1 is bypassed and no L2->L1 promotion occurs.
     l2_enabled: Whether the L2 (semantic) level participates in get/set.
         When False, L2 is bypassed. Both flags come from CacheConfig.
+    version_support_enabled: Forwarded to :class:`~src.cache.exact_cache.ExactCache`.
+        When ``False``, L1 stores keys without version prefixes.
+    max_versions: Forwarded to :class:`~src.cache.exact_cache.ExactCache`.
+        Cap on migrate() history depth.
 
 
 ##### `get(key: str, version: Optional[str]) -> Optional[str]`

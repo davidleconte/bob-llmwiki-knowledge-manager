@@ -16,7 +16,8 @@ lives here, once.
 Build a :class:`MultiLevelCache` from a :class:`CacheConfig`.
 
 Maps every ``CacheConfig`` field onto the cache constructor: sizes, TTLs, the
-L2 similarity threshold, and the L1/L2 enabled flags all take effect.
+L2 similarity threshold, the L1/L2 enabled flags, and version-support
+settings (``version_support_enabled``, ``max_versions``) all take effect.
 
 
 ### `build_optimizer(config: 'OptimizerConfig') -> PromptOptimizer`

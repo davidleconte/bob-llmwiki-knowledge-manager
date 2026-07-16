@@ -48,7 +48,7 @@ Attributes:
 
 #### Methods
 
-##### `__init__(max_size: int, track_costs: bool, ttl_seconds: Optional[float], clock: Callable[[], float])`
+##### `__init__(max_size: int, track_costs: bool, ttl_seconds: Optional[float], clock: Callable[[], float], version_support_enabled: bool, max_versions: int)`
 
 Initialize exact cache.
 
@@ -61,6 +61,13 @@ Args:
         behaviour for callers that don't opt in.
     clock: Time source for stamping/expiry, injectable for
         deterministic tests. Defaults to ``time.time``.
+    version_support_enabled: Whether versioned key prefixes are applied.
+        When ``False``, keys are stored without a version prefix —
+        useful for callers that do not need key-format migration. Comes
+        from :attr:`~src.config.schema.CacheConfig.version_support_enabled`.
+    max_versions: Maximum number of historic versions to retain during
+        :meth:`migrate`. Unused version slots are not pre-allocated;
+        this is a cap on ``migrate()`` history depth.
 
 
 ##### `get(key: str, version: Optional[str]) -> Optional[str]`
