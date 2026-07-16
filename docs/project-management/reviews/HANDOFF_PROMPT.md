@@ -1,3 +1,11 @@
+---
+title: "Session Handoff Prompt (Historical — Stale)"
+date: 2026-07-12
+status: historical
+category: planning
+note: "Stale handoff describing an unrelated HCD project. Do not use as current context. See session-context-prompt.md at root for current handoff."
+---
+
 > ⚠️ **STALE — DO NOT USE AS CURRENT STATUS.** This handoff describes an
 > **unrelated** "HCD (Hyper Converged Database)" documentation project and quotes
 > metrics (e.g. "89.3% token savings", "87% test coverage") that do **not** apply

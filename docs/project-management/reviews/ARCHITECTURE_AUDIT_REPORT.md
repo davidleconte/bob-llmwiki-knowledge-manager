@@ -1,3 +1,11 @@
+---
+title: "Architecture Audit Report — Deep Technical Review (Historical)"
+date: 2026-07-12
+status: historical
+category: audit
+superseded_by: docs/knowledge-base/research/architecture-audit-mece-2026-07-14.md
+---
+
 # Architecture Audit Report - Deep Technical Review
 
 **Audit Date**: July 12, 2026  

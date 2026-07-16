@@ -187,12 +187,12 @@ Authoritative status: [`STATUS.md`](STATUS.md). Authoritative audit: [`docs/know
 | Dimension | Grade | Notes |
 |-----------|:-----:|-------|
 | Product Integrity & Claims | **A** | All fabricated metrics retracted; README duplicates deleted |
-| Architecture & Design | A− | Clean facade + layering; ADR-013 added; §9 Deployment + §10 Glossary added; architecture docs B− → A−; dead `strategies` config field remains |
+| Architecture & Design | A− | Clean facade + layering; ADR-013 added; §9 Deployment + §10 Glossary added; architecture docs B− → A−; `strategies` config field wired through `from_config()` (Gap B closed) |
 | Code Correctness | **A** | C1–C7 + RLock + C8 singletons fixed; behavioral regression tests for each |
 | Testing & Verification | A− | 899 passed · 87.1% coverage (gate ≥80%) · delegation floor frozen at 52% |
 | Build, Release & Supply-Chain | **A** | CI locked to uv.lock · 0 CVEs · bandit SAST blocking · SBOM |
 | Documentation | **A** | Diátaxis spine · docs/ root curated · two authoritative arch docs (one per system) · all docs/ Tier-1 arc42 · API docs in sync |
-| Governance & Compliance | A− | 12-artifact community health · STRIDE threat model · TOCTOU unnamed |
+| Governance & Compliance | A− | 12-artifact community health · STRIDE threat model · TOCTOU named as residual 4 (Gap G closed) |
 
 **Suitable for:**
 - ✅ Development, testing, and research environments

@@ -55,19 +55,21 @@ Review reports, validation documentation, and handoff materials:
 - **Test Examples:** 30+ pytest examples
 
 ### Quality Achievements
-- **MECE Compliance:** 100%
-- **A+ Quality Standards:** 100%
-- **Production Readiness:** 100%
-- **Metrics Consistency:** 100%
-- **Overall Grade:** A+ WITH HONORS
+
+> ⚠️ **Historical snapshot (2026-07-12). See [STATUS.md](../../STATUS.md) for current authoritative values.**
+
+- **Current Grade:** A (3.89 / 4.30) — see [STATUS.md](../../STATUS.md)
+- **Production Readiness:** Beta — Not Production Ready
+- **Overall:** A against institutional vendor standard (up from D− at Phase-0)
 
 ### System Performance
-- **Token Savings:** 89.3%
-- **Quality Score:** 91.80%
-- **Cache Hit Rate:** 23.33%
+
+> ⚠️ **Token Savings (89.3%) and Quality Score (91.80%) were fabricated and are retracted.** Manifest-backed measured figure: ~20% mean optimizer compression — [`evaluation/results/validation-2026-07-14/manifest.json`](../../evaluation/results/validation-2026-07-14/manifest.json).
+
+- **Optimizer Compression:** ~20% mean (manifest-backed, N=183)
+- **Cache Hit Rate:** workload-dependent (not blended into compression figure)
 - **Latency (p95):** <100ms
-- **Throughput:** 600 tasks/second
-- **Test Coverage:** 87%
+- **Test Coverage:** 87.1% (gate ≥80%)
 
 ## Project Timeline
 
@@ -93,14 +95,11 @@ Review reports, validation documentation, and handoff materials:
 
 ## Project Status
 
-**Current Phase:** Documentation Complete ✅
+**Current Phase:** Phases 0–8 complete + post-Phase-8 gap closure
 
-**Status:** APPROVED FOR PRODUCTION
+**Status:** Beta — Not Production Ready — see [STATUS.md](../../STATUS.md) for authoritative current status
 
-**Next Steps:**
-1. Stakeholder review and sign-off
-2. Knowledge transfer and training
-3. Continuous improvement planning
+**Next Steps:** See [STATUS.md](../../STATUS.md) roadmap.
 
 ## Related Documentation
 

@@ -1,3 +1,12 @@
+---
+title: "Token Savings Test Plan — Synthetic Data Validation (Historical)"
+date: 2026-07-12
+status: superseded
+category: research
+superseded_by: evaluation/results/validation-2026-07-14/manifest.json
+note: "Design target (55%) on synthetic data — never a measured result. Phase 5 replaced this with a real manifest-backed harness."
+---
+
 # Token Savings Test Plan - Synthetic Data Validation
 
 **Purpose:** Mathematically prove token savings across all 4 phases using synthetic data and statistical analysis

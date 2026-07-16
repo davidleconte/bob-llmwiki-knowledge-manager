@@ -1,3 +1,11 @@
+---
+title: "Documentation Reorganization Plan (Historical)"
+date: 2026-07-12
+status: historical
+category: planning
+note: "Reorganization plan from 2026-07-12. Executed across Phases 1–8."
+---
+
 # Documentation Reorganization Plan
 
 **Date:** 2026-07-12  

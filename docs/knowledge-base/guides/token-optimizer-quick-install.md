@@ -174,11 +174,12 @@ config.cache.l2_max_size = 250  # Default: 500
 
 ## Important Caveats
 
-⚠️ **Not Production Ready** - See [Institutional Audit](../research/senior-expert-institutional-audit-2026-07-14.md)
+⚠️ **Not Production Ready** — See [STATUS.md](../../../STATUS.md) for the current, authoritative grade.
 
-**Status:** C+ (2.5/4.0 GPA), 60% production readiness
+**Status:** A (3.89 / 4.30) against institutional vendor standard — **Beta, not production-ready.**
+See [`STATUS.md`](../../../STATUS.md) for full dimension breakdown and roadmap.
 
-**Critical Blockers:**
+**Critical Blockers (for production deployment):**
 1. ❌ No external security audit
 2. ❌ No penetration testing
 3. ❌ No load testing

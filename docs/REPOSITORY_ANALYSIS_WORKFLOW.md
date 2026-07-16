@@ -1,15 +1,26 @@
+---
+title: "Token-Efficient Repository Analysis Workflow"
+date: 2026-07-12
+status: reference
+category: guide
+related:
+  - ../knowledge-base/guides/setup-token-optimization.md
+  - ../QUICK_START.md
+  - ../USAGE.md
+---
+
 # Token-Efficient Repository Analysis Workflow
 
 **Purpose:** A systematic workflow for auditing, analyzing, correcting, enriching, and adding features to GitHub repositories while minimizing token consumption.
 
-**Version:** 1.0  
+**Version:** 1.0
 **Last Updated:** July 12, 2026
 
 ---
 
 ## Overview
 
-This workflow combines **Bob Shell Knowledge Manager** (documentation framework) with **Token Optimization System** (caching & optimization) to create a token-efficient process for deep repository analysis.
+This workflow describes how the **Bob Shell Knowledge Manager** (KB documentation framework) and the **Token Optimization System** (Python prompt optimization) can be used **independently or alongside each other** for token-efficient repository analysis. The two systems are **not integrated** — each operates as a standalone tool. See [README.md `§` dual systems](../README.md#this-repository-contains-two-separate-systems) for details.
 
 ### Key Principles
 

@@ -1,3 +1,11 @@
+---
+title: "Week 20 Implementation Plan — Production Readiness (Historical)"
+date: 2026-07-12
+status: historical
+category: planning
+superseded_by: docs/knowledge-base/research/audit-2026-07-14-signoff.md
+---
+
 # Week 20 Implementation Plan - Production Readiness
 
 > ⚠️ **Frozen historical snapshot — retracted metrics.** This is a point-in-time planning/audit-trail document, preserved unedited below for the record. Any token-savings/quality figures it cites — e.g. "68.96%", "89.3%", "91.80%" — were **fabricated** (a simulation that never invoked the optimizer) and are **retracted**; the measured figure is ~20% optimizer compression (manifest-backed: `evaluation/results/validation-2026-07-14/`). See `STATUS.md` and `CHANGELOG.md` for current, provenance-backed numbers.

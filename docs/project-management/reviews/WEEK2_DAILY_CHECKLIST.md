@@ -1,3 +1,11 @@
+---
+title: "Week 2 Daily Checklist — Baseline Data Collection (Historical)"
+date: 2026-07-12
+status: historical
+category: audit
+note: "Baseline data collection checklist from Week 2. Historical reference only."
+---
+
 # Week 2 Daily Checklist - Baseline Data Collection
 
 **Goal**: Complete 30 control tasks over 6 days (5 tasks per day)  
