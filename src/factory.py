@@ -26,7 +26,8 @@ def build_cache(config: "CacheConfig") -> MultiLevelCache:
     """Build a :class:`MultiLevelCache` from a :class:`CacheConfig`.
 
     Maps every ``CacheConfig`` field onto the cache constructor: sizes, TTLs, the
-    L2 similarity threshold, and the L1/L2 enabled flags all take effect.
+    L2 similarity threshold, the L1/L2 enabled flags, and version-support
+    settings (``version_support_enabled``, ``max_versions``) all take effect.
     """
     return MultiLevelCache(
         l1_max_size=config.l1_max_size,
@@ -36,6 +37,8 @@ def build_cache(config: "CacheConfig") -> MultiLevelCache:
         l2_ttl_seconds=config.l2_ttl_seconds,
         l1_enabled=config.l1_enabled,
         l2_enabled=config.l2_enabled,
+        version_support_enabled=config.version_support_enabled,
+        max_versions=config.max_versions,
     )
 
 

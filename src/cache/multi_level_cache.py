@@ -51,6 +51,8 @@ class MultiLevelCache(CacheInterface):
         l2_ttl_seconds: Optional[float] = None,
         l1_enabled: bool = True,
         l2_enabled: bool = True,
+        version_support_enabled: bool = True,
+        max_versions: int = 5,
     ):
         """Initialize multi-level cache.
 
@@ -69,8 +71,17 @@ class MultiLevelCache(CacheInterface):
                 When False, L1 is bypassed and no L2->L1 promotion occurs.
             l2_enabled: Whether the L2 (semantic) level participates in get/set.
                 When False, L2 is bypassed. Both flags come from CacheConfig.
+            version_support_enabled: Forwarded to :class:`~src.cache.exact_cache.ExactCache`.
+                When ``False``, L1 stores keys without version prefixes.
+            max_versions: Forwarded to :class:`~src.cache.exact_cache.ExactCache`.
+                Cap on migrate() history depth.
         """
-        self.l1_cache = ExactCache(max_size=l1_max_size, ttl_seconds=l1_ttl_seconds)
+        self.l1_cache = ExactCache(
+            max_size=l1_max_size,
+            ttl_seconds=l1_ttl_seconds,
+            version_support_enabled=version_support_enabled,
+            max_versions=max_versions,
+        )
         self.l2_cache = SemanticCache(
             max_size=l2_max_size,
             similarity_threshold=similarity_threshold,

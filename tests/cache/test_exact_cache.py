@@ -259,6 +259,7 @@ class TestExactCache:
         assert stats["max_size"] == 100
         assert stats["utilization"] == 2.0  # 2/100 * 100
 
+    @pytest.mark.slow
     def test_performance_lookup_latency(self):
         """Test that lookup latency is <1ms (target)."""
         cache = ExactCache()
@@ -341,6 +342,32 @@ class TestExactCache:
         # Wait and check idle time
         time.sleep(0.1)
         assert entry.idle_seconds() >= 0.1
+
+    def test_version_support_disabled(self):
+        """When version_support_enabled=False, set/get round-trips correctly.
+
+        Regression: CacheConfig.version_support_enabled and max_versions were
+        validated and stored in the manifest config but never passed to
+        ExactCache.__init__, so version_support_enabled=False was silently ignored.
+        """
+        cache = ExactCache(version_support_enabled=False, max_versions=3)
+
+        cache.set("key1", "response1")
+        cache.set("key2", "response2")
+
+        assert cache.get("key1") == "response1"
+        assert cache.get("key2") == "response2"
+        assert cache.size() == 2
+        assert cache.version_support_enabled is False
+
+    def test_version_support_enabled_default(self):
+        """Default ExactCache has version_support_enabled=True."""
+        cache = ExactCache()
+        assert cache.version_support_enabled is True
+        assert cache.max_versions == 5
+
+        cache.set("key1", "value1")
+        assert cache.get("key1") == "value1"
 
 
 class TestExactCacheTTL:

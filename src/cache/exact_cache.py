@@ -64,6 +64,8 @@ class ExactCache(CacheInterface):
         track_costs: bool = False,
         ttl_seconds: Optional[float] = None,
         clock: Callable[[], float] = time.time,
+        version_support_enabled: bool = True,
+        max_versions: int = 5,
     ):
         """Initialize exact cache.
 
@@ -76,6 +78,13 @@ class ExactCache(CacheInterface):
                 behaviour for callers that don't opt in.
             clock: Time source for stamping/expiry, injectable for
                 deterministic tests. Defaults to ``time.time``.
+            version_support_enabled: Whether versioned key prefixes are applied.
+                When ``False``, keys are stored without a version prefix —
+                useful for callers that do not need key-format migration. Comes
+                from :attr:`~src.config.schema.CacheConfig.version_support_enabled`.
+            max_versions: Maximum number of historic versions to retain during
+                :meth:`migrate`. Unused version slots are not pre-allocated;
+                this is a cap on ``migrate()`` history depth.
         """
         if max_size <= 0:
             raise ValueError("max_size must be positive")
@@ -87,6 +96,8 @@ class ExactCache(CacheInterface):
         self.max_size = max_size
         self.ttl_seconds = ttl_seconds
         self._clock = clock
+        self.version_support_enabled = version_support_enabled
+        self.max_versions = max_versions
         self.cache: OrderedDict[str, CacheEntry] = OrderedDict()
         self._stats = CacheStats()
         self.track_costs = track_costs
@@ -115,13 +126,19 @@ class ExactCache(CacheInterface):
     def _make_versioned_key(self, key: str, version: Optional[str] = None) -> str:
         """Create versioned cache key.
 
+        When :attr:`version_support_enabled` is ``False`` the key is returned
+        as-is (no version prefix), so callers that disable version support
+        store and retrieve without any migration overhead.
+
         Args:
             key: Base key (prompt)
             version: Version string (defaults to current VERSION)
 
         Returns:
-            Versioned key string
+            Versioned key string (or plain key when version support is off)
         """
+        if not self.version_support_enabled:
+            return key
         if version is None:
             version = self.VERSION
         # Escape the version so a colon inside it cannot be confused with the
