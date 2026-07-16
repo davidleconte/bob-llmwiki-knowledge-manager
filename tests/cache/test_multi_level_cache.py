@@ -314,6 +314,7 @@ class TestMultiLevelCache:
         assert cache.misses == 0
         assert len(cache._lookup_times) == 0
 
+    @pytest.mark.slow
     def test_performance_lookup_latency(self):
         """Test that lookup latency is <100ms (target)."""
         cache = MultiLevelCache()

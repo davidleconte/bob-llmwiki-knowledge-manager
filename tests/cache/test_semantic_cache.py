@@ -309,6 +309,7 @@ class TestSemanticCache:
         avg = cache.average_similarity_score()
         assert 0 <= avg <= 1
 
+    @pytest.mark.slow
     def test_performance_lookup_latency(self):
         """Test that lookup latency is <100ms (target)."""
         cache = SemanticCache()

@@ -237,4 +237,6 @@ jobs:
       - name: Dependency vulnerability audit (BLOCKING, against the locked closure)
         # Was continue-on-error in Phase 3; the locked closure is clean (0 CVEs),
         # so this is now a blocking gate that fails the build on any new CVE.
-        run: pip-audit --requirement requirements.lock.txt
+        # --strict: also fails if pip-audit itself encounters an error (e.g. network
+        # unavailable, missing metadata) so a broken audit cannot silently pass.
+        run: pip-audit --requirement requirements.lock.txt --strict

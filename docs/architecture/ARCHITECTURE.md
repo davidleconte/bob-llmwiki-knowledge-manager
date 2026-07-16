@@ -186,7 +186,21 @@ re-incentivise fabrication). See [`../../src/validation/README.md`](../../src/va
 - **Doc freshness.** `docs/api/` is regenerated from source docstrings and
   CI-checked (`generate_api_docs.py --check`).
 
-## 8. Where to go next
+## 8. Quality scenarios
+
+Verifiable acceptance criteria for the system's cross-cutting quality attributes.
+
+| ID | Attribute | Stimulus | Measurable response | Verification |
+|:--:|-----------|----------|---------------------|--------------|
+| QS-1 | Performance (L1 cache) | Single exact-match lookup with 1,000-entry cache | Mean latency < 1 ms | `pytest tests/cache/test_exact_cache.py -m slow -v` |
+| QS-2 | Performance (L2 cache) | Single semantic lookup with 50-entry cache | Mean latency < 100 ms | `pytest tests/cache/test_semantic_cache.py -m slow -v` |
+| QS-3 | Performance (optimizer) | `optimize()` call on a 1,000-token prompt | Latency < 50 ms (p95) | Benchmark suite: `pytest tests/ --benchmark-only` |
+| QS-4 | Accuracy (savings) | Optimizer compression over N=183 real in-repo docs | Mean ≥ 19% (95% CI lower bound); null test collapses to < 5% | `python -m src.validation` → `evaluation/results/validation-2026-07-14/manifest.json` |
+| QS-5 | Correctness (C1–C8) | Revert any of the 8 known bug fixes | Dedicated regression test fails immediately | `uv run pytest tests/ -k "regression or c1 or c5 or c7 or c8 or rlock or deadlock" -v` |
+| QS-6 | Thread safety | Two concurrent `cache.get()` / `cache.set()` calls on the same key | No data corruption; no deadlock | `uv run pytest tests/cache/ -k "concurrent or thread" -v` |
+| QS-7 | Coverage | Full test suite including `src/tools/` and `src/monitoring/` | Global ≥ 80%; per-package floors enforced | `uv run pytest tests/ --cov=src --cov-report=term-missing` + `python scripts/check_coverage_by_package.py` |
+
+## 9. Where to go next
 
 - Decisions and their rationale: [`../adr/`](../adr/README.md) (ADR 001–013).
 - Per-module API: [`../api/`](../api/README.md) (generated, drift-checked).
