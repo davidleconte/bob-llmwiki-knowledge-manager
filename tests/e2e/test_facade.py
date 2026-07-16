@@ -139,3 +139,49 @@ class TestTokenOptimizerFacade:
         )
         facade = TokenOptimizer(config=schema)
         assert facade.optimizer.cache is None
+
+    def test_monitoring_config_log_level_wired(self):
+        """config.monitoring.log_level is applied to the facade logger.
+
+        Regression: MonitoringConfig.log_level was declared and validated but the
+        facade constructed its logger via get_logger() with no level argument, so
+        the configured level was silently ignored.
+        """
+        import logging
+
+        from src.monitoring.logger import LoggerFactory
+
+        # Clear the logger cache so this test is not affected by a prior build
+        # that already created "facade.token_optimizer" at INFO.
+        LoggerFactory.clear_loggers()
+
+        schema = ConfigSchema(
+            cache=CacheConfig(),
+            optimizer=OptimizerConfig(),
+            monitoring=MonitoringConfig(log_level="WARNING"),
+        )
+        facade = TokenOptimizer(config=schema)
+
+        # The facade logger must be at WARNING (not the default INFO).
+        underlying = logging.getLogger("token_optimizer.facade.token_optimizer")
+        assert underlying.level == logging.WARNING
+
+    def test_monitoring_config_metrics_enabled_wired(self):
+        """config.monitoring.metrics_enabled=False sets the facade flag."""
+        schema = ConfigSchema(
+            cache=CacheConfig(),
+            optimizer=OptimizerConfig(),
+            monitoring=MonitoringConfig(metrics_enabled=False),
+        )
+        facade = TokenOptimizer(config=schema)
+        assert facade._metrics_enabled is False
+
+    def test_monitoring_config_metrics_enabled_true_by_default(self):
+        """Default MonitoringConfig leaves metrics_enabled=True on facade."""
+        schema = ConfigSchema(
+            cache=CacheConfig(),
+            optimizer=OptimizerConfig(),
+            monitoring=MonitoringConfig(),
+        )
+        facade = TokenOptimizer(config=schema)
+        assert facade._metrics_enabled is True

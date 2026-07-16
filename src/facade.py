@@ -6,9 +6,16 @@ checks, so callers (and the CLI) have one entry point instead of wiring each
 component by hand. Build it from the config singleton with
 :meth:`TokenOptimizer.from_config`, or pass an explicit ``ConfigSchema``.
 
-Note: ``config.monitoring`` fields (``log_level``, ``metrics_enabled``,
-``health_check_interval``) are not yet applied by the facade -- monitoring is
-wired as health-check registration, not configured from ``MonitoringConfig``.
+``config.monitoring`` fields applied by the facade:
+
+- ``log_level``: passed to the facade's :class:`~src.monitoring.logger.LoggerFactory`
+  logger so all facade-level log events respect the configured severity floor.
+- ``metrics_enabled``: gates the facade's own :attr:`_metrics` usage (``True`` by
+  default; set ``False`` to suppress facade-level metric recording).
+
+``config.monitoring.health_check_interval`` is *not yet applied* — health checks
+are on-demand (called by :meth:`health`); a background timer scheduler is a future
+enhancement and would require a daemon thread (out of scope for Beta).
 
 The facade holds no business logic of its own: every operation delegates to an
 already-tested component method. It is the first place cache + optimizer +
@@ -22,12 +29,12 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 from src.config.manager import get_config
 from src.factory import build_cache, build_optimizer, build_truncator
 from src.monitoring import (
-    get_logger,
     get_metrics_collector,
     register_cache_health_check,
     register_monitoring_health_check,
     register_system_health_check,
 )
+from src.monitoring.logger import LoggerFactory
 from src.pricing import DEFAULT_MODEL
 
 if TYPE_CHECKING:
@@ -86,8 +93,11 @@ class TokenOptimizer:
         )
         self.truncator = build_truncator(model=model)
 
-        self._logger = get_logger("facade.token_optimizer")
+        self._logger = LoggerFactory.get_logger(
+            "facade.token_optimizer", log_level=config.monitoring.log_level
+        )
         self._metrics = get_metrics_collector()
+        self._metrics_enabled: bool = config.monitoring.metrics_enabled
 
         # Register health checks so health() reports on the live components
         # (closes the B4 "health checks defined but never wired" orphan).
