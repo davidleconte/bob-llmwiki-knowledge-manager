@@ -85,7 +85,7 @@ The savings are **structural** — each IBM token-economy principle has a concre
 | **Let caching work** | Reworded prefixes miss the cache | Fixed mode definition + `AGENTS.md` + KB layout = a **cacheable prefix** |
 | **Trim output** | Verbose narration is paid on every reply | Bounded artifacts: templates, `INDEX.md`, reports — not essays |
 
-## 5. Get started in 5 minutes
+## 5. Get started in 5 minutes (one-time setup)
 
 No custom mode required. Point three scripts at your project, then let any Bob mode do the thinking.
 
@@ -124,7 +124,61 @@ The scripts have already filed digested reports into `docs/knowledge-base/`, so 
 
 > *Optional:* the `knowledge-manager` mode packages this as a one-liner (`./scripts/install.sh`). Not required.
 
-## 6. What's in the box
+## 6. Starting a new session (daily use)
+
+Bob Shell sessions start fresh — the mode does not persist between restarts. After the one-time setup above, every new session takes one step.
+
+### Path A — Wrapper script (recommended)
+
+```bash
+alias kb='~/Projects/bob-llmwiki-knowledge-manager/scripts/start-kb.sh'
+
+kb                          # start KB session in current directory
+kb ~/Projects/other-project # start in a different project
+```
+
+`start-kb.sh` verifies the KB exists, prints the document count, and launches `bob --chat-mode=knowledge-manager`. Add the alias to `~/.zshrc` for one-word daily activation.
+
+### Path B — Direct CLI flag
+
+```bash
+cd ~/your-project
+bob --chat-mode=knowledge-manager
+```
+
+### Path C — Switch mode inside an existing session
+
+```text
+/mode knowledge-manager
+```
+
+### Path D — No mode installed (prompt injection)
+
+If the mode is not installed globally, paste this at the start of any Bob mode:
+
+```text
+You are acting as the knowledge manager for this project.
+KB location: docs/knowledge-base/  (INDEX.md is loaded in context)
+Resume: summarise what exists in the KB, what was most recently documented,
+and suggest what to work on next.
+Workflow: follow the 7-step process (determine category → select template →
+apply naming convention → write content → add cross-references → save to
+memory → update INDEX.md).
+```
+
+### Standard resume prompt (first message of every session)
+
+Once activated, open with:
+
+```text
+What did we document most recently? Summarise the KB and suggest what to work on next.
+```
+
+Bob will scan `INDEX.md` (auto-loaded via `.bob/settings.json`), recall any `save_memory` facts from prior sessions, and propose the next logical documents or updates.
+
+> **Full reference:** [`docs/USAGE.md §0`](docs/USAGE.md#0-starting-a-session) · [`docs/knowledge-base/guides/activating-knowledge-manager-in-new-session.md`](docs/knowledge-base/guides/activating-knowledge-manager-in-new-session.md)
+
+## 7. What's in the box
 
 **Bob Shell Knowledge Manager (the Bash system):**
 - 2 native Bob modes — `knowledge-manager`, `repo-analyzer`
@@ -141,7 +195,7 @@ The scripts have already filed digested reports into `docs/knowledge-base/`, so 
 - Truncation — smart budget-fit strategies (lossy; reported separately from compression)
 - Structured monitoring — JSON logging, metrics, health checks, cost tracking
 
-## 7. How it compares
+## 8. How it compares
 
 | | **Karpathy's LLM-Wiki** | **nvk/llm-wiki** | **Bob Shell KM** |
 |---|---|---|---|
@@ -154,7 +208,7 @@ The scripts have already filed digested reports into `docs/knowledge-base/`, so 
 | **Production** | Concept | Production | **Beta** |
 | **Reach for it when…** | You want the idea | You want a research hub in Claude Code | **You live in Bob Shell and optimise Bobcoins** |
 
-## 8. Token savings — measured, manifest-backed
+## 9. Token savings — measured, manifest-backed
 
 The optimizer savings below are **measured** over a real corpus and carry a reproducibility manifest.
 Reproduce with `python -m src.validation`; CI re-runs it on every push.
@@ -171,28 +225,23 @@ Reproduce with `python -m src.validation`; CI re-runs it on every push.
 > a simulation that never invoked the optimizer. See
 > [`evaluation/VALIDATION_DISCLAIMER.md`](evaluation/VALIDATION_DISCLAIMER.md).
 
-**On the 0.36 Bobcoin HCD example:** one reported run on a 94-module platform allegedly cost 0.36 Bobcoins
-in six tool calls. This figure has no token counts, tokenizer, model, or reproducibility manifest and
-represents an ideal case (structured analysis, script-assisted digestion). **It cannot be independently
-verified.** Do not base adoption decisions on it. The measured ~20% compression (manifest-backed, see §8) is the honest number.
+## 10. Maturity and current status
 
-## 9. Maturity and current status
-
-**Current grade: A (3.89 / 4.30) against institutional vendor standard.**
-Trajectory: D− (0.9) → B+/A− (3.46) → A− (3.70) → **A (3.89)** across Phases 0–8 + post-Phase-8 gap closure.
-Authoritative status: [`STATUS.md`](STATUS.md). Authoritative audit: [`docs/knowledge-base/research/audit-2026-07-14-post-remediation.md`](docs/knowledge-base/research/audit-2026-07-14-post-remediation.md).
+**Current grade: A (4.09 / 4.30) against institutional Tier-1 vendor standard.**
+Trajectory: D− (0.9) → B+/A− (3.46) → A− (3.70) → A (3.89) → **A (4.09)** across Phases 0–8 + gap-closure sessions.
+Authoritative status: [`STATUS.md`](STATUS.md).
 
 **What "Beta — Not Production Ready" means here:**
 
 | Dimension | Grade | Notes |
 |-----------|:-----:|-------|
-| Product Integrity & Claims | **A** | All fabricated metrics retracted; README duplicates deleted |
-| Architecture & Design | A− | Clean facade + layering; ADR-013 added; §9 Deployment + §10 Glossary added; architecture docs B− → A−; `strategies` config field wired through `from_config()` (Gap B closed) |
-| Code Correctness | **A** | C1–C7 + RLock + C8 singletons fixed; behavioral regression tests for each |
-| Testing & Verification | A− | 899 passed · 87.1% coverage (gate ≥80%) · delegation floor frozen at 52% |
-| Build, Release & Supply-Chain | **A** | CI locked to uv.lock · 0 CVEs · bandit SAST blocking · SBOM |
-| Documentation | **A** | Diátaxis spine · docs/ root curated · two authoritative arch docs (one per system) · all docs/ Tier-1 arc42 · API docs in sync |
-| Governance & Compliance | A− | 12-artifact community health · STRIDE threat model · TOCTOU named as residual 4 (Gap G closed) |
+| Product Integrity & Claims | **A+** | All fabricated metrics retracted and permanently recorded; every published number manifest-backed; machine-validated by CI |
+| Architecture & Design | **A** | Facade holds no logic; factory is single config→constructor home; all config fields wired (`version_support_enabled`, `max_versions`, `log_level`, `metrics_enabled`); `health_check_interval` documented as deferred |
+| Code Correctness | **A** | C1–C8 + RLock fixed; behavioral regression tests for each; zero `# type: ignore` in `src/`; TOCTOU window narrowed 3-step → 2-step |
+| Testing & Verification | **A−** | 907 passed · 87.1% coverage (gate ≥80%) · `@pytest.mark.slow` on wall-clock latency tests · delegation floor frozen at 52% (documented, intentional) |
+| Build, Release & Supply-Chain | **A+** | `uv sync --frozen` in CI · `pip-audit --strict` · 0 CVEs · bandit SAST blocking · CycloneDX SBOM · 3.11+3.12 matrix |
+| Documentation | **A+** | Two authoritative arc42 documents · 13 ADRs · 41 API docs CI-drift-checked · STRIDE threat model grounded in `path:line` citations |
+| Governance & Compliance | **A** | 12-artifact community health · STRIDE TOCTOU narrowed to two-step · all governance validators in CI |
 
 **Suitable for:**
 - ✅ Development, testing, and research environments
@@ -213,7 +262,7 @@ Authoritative status: [`STATUS.md`](STATUS.md). Authoritative audit: [`docs/know
 **Not claimed:** Enterprise SLAs, production support, guaranteed savings percentages,
 automated multi-agent research, or Windows compatibility.
 
-## 10. Security
+## 11. Security
 
 Local library and CLI — no network service, no stored credentials, no outbound traffic
 (except optional tiktoken BPE vocab download on first use).
@@ -224,7 +273,7 @@ Local library and CLI — no network service, no stored credentials, no outbound
 - **In CI:** bandit SAST (medium+, blocking) · CycloneDX SBOM · `pip-audit` (blocking, 0 CVEs) ·
   Dependabot · path-traversal containment in `src/tools/` verified end-to-end.
 
-## 11. Documentation
+## 12. Documentation
 
 - **[docs/README.md](docs/README.md)** — Diátaxis navigation hub (tutorials, how-to, reference, explanation)
 - **[docs/QUICK_START.md](docs/QUICK_START.md)** — 5-minute getting started (arc42 Tier-1)
