@@ -65,3 +65,97 @@ class TestEmbeddingDeterminism:
         # The property SemanticCache relies on for exact-text hits.
         gen = EmbeddingGenerator()
         assert gen.similarity("cache me if you can", "cache me if you can") == pytest.approx(1.0)
+
+
+class TestMiniLMBackend:
+    """Verify that EmbeddingGenerator(backend='minilm') activates correctly
+    via sentence-transformers when mlx-embeddings is not installed (ADR-017
+    follow-up; P4 Sub-Task 2).
+    """
+
+    def test_minilm_st_fallback_activates(self, monkeypatch):
+        """When mlx-embeddings is absent, sentence-transformers provides MiniLM."""
+        import src.cache.embeddings as emb_mod
+
+        # Reset cached resolution state so _try_load_minilm() re-runs.
+        monkeypatch.setattr(emb_mod, "_minilm_available", None)
+        monkeypatch.setattr(emb_mod, "_minilm_backend", "")
+        monkeypatch.setattr(emb_mod, "_minilm_model", None)
+
+        # Simulate mlx-embeddings being absent while keeping sentence-transformers.
+        import builtins
+        real_import = builtins.__import__
+
+        def _block_mlx(name, *args, **kwargs):
+            if name in ("mlx_embeddings", "mlx"):
+                raise ImportError("mlx-embeddings not installed (simulated)")
+            return real_import(name, *args, **kwargs)
+
+        monkeypatch.setattr(builtins, "__import__", _block_mlx)
+
+        result = emb_mod._try_load_minilm()
+
+        # sentence-transformers is installed in this environment → should succeed.
+        assert result is True, "sentence-transformers fallback must activate"
+        assert emb_mod._minilm_backend == "st"
+        assert emb_mod._minilm_model is not None
+
+    def test_minilm_st_vector_shape_and_norm(self, monkeypatch):
+        """MiniLM via sentence-transformers produces 384-dim unit-norm vectors."""
+        import src.cache.embeddings as emb_mod
+
+        monkeypatch.setattr(emb_mod, "_minilm_available", None)
+        monkeypatch.setattr(emb_mod, "_minilm_backend", "")
+        monkeypatch.setattr(emb_mod, "_minilm_model", None)
+
+        import builtins
+        real_import = builtins.__import__
+
+        def _block_mlx(name, *args, **kwargs):
+            if name in ("mlx_embeddings", "mlx"):
+                raise ImportError("mlx-embeddings not installed (simulated)")
+            return real_import(name, *args, **kwargs)
+
+        monkeypatch.setattr(builtins, "__import__", _block_mlx)
+
+        if not emb_mod._try_load_minilm():
+            import pytest
+            pytest.skip("sentence-transformers not installed")
+
+        import numpy as np
+        vec = emb_mod._embed_minilm("caching strategy for LLM token optimisation")
+        assert vec.shape == (384,), f"Expected (384,), got {vec.shape}"
+        norm = float(np.linalg.norm(vec))
+        assert abs(norm - 1.0) < 1e-5, f"Vector not unit-norm: {norm}"
+
+    def test_minilm_generator_backend_property(self, monkeypatch):
+        """EmbeddingGenerator(backend='minilm') reports correct backend and dim.
+
+        Calls _try_load_minilm() first so the model is already resident when the
+        constructor runs — avoids re-downloading the model (which times out).
+        """
+        import src.cache.embeddings as emb_mod
+
+        monkeypatch.setattr(emb_mod, "_minilm_available", None)
+        monkeypatch.setattr(emb_mod, "_minilm_backend", "")
+        monkeypatch.setattr(emb_mod, "_minilm_model", None)
+
+        import builtins
+        real_import = builtins.__import__
+
+        def _block_mlx(name, *args, **kwargs):
+            if name in ("mlx_embeddings", "mlx"):
+                raise ImportError("mlx-embeddings not installed (simulated)")
+            return real_import(name, *args, **kwargs)
+
+        monkeypatch.setattr(builtins, "__import__", _block_mlx)
+
+        # Pre-load the model so the EmbeddingGenerator ctor finds it resident.
+        loaded = emb_mod._try_load_minilm()
+        if not loaded:
+            import pytest
+            pytest.skip("sentence-transformers not installed")
+
+        gen = emb_mod.EmbeddingGenerator(backend="minilm")
+        assert gen._backend == "minilm"
+        assert gen.embedding_dim == 384
