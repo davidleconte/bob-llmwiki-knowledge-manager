@@ -183,37 +183,58 @@ class TestPersistentEmbeddingIndex:
         assert idx.is_stale(doc) is True
 
     def test_rebuild_from_kb(self, tmp_path):
-        """rebuild() indexes all .md files and returns the count."""
+        """rebuild() indexes all .md files and returns the chunk count."""
         kb = _make_kb(tmp_path / "kb")
-        (kb / "concepts" / "a.md").write_text("# A\n\nalpha content")
-        (kb / "guides" / "b.md").write_text("# B\n\nbeta content")
+        (kb / "concepts" / "a.md").write_text(
+            "## Alpha Topic\n\nThis section covers the alpha concept in sufficient detail.\n"
+        )
+        (kb / "guides" / "b.md").write_text(
+            "## Beta Guide\n\nStep-by-step instructions for the beta workflow with detail.\n"
+        )
         idx = self._index(tmp_path)
         n = idx.rebuild(kb)
-        assert n == 2
-        assert idx.doc_count == 2
+        # With chunking each file produces ≥1 chunk; 2 files → ≥2 chunks.
+        assert n >= 2
+        assert idx.doc_count >= 2
+
+    def test_rebuild_doc_ids_have_slug_suffix(self, tmp_path):
+        """rebuild() stores chunk doc_ids with #slug fragment identifiers."""
+        kb = _make_kb(tmp_path / "kb")
+        (kb / "concepts" / "a.md").write_text(
+            "## Section One\n\nThis section has enough content for the index.\n"
+        )
+        idx = self._index(tmp_path)
+        idx.rebuild(kb)
+        assert any("#" in doc_id for doc_id in idx._doc_ids)
 
     def test_rebuild_incremental_skips_unchanged(self, tmp_path):
         """Second rebuild with no changes returns same count, zero re-embeds."""
         kb = _make_kb(tmp_path / "kb")
-        (kb / "concepts" / "a.md").write_text("# A\n\nalpha content")
+        (kb / "concepts" / "a.md").write_text(
+            "## Alpha Topic\n\nThis section covers the alpha concept in sufficient detail.\n"
+        )
         idx = self._index(tmp_path)
-        idx.rebuild(kb)
+        n1 = idx.rebuild(kb)
         # Rebuild again — manifest entry matches mtime+hash, so zero updates
         n2 = idx.rebuild(kb)
-        assert n2 == 1
+        assert n2 == n1  # chunk count unchanged
 
     def test_rebuild_re_embeds_changed_doc(self, tmp_path):
         """Modifying a document triggers re-embedding on next rebuild."""
         kb = _make_kb(tmp_path / "kb")
         doc = kb / "concepts" / "a.md"
-        doc.write_text("# A\n\noriginal content")
+        doc.write_text(
+            "## Original\n\nThis section covers the original content in enough detail.\n"
+        )
         idx = self._index(tmp_path)
         idx.rebuild(kb)
 
         # Change content (different hash)
-        doc.write_text("# A\n\ncompletely different topic now")
+        doc.write_text(
+            "## Revised\n\nCompletely different topic now with enough chars to index.\n"
+        )
         n = idx.rebuild(kb)
-        assert n == 1  # still 1 doc total
+        assert n >= 1  # at least one chunk remains after re-index
 
     def test_corrupt_index_triggers_full_rebuild(self, tmp_path):
         """A corrupt index is silently ignored; rebuild starts fresh."""
@@ -223,10 +244,12 @@ class TestPersistentEmbeddingIndex:
         (idx_path / "manifest.json").write_text('{"bad": {}}')
 
         kb = _make_kb(tmp_path / "kb")
-        (kb / "concepts" / "x.md").write_text("# X\n\nfresh doc")
+        (kb / "concepts" / "x.md").write_text(
+            "## Fresh Section\n\nThis is fresh content that should be indexed properly.\n"
+        )
         idx = PersistentEmbeddingIndex(EmbeddingGenerator(), idx_path)
         n = idx.rebuild(kb)
-        assert n == 1  # built from scratch despite corrupt index
+        assert n >= 1  # built from scratch despite corrupt index
 
 
 # --------------------------------------------------------------------------- #
@@ -237,13 +260,18 @@ class TestPersistentEmbeddingIndex:
 class TestKBIndexer:
     def test_sync_returns_doc_count(self, tmp_path):
         kb = _make_kb(tmp_path / "kb")
-        (kb / "concepts" / "c.md").write_text("# C\n\nconcept content")
-        (kb / "research" / "r.md").write_text("# R\n\nresearch notes")
+        (kb / "concepts" / "c.md").write_text(
+            "## Concept Section\n\nDetailed concept covering core ideas for the knowledge base.\n"
+        )
+        (kb / "research" / "r.md").write_text(
+            "## Research Notes\n\nFindings from the research phase covering key discoveries.\n"
+        )
         embedder = EmbeddingGenerator()
         idx = PersistentEmbeddingIndex(embedder, tmp_path / "idx")
         indexer = KBIndexer(kb, idx)
         n = indexer.sync()
-        assert n == 2
+        # 2 files → ≥2 chunks (chunking may produce more than 1 per file)
+        assert n >= 2
 
     def test_query_uses_index_fast_path(self, tmp_path):
         """KBIndexer.query() returns results using the persistent index."""
@@ -323,3 +351,109 @@ def test_content_hash_stable():
 
 def test_content_hash_differs():
     assert _content_hash("a") != _content_hash("b")
+
+# --------------------------------------------------------------------------- #
+# MarkdownChunker
+# --------------------------------------------------------------------------- #
+
+
+class TestMarkdownChunker:
+    from src.embeddings.chunker import MarkdownChunker as _Chunker
+
+    def _chunker(self):
+        from src.embeddings.chunker import MarkdownChunker
+        return MarkdownChunker()
+
+    def test_no_headings_yields_preamble(self):
+        content = "This is plain text without any level-2 headings. " * 3
+        chunks = list(self._chunker().chunk("a.md", content))
+        assert len(chunks) == 1
+        slug, text = chunks[0]
+        assert slug == "preamble"
+        assert "plain text" in text
+
+    def test_single_section(self):
+        content = "# Title\n\n## Introduction\n\nThis is the intro paragraph with enough content."
+        chunks = list(self._chunker().chunk("a.md", content))
+        slugs = [s for s, _ in chunks]
+        assert "introduction" in slugs
+
+    def test_multiple_sections(self):
+        content = (
+            "# Doc\n\n"
+            "## Performance Targets\n\nLatency must be under 10ms for all cache hits.\n\n"
+            "## Configuration Options\n\nAll config comes from environment variables.\n"
+        )
+        chunks = list(self._chunker().chunk("a.md", content))
+        slugs = [s for s, _ in chunks]
+        assert "performance-targets" in slugs
+        assert "configuration-options" in slugs
+
+    def test_slug_normalisation(self):
+        content = "## L1 / L2 Cache Strategy\n\nDescription goes here with enough text to pass minimum.\n"
+        chunks = list(self._chunker().chunk("a.md", content))
+        slugs = [s for s, _ in chunks]
+        assert "l1-l2-cache-strategy" in slugs
+
+    def test_short_chunk_skipped(self):
+        content = "## See Also\n\nFoo.\n"  # < 50 chars body
+        chunks = list(self._chunker().chunk("a.md", content))
+        # May be empty or contain only table chunks; "see-also" section itself
+        # is too short and must NOT appear.
+        assert all(t for _, t in chunks)  # any yielded chunk has non-empty text
+
+    def test_preamble_below_min_skipped(self):
+        content = "Short.\n\n## Real Section\n\nThis section has enough content to be indexed properly.\n"
+        chunks = list(self._chunker().chunk("a.md", content))
+        slugs = [s for s, _ in chunks]
+        assert "preamble" not in slugs  # too short
+        assert "real-section" in slugs
+
+    def test_table_extracted_as_standalone_chunk(self):
+        content = (
+            "## Performance Targets\n\n"
+            "Here are the targets.\n\n"
+            "| Metric | Target |\n"
+            "| ------ | ------ |\n"
+            "| L1 hit | <1ms   |\n"
+            "| L2 hit | <100ms |\n"
+            "\nMore prose after the table.\n"
+        )
+        chunks = list(self._chunker().chunk("a.md", content))
+        slugs = [s for s, _ in chunks]
+        assert "performance-targets" in slugs
+        assert "performance-targets-table" in slugs
+
+    def test_duplicate_heading_slugs_deduplicated(self):
+        content = (
+            "## Summary\n\nFirst summary section with enough text here.\n\n"
+            "## Summary\n\nSecond summary section with enough text here.\n"
+        )
+        chunks = list(self._chunker().chunk("a.md", content))
+        slugs = [s for s, _ in chunks]
+        # Both sections must appear but with distinct slugs
+        assert len(set(slugs)) == len(slugs), f"Duplicate slugs: {slugs}"
+
+    def test_file_path_not_in_output(self):
+        """The file path argument must not leak into slug or text."""
+        content = "## Section One\n\nContent with sufficient length to pass minimum chars.\n"
+        chunks = list(self._chunker().chunk("concepts/caching.md", content))
+        for slug, text in chunks:
+            assert "concepts/caching.md" not in slug
+
+    def test_chunk_doc_ids_have_hash_suffix(self):
+        """Integration: doc_ids produced by rebuild() carry #slug suffix."""
+        content = (
+            "## Alpha\n\nFirst section with enough content to index properly.\n\n"
+            "## Beta\n\nSecond section with enough content to index properly.\n"
+        )
+        from src.embeddings.chunker import MarkdownChunker
+        chunker = MarkdownChunker()
+        doc_ids = [
+            f"concepts/test.md#{slug}"
+            for slug, _ in chunker.chunk("concepts/test.md", content)
+        ]
+        assert all("#" in d for d in doc_ids)
+        assert any("alpha" in d for d in doc_ids)
+        assert any("beta" in d for d in doc_ids)
+

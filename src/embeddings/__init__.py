@@ -16,8 +16,9 @@ Cross-package dependency: ``src/embeddings/`` → ``src/cache/embeddings.Embeddi
 This is legal under the layering gate (``src/ → scripts/`` only is forbidden).
 """
 
+from src.embeddings.chunker import MarkdownChunker
 from src.embeddings.index import PersistentEmbeddingIndex
 from src.embeddings.indexer import KBIndexer
 from src.embeddings.store import FileBackedVectorStore
 
-__all__ = ["PersistentEmbeddingIndex", "KBIndexer", "FileBackedVectorStore"]
+__all__ = ["MarkdownChunker", "PersistentEmbeddingIndex", "KBIndexer", "FileBackedVectorStore"]
