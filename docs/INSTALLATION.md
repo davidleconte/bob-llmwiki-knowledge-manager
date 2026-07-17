@@ -1,9 +1,9 @@
 # Installation Guide
 
-> **Version**: 2.0  
-> **Last updated**: 2026-07-14  
-> **Standard**: arc42 / Tier-1 (Grade A)  
-> **Scope**: This document covers the complete lifecycle of installing, verifying, updating, and removing the Bob Shell Knowledge Manager integration. It is authoritative for the two installation scripts: [`scripts/install.sh`](../scripts/install.sh) and [`scripts/init-project.sh`](../scripts/init-project.sh). All claims are grounded in those scripts.
+> **Version**: 2.1
+> **Last updated**: 2026-07-16
+> **Standard**: arc42 / Tier-1 (Grade A)
+> **Scope**: This document covers **Bob Shell CLI installation** — the complete lifecycle of installing, verifying, updating, and removing the Bob Shell Knowledge Manager integration via `scripts/install.sh` and `scripts/init-project.sh`. **For Bob IDE users, see [§14 Bob IDE Installation](#14-bob-ide-installation)** — no scripts are required.
 
 ---
 
@@ -22,6 +22,7 @@
 11. [Quality Scenarios](#11-quality-scenarios)
 12. [Risk Register](#12-risk-register)
 13. [Glossary](#13-glossary)
+14. [Bob IDE Installation](#14-bob-ide-installation)
 
 ---
 
@@ -291,6 +292,46 @@ Expected `.bob/settings.json` content (written by [`init-project.sh` L83–L89](
 }
 ```
 
+### 6.4 Bob IDE verification
+
+If you are using **Bob IDE**, the CLI verification commands above do not apply. Verify the Bob IDE setup with these checks:
+
+**① Mode picker shows 📚 Knowledge Manager**
+
+Open this workspace in Bob IDE. Click the **mode picker** in the bottom-left status bar. Scroll to and confirm that **📚 Knowledge Manager** is listed. Select it.
+
+**② Skill activation succeeds**
+
+With the knowledge-manager mode active, send:
+```
+use_skill("knowledge-manager")
+```
+Expected: the skill loads without error and the agent confirms it has loaded the document templates and cross-reference protocol.
+
+**③ Tool group validation (shell)**
+
+Send this prompt:
+```
+Run this shell command: echo "KB shell access OK"
+```
+Expected output: `KB shell access OK`
+
+**④ Tool group validation (read)**
+
+Send this prompt:
+```
+Read docs/knowledge-base/INDEX.md and confirm it exists
+```
+Expected: the agent reads and summarises the file without error.
+
+**⑤ Custom instructions validation**
+
+Send this prompt:
+```
+What are the document categories in this knowledge base?
+```
+Expected: the agent answers using the knowledge-manager `customInstructions` (concepts, guides, references, research) — not from a web search.
+
 ---
 
 ## 7. Failure Modes
@@ -451,3 +492,57 @@ These are verifiable success criteria. Each maps to a specific observable state 
 | **pandoc** | An optional command-line document converter used by the knowledge-manager mode to export KB articles to HTML or PDF. Not required for installation; required only for export operations. Install via `brew install pandoc` (macOS) or `apt-get install pandoc` (Debian/Ubuntu). |
 | **KB scaffold** | The directory structure (`docs/knowledge-base/{concepts,guides,references,research}/`) and supporting files (`INDEX.md`, `.bob/settings.json`) created by [`init-project.sh`](../scripts/init-project.sh) inside a target project. |
 | **`set -e`** | A Bash option (`errexit`) active in both scripts ([`install.sh` L2](../scripts/install.sh), [`init-project.sh` L2](../scripts/init-project.sh)) that causes the script to abort immediately if any command returns a non-zero exit code. |
+
+---
+
+## 14. Bob IDE Installation
+
+> **Cross-reference:** For a 5-minute walkthrough, see [docs/QUICK_START.md](QUICK_START.md). For full Bob IDE reference documentation, see [docs/BOB-IDE-GUIDE.md](BOB-IDE-GUIDE.md).
+
+### 14.1 Overview
+
+Bob IDE users have a **zero-step installation**. No scripts are required. The mode definition and skill are already present in the workspace:
+
+| Artefact | Path | Purpose |
+|---|---|---|
+| Workspace mode config | [`.bob/custom_modes.yaml`](../.bob/custom_modes.yaml) | Registers `knowledge-manager` mode in Bob IDE |
+| Lazy-load skill | [`.bob/skills/knowledge-manager/SKILL.md`](../.bob/skills/knowledge-manager/SKILL.md) | Full templates + cross-reference protocol |
+
+Bob IDE picks up `.bob/custom_modes.yaml` automatically when the workspace is opened. Changes to that file are hot-reloaded — no restart required.
+
+### 14.2 Activation
+
+1. Open the `bob-llmwiki-knowledge-manager` workspace in Bob IDE (VS Code or Cursor with the Bob IDE extension installed).
+2. Click the **mode picker** in the bottom-left status bar.
+3. Scroll to and select **📚 Knowledge Manager**.
+
+The mode is now active. The agent is constrained to the `execute`, `skill`, `read`, and `edit[\.md$]` tool groups defined in `.bob/custom_modes.yaml`.
+
+### 14.3 Skill activation
+
+The knowledge-manager skill is **lazy-loaded** — it is not automatically injected into every session. At the start of each knowledge-management session, activate it explicitly by sending:
+
+```
+use_skill("knowledge-manager")
+```
+
+This loads the full document templates, cross-reference protocol, and INDEX.md maintenance instructions from `.bob/skills/knowledge-manager/SKILL.md` into the agent's context.
+
+> **When to call `use_skill`:** Call it once per session, before your first document-creation or research request. You do not need to call it again unless the context window is compacted.
+
+### 14.4 Persistence
+
+Bob IDE does **not** have the `save_memory` tool (Bob Shell CLI only). All knowledge is persisted by writing markdown files directly to `docs/knowledge-base/`. Commit changes to Git to make them durable across sessions.
+
+### 14.5 Verification
+
+After activation, confirm the setup with the checks in [§6.4](#64-bob-ide-verification) of this document.
+
+### 14.6 Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| **📚 Knowledge Manager not in mode picker** | Reload the window (**Cmd+Shift+P → Developer: Reload Window**), or make a trivial edit to `.bob/custom_modes.yaml` and save (Bob IDE hot-reloads on file change) |
+| **`use_skill` returns an error** | Confirm `.bob/skills/knowledge-manager/SKILL.md` exists: `ls .bob/skills/knowledge-manager/SKILL.md` |
+| **Agent cannot run shell commands** | Confirm the active mode is 📚 Knowledge Manager, not the default Agent mode. Only knowledge-manager mode has the `execute` group wired to this workspace |
+| **Agent cannot write markdown files** | The `edit[\.md$]` fileRegex restricts edits to `.md` files. This is intentional — use the knowledge-manager mode for all KB writes |

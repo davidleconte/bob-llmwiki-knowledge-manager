@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic Stock Trader - Demo</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="warning-banner">
+                <h1>⚠️ AGENTIC STOCK TRADER - DEMO VERSION ⚠️</h1>
+                <p>WARNING: This application contains intentionally EXPOSED SECRETS for Vault demonstration purposes!</p>
+            </div>
+        </header>
+
+        <main>
+            <div class="dashboard">
+                <!-- Portfolio Section -->
+                <section class="card portfolio-card">
+                    <h2>📊 Portfolio Dashboard</h2>
+                    <div class="portfolio-summary">
+                        <div class="stat-box">
+                            <span class="stat-label">Cash Balance</span>
+                            <span class="stat-value" id="cashBalance">$100,000.00</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">Total Value</span>
+                            <span class="stat-value" id="totalValue">$100,000.00</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">Positions</span>
+                            <span class="stat-value" id="positionCount">0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button id="runTradeBtn" class="btn btn-primary">🚀 Run Trading Session</button>
+                        <button id="refreshBtn" class="btn btn-secondary">🔄 Refresh Portfolio</button>
+                    </div>
+
+                    <div id="positionsTable" class="positions-table">
+                        <h3>Current Positions</h3>
+                        <div id="positionsContent">
+                            <p class="empty-state">No positions yet. Click "Run Trading Session" to start trading!</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Exposed Secrets Section -->
+                <section class="card secrets-card">
+                    <h2>🔓 EXPOSED SECRETS (Security Risk!)</h2>
+                    <p class="warning-text">These secrets are hardcoded in the application source code:</p>
+                    
+                    <div class="secrets-section">
+                        <h3>🔑 API Keys</h3>
+                        <div class="secret-list">
+                            <div class="secret-item" th:each="entry : ${secrets.apiKeys}">
+                                <span class="secret-label" th:text="${entry.key}">API Name</span>
+                                <code class="secret-value" th:text="${entry.value}">secret-value</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="secrets-section">
+                        <h3>💾 Database Credentials</h3>
+                        <div class="secret-list">
+                            <div class="secret-item" th:each="entry : ${secrets.database}">
+                                <span class="secret-label" th:text="${entry.key}">DB Field</span>
+                                <code class="secret-value" th:text="${entry.value}">secret-value</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="secrets-section">
+                        <h3>☁️ AWS Credentials</h3>
+                        <div class="secret-list">
+                            <div class="secret-item" th:each="entry : ${secrets.aws}">
+                                <span class="secret-label" th:text="${entry.key}">AWS Field</span>
+                                <code class="secret-value" th:text="${entry.value}">secret-value</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="vault-solution">
+                        <h3>✅ Solution: Use HashiCorp Vault</h3>
+                        <p>Store these secrets securely in Vault and retrieve them at runtime!</p>
+                    </div>
+                </section>
+
+                <!-- Activity Log Section -->
+                <section class="card activity-card">
+                    <h2>📝 Activity Log</h2>
+                    <div id="activityLog" class="activity-log">
+                        <p class="empty-state">No activity yet. Run a trading session to see logs.</p>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <footer>
+            <p>⚠️ Demo Application - DO NOT use in production! All secrets are intentionally exposed for demonstration purposes.</p>
+        </footer>
+    </div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>

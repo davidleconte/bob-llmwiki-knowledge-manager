@@ -1,0 +1,579 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bob Shell 1.0.6 — Knowledge Manager Validation Playbook</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; font-size: 14px; line-height: 1.6; background: #ffffff; color: #1f2328; }
+  .page { max-width: 760px; margin: 0 auto; padding: 32px 24px 48px; }
+
+  h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  h2 { font-size: 15px; font-weight: 700; margin: 28px 0 10px; color: #1f2328; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; }
+  h3 { font-size: 13px; font-weight: 700; margin: 16px 0 6px; color: #1f2328; }
+  p  { margin-bottom: 8px; color: #1f2328; }
+  ul, ol { padding-left: 20px; margin-bottom: 8px; }
+  li { margin-bottom: 3px; }
+  a  { color: #3b82d4; }
+
+  .meta { font-size: 12px; color: #57606a; margin-bottom: 20px; }
+  .meta span { margin-right: 16px; }
+
+  /* phase header */
+  .phase { background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 6px; margin-bottom: 20px; overflow: hidden; }
+  .phase-header { display: flex; align-items: baseline; gap: 10px; padding: 10px 14px 8px; border-bottom: 1px solid #e5e7eb; }
+  .phase-num  { font-size: 11px; font-weight: 700; color: #57606a; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+  .phase-title { font-size: 14px; font-weight: 700; color: #1f2328; }
+  .phase-scope { font-size: 12px; color: #57606a; margin-left: auto; white-space: nowrap; }
+  .phase-body { padding: 12px 14px; }
+
+  /* test rows */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0 14px; }
+  th { background: #f7f8fa; text-align: left; padding: 6px 10px; font-weight: 600; border: 1px solid #e5e7eb; font-size: 12px; color: #57606a; }
+  td { padding: 6px 10px; border: 1px solid #e5e7eb; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+
+  /* code */
+  code { font-family: "SF Mono", "Fira Mono", "Consolas", monospace; font-size: 12px; background: #f0f2f4; padding: 1px 5px; border-radius: 3px; color: #1f2328; }
+  pre  { background: #f0f2f4; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px 12px; font-size: 12px; font-family: "SF Mono","Fira Mono","Consolas",monospace; overflow-x: auto; margin: 8px 0 12px; white-space: pre; color: #1f2328; }
+
+  /* status badges */
+  .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 10px; white-space: nowrap; }
+  .badge-gate   { background: #fff3cd; color: #856404; border: 1px solid #ffc107; }
+  .badge-auto   { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+  .badge-manual { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+  .badge-ok     { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+  .badge-info   { background: #e8eaf6; color: #283593; border: 1px solid #c5cae9; }
+
+  /* callout boxes */
+  .note  { background: #fffbea; border-left: 4px solid #f0b429; padding: 10px 14px; border-radius: 0 4px 4px 0; margin: 10px 0; font-size: 13px; }
+  .warn  { background: #fff5f5; border-left: 4px solid #e53e3e; padding: 10px 14px; border-radius: 0 4px 4px 0; margin: 10px 0; font-size: 13px; }
+  .ok    { background: #f0fff4; border-left: 4px solid #38a169; padding: 10px 14px; border-radius: 0 4px 4px 0; margin: 10px 0; font-size: 13px; }
+
+  /* checklist */
+  .checklist { list-style: none; padding: 0; margin: 8px 0; }
+  .checklist li { display: flex; gap: 8px; padding: 3px 0; font-size: 13px; }
+  .checklist li::before { content: "☐"; color: #57606a; flex-shrink: 0; font-size: 14px; }
+
+  .divider { border: none; border-top: 1px solid #e5e7eb; margin: 24px 0; }
+
+  footer { text-align: center; font-size: 11px; color: #57606a; border-top: 1px solid #e5e7eb; margin-top: 40px; padding-top: 14px; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0; }
+  .col-box { background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px 12px; font-size: 12px; }
+  .col-box strong { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #57606a; margin-bottom: 4px; }
+
+  .truth-table td:first-child { font-family: "SF Mono","Fira Mono","Consolas",monospace; font-size: 11px; }
+  .pass { color: #155724; font-weight: 700; }
+  .fail { color: #721c24; font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>Bob Shell 1.0.6 — Knowledge Manager Validation Playbook</h1>
+  <p class="meta">
+    <span>Environment: macOS arm64</span>
+    <span>Bob: <code>1.0.6</code> at <code>/opt/homebrew/bin/bob</code></span>
+    <span>Config: <code>~/.bob/</code></span>
+    <span>Scope: Bob Shell CLI only</span>
+  </p>
+
+  <div class="ok">
+    <strong>Pre-flight state confirmed.</strong> <code>~/.bob/custom_modes.yaml</code> already contains both <code>knowledge-manager</code> and <code>repo-analyzer</code> with <code>command</code>/<code>browser</code> groups. <code>install.sh</code> syntax is clean. Run each phase in order; every GATE must pass before continuing.
+  </div>
+
+  
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-num">Phase 0</span>
+      <span class="phase-title">Pre-conditions — verify the installed artefacts</span>
+      <span class="phase-scope"><span class="badge badge-auto">Automated</span></span>
+    </div>
+    <div class="phase-body">
+      <p>Run this single script in your terminal from the project root. It checks everything that must be true before any Bob session starts.</p>
+      <pre>python3 - &lt;&lt;'PYEOF'
+import yaml, re, os, stat, sys
+
+VALID_CLI = {'read','edit','command','browser'}
+issues = []
+
+# 1. Config directory exists
+cfg = os.path.expanduser('~/.bob')
+if not os.path.isdir(cfg):
+    issues.append('~/.bob directory not found')
+
+# 2. custom_modes.yaml exists at global path
+cm = os.path.join(cfg, 'custom_modes.yaml')
+if not os.path.isfile(cm):
+    issues.append('~/.bob/custom_modes.yaml not found — run scripts/install.sh first')
+else:
+    with open(cm) as f:
+        data = yaml.safe_load(f)
+    modes = {m['slug']: m for m in data.get('customModes', [])}
+
+    for slug in ('knowledge-manager', 'repo-analyzer'):
+        if slug not in modes:
+            issues.append(f'Mode missing: {slug}')
+        else:
+            m = modes[slug]
+            flat = [g[0] if isinstance(g,list) else g for g in m.get('groups',[])]
+            if 'command' not in flat:
+                issues.append(f'{slug}: missing "command" group — shell will be silent')
+            if 'read' not in flat:
+                issues.append(f'{slug}: missing "read" group')
+            if 'edit' not in flat:
+                issues.append(f'{slug}: missing "edit" group')
+            for g in m.get('groups',[]):
+                if isinstance(g, list) and len(g) &gt; 1:
+                    rx = g[1].get('fileRegex','')
+                    try: re.compile(rx)
+                    except re.error as e:
+                        issues.append(f'{slug}: bad fileRegex {rx!r}: {e}')
+            # No stale save_memory calls
+            ci = m.get('customInstructions','') or ''
+            for line in ci.splitlines():
+                if 'save_memory' in line and 'no save_memory' not in line:
+                    issues.append(f'{slug}: stale save_memory instruction: {line.strip()!r}')
+
+# 3. settings.json exists (context auto-load)
+sj = os.path.join(cfg, 'settings.json')
+if not os.path.isfile(sj):
+    issues.append('~/.bob/settings.json not found (context auto-load won\'t work)')
+
+# 4. install.sh is executable
+if not (os.stat('scripts/install.sh').st_mode &amp; stat.S_IXUSR):
+    issues.append('scripts/install.sh is not executable')
+
+if issues:
+    print(f'FAIL — {len(issues)} pre-condition(s) not met:')
+    for i in issues: print(f'  - {i}')
+    sys.exit(1)
+else:
+    print('PASS — all pre-conditions met')
+PYEOF</pre>
+      <p><strong>Expected output:</strong> <code>PASS — all pre-conditions met</code></p>
+      <div class="warn"><strong>GATE 0:</strong> Do not proceed past this point unless the script prints PASS.</div>
+    </div>
+  </div>
+
+  
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-num">Phase 1</span>
+      <span class="phase-title">Mode registration — Bob Shell loads both modes</span>
+      <span class="phase-scope"><span class="badge badge-manual">Manual — Bob Shell</span></span>
+    </div>
+    <div class="phase-body">
+      <p>Verify Bob Shell recognises and activates each mode before any document work begins.</p>
+
+      <h3>T1-A — Mode list includes both slugs</h3>
+      <pre>bob --list-modes 2&gt;&amp;1 | grep -E "knowledge-manager|repo-analyzer"</pre>
+      <p><strong>Pass:</strong> Both slugs appear in the output. <strong>Fail:</strong> Missing entries → re-run <code>scripts/install.sh</code> and confirm <code>~/.bob/custom_modes.yaml</code> was updated.</p>
+
+      <h3>T1-B — knowledge-manager mode activates without error</h3>
+      <pre>echo "What mode are you in? Respond with your slug only." | \
+  bob --chat-mode=knowledge-manager --no-interactive 2&gt;&amp;1</pre>
+      <p><strong>Pass:</strong> Bob responds with <code>knowledge-manager</code> (or equivalent confirmation). No <code>Unknown mode</code> or schema error in stderr.</p>
+      <div class="note"><strong>Note on --no-interactive:</strong> If your Bob build does not support <code>--no-interactive</code>, start an interactive session with <code>bob --chat-mode=knowledge-manager</code> and type the prompt manually. The acceptance criteria are identical.</div>
+
+      <h3>T1-C — repo-analyzer mode activates without error</h3>
+      <pre>echo "What mode are you in? Respond with your slug only." | \
+  bob --chat-mode=repo-analyzer --no-interactive 2&gt;&amp;1</pre>
+      <p><strong>Pass:</strong> Bob responds with <code>repo-analyzer</code>. No errors.</p>
+
+      <h3>T1-D — Wrong slug is rejected cleanly</h3>
+      <pre>bob --chat-mode=knowledge-manager-typo --no-interactive 2&gt;&amp;1 | head -3</pre>
+      <p><strong>Pass:</strong> Bob prints an error or falls back to default mode. Confirms the slug-lookup path works.</p>
+
+      <div class="warn"><strong>GATE 1:</strong> T1-A and T1-B must both pass before Phase 2.</div>
+    </div>
+  </div>
+
+  
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-num">Phase 2</span>
+      <span class="phase-title">Tool permission groups — command / edit / read verified</span>
+      <span class="phase-scope"><span class="badge badge-manual">Manual — Bob Shell</span></span>
+    </div>
+    <div class="phase-body">
+      <p>These tests confirm that the three non-trivial permission groups (<code>command</code>, <code>edit fileRegex</code>, <code>read</code>) behave as declared. Start an interactive session first:</p>
+      <pre>bob --chat-mode=knowledge-manager</pre>
+
+      <h3>T2-A — Shell execution (command group)</h3>
+      <p>In the session, type:</p>
+      <pre>Run: echo "SHELL_OK" and show me the output.</pre>
+      <p><strong>Pass:</strong> Bob executes the command and the output contains <code>SHELL_OK</code>.<br />
+      <strong>Fail:</strong> "I don't have permission to run shell commands" → <code>command</code> group not loaded. Re-check <code>~/.bob/custom_modes.yaml</code> groups.</p>
+
+      <h3>T2-B — Markdown file write (edit group with fileRegex)</h3>
+      <p>In the session, type:</p>
+      <pre>Create a file at /tmp/kb-test-write.md with exactly this content:
+# Test
+validation-token-001</pre>
+      <p>Then verify from your terminal (outside Bob):</p>
+      <pre>cat /tmp/kb-test-write.md</pre>
+      <p><strong>Pass:</strong> File exists and contains <code>validation-token-001</code>.<br />
+      <strong>Fail:</strong> Bob says it cannot write files → <code>edit</code> group not loaded.</p>
+
+      <h3>T2-C — Non-markdown write is blocked (fileRegex enforcement)</h3>
+      <p>In the session, type:</p>
+      <pre>Create a file at /tmp/kb-test-write.py with the content: print("hello")</pre>
+      <p><strong>Pass:</strong> Bob refuses with a permission error (fileRegex blocks <code>.py</code>).<br />
+      <strong>Warn (not a hard failure):</strong> If Bob writes the file, the <code>fileRegex</code> is not being enforced by this Bob version — note this as a known limitation but do not block on it.</p>
+
+      <h3>T2-D — Read access works</h3>
+      <p>In the session, type:</p>
+      <pre>Read the first 5 lines of config/custom_modes.yaml and show them to me.</pre>
+      <p><strong>Pass:</strong> Bob returns the first 5 lines. <strong>Fail:</strong> Cannot read → <code>read</code> group not loaded.</p>
+
+      <div class="warn"><strong>GATE 2:</strong> T2-A, T2-B, and T2-D must pass. T2-C is informational.</div>
+      <pre style="margin-top:10px"># Clean up after Phase 2
+rm -f /tmp/kb-test-write.md /tmp/kb-test-write.py</pre>
+    </div>
+  </div>
+
+  
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-num">Phase 3</span>
+      <span class="phase-title">KB initialisation — init-project.sh in a test directory</span>
+      <span class="phase-scope"><span class="badge badge-auto">Automated</span> + <span class="badge badge-manual">Manual</span></span>
+    </div>
+    <div class="phase-body">
+      <p>Test KB initialisation in a throw-away directory so nothing in the live project is touched.</p>
+
+      <h3>T3-A — init-project.sh creates expected structure</h3>
+      <pre>TESTDIR=$(mktemp -d)
+cd "$TESTDIR"
+git init -q   # init-project.sh detects .git for project check
+~/Projects/bob-llmwiki-knowledge-manager/scripts/init-project.sh
+
+# Verify structure
+for f in \
+  "docs/knowledge-base/INDEX.md" \
+  "docs/knowledge-base/concepts" \
+  "docs/knowledge-base/guides" \
+  "docs/knowledge-base/references" \
+  "docs/knowledge-base/research" \
+  "CONTEXT.md" \
+  ".bob/settings.json"; do
+  [ -e "$f" ] &amp;&amp; echo "PASS: $f" || echo "FAIL: $f missing"
+done</pre>
+      <p><strong>Pass:</strong> All lines print <code>PASS</code>.</p>
+
+      <h3>T3-B — settings.json auto-loads INDEX.md</h3>
+      <pre>python3 -c "
+import json
+with open('.bob/settings.json') as f:
+    s = json.load(f)
+ctx = s.get('context', {}).get('fileName', [])
+assert 'docs/knowledge-base/INDEX.md' in ctx, f'INDEX.md not in context.fileName: {ctx}'
+print('PASS: settings.json includes INDEX.md in auto-loaded context')
+"</pre>
+
+      <h3>T3-C — validate-kb.sh passes on fresh KB</h3>
+      <pre>~/Projects/bob-llmwiki-knowledge-manager/scripts/validate-kb.sh</pre>
+      <p><strong>Pass:</strong> All lines print a green tick. No <code>FAIL</code> or <code>exit 1</code>.</p>
+
+      <h3>T3-D — Clean up test directory</h3>
+      <pre>cd ~
+rm -rf "$TESTDIR"</pre>
+
+      <div class="warn"><strong>GATE 3:</strong> T3-A, T3-B, T3-C must all pass.</div>
+    </div>
+  </div>
+
+  
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-num">Phase 4</span>
+      <span class="phase-title">End-to-end KB workflow — create a real document</span>
+      <span class="phase-scope"><span class="badge badge-manual">Manual — Bob Shell</span></span>
+    </div>
+    <div class="phase-body">
+      <p>This phase validates the full document-creation loop inside a real knowledge-manager session. Use the live project KB at <code>docs/knowledge-base/</code>.</p>
+
+      <pre>cd ~/Projects/bob-llmwiki-knowledge-manager
+bob --chat-mode=knowledge-manager</pre>
+
+      <h3>T4-A — Concept document creation</h3>
+      <p>Prompt:</p>
+      <pre>Create a concept document for "bob-shell-mode-validation". 
+Use the standard concept template. The overview should say:
+"Validation methodology for confirming Bob Shell custom modes load correctly."
+Save it to docs/knowledge-base/concepts/bob-shell-mode-validation.md</pre>
+      <p>After Bob responds, from a separate terminal verify:</p>
+      <pre>test -f docs/knowledge-base/concepts/bob-shell-mode-validation.md \
+  &amp;&amp; grep -q "validation-methodology\|Validation methodology" \
+     docs/knowledge-base/concepts/bob-shell-mode-validation.md \
+  &amp;&amp; echo "PASS: file exists and contains expected text" \
+  || echo "FAIL"</pre>
+      <p>Also verify the template structure is present:</p>
+      <pre>python3 -c "
+with open('docs/knowledge-base/concepts/bob-shell-mode-validation.md') as f:
+    content = f.read()
+required = ['## Overview', '## Key Points', '## Related Documents', 'Last Updated']
+for r in required:
+    status = 'PASS' if r in content else 'FAIL'
+    print(f'{status}: {r!r}')
+"</pre>
+      <p><strong>Pass:</strong> All lines print PASS.</p>
+
+      <h3>T4-B — INDEX.md is updated</h3>
+      <p>Prompt (in the same session):</p>
+      <pre>Update INDEX.md to include the new concept document we just created.</pre>
+      <p>Verify:</p>
+      <pre>grep -c "bob-shell-mode-validation" docs/knowledge-base/INDEX.md \
+  &amp;&amp; echo "PASS: INDEX.md updated" || echo "FAIL: INDEX.md not updated"</pre>
+
+      <h3>T4-C — File persistence (not save_memory)</h3>
+      <p>Exit and restart the session:</p>
+      <pre>exit   # close Bob session
+bob --chat-mode=knowledge-manager</pre>
+      <p>Prompt:</p>
+      <pre>What is the concept document about "bob-shell-mode-validation"?
+Read docs/knowledge-base/concepts/bob-shell-mode-validation.md and summarise it.</pre>
+      <p><strong>Pass:</strong> Bob reads and summarises the file from disk. Knowledge persists across sessions purely via files — no save_memory involved.</p>
+
+      <h3>T4-D — customInstructions are active</h3>
+      <p>In a fresh session, prompt:</p>
+      <pre>List the naming conventions for knowledge base files.</pre>
+      <p><strong>Pass:</strong> Bob replies with the four patterns: <code>concept-name.md</code>, <code>task-name-guide.md</code>, <code>api-name-reference.md</code>, <code>topic-YYYY-MM.md</code>. These come from <code>customInstructions</code> — if missing, the mode definition is not being loaded.</p>
+
+      <div class="warn"><strong>GATE 4:</strong> T4-A, T4-B, T4-C, T4-D must all pass.</div>
+    </div>
+  </div>
+
+  
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-num">Phase 5</span>
+      <span class="phase-title">repo-analyzer mode — shell execution in 7-phase workflow</span>
+      <span class="phase-scope"><span class="badge badge-manual">Manual — Bob Shell</span></span>
+    </div>
+    <div class="phase-body">
+      <pre>bob --chat-mode=repo-analyzer</pre>
+
+      <h3>T5-A — Phase 1 scan executes a real script</h3>
+      <p>Prompt:</p>
+      <pre>Run Phase 1: execute scripts/scan-repository.sh and show me the output.</pre>
+      <p><strong>Pass:</strong> Bob executes the script and returns its stdout. <strong>Fail:</strong> Cannot run shell commands → <code>command</code> group broken for this mode.</p>
+
+      <h3>T5-B — 7-phase instructions are present</h3>
+      <p>Prompt:</p>
+      <pre>Summarise the 7 analysis phases you follow.</pre>
+      <p><strong>Pass:</strong> Bob lists all 7 phases (Setup, Dependency, Code Quality, Security, Test Coverage, Git History, Documentation). These come from <code>customInstructions</code>.</p>
+
+      <div class="warn"><strong>GATE 5:</strong> T5-A must pass (shell execution). T5-B is informational.</div>
+    </div>
+  </div>
+
+  
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-num">Phase 6</span>
+      <span class="phase-title">Regression — install.sh is idempotent and safe</span>
+      <span class="phase-scope"><span class="badge badge-auto">Automated</span></span>
+    </div>
+    <div class="phase-body">
+      <p>Re-run <code>install.sh</code> and confirm it does not corrupt an existing setup.</p>
+      <pre># Take a checksum before
+BEFORE=$(md5 -q ~/.bob/custom_modes.yaml)
+
+# Re-run install
+bash scripts/install.sh
+
+# Checksum after (the install always overwrites from config/)
+AFTER=$(md5 -q ~/.bob/custom_modes.yaml)
+
+# The backup should exist
+test -f ~/.bob/custom_modes.yaml.backup \
+  &amp;&amp; echo "PASS: backup created" \
+  || echo "FAIL: no backup"
+
+# The file should be valid YAML containing both modes
+python3 -c "
+import yaml
+with open('$HOME/.bob/custom_modes.yaml') as f:
+    data = yaml.safe_load(f)
+slugs = [m['slug'] for m in data.get('customModes',[])]
+assert 'knowledge-manager' in slugs, 'knowledge-manager missing'
+assert 'repo-analyzer' in slugs, 'repo-analyzer missing'
+print('PASS: both modes present after re-install')
+"</pre>
+      <p><strong>Pass:</strong> Both PASS lines print. No Python exception.</p>
+
+      <div class="warn"><strong>GATE 6:</strong> Must pass before shipping to other users.</div>
+    </div>
+  </div>
+
+  
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-num">Phase 7</span>
+      <span class="phase-title">Negative tests — known failure modes confirmed absent</span>
+      <span class="phase-scope"><span class="badge badge-auto">Automated</span></span>
+    </div>
+    <div class="phase-body">
+      <p>These tests confirm that the bugs found in the audit are confirmed absent from the installed file.</p>
+      <pre>python3 - &lt;&lt;'PYEOF'
+import yaml, re, sys, os
+
+results = []
+
+with open(os.path.expanduser('~/.bob/custom_modes.yaml')) as f:
+    data = yaml.safe_load(f)
+our = {m['slug']: m for m in data['customModes']
+       if m['slug'] in ('knowledge-manager','repo-analyzer')}
+
+for slug, m in our.items():
+    flat = [g[0] if isinstance(g,list) else g for g in m.get('groups',[])]
+    ci = m.get('customInstructions','') or ''
+
+    # Bug 1: 'execute' instead of 'command' in CLI file
+    if 'execute' in flat:
+        results.append(('FAIL', slug, '"execute" group found — regression from IDE port'))
+    else:
+        results.append(('PASS', slug, '"execute" absent (correct CLI group is "command")'))
+
+    # Bug 2: save_memory as an actionable instruction
+    for line in ci.splitlines():
+        if 'save_memory' in line and 'no save_memory' not in line and 'save_memory tool in Bob IDE' not in line:
+            results.append(('FAIL', slug, f'save_memory instruction: {line.strip()!r}'))
+    else:
+        results.append(('PASS', slug, 'no stale save_memory instruction'))
+
+    # Bug 3: fileRegex must compile
+    for g in m.get('groups',[]):
+        if isinstance(g, list) and len(g) &gt; 1:
+            rx = g[1].get('fileRegex','')
+            try:
+                re.compile(rx)
+                results.append(('PASS', slug, f'fileRegex {rx!r} compiles'))
+            except re.error as e:
+                results.append(('FAIL', slug, f'fileRegex {rx!r} broken: {e}'))
+
+for status, slug, msg in results:
+    print(f'{status}: [{slug}] {msg}')
+
+failed = [r for r in results if r[0]=='FAIL']
+if failed:
+    print(f'\n{len(failed)} regression(s) found')
+    sys.exit(1)
+else:
+    print(f'\nAll {len(results)} negative tests passed')
+PYEOF</pre>
+      <p><strong>Pass:</strong> All lines print <code>PASS</code> and the final line is <code>All N negative tests passed</code>.</p>
+      <div class="warn"><strong>GATE 7:</strong> Any FAIL here is a regression — stop and investigate before declaring success.</div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  
+  <h2>Validation Sign-off Checklist</h2>
+  <p>Complete each row. The playbook is passed when every mandatory row is ticked PASS.</p>
+  <table>
+    <thead>
+      <tr><th>Gate</th><th>Phase</th><th>Mandatory?</th><th>Pass criterion</th><th>Result</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>0</td><td>Pre-conditions script</td><td><span class="badge badge-gate">Mandatory</span></td><td>Script exits 0 and prints PASS</td><td></td></tr>
+      <tr><td>1</td><td>Mode registration (T1-A, T1-B)</td><td><span class="badge badge-gate">Mandatory</span></td><td>Both slugs appear; modes activate without errors</td><td></td></tr>
+      <tr><td>2</td><td>Tool groups (T2-A, T2-B, T2-D)</td><td><span class="badge badge-gate">Mandatory</span></td><td>Shell runs; .md file written; read works</td><td></td></tr>
+      <tr><td>2-C</td><td>fileRegex enforcement</td><td><span class="badge badge-info">Informational</span></td><td>Non-.md write refused (may vary by Bob version)</td><td></td></tr>
+      <tr><td>3</td><td>KB init (T3-A, T3-B, T3-C)</td><td><span class="badge badge-gate">Mandatory</span></td><td>All paths created; settings.json correct; validate-kb passes</td><td></td></tr>
+      <tr><td>4</td><td>End-to-end workflow (T4-A–D)</td><td><span class="badge badge-gate">Mandatory</span></td><td>Document created; INDEX updated; persists across session restart; naming conventions recalled</td><td></td></tr>
+      <tr><td>5</td><td>repo-analyzer shell (T5-A)</td><td><span class="badge badge-gate">Mandatory</span></td><td>Phase 1 script executes in mode</td><td></td></tr>
+      <tr><td>6</td><td>Idempotent install</td><td><span class="badge badge-gate">Mandatory</span></td><td>Re-install creates backup; both modes present after</td><td></td></tr>
+      <tr><td>7</td><td>Regression / negative tests</td><td><span class="badge badge-gate">Mandatory</span></td><td>All negative tests PASS (no execute, no save_memory, valid regex)</td><td></td></tr>
+    </tbody>
+  </table>
+
+  <hr class="divider" />
+
+  
+  <h2>Known Limitations — Bob Shell 1.0.6</h2>
+  <div class="two-col">
+    <div class="col-box">
+      <strong>fileRegex enforcement (T2-C)</strong>
+      Whether Bob 1.0.6 actually enforces the <code>fileRegex</code> restriction at runtime is unverified. The schema accepts it; enforcement depends on the Bob version. Treat T2-C as informational — document the result but do not gate on it.
+    </div>
+    <div class="col-box">
+      <strong>--no-interactive flag</strong>
+      Phase 1 commands use <code>--no-interactive</code>. If your Bob build does not support this flag, run the prompts in an interactive session manually. The acceptance criteria are identical.
+    </div>
+    <div class="col-box">
+      <strong>browser group not tested</strong>
+      The <code>browser</code> group is declared in both modes. There is no automated test for it here because web access requires a real URL and live network. If web-search is a workflow requirement, add a T2-E manually: prompt Bob to fetch a URL and confirm it returns content.
+    </div>
+    <div class="col-box">
+      <strong>Bob IDE vs Bob Shell</strong>
+      This playbook covers Bob Shell CLI only. The Bob IDE path uses <code>execute</code>/<code>skill</code> groups in <code>.bob/custom_modes.yaml</code> — those are verified separately by the adversarial audit script and need no CLI validation.
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  
+  <h2>Quick Re-run Script (Phases 0, 6, 7 only)</h2>
+  <p>For daily regression checks after any config change, run only the automated phases:</p>
+  <pre>cd ~/Projects/bob-llmwiki-knowledge-manager
+
+echo "=== Phase 0: Pre-conditions ===" &amp;&amp;
+python3 - &lt;&lt;'EOF'
+import yaml,re,os,sys
+cfg=os.path.expanduser('~/.bob')
+cm=os.path.join(cfg,'custom_modes.yaml')
+with open(cm) as f: data=yaml.safe_load(f)
+modes={m['slug']:m for m in data.get('customModes',[])}
+issues=[]
+for slug in ('knowledge-manager','repo-analyzer'):
+    if slug not in modes: issues.append(f'missing {slug}')
+    else:
+        flat=[g[0] if isinstance(g,list) else g for g in modes[slug].get('groups',[])]
+        if 'command' not in flat: issues.append(f'{slug}: no command group')
+        if 'execute' in flat: issues.append(f'{slug}: execute regression')
+print('PASS' if not issues else f'FAIL: {issues}')
+sys.exit(0 if not issues else 1)
+EOF
+
+echo "=== Phase 6: Re-install idempotency ===" &amp;&amp;
+bash scripts/install.sh &amp;&amp;
+python3 -c "
+import yaml,os
+with open(os.path.expanduser('~/.bob/custom_modes.yaml')) as f:
+    d=yaml.safe_load(f)
+slugs=[m['slug'] for m in d.get('customModes',[])]
+assert 'knowledge-manager' in slugs and 'repo-analyzer' in slugs
+print('PASS')
+"
+
+echo "=== Phase 7: Negative tests ===" &amp;&amp;
+python3 - &lt;&lt;'EOF'
+import yaml,re,os,sys
+with open(os.path.expanduser('~/.bob/custom_modes.yaml')) as f:
+    data=yaml.safe_load(f)
+our={m['slug']:m for m in data['customModes'] if m['slug'] in('knowledge-manager','repo-analyzer')}
+fails=[]
+for slug,m in our.items():
+    flat=[g[0] if isinstance(g,list) else g for g in m.get('groups',[])]
+    if 'execute' in flat: fails.append(f'{slug}: execute regression')
+    for g in m.get('groups',[]):
+        if isinstance(g,list) and len(g)&gt;1:
+            try: re.compile(g[1].get('fileRegex',''))
+            except: fails.append(f'{slug}: bad fileRegex')
+print('PASS' if not fails else f'FAIL: {fails}')
+sys.exit(0 if not fails else 1)
+EOF
+
+echo ""
+echo "=== All automated checks complete ==="</pre>
+
+  <footer>Made with IBM Bob</footer>
+</div>
+</body>
+</html>

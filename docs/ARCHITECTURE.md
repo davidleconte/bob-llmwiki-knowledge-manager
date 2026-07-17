@@ -1,9 +1,11 @@
 # Bob Shell Knowledge Manager — Architecture
 
-**Version:** 2.0 (authoritative)  
-**Last updated:** 2026-07-14  
-**Standard:** arc42 / ISO/IEC 42010 · Tier-1 Software Vendor bar  
-**Scope:** The Bash/YAML/Markdown product in this repository (~500 lines).  
+**Version:** 2.1 (authoritative)
+**Last updated:** 2026-07-16
+**Standard:** arc42 / ISO/IEC 42010 · Tier-1 Software Vendor bar
+**Scope:** The Bash/YAML/Markdown product in this repository (~500 lines). Bob IDE-compatible
+implementation: `.bob/skills/knowledge-manager/SKILL.md` and `.bob/custom_modes.yaml`
+(workspace entry, `execute`/`skill` groups, verified on Bob IDE 1.121.0+bob2.0.1).
 Not to be confused with the Python token-optimization system (`src/`), which is documented in
 [`docs/architecture/ARCHITECTURE.md`](architecture/ARCHITECTURE.md).
 
@@ -81,7 +83,7 @@ C4Context
 | **Language** | Bash (scripts), YAML (mode config), Markdown (content) | No additional runtime dependencies |
 | **Persistence** | Plain files under `docs/knowledge-base/` | Git-trackable; human-readable; tool-agnostic |
 | **Search** | Bob Shell's native `search_file_content` | No external index or database required |
-| **Memory** | Bob Shell's `save_memory` tool | Cross-session persistence of key facts |
+| **Memory** | Bob Shell CLI: `save_memory` tool. Bob IDE: file persistence via `write_file` only (`save_memory` not available in Bob IDE). | Cross-session persistence of key facts |
 | **Platform** | macOS, Linux (Bash ≥ 3.2) | Windows only via WSL |
 | **Optional tools** | `pandoc` for HTML/PDF export only | Core functionality works without it |
 | **Bob Shell version** | Any version that supports `customModes` in `custom_modes.yaml` | Tested on current release |
@@ -463,7 +465,7 @@ The mode:
 2. Selects the correct template
 3. Applies the `lowercase-with-hyphens.md` naming convention
 4. Adds cross-references to related existing documents
-5. Calls `save_memory` with the document's location
+5. Calls `save_memory` with the document's location *(Bob Shell CLI only — Bob IDE skips this step)*
 6. Updates `INDEX.md`
 
 ### Memory persistence

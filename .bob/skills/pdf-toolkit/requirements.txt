@@ -1,0 +1,26 @@
+# pdf-toolkit dependencies
+# ---------------------------------------------------------------------------
+# Tiered install. You do NOT need all of these — install by capability.
+#
+#   Tier 1 (light, fast, pure-python)   pip install pypdf pikepdf pdfplumber
+#   Tier 2 (generation, pure-python)    pip install reportlab markdown
+#   Tier 3 (heavy, ML layout+OCR)       pip install "docling>=2.0"
+#
+# Pandoc/XeLaTeX generation (Part 3) is installed via the OS package manager,
+# not pip:  brew install pandoc && brew install --cask mactex
+# ---------------------------------------------------------------------------
+
+# --- Tier 1: manipulation + fast extraction (recommended baseline) ---
+pypdf>=4.0
+pikepdf>=8.0
+pdfplumber>=0.10
+
+# --- Tier 2: pure-python generation fallback (no LaTeX toolchain needed) ---
+reportlab>=4.0
+markdown>=3.5
+
+# --- Tier 3: high-fidelity layout, tables, OCR, RAG (heavy: pulls torch) ---
+# Uncomment to enable. Large download (~GB) + model artifacts.
+# docling>=2.0
+# langchain-docling      # optional: LangChain loader
+# llama-index-readers-docling llama-index-node-parser-docling  # optional: LlamaIndex

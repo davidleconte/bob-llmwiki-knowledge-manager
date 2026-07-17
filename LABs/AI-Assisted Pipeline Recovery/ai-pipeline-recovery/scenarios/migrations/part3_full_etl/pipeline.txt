@@ -1,0 +1,4 @@
+# Part 3: Full ETL Pipeline (CSV → SQLite → JSON)
+# This pipeline extracts CSV data, transforms into SQLite, exports to JSON
+
+run_etl: python3 scenarios/migrations/part3_full_etl/scripts/etl_pipeline.py

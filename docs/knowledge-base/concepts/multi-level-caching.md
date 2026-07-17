@@ -148,6 +148,7 @@ result = cache.get(new_query)  # None (miss both L1 and L2)
 ```
 
 ## Related Documents
+- [Multi-Level Caching Architecture Patterns](./multi-level-caching-architecture-patterns.md) - Comprehensive guide to cache hierarchy patterns and strategies
 - [Token Optimization](./token-optimization.md) - Overall optimization strategy
 - [Cache API Reference](../references/cache-api.md) - Detailed API documentation
 - [Setting Up Token Optimization System](../guides/setup-token-optimization.md) - Installation guide

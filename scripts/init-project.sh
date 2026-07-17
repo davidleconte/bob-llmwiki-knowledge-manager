@@ -20,7 +20,7 @@ mkdir -p docs/knowledge-base/{concepts,guides,references,research}
 # Create INDEX.md
 echo "📝 Creating INDEX.md..."
 TODAY=$(date +%Y-%m-%d)
-cat > docs/knowledge-base/INDEX.md << INDEXEOF
+cat > docs/knowledge-base/INDEX.md <<INDEXEOF
 # Knowledge Base Index
 
 Last Updated: $TODAY
@@ -96,7 +96,7 @@ fi
 PROJECT_NAME=$(basename "$(pwd)")
 if [ ! -f "CONTEXT.md" ]; then
     echo "📝 Creating CONTEXT.md..."
-    cat > CONTEXT.md << CTXEOF
+    cat > CONTEXT.md <<CTXEOF
 # $PROJECT_NAME — Knowledge Base Context
 
 > Auto-loaded by Bob Shell at session start (declared in \`.bob/settings.json\`).

@@ -1,9 +1,9 @@
 # Quick Start Guide
 
-**Version:** 2.0  
-**Last updated:** 2026-07-14  
-**Standard:** arc42 / Tier-1  
-**Scope:** 5-minute onboarding guide
+**Version:** 2.1
+**Last updated:** 2026-07-16
+**Standard:** arc42 / Tier-1
+**Scope:** 5-minute onboarding guide — Bob Shell CLI and Bob IDE
 
 ---
 
@@ -23,17 +23,22 @@
 
 ## 1. What this guide achieves
 
-By the end of this guide you will have a **KB-aware Bob Shell session with your first document created.**
+By the end of this guide you will have a **KB-aware session with your first document created** — whether you are using Bob Shell CLI or Bob IDE.
 
-The three installation steps are independent: if you have already completed an earlier step, the flowchart below shows you exactly where to re-enter.
+The installation steps are independent: if you have already completed an earlier step, the flowchart below shows you exactly where to re-enter. **Bob IDE users skip Step 1 entirely.**
 
 ```mermaid
 flowchart TD
-    Start([Start]) --> Q1{Mode already\ninstalled?}
+    Start([Start]) --> QTarget{Which target?}
 
+    QTarget -- Bob IDE --> IDE1[Open this workspace in Bob IDE]
+    IDE1 --> IDE2[Mode picker bottom-left status bar]
+    IDE2 --> IDE3[Select Knowledge Manager]
+    IDE3 --> Q2
+
+    QTarget -- Bob Shell CLI --> Q1{Mode already\ninstalled?}
     Q1 -- Yes --> Q2{KB already\ninitialised?}
     Q1 -- No  --> S1[Step 1 — Install the mode\nscripts/install.sh]
-
     S1 --> Q2
 
     Q2 -- Yes --> S3[Step 3 — Create first document]
@@ -41,25 +46,29 @@ flowchart TD
 
     S2 --> S3
 
-    S3 --> End([KB-aware Bob Shell session\nwith first document created ✅])
+    S3 --> End([KB-aware session with\nfirst document created])
 
     style Start fill:#4CAF50,color:#fff
     style End fill:#2196F3,color:#fff
     style S1 fill:#FF9800,color:#fff
     style S2 fill:#FF9800,color:#fff
     style S3 fill:#FF9800,color:#fff
+    style IDE1 fill:#7c5cd8,color:#fff
+    style IDE2 fill:#7c5cd8,color:#fff
+    style IDE3 fill:#7c5cd8,color:#fff
 ```
 
 ---
 
 ## 2. Prerequisites
 
-| Dependency | Required | Minimum version | Purpose |
+| Dependency | Required for | Minimum version | Purpose |
 |---|---|---|---|
-| Bob Shell | ✅ Yes | Any version with `customModes` support | Runs the knowledge-manager mode |
-| Bash | ✅ Yes | 3.2 | Executes all scripts |
-| Git | ⬜ Optional | Any | Project-directory detection in `init-project.sh` |
-| Pandoc | ⬜ Optional | Any | KB export to HTML/PDF |
+| Bob Shell CLI | Bob Shell CLI path | Any version with `customModes` support | Runs the knowledge-manager mode via terminal |
+| Bob IDE | Bob IDE path | Bob IDE 1.121.0+ with bob2.0.1+ | VS Code / Cursor extension with mode picker |
+| Bash | Bob Shell CLI path | 3.2 | Executes all scripts |
+| Git | Both | Any | Project-directory detection in `init-project.sh` |
+| Pandoc | Bob Shell CLI path | Any | KB export to HTML/PDF |
 
 ### Verify your environment
 
@@ -83,7 +92,12 @@ pandoc --version | head -1
 
 ## 3. Step 1: Install the mode (~2 min)
 
-### Command
+> **Bob IDE users — no install needed.**
+> Open this workspace (`bob-llmwiki-knowledge-manager`) in Bob IDE. Click the **mode picker** in the bottom-left status bar, scroll to and select **📚 Knowledge Manager**. The mode is already registered in `.bob/custom_modes.yaml`. **Skip directly to [Step 3](#5-step-3-your-first-document-2-min).** See [docs/BOB-IDE-GUIDE.md](BOB-IDE-GUIDE.md) for full Bob IDE details.
+
+---
+
+### Command (Bob Shell CLI)
 
 Run this from inside the `bob-llmwiki-knowledge-manager` repository root:
 
@@ -201,7 +215,7 @@ This step creates the **KB directory contract** — the fixed directory layout t
 
 ## 5. Step 3: Your first document (~2 min)
 
-### Option A — Bob Shell (recommended)
+### Option A — Bob Shell CLI (recommended)
 
 1. **Activate the mode** in your project directory:
    ```bash
@@ -221,11 +235,30 @@ This step creates the **KB directory contract** — the fixed directory layout t
 | 2 | Select template | `concept.md` template applied |
 | 3 | Apply naming convention | `microservices-architecture.md` |
 | 4 | Populate all standard sections | Full markdown document written |
-| 5 | Save key facts to memory | `save_memory` tool called |
+| 5 | Save key facts to memory | `save_memory` tool called *(Bob Shell CLI only)* |
 | 6 | Add cross-references | Links to related documents inserted |
 | 7 | Update INDEX.md | Entry added under `### Concepts` |
 
 > This workflow is defined verbatim in the `customInstructions` of the [`knowledge-manager` mode](../config/custom_modes.yaml:180).
+
+---
+
+### Option A2 — Bob IDE mode picker
+
+1. **Select the mode** using the mode picker (bottom-left status bar → **📚 Knowledge Manager**).
+
+2. **Activate the skill** at the start of your session:
+   ```
+   use_skill("knowledge-manager")
+   ```
+   This loads the full document templates, cross-reference protocol, and INDEX.md maintenance instructions from [`.bob/skills/knowledge-manager/SKILL.md`](../.bob/skills/knowledge-manager/SKILL.md).
+
+3. **Send an example prompt:**
+   ```
+   Research "microservices architecture" and create a concept document
+   ```
+
+> **Persistence note:** Bob IDE does not have `save_memory`. All knowledge is persisted by writing markdown files to `docs/knowledge-base/`. Commit to Git to make changes durable.
 
 ---
 
@@ -326,6 +359,20 @@ microservices-architecture.md
 
 ## 7. Troubleshooting
 
+### T0 — Bob IDE: 📚 Knowledge Manager not in mode picker
+
+| Field | Detail |
+|---|---|
+| **Symptom** | The mode picker does not show **📚 Knowledge Manager** |
+| **Cause** | Bob IDE has not picked up `.bob/custom_modes.yaml`, or the workspace was opened before the file was written |
+| **Fix 1** | Reload the Bob IDE window: **Cmd+Shift+P → Developer: Reload Window** |
+| **Fix 2** | Make a trivial edit to [`.bob/custom_modes.yaml`](../.bob/custom_modes.yaml) (add and remove a space), then save — Bob IDE hot-reloads on file change |
+| **Fix 3** | Confirm the file exists: `ls .bob/custom_modes.yaml` and contains the `knowledge-manager` slug: `grep knowledge-manager .bob/custom_modes.yaml` |
+
+See [docs/BOB-IDE-GUIDE.md — Troubleshooting](BOB-IDE-GUIDE.md#10-troubleshooting) for additional Bob IDE issues.
+
+---
+
 ### T1 — `❌ Bob Shell config directory not found`
 
 | Field | Detail |
@@ -409,5 +456,5 @@ The master index file at `docs/knowledge-base/INDEX.md`. It is automatically loa
 
 ---
 
-**save_memory**  
+**save_memory** *(Bob Shell CLI only)*  
 A Bob Shell built-in tool called by the `knowledge-manager` mode during document creation (Step 5 of 7). It persists key facts extracted from a document into the agent's long-term memory store, making those facts retrievable in future sessions without re-reading the source file.

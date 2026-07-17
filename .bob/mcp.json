@@ -1,0 +1,185 @@
+{
+  "mcpServers": {
+    "bob-marketplace": {
+      "type": "streamable-http",
+      "url": "http://127.0.0.1:39247/mcp",
+      "headers": {
+        "Bob-Marketplace-Token": "bob-marketplace-local"
+      },
+      "disabled": false,
+      "alwaysAllow": [
+        "search_assets",
+        "get_asset",
+        "list_installed",
+        "list_favorites",
+        "suggest_assets",
+        "list_updates"
+      ]
+    },
+    "atlassian": {
+      "type": "streamable-http",
+      "url": "https://mcp.atlassian.com/v1/mcp/authv2",
+      "headers": {
+        "Authorization": "Bearer YOUR-OAUTH-ACCESS-TOKEN-HERE"
+      },
+      "disabled": false,
+      "alwaysAllow": [
+        "atlassianUserInfo",
+        "getAccessibleAtlassianResources",
+        "getVisibleJiraProjects",
+        "getJiraProjectIssueTypesMetadata",
+        "getJiraIssue",
+        "searchJiraIssuesUsingJql",
+        "getTransitionsForJiraIssue",
+        "lookupJiraAccountId"
+      ]
+    },
+    "external-llm": {
+      "command": "/Users/coredump/Desktop/EXEC2/.venv/bin/python",
+      "args": [
+        "/Users/coredump/Desktop/EXEC2/external-llm-mcp-server-bob/external_llm_mcp_server.py"
+      ],
+      "env": {
+        "OPENAI_API_KEY": "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",
+        "OPENAI_MODEL": "gpt-5.5",
+        "OPENAI_BASE_URL": "https://api.openai.com/v1",
+        "EXTERNAL_LLM_MAX_TOKENS": "4096",
+        "EXTERNAL_LLM_TIMEOUT": "180",
+        "EXTERNAL_LLM_CONCURRENCY": "2"
+      },
+      "description": "External LLM MCP Server - delegates hard reasoning tasks (planning, deep review, root-cause analysis, adversarial second opinions, debugging, approach comparison) to OpenAI GPT-5.5 via the Responses API (/v1/responses) with configurable reasoning_effort, complementing Bob's primary Sonnet driver",
+      "tools": [
+        {
+          "name": "consult_llm",
+          "description": "Send a free-form prompt to GPT-5.5 via the Responses API with optional additive system_prompt (Bob framing is always preserved), model override, and reasoning_effort (none/minimal/low/medium/high/xhigh) - general-purpose escape hatch when no specialised tool fits"
+        },
+        {
+          "name": "plan_task",
+          "description": "Produce a numbered implementation plan for a non-trivial coding task - returns goal, assumptions, ordered steps with file hints, risks, and verification strategy; does not write code"
+        },
+        {
+          "name": "deep_review",
+          "description": "Deep code or design review with findings grouped by severity (CRITICAL/HIGH/MEDIUM/LOW/NIT), location citations, concrete fixes, and a ship/fix-then-ship/block verdict"
+        },
+        {
+          "name": "analyze_problem",
+          "description": "Root-cause analysis of a hard problem - returns ranked hypotheses with likelihoods, evidence for/against each, and the single most informative next diagnostic step"
+        },
+        {
+          "name": "second_opinion",
+          "description": "Adversarial review of a proposed approach - returns what is correct, strongest objections, alternative approaches with tradeoffs, and a keep/adjust/reconsider verdict; use before committing to architectural decisions"
+        },
+        {
+          "name": "debug_assist",
+          "description": "Deep debugging help for a stubborn bug - returns most likely cause, reasoning chain, concrete confirmation checks, and a proposed fix; falls back to a ranked candidate list when evidence is insufficient"
+        },
+        {
+          "name": "compare_approaches",
+          "description": "Compare 2-6 approaches against criteria - returns side-by-side comparison, prose tradeoffs for the top two, a decisive recommendation, and conditions under which it would flip"
+        },
+        {
+          "name": "server_info",
+          "description": "Return current configuration (default model, base URL, token cap, timeout, concurrency, known models) without making a paid API request - use to verify setup"
+        }
+      ]
+    },
+    "carbon-mcp": {
+      "type": "streamable-http",
+      "url": "https://mcp.carbondesignsystem.com/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR-CARBON-API-HERE",
+        "X-MCP-Session": "YOUR-SESSION-ID-HERE"
+      }
+    },
+    "mq-mcp-server-bob": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "/FULL/PATH/TO/LAB/mq-mcp-server-bob",
+        "mqmcpserver_bob.py"
+      ],
+      "env": {
+        "MQ_HOST": "localhost",
+        "MQ_PORT": "9443",
+        "MQ_USER": "admin",
+        "MQ_PASSWORD": "passw0rd"
+      },
+      "description": "IBM MQ MCP Server for managing WebSphere MQ queue managers",
+      "tools": [
+        {
+          "name": "dspmq",
+          "description": "List available queue managers and their running status"
+        },
+        {
+          "name": "get_status",
+          "description": "Get MQ status as JSON for dashboard and monitoring"
+        },
+        {
+          "name": "runmqsc",
+          "description": "Run MQSC commands against a specific queue manager"
+        }
+      ]
+    },
+    "terraform": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "hashicorp/terraform-mcp-server"
+      ],
+      "env": {},
+      "disabled": false
+    },
+    "watsonx-orchestrate-docs": {
+      "type": "streamable-http",
+      "url": "https://ibm-2e3153bf.main-kill-isr.mintlify.me/mcp",
+      "disabled": false,
+      "alwaysAllow": []
+    },
+    "swift-info": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "/path/to/swift-mcp-server",
+        "swift_mcp_server.py"
+      ],
+      "description": "Swift MCP Server - provides information about Swift and SwiftUI releases and features",
+      "tools": [
+        {
+          "name": "get_swift_info",
+          "description": "Return information about the latest Swift release including version, release date, highlights, and sources"
+        },
+        {
+          "name": "get_swiftui_info",
+          "description": "Return information about recent SwiftUI updates including design, scene bridging, spatial layout, performance, and concurrency improvements"
+        }
+      ]
+    },
+    "tavily-remo": {
+      "type": "streamable-http",
+      "url": "https://mcp.tavily.com/mcp/?tavilyApiKey=<YOUR-TAVILY-API-KEY>",
+      "disabled": false,
+      "alwaysAllow": []
+    },
+    "techzone": {
+      "type": "streamable-http",
+      "url": "https://mcp.techzone.ibm.com/servers/c7442b81221647c3b36c75df4f2f88e8/mcp",
+      "headers": {
+        "TechZone-Token": "YOUR-TECHZONE-API-KEY-HERE"
+      },
+      "disabled": false,
+      "alwaysAllow": [
+        "documentation-mcp-techzone-search-content-docs",
+        "request-mcp-techzone-get-request",
+        "request-mcp-search-environments",
+        "platform-mcp-platform-get",
+        "platform-mcp-platform-list",
+        "collection-mcp-collection-get",
+        "collection-mcp-collection-list"
+      ]
+    }
+  }
+}

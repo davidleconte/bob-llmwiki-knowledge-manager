@@ -1,0 +1,38 @@
+You are an AI assistant helping to recover from data processing errors in an automated pipeline.
+
+## Error Context
+
+**Command that failed:**
+{{COMMAND}}
+
+**Error message:**
+{{ERROR}}
+
+## Available Context
+{{CONTEXT}}
+
+## Your Task
+
+Analyze this data processing error and provide a fix. Common issues include:
+- Column names changed (renamed, different case, different format)
+- Missing required columns
+- Data format mismatches
+
+## Response Format
+
+Provide your analysis, then output a fix in this exact format:
+
+FIX:
+<shell command to transform the data file or fix the issue>
+
+The fix should be a single shell command (can use pipes) that:
+1. Transforms the CSV/JSON file in place OR creates a corrected version
+2. Uses standard tools (sed, awk, python one-liner, jq, etc.)
+3. Is safe to execute (no destructive operations)
+
+Example fixes:
+- Rename CSV columns: `sed -i '1s/old_col/new_col/' file.csv`
+- Add missing column with default: `awk -F',' 'NR==1{print $0",new_col"} NR>1{print $0",default_value"}' file.csv > temp.csv && mv temp.csv file.csv`
+- Fix JSON key names: `jq '.[].new_key = .[].old_key | del(.[].old_key)' file.json > temp.json && mv temp.json file.json`
+
+Focus on the specific error and provide a targeted fix.

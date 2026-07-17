@@ -81,6 +81,28 @@ How Bob Shell Knowledge Manager compares to other solutions.
 
 Bob Shell Knowledge Manager can export to Obsidian format for the best of both worlds.
 
+## Bob Shell CLI vs Bob IDE
+
+The Knowledge Manager mode runs on both surfaces. This table documents
+machine-verified behavioural differences so you can choose the right
+environment for your workflow.
+
+| Dimension | Bob Shell CLI | Bob IDE |
+|---|---|---|
+| Installation | `scripts/install.sh` → `~/.bob/custom_modes.yaml` | Open workspace — zero steps |
+| Mode activation | `bob --chat-mode=knowledge-manager` | Mode picker → 📚 Knowledge Manager |
+| Config file | `~/.bob/custom_modes.yaml` | `.bob/custom_modes.yaml` (workspace) |
+| Shell group name | `command` | `execute` |
+| Web group name | `browser` | not supported |
+| Skill lazy-load | not supported | `skill` group + `use_skill()` |
+| `save_memory` tool | available | not available |
+| Knowledge persistence | `save_memory` + markdown files | markdown files only |
+| Hot-reload | restart required | immediate |
+| Non-interactive flag | `-p "prompt"` | N/A |
+| Bob version verified | 1.0.6 | 1.121.0+bob2.0.1 |
+
+> **Note:** All facts in this table were machine-verified in the session of 2026-07-16.
+
 ## Summary
 
 Bob Shell Knowledge Manager is ideal for:

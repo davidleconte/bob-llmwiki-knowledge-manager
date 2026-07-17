@@ -1,0 +1,265 @@
+{
+  "exportedAt": "2026-01-28T11:40:10.490379Z",
+  "recordCount": 15,
+  "sales": [
+    {
+      "saleId": 1001,
+      "saleDate": "2024-01-15",
+      "quantity": 1,
+      "unitPrice": 1299.99,
+      "totalAmount": 1299.99,
+      "region": "North",
+      "customer": {
+        "name": "John Doe",
+        "email": "john.doe@email.com"
+      },
+      "product": {
+        "name": "Laptop Pro",
+        "category": "Electronics"
+      },
+      "salesRep": "Alice Brown"
+    },
+    {
+      "saleId": 1002,
+      "saleDate": "2024-01-16",
+      "quantity": 3,
+      "unitPrice": 29.99,
+      "totalAmount": 89.97,
+      "region": "South",
+      "customer": {
+        "name": "Jane Smith",
+        "email": "jane.smith@corp.com"
+      },
+      "product": {
+        "name": "Wireless Mouse",
+        "category": "Electronics"
+      },
+      "salesRep": "Bob Wilson"
+    },
+    {
+      "saleId": 1003,
+      "saleDate": "2024-01-17",
+      "quantity": 1,
+      "unitPrice": 599.99,
+      "totalAmount": 599.99,
+      "region": "East",
+      "customer": {
+        "name": "Bob Johnson",
+        "email": "bob.j@mail.org"
+      },
+      "product": {
+        "name": "Standing Desk",
+        "category": "Furniture"
+      },
+      "salesRep": "Alice Brown"
+    },
+    {
+      "saleId": 1004,
+      "saleDate": "2024-01-18",
+      "quantity": 2,
+      "unitPrice": 49.99,
+      "totalAmount": 99.98,
+      "region": "West",
+      "customer": {
+        "name": "Alice Williams",
+        "email": "alice.w@company.io"
+      },
+      "product": {
+        "name": "USB-C Hub",
+        "category": "Electronics"
+      },
+      "salesRep": "Carol Davis"
+    },
+    {
+      "saleId": 1005,
+      "saleDate": "2024-01-19",
+      "quantity": 1,
+      "unitPrice": 399.99,
+      "totalAmount": 399.99,
+      "region": "North",
+      "customer": {
+        "name": "Charlie Brown",
+        "email": "charlie.b@email.com"
+      },
+      "product": {
+        "name": "Ergonomic Chair",
+        "category": "Furniture"
+      },
+      "salesRep": "Bob Wilson"
+    },
+    {
+      "saleId": 1006,
+      "saleDate": "2024-01-20",
+      "quantity": 2,
+      "unitPrice": 349.99,
+      "totalAmount": 699.98,
+      "region": "South",
+      "customer": {
+        "name": "Diana Prince",
+        "email": "diana.p@email.com"
+      },
+      "product": {
+        "name": "Monitor 27\"",
+        "category": "Electronics"
+      },
+      "salesRep": "Carol Davis"
+    },
+    {
+      "saleId": 1007,
+      "saleDate": "2024-01-21",
+      "quantity": 1,
+      "unitPrice": 89.99,
+      "totalAmount": 89.99,
+      "region": "East",
+      "customer": {
+        "name": "Edward Norton",
+        "email": "edward.n@corp.com"
+      },
+      "product": {
+        "name": "Keyboard Mechanical",
+        "category": "Electronics"
+      },
+      "salesRep": "Alice Brown"
+    },
+    {
+      "saleId": 1008,
+      "saleDate": "2024-01-22",
+      "quantity": 2,
+      "unitPrice": 79.99,
+      "totalAmount": 159.98,
+      "region": "West",
+      "customer": {
+        "name": "Fiona Green",
+        "email": "fiona.g@mail.org"
+      },
+      "product": {
+        "name": "Webcam HD",
+        "category": "Electronics"
+      },
+      "salesRep": "Bob Wilson"
+    },
+    {
+      "saleId": 1009,
+      "saleDate": "2024-01-23",
+      "quantity": 1,
+      "unitPrice": 1299.99,
+      "totalAmount": 1299.99,
+      "region": "North",
+      "customer": {
+        "name": "George Lucas",
+        "email": "george.l@company.io"
+      },
+      "product": {
+        "name": "Laptop Pro",
+        "category": "Electronics"
+      },
+      "salesRep": "Carol Davis"
+    },
+    {
+      "saleId": 1010,
+      "saleDate": "2024-01-24",
+      "quantity": 5,
+      "unitPrice": 29.99,
+      "totalAmount": 149.95,
+      "region": "South",
+      "customer": {
+        "name": "Helen Troy",
+        "email": "helen.t@email.com"
+      },
+      "product": {
+        "name": "Wireless Mouse",
+        "category": "Electronics"
+      },
+      "salesRep": "Alice Brown"
+    },
+    {
+      "saleId": 1011,
+      "saleDate": "2024-01-25",
+      "quantity": 2,
+      "unitPrice": 599.99,
+      "totalAmount": 1199.98,
+      "region": "East",
+      "customer": {
+        "name": "Ivan Petrov",
+        "email": "ivan.p@corp.com"
+      },
+      "product": {
+        "name": "Standing Desk",
+        "category": "Furniture"
+      },
+      "salesRep": "Bob Wilson"
+    },
+    {
+      "saleId": 1012,
+      "saleDate": "2024-01-26",
+      "quantity": 1,
+      "unitPrice": 49.99,
+      "totalAmount": 49.99,
+      "region": "West",
+      "customer": {
+        "name": "Julia Roberts",
+        "email": "julia.r@mail.org"
+      },
+      "product": {
+        "name": "USB-C Hub",
+        "category": "Electronics"
+      },
+      "salesRep": "Carol Davis"
+    },
+    {
+      "saleId": 1013,
+      "saleDate": "2024-01-27",
+      "quantity": 1,
+      "unitPrice": 399.99,
+      "totalAmount": 399.99,
+      "region": "North",
+      "customer": {
+        "name": "Kevin Hart",
+        "email": "kevin.h@company.io"
+      },
+      "product": {
+        "name": "Ergonomic Chair",
+        "category": "Furniture"
+      },
+      "salesRep": "Alice Brown"
+    },
+    {
+      "saleId": 1014,
+      "saleDate": "2024-01-28",
+      "quantity": 1,
+      "unitPrice": 349.99,
+      "totalAmount": 349.99,
+      "region": "South",
+      "customer": {
+        "name": "Laura Palmer",
+        "email": "laura.p@email.com"
+      },
+      "product": {
+        "name": "Monitor 27\"",
+        "category": "Electronics"
+      },
+      "salesRep": "Bob Wilson"
+    },
+    {
+      "saleId": 1015,
+      "saleDate": "2024-01-29",
+      "quantity": 2,
+      "unitPrice": 89.99,
+      "totalAmount": 179.98,
+      "region": "East",
+      "customer": {
+        "name": "Mike Tyson",
+        "email": "mike.t@corp.com"
+      },
+      "product": {
+        "name": "Keyboard Mechanical",
+        "category": "Electronics"
+      },
+      "salesRep": "Carol Davis"
+    }
+  ],
+  "summary": {
+    "totalSales": 7069.74,
+    "transactionCount": 15
+  }
+}

@@ -2,10 +2,14 @@
 
 | Attribute | Value |
 |-----------|-------|
-| **Version** | 2.0 |
-| **Last Updated** | 2026-07-14 |
+| **Version** | 2.1 |
+| **Last Updated** | 2026-07-16 |
 | **Standard** | arc42 / Tier-1 |
 | **Scope** | End-to-end operational workflows for the Bob Shell LLM Wiki Knowledge Manager — covering document creation, project onboarding, KB maintenance, and research documentation. Each workflow is grounded in the system's actual mode configuration ([`config/custom_modes.yaml`](../config/custom_modes.yaml)) and supporting scripts ([`scripts/validate-kb.sh`](../scripts/validate-kb.sh), [`scripts/export-kb.sh`](../scripts/export-kb.sh)). |
+
+> **Scope note — Bob Shell CLI:** These workflows are written for Bob Shell CLI (`bob --chat-mode=knowledge-manager`).
+> **Bob IDE users:** activate via the mode picker (📚 Knowledge Manager) and see [docs/BOB-IDE-GUIDE.md](BOB-IDE-GUIDE.md).
+> Key difference: `save_memory` is **not available** in Bob IDE — all persistence is via `write_file` to `docs/knowledge-base/`.
 
 ---
 
@@ -108,7 +112,7 @@ flowchart TD
 |---|-----------|
 | S1 | At least one new or updated document exists in the correct `docs/knowledge-base/<category>/` subdirectory |
 | S2 | The document follows the naming convention defined in §6, Step 3 |
-| S3 | Key facts extracted during the session are persisted via `save_memory` or recorded in document front-matter |
+| S3 | Key facts extracted during the session are persisted via `save_memory` (Bob Shell CLI) or recorded in document front-matter |
 | S4 | `INDEX.md` contains an entry for every document created or updated during the session |
 
 ### Failure Paths
@@ -379,7 +383,7 @@ The table below expands each step with what Bob does internally and what the ope
 
 | | Detail |
 |--|--------|
-| **What Bob does** | Identifies two to five atomic facts from the document (definitions, version numbers, decision rationales) and calls `save_memory` for each. |
+| **What Bob does** | Identifies two to five atomic facts from the document (definitions, version numbers, decision rationales) and calls `save_memory` for each. *(Bob Shell CLI only — Bob IDE skips this step.)* |
 | **What the operator sees** | Bob confirms which facts were saved, e.g. *"Saved: 'Event sourcing stores state as a sequence of events.'"* |
 | **Failure path** | If `save_memory` fails (quota, connectivity), Bob records the facts in a `## Key Facts` front-matter section inside the document itself. |
 | **Note** | Step 5 intentionally precedes Step 6 so that cross-references can reference already-persisted facts. |
@@ -541,8 +545,8 @@ The custom Bob Shell operational mode defined in [`config/custom_modes.yaml`](..
 
 ---
 
-**save_memory**
-A Bob Shell tool call that persists a piece of text (a fact, definition, or decision) to Bob's long-term memory store. Facts saved via `save_memory` are retrievable across sessions without re-reading source documents. In the 7-step workflow, `save_memory` is invoked in Step 5 for each key fact identified in the newly created document.
+**save_memory** *(Bob Shell CLI only — not available in Bob IDE)*
+A Bob Shell CLI tool call that persists a piece of text (a fact, definition, or decision) to Bob's long-term memory store. Facts saved via `save_memory` are retrievable across sessions without re-reading source documents. In the 7-step workflow, `save_memory` is invoked in Step 5 for each key fact identified in the newly created document. Bob IDE users rely on file-based persistence to `docs/knowledge-base/` instead.
 
 ---
 

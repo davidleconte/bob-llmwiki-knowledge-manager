@@ -2,10 +2,14 @@
 
 | Attribute | Value |
 |---|---|
-| **Version** | 2.0 |
-| **Last Updated** | 2026-07-14 |
+| **Version** | 2.1 |
+| **Last Updated** | 2026-07-16 |
 | **Standard** | arc42 / Tier-1 |
-| **Scope** | Operational reference for all interactions with Bob Shell in `knowledge-manager` mode: document creation, querying, updating, organizing, exporting, and validating the `docs/knowledge-base/` directory tree. |
+| **Scope** | Operational reference for all interactions with the `knowledge-manager` mode in both **Bob Shell CLI** and **Bob IDE**: document creation, querying, updating, organizing, exporting, and validating the `docs/knowledge-base/` directory tree. |
+
+> **Bob IDE users:** see [docs/BOB-IDE-GUIDE.md](BOB-IDE-GUIDE.md) for the IDE-specific reference.
+> Key differences: activation via mode picker (not `--chat-mode=`); `save_memory` is **not available**
+> (file persistence only); shell group is `execute` (not `command`).
 
 ---
 
@@ -41,19 +45,45 @@ Every Bob Shell session starts fresh — the mode must be activated and Bob must
 
 ```mermaid
 flowchart TD
-    subgraph daily ["Every new session"]
-        A["Navigate to project\ncd ~/your-project"]
-        A --> B{"Quickest path?"}
-        B -- "wrapper script" --> C["scripts/start-kb.sh\n(verifies KB, launches Bob)"]
+    Start([Start]) --> Q0{"Which environment?"}
+    Q0 -- "Bob IDE" --> E0["Mode picker\nbottom-left status bar"]
+    E0 --> E1["Select Knowledge Manager"]
+    E1 --> E2["Status bar shows\nKnowledge Manager"]
+    E2 --> G
+    Q0 -- "Bob Shell CLI" --> B{"Quickest path?"}
+    subgraph daily ["Bob Shell CLI paths"]
+        B -- "wrapper script" --> C["scripts/start-kb.sh\nverifies KB and launches Bob"]
         B -- "direct" --> D["bob --chat-mode=knowledge-manager"]
         B -- "already in Bob" --> E["/mode knowledge-manager"]
-        B -- "no mode installed" --> F["Paste resume prompt\n(see Path C below)"]
+        B -- "no mode installed" --> F["Paste resume prompt\nsee Path C below"]
     end
     C & D & E & F --> G["Bob loads CONTEXT.md + INDEX.md\nautomatically via .bob/settings.json"]
     G --> H["Session ready — KB oriented"]
 ```
 
-### Path A — Wrapper script (recommended daily driver)
+### Path E — Bob IDE mode picker (verified on Bob IDE 1.121.0+bob2.0.1)
+
+No install step required. The mode is registered in `.bob/custom_modes.yaml`.
+
+1. Open this workspace in Bob IDE.
+2. Click the **mode picker** in the bottom-left of the chat panel (shows the current mode name).
+3. Scroll to **📚 Knowledge Manager** and select it.
+4. Confirm the status bar shows `Mode: 📚 Knowledge Manager`.
+
+Bob IDE differences vs Bob Shell CLI:
+
+| Feature | Bob Shell CLI | Bob IDE |
+|---|---|---|
+| `save_memory` tool | available | **not available** — use `write_file` instead |
+| Shell group name | `command` | `execute` |
+| Skill lazy-load | not supported | `use_skill("knowledge-manager")` |
+| Writes outside workspace | allowed | workspace-constrained |
+
+For the complete Bob IDE reference see [docs/BOB-IDE-GUIDE.md](BOB-IDE-GUIDE.md).
+
+---
+
+### Path A — Wrapper script (recommended daily driver, Bob Shell CLI)
 
 ```bash
 cd ~/your-project
@@ -95,7 +125,7 @@ What did we document most recently? Summarise the KB and suggest what to work on
 
 Bob will:
 1. Scan `INDEX.md` (already in context via `.bob/settings.json`)
-2. Recall any facts saved with `save_memory` in prior sessions
+2. Recall any facts saved with `save_memory` in prior sessions *(Bob Shell CLI only — not available in Bob IDE)*
 3. Propose the next logical documents or updates
 
 ### What `CONTEXT.md` provides
@@ -111,7 +141,15 @@ Edit `CONTEXT.md` directly to add project-specific guidance, constraints, or ter
 
 ## 1. System Context
 
-The knowledge manager is a **Bob Shell custom mode** defined in [`config/custom_modes.yaml`](../config/custom_modes.yaml:180). It wraps the LLM interaction layer with a fixed workflow and a set of tool bindings (`save_memory`, `search_file_content`, `write_file`). All persistent output lands in `docs/knowledge-base/` and its four sub-directories.
+The knowledge manager is a custom mode defined in [`config/custom_modes.yaml`](../config/custom_modes.yaml:180). It wraps the LLM interaction layer with a fixed workflow and a set of tool bindings. All persistent output lands in `docs/knowledge-base/` and its four sub-directories.
+
+**Tool bindings by target:**
+
+| Tool | Bob Shell CLI | Bob IDE |
+|---|---|---|
+| `save_memory` | available — persists key facts across turns | **not available** |
+| `search_file_content` | available | available |
+| `write_file` | available | available (workspace-constrained) |
 
 ```mermaid
 flowchart LR
@@ -161,7 +199,7 @@ Bob Shell will:
 - Research the topic using `web_fetch`
 - Create `docs/knowledge-base/concepts/gossip-protocol.md`
 - Follow the [`config/templates/concept.md`](../config/templates/concept.md) template
-- Save key facts with `save_memory`
+- Save key facts with `save_memory` *(Bob Shell CLI only)*
 - Append an entry to [`docs/knowledge-base/INDEX.md`](knowledge-base/INDEX.md)
 
 ---
@@ -403,7 +441,7 @@ When an update is requested, Bob Shell performs the following internal sequence:
 
 1. **Reads current document** — fetches the full content of the target file so no existing information is lost
 2. **Applies the change** — integrates the new information into the appropriate section (adds a subsection, extends an existing one, or appends to Key Points)
-3. **Saves updated facts to memory** — calls `save_memory` with the revised key facts, overwriting stale entries
+3. **Saves updated facts to memory** — calls `save_memory` with the revised key facts, overwriting stale entries *(Bob Shell CLI only — Bob IDE skips this step)*
 4. **Re-checks cross-references** — scans the Updated Documents section; if the new information is related to other existing documents, adds or updates the "Related Documents" links
 5. **Updates the `Last Updated` footer** — changes the date stamp at the bottom of the file
 6. **Does not touch INDEX.md** unless the document's title or category changes
@@ -435,7 +473,7 @@ Research today's topics:
 Create appropriate documents for each topic.
 ```
 
-Bob Shell automatically uses `save_memory` to persist important facts.
+Bob Shell CLI automatically uses `save_memory` to persist important facts. *(Bob IDE does not have `save_memory` — all persistence is via `write_file` to `docs/knowledge-base/`.)*
 
 **Review Later**:
 ```
@@ -840,7 +878,7 @@ Links must be relative to the file's own directory. The validator ([`scripts/val
 
 ### 10.3 Memory Management
 
-Enabled by the `save_memory` tool binding in the mode at [`config/custom_modes.yaml:186`](../config/custom_modes.yaml:186). Bob Shell automatically persists key facts:
+Enabled by the `save_memory` tool binding in the mode at [`config/custom_modes.yaml:186`](../config/custom_modes.yaml:186). Bob Shell CLI automatically persists key facts *(Bob Shell CLI only — not available in Bob IDE)*:
 
 - Include context in facts (not just values)
 - Be specific and concise
@@ -906,7 +944,7 @@ The following six scenarios define verifiable success criteria for each major op
 |---|---|
 | **Bob mode** | A named configuration unit in [`config/custom_modes.yaml`](../config/custom_modes.yaml) that binds a system prompt, a tool set, and `customInstructions` to a Bob Shell `--chat-mode` flag. The `knowledge-manager` mode activates the 7-step document creation workflow and all KB-specific tool bindings. |
 | **`search_file_content`** | A Bob Shell built-in tool that performs a regex or substring scan across all files in a specified directory tree. In the knowledge-manager mode it is used during query resolution (Path 2, §4.1) to find documents whose facts were not saved to memory. |
-| **`save_memory`** | A Bob Shell built-in tool that persists a key-value or structured fact into the session's in-context memory store. Facts saved with this tool are automatically recalled on subsequent turns. Used in Step 6 of the document creation workflow ([`config/custom_modes.yaml:195`](../config/custom_modes.yaml:195)) and after every update operation. |
+| **`save_memory`** | A Bob Shell CLI built-in tool that persists a key-value or structured fact into the session's in-context memory store. Facts saved with this tool are automatically recalled on subsequent turns. Used in Step 6 of the document creation workflow ([`config/custom_modes.yaml:195`](../config/custom_modes.yaml:195)) and after every update operation. **Not available in Bob IDE** — use `write_file` to `docs/knowledge-base/` instead. |
 | **INDEX.md** | The canonical document registry at [`docs/knowledge-base/INDEX.md`](knowledge-base/INDEX.md). Contains three sections: Quick Navigation (category links), Recent Additions (reverse-chronological), and All Documents (full enumeration by category). It is the single source of truth for what documents exist in the knowledge base and is updated in Step 7 of every document creation. |
 | **Cross-reference** | A bidirectional relative Markdown link between two documents in the knowledge base. Cross-references appear in each document's "Related Documents" section and are validated by [`scripts/validate-kb.sh`](../scripts/validate-kb.sh). The mode's core principles require bidirectionality ([`config/custom_modes.yaml:185`](../config/custom_modes.yaml:185)): if document A links to document B, document B should link back to document A. |
 | **knowledge-manager workflow** | The 7-step sequence defined at [`config/custom_modes.yaml:191-197`](../config/custom_modes.yaml:191): (1) determine category, (2) select template, (3) apply naming convention, (4) write content, (5) add cross-references, (6) save key facts to memory, (7) update INDEX.md. Every document creation and significant update follows this sequence. |

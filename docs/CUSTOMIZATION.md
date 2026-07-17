@@ -2,12 +2,16 @@
 
 | Attribute     | Value                                                 |
 |---------------|-------------------------------------------------------|
-| Version       | 2.0                                                   |
-| Last Updated  | 2026-07-14                                            |
+| Version       | 2.1                                                   |
+| Last Updated  | 2026-07-16                                            |
 | Standard      | arc42 / Tier-1                                        |
 | Scope         | All supported customization points for mode behaviour, document templates, and KB categories. Documents invariants that must not be changed without breaking the KB contract. |
 | Authors       | Knowledge Manager team                                |
 | Status        | Active                                                |
+
+> **Scope note — Bob Shell CLI:** This document covers Bob Shell CLI customization (`config/custom_modes.yaml` → `~/.bob/custom_modes.yaml`).
+> **Bob IDE users:** group names differ (`execute`/`skill` vs `command`/`browser`), `save_memory` is not available,
+> and workspace modes live in `.bob/custom_modes.yaml`. See [docs/BOB-IDE-GUIDE.md](BOB-IDE-GUIDE.md).
 
 ---
 
@@ -176,7 +180,7 @@ The following is the complete `knowledge-manager` entry from [`config/custom_mod
       ### Core Principles
       1. Structured Organization: Consistent categorization
       2. Cross-Referencing: Bidirectional links between documents
-      3. Memory Persistence: Save key facts using save_memory tool
+      3. Memory Persistence: Save key facts using save_memory tool (Bob Shell CLI only)
       4. Template-Driven: Use standard templates for consistency
       5. Index Maintenance: Keep INDEX.md current
       
@@ -280,7 +284,7 @@ customModes:
       ### Core Principles
       1. Structured Organization: Consistent categorization
       2. Cross-Referencing: Bidirectional links between documents
-      3. Memory Persistence: Save key facts using save_memory tool
+      3. Memory Persistence: Save key facts using save_memory tool (Bob Shell CLI only)
       4. Template-Driven: Use standard templates for consistency
       5. Index Maintenance: Keep INDEX.md current
 

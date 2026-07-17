@@ -1,0 +1,114 @@
+[
+  {
+    "id": 101,
+    "name": "Laptop Pro 15",
+    "category": "Electronics",
+    "price": 1299.99,
+    "stockQuantity": 50,
+    "isActive": true,
+    "salesStats": {
+      "totalSold": 4,
+      "totalRevenue": 5199.96,
+      "uniqueBuyers": 2
+    },
+    "exportedAt": "2026-01-28T11:39:50.112107Z"
+  },
+  {
+    "id": 102,
+    "name": "Wireless Mouse",
+    "category": "Electronics",
+    "price": 29.99,
+    "stockQuantity": 200,
+    "isActive": true,
+    "salesStats": {
+      "totalSold": 2,
+      "totalRevenue": 59.98,
+      "uniqueBuyers": 1
+    },
+    "exportedAt": "2026-01-28T11:39:50.112111Z"
+  },
+  {
+    "id": 103,
+    "name": "USB-C Hub",
+    "category": "Electronics",
+    "price": 49.99,
+    "stockQuantity": 150,
+    "isActive": true,
+    "salesStats": {
+      "totalSold": 0,
+      "totalRevenue": 0,
+      "uniqueBuyers": 0
+    },
+    "exportedAt": "2026-01-28T11:39:50.112114Z"
+  },
+  {
+    "id": 104,
+    "name": "Standing Desk",
+    "category": "Furniture",
+    "price": 599.99,
+    "stockQuantity": 25,
+    "isActive": true,
+    "salesStats": {
+      "totalSold": 5,
+      "totalRevenue": 2999.95,
+      "uniqueBuyers": 3
+    },
+    "exportedAt": "2026-01-28T11:39:50.112116Z"
+  },
+  {
+    "id": 105,
+    "name": "Ergonomic Chair",
+    "category": "Furniture",
+    "price": 399.99,
+    "stockQuantity": 40,
+    "isActive": true,
+    "salesStats": {
+      "totalSold": 2,
+      "totalRevenue": 799.98,
+      "uniqueBuyers": 1
+    },
+    "exportedAt": "2026-01-28T11:39:50.112117Z"
+  },
+  {
+    "id": 106,
+    "name": "Monitor 27\"",
+    "category": "Electronics",
+    "price": 349.99,
+    "stockQuantity": 0,
+    "isActive": false,
+    "salesStats": {
+      "totalSold": 3,
+      "totalRevenue": 1049.97,
+      "uniqueBuyers": 1
+    },
+    "exportedAt": "2026-01-28T11:39:50.112119Z"
+  },
+  {
+    "id": 107,
+    "name": "Keyboard Mechanical",
+    "category": "Electronics",
+    "price": 89.99,
+    "stockQuantity": 75,
+    "isActive": true,
+    "salesStats": {
+      "totalSold": 3,
+      "totalRevenue": 269.97,
+      "uniqueBuyers": 3
+    },
+    "exportedAt": "2026-01-28T11:39:50.112121Z"
+  },
+  {
+    "id": 108,
+    "name": "Webcam HD",
+    "category": "Electronics",
+    "price": 79.99,
+    "stockQuantity": 100,
+    "isActive": true,
+    "salesStats": {
+      "totalSold": 0,
+      "totalRevenue": 0,
+      "uniqueBuyers": 0
+    },
+    "exportedAt": "2026-01-28T11:39:50.112122Z"
+  }
+]
