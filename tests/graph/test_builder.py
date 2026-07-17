@@ -310,3 +310,93 @@ class TestBuildSemantic:
             for e in edges if e.type == "semantic"
         ]
         assert len(semantic) == 0
+
+
+# --------------------------------------------------------------------------- #
+# P4 NodeProps enrichment — builder populates new fields
+# --------------------------------------------------------------------------- #
+
+
+class TestBuilderNodePropsEnrichment:
+    """P4 Sub-Task 3: verify _add_nodes() populates mtime_epoch, content_length,
+    description, and related_refs on each node."""
+
+    def test_builder_populates_mtime_epoch(self, tmp_path):
+        """mtime_epoch is set to the file's actual mtime, not 0.0."""
+        kb = _make_kb(tmp_path)
+        doc = _write_doc(kb, "concepts/a.md", "# A\n\nSome content here.")
+        import time
+        before = time.time() - 1  # slightly before write
+        graph = KnowledgeGraphBuilder(kb).build()
+        props = graph.get_node("concepts/a.md")
+        assert props is not None
+        assert props.mtime_epoch > before, "mtime_epoch must reflect actual file mtime"
+
+    def test_builder_populates_content_length(self, tmp_path):
+        """content_length matches the character count of the file content."""
+        kb = _make_kb(tmp_path)
+        body = "---\ntitle: Alpha\n---\n# Alpha\n\nThis is the body of the document.\n"
+        _write_doc(kb, "concepts/a.md", body)
+        graph = KnowledgeGraphBuilder(kb).build()
+        props = graph.get_node("concepts/a.md")
+        assert props is not None
+        assert props.content_length == len(body)
+
+    def test_builder_populates_description(self, tmp_path):
+        """description is the first non-heading, non-blank line after frontmatter."""
+        kb = _make_kb(tmp_path)
+        content = (
+            "---\ntitle: Guide\n---\n"
+            "\n"
+            "# Guide Title\n"
+            "\n"
+            "This is the introductory paragraph of the guide.\n"
+        )
+        _write_doc(kb, "guides/g.md", content)
+        graph = KnowledgeGraphBuilder(kb).build()
+        props = graph.get_node("guides/g.md")
+        assert props is not None
+        assert props.description == "This is the introductory paragraph of the guide."
+
+    def test_builder_description_truncated_to_200(self, tmp_path):
+        """description is truncated to 200 characters."""
+        kb = _make_kb(tmp_path)
+        long_para = "x" * 300
+        _write_doc(kb, "concepts/a.md", f"# A\n\n{long_para}\n")
+        graph = KnowledgeGraphBuilder(kb).build()
+        props = graph.get_node("concepts/a.md")
+        assert props is not None
+        assert len(props.description) == 200
+
+    def test_builder_description_empty_when_no_body(self, tmp_path):
+        """description is '' when document has no qualifying paragraph."""
+        kb = _make_kb(tmp_path)
+        _write_doc(kb, "concepts/a.md", "# Heading Only\n\n## Section\n\n")
+        graph = KnowledgeGraphBuilder(kb).build()
+        props = graph.get_node("concepts/a.md")
+        assert props is not None
+        assert props.description == ""
+
+    def test_builder_populates_related_refs(self, tmp_path):
+        """related_refs contains the raw related: list from frontmatter."""
+        kb = _make_kb(tmp_path)
+        _write_doc(kb, "concepts/a.md", (
+            "---\ntitle: A\nrelated:\n"
+            "  - ../guides/setup.md\n"
+            "  - ../research/notes.md\n"
+            "---\n# A\n\nBody.\n"
+        ))
+        graph = KnowledgeGraphBuilder(kb).build()
+        props = graph.get_node("concepts/a.md")
+        assert props is not None
+        assert "../guides/setup.md" in props.related_refs
+        assert "../research/notes.md" in props.related_refs
+
+    def test_builder_related_refs_empty_when_no_frontmatter_related(self, tmp_path):
+        """related_refs is [] when the document has no related: list."""
+        kb = _make_kb(tmp_path)
+        _write_doc(kb, "concepts/a.md", "---\ntitle: A\n---\n# A\n\nBody.\n")
+        graph = KnowledgeGraphBuilder(kb).build()
+        props = graph.get_node("concepts/a.md")
+        assert props is not None
+        assert props.related_refs == []

@@ -315,6 +315,7 @@ class KnowledgeGraphBuilder:
         """Add all KB documents as nodes, populating props from frontmatter."""
         for md_file in self._walk_kb():
             doc_id = str(md_file.relative_to(self._kb_path))
+            content = ""
             try:
                 content = md_file.read_text(encoding="utf-8")
                 fm = _parse_frontmatter(content)
@@ -322,14 +323,23 @@ class KnowledgeGraphBuilder:
                 fm = {}
 
             category = doc_id.split("/")[0] if "/" in doc_id else ""
+            try:
+                mtime_epoch = md_file.stat().st_mtime
+            except OSError:
+                mtime_epoch = 0.0
+
             graph.add_node(
                 doc_id,
-                title=fm.get("title", _extract_h1(content if "content" in dir() else "")),
+                title=fm.get("title", _extract_h1(content)),
                 category=category,
                 tags=fm.get("tags", []),
                 date=fm.get("date", ""),
                 type=fm.get("type", ""),
                 status=fm.get("status", ""),
+                mtime_epoch=mtime_epoch,
+                content_length=len(content),
+                description=_extract_description(content),
+                related_refs=fm.get("related", []),
             )
 
     def _walk_kb(self):
@@ -353,6 +363,39 @@ def _extract_h1(content: str) -> str:
         if line.startswith("# "):
             return line[2:].strip()
     return "Untitled"
+
+
+def _extract_description(content: str) -> str:
+    """Extract the first non-heading, non-blank paragraph from *content*.
+
+    Strips the YAML frontmatter block first, then skips blank lines and lines
+    that start with ``#``.  Returns the first non-empty paragraph truncated to
+    200 characters.  Returns ``""`` if nothing qualifies.
+
+    Args:
+        content: Raw Markdown document text.
+
+    Returns:
+        A short description string (≤ 200 chars) or ``""``.
+    """
+    # Strip frontmatter
+    text = _FRONTMATTER_RE.sub("", content, count=1)
+
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue  # blank line
+        if stripped.startswith("#"):
+            continue  # heading
+        if stripped.startswith("|"):
+            continue  # table row
+        if stripped.startswith("```") or stripped.startswith("~~~"):
+            continue  # code fence
+        if stripped.startswith(">"):
+            continue  # blockquote preamble
+        # First qualifying line
+        return stripped[:200]
+    return ""
 
 
 def build_graph_metadata(

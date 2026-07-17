@@ -29,6 +29,12 @@ class NodeProps:
 
     All fields are optional so callers can add nodes with partial metadata.
     Defaults ensure the graph is always traversable even on partial data.
+
+    P4 additions (backward-compatible — old ``kb-graph.json`` files load cleanly):
+        mtime_epoch: File modification time as a Unix epoch float (0.0 = unknown).
+        content_length: Document character count (0 = unknown).
+        description: First non-heading paragraph, ≤ 200 chars (empty = none found).
+        related_refs: Raw ``related:`` list from frontmatter (strings, not resolved).
     """
 
     title: str = "Untitled"
@@ -37,6 +43,11 @@ class NodeProps:
     date: str = ""
     type: str = ""
     status: str = ""
+    # P4 fields — all optional with safe defaults
+    mtime_epoch: float = 0.0
+    content_length: int = 0
+    description: str = ""
+    related_refs: List[str] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -46,6 +57,10 @@ class NodeProps:
             "date": self.date,
             "type": self.type,
             "status": self.status,
+            "mtime_epoch": self.mtime_epoch,
+            "content_length": self.content_length,
+            "description": self.description,
+            "related_refs": self.related_refs,
         }
 
     @classmethod
@@ -57,6 +72,10 @@ class NodeProps:
             date=d.get("date", ""),
             type=d.get("type", ""),
             status=d.get("status", ""),
+            mtime_epoch=float(d.get("mtime_epoch", 0.0)),
+            content_length=int(d.get("content_length", 0)),
+            description=d.get("description", ""),
+            related_refs=d.get("related_refs", []),
         )
 
 

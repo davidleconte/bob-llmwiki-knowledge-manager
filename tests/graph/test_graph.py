@@ -50,6 +50,40 @@ class TestNodeProps:
         assert NodeProps.from_dict(n.to_dict()) == n
 
 
+    def test_new_fields_have_safe_defaults(self):
+        """P4: mtime_epoch, content_length, description, related_refs default correctly."""
+        n = NodeProps()
+        assert n.mtime_epoch == 0.0
+        assert n.content_length == 0
+        assert n.description == ""
+        assert n.related_refs == []
+
+    def test_new_fields_roundtrip(self):
+        """P4: NodeProps.to_dict() / from_dict() preserves all four new fields."""
+        n = NodeProps(
+            title="Test Doc",
+            mtime_epoch=1721222400.0,
+            content_length=1234,
+            description="A first paragraph about caching.",
+            related_refs=["../guides/setup.md", "../concepts/other.md"],
+        )
+        restored = NodeProps.from_dict(n.to_dict())
+        assert restored.mtime_epoch == pytest.approx(1721222400.0)
+        assert restored.content_length == 1234
+        assert restored.description == "A first paragraph about caching."
+        assert restored.related_refs == ["../guides/setup.md", "../concepts/other.md"]
+
+    def test_old_json_missing_new_fields_loads_cleanly(self):
+        """P4: from_dict() on old JSON without P4 keys returns safe defaults."""
+        old_json = {"title": "Old Doc", "category": "concepts", "tags": [], "date": "", "type": "", "status": ""}
+        n = NodeProps.from_dict(old_json)
+        assert n.mtime_epoch == 0.0
+        assert n.content_length == 0
+        assert n.description == ""
+        assert n.related_refs == []
+
+
+
 # --------------------------------------------------------------------------- #
 # Edge
 # --------------------------------------------------------------------------- #
