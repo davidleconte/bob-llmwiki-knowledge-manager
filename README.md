@@ -246,6 +246,25 @@ remain available when you switch back.
 The Python system (`src/`) is **independent** — it works without a KB, and the KB works without it.
 Install once with `pip install -e ".[dev,monitoring]"`, then use whichever mode fits your workflow.
 
+### How `bob-optimize` works inside Bob Shell and Bob IDE
+
+`bob-optimize` is a **pre-processing step** — it compresses text before it reaches the LLM, saving
+input tokens. It is not a chat interface; it does not send anything to an LLM. Both Bob Shell CLI and
+Bob IDE can call it, but the experience differs:
+
+| Interface | Integration | What you do |
+|-----------|------------|------------|
+| **Bob Shell CLI** | ✅ **Transparent — automatic** | Nothing. The `knowledge-manager` mode runs `bob-optimize` as a background subprocess when assembling KB context. You ask a question; Bob answers; compression happened invisibly. |
+| **Bob Shell CLI** | ✅ On demand in the chat | Type *"Compress this text: …"* — Bob calls `bob-optimize optimize -` via its `command` tool and returns the compressed text. |
+| **Bob IDE chat** | ✅ Via Python library | Type *"Use TokenOptimizer to compress: …"* — Bob runs `from src.facade import TokenOptimizer` in the workspace Python environment. More reliable than the CLI path in IDE. |
+| **Bob IDE chat** | ⚠️ Via CLI | Works only if the `.venv/` is activated in the IDE's shell context. Falls back silently if unavailable — KB retrieval is never blocked. |
+
+**In Bob Shell CLI you never need to type a `bob-optimize` command.** If it is in `PATH`, the mode
+applies it automatically. If it is absent, the mode skips it silently and KB retrieval continues
+unchanged.
+
+---
+
 ### Example A — Compress a prompt before sending to an LLM (CLI, zero code)
 
 ```bash
@@ -293,15 +312,30 @@ r3 = optimizer.optimize("Give me the architecture summary for the auth module.")
 **Benefit:** Identical or near-identical prompts across a long session are served from cache at
 <1 ms (L1) or <100 ms (L2) — the optimizer runs once, not on every repeated question.
 
+> **Bob IDE tip:** ask Bob directly — *"Use TokenOptimizer to compress this text: …"* — and Bob
+> will execute this code in the workspace Python environment and return the compressed result.
+
 ---
 
-### Example C — Compress KB context before injecting it into a prompt (shell script / Bob mode)
+### Example C — KB context compression: automatic in Bob Shell CLI, on-demand in Bob IDE
 
-When the KB Manager retrieves context (e.g. 3 documents totalling 600 tokens), you can compress
-it before it reaches the LLM, saving ~20% of that input budget:
+**Bob Shell CLI — nothing to do.** The `knowledge-manager` mode already runs this pattern as a
+background subprocess whenever it assembles KB context for injection. Install `bob-optimize` once;
+the mode handles the rest transparently.
+
+**Bob IDE — ask Bob directly in the chat:**
+
+```text
+Compress this KB context before I use it in a prompt:
+<paste the text you retrieved from the knowledge base>
+```
+
+Bob IDE will execute `TokenOptimizer().optimize(...)` in the workspace and return the compressed
+text, ready to paste.
+
+**When scripting it yourself** (e.g. in a pipeline or pre-commit hook):
 
 ```bash
-# Retrieve KB context however you prefer, then compress before injecting
 KB_CONTEXT=$(cat docs/knowledge-base/concepts/multi-level-caching.md)
 
 compressed=$(echo "$KB_CONTEXT" | bob-optimize optimize - --json \
@@ -312,10 +346,9 @@ compressed=$(echo "$KB_CONTEXT" | bob-optimize optimize - --json \
 CONTEXT_TO_INJECT="${compressed:-$KB_CONTEXT}"
 ```
 
-**Benefit:** KB retrieval is never blocked (the fallback keeps working if `bob-optimize` is absent),
-and every token saved on context injection is a token saved on LLM input cost. The
-`knowledge-manager` mode applies this pattern automatically when `bob-optimize` is in `PATH`
-(see [INTEGRATIONS.md §4](INTEGRATIONS.md#4-kb-manager--opt-in-context-compression-p1-3)).
+**Benefit:** ~20% token reduction on retrieved context (manifest-backed). KB retrieval is never
+blocked — the `${compressed:-$KB_CONTEXT}` fallback ensures silence on failure.
+(Full contract: [INTEGRATIONS.md §4](INTEGRATIONS.md#4-kb-manager--opt-in-context-compression-p1-3))
 
 ---
 
