@@ -197,12 +197,13 @@ jobs:
             benchmarks-${{ runner.os }}-
       - name: Run benchmarks (autosave + guarded regression compare)
         # First run has no baseline — just snapshot. Later runs fail if the median
-        # regresses >25% vs the most recent saved run (generous; CI runners are
-        # noisy). Phase 3 can tighten this once a stable baseline exists.
+        # regresses >50% vs the most recent saved run. 50% tolerates the 2–5× noise
+        # of GitHub Actions ubuntu-latest (2-vCPU shared VM) while still catching
+        # genuine regressions (e.g. an accidental O(n²) loop or a broken cache path).
         run: |
           if ls .benchmarks/*/*.json >/dev/null 2>&1; then
             uv run pytest tests/performance/ --benchmark-only --benchmark-autosave \
-              --benchmark-compare --benchmark-compare-fail=median:25%
+              --benchmark-compare --benchmark-compare-fail=median:50%
           else
             echo "No benchmark baseline yet — establishing first snapshot."
             uv run pytest tests/performance/ --benchmark-only --benchmark-autosave
