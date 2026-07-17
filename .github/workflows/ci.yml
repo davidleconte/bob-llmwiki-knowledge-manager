@@ -44,22 +44,24 @@ jobs:
       - name: Install (locked from uv.lock — test matrix)
         # uv sync --frozen installs the exact versions pinned in uv.lock, making
         # builds reproducible. The uv.lock is verified in-sync by the sbom job
-        # (uv lock --check). Replaces the floating ">=" pip install (supply-chain fix).
+        # (uv lock --check). All subsequent steps use `uv run` so they execute
+        # inside the managed venv rather than against the system Python.
+        # Replaces the floating ">=" pip install (supply-chain fix).
         run: uv sync --frozen --extra dev --extra monitoring
       - name: Pre-warm tiktoken cache
         # encoding_for_model downloads the BPE vocab on a cold cache; the
         # TokenCounter constructor only catches (ImportError, KeyError), not a
         # network error — so warm it once to keep the tests hermetic.
-        run: python -c "import tiktoken; tiktoken.encoding_for_model('gpt-4')"
+        run: uv run python -c "import tiktoken; tiktoken.encoding_for_model('gpt-4')"
       - name: Run tests with coverage gate
         # --cov enforces fail_under from [tool.coverage.report]; plain pytest does not.
-        run: pytest --cov=src --cov-report=json:coverage.json --cov-report=term-missing
+        run: uv run pytest --cov=src --cov-report=json:coverage.json --cov-report=term-missing
       - name: Enforce per-package coverage floors
-        run: python scripts/check_coverage_by_package.py coverage.json
+        run: uv run python scripts/check_coverage_by_package.py coverage.json
       - name: Enforce status/coverage "one home per value" consistency
         # Fails if a live status doc cites a coverage gate that disagrees with
         # pyproject fail_under, or reintroduces a retracted maturity claim.
-        run: python scripts/check_status_consistency.py
+        run: uv run python scripts/check_status_consistency.py
 
   lint:
     name: lint + format (ruff)
@@ -118,7 +120,7 @@ jobs:
         # mypy + the runtime deps it needs to resolve types are in the dev extra.
         run: uv sync --frozen --extra dev --extra monitoring
       - name: Run mypy (config + scope in pyproject [tool.mypy])
-        run: mypy
+        run: uv run mypy
 
   e2e:
     name: e2e (RUN_E2E_TESTS)
@@ -134,13 +136,13 @@ jobs:
       - name: Install (locked from uv.lock — e2e)
         run: uv sync --frozen --extra dev --extra monitoring
       - name: Pre-warm tiktoken cache
-        run: python -c "import tiktoken; tiktoken.encoding_for_model('gpt-4')"
+        run: uv run python -c "import tiktoken; tiktoken.encoding_for_model('gpt-4')"
       - name: Run end-to-end suite behind the flag
         # These e2e tests use tiktoken for real token counting; they do NOT call a
         # live LLM API, so no secrets are required.
         env:
           RUN_E2E_TESTS: "1"
-        run: pytest tests/e2e/ -v
+        run: uv run pytest tests/e2e/ -v
 
   validation:
     name: validation (manifest-backed savings)
@@ -156,13 +158,13 @@ jobs:
       - name: Install (locked from uv.lock — validation)
         run: uv sync --frozen --extra dev --extra monitoring
       - name: Pre-warm tiktoken cache
-        run: python -c "import tiktoken; tiktoken.encoding_for_model('gpt-4')"
+        run: uv run python -c "import tiktoken; tiktoken.encoding_for_model('gpt-4')"
       - name: Run manifest-backed validation harness
         # The exit code encodes the honest gates: the null test passes (optimizer
         # savings on shuffled input < threshold), the manifest is complete, and
         # tiktoken counting is active. It deliberately does NOT gate on savings
         # MAGNITUDE -- gating a measurement would re-incentivise fabrication.
-        run: python -m src.validation --corpus repo --out "$RUNNER_TEMP/validation"
+        run: uv run python -m src.validation --corpus repo --out "$RUNNER_TEMP/validation"
       - name: Upload validation report + manifest
         if: always()
         uses: actions/upload-artifact@v4
@@ -185,7 +187,7 @@ jobs:
       - name: Install (locked from uv.lock — benchmarks)
         run: uv sync --frozen --extra dev --extra monitoring
       - name: Pre-warm tiktoken cache
-        run: python -c "import tiktoken; tiktoken.encoding_for_model('gpt-4')"
+        run: uv run python -c "import tiktoken; tiktoken.encoding_for_model('gpt-4')"
       - name: Restore benchmark baseline
         uses: actions/cache@v4
         with:
@@ -199,11 +201,11 @@ jobs:
         # noisy). Phase 3 can tighten this once a stable baseline exists.
         run: |
           if ls .benchmarks/*/*.json >/dev/null 2>&1; then
-            pytest tests/performance/ --benchmark-only --benchmark-autosave \
+            uv run pytest tests/performance/ --benchmark-only --benchmark-autosave \
               --benchmark-compare --benchmark-compare-fail=median:25%
           else
             echo "No benchmark baseline yet — establishing first snapshot."
-            pytest tests/performance/ --benchmark-only --benchmark-autosave
+            uv run pytest tests/performance/ --benchmark-only --benchmark-autosave
           fi
 
   sbom:
