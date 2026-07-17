@@ -44,6 +44,11 @@ dev = [
 monitoring = [
     "psutil>=5.9.0",
 ]
+# Apple Neural Engine MiniLM backend — macOS + Apple Silicon only.
+# Safe to omit: EmbeddingGenerator silently falls back to "hashing" when absent.
+mlx = [
+    "mlx-embeddings>=0.1",
+]
 
 [project.scripts]
 # Unified CLI over the TokenOptimizer facade (src/cli.py). Also runnable as

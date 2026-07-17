@@ -7,25 +7,95 @@ vector, regardless of corpus history or which instance produced it. (A prior
 TF-IDF implementation refit on every newly-seen text, making embeddings drift
 with the corpus -- see C-5.)
 
-For production, can be extended to use:
-- OpenAI embeddings
-- Sentence transformers
-- Custom embedding models
+An optional MiniLM-L6-v2 backend (384-dim, Apple Neural Engine) is available
+via ``backend="minilm"``.  It requires the ``mlx-embeddings`` package (install
+with ``pip install -e ".[mlx]"``).  When the package is absent the constructor
+silently falls back to the ``"hashing"`` backend so CI and non-Apple platforms
+are unaffected.
 """
 
-from typing import Dict, List
+from __future__ import annotations
+
+from typing import Dict, List, Literal
 
 import numpy as np
 from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 
-class EmbeddingGenerator:
-    """Generate deterministic embeddings for text using a HashingVectorizer.
+# ---------------------------------------------------------------------------
+# MiniLM lazy singleton — loaded once on first use, never on import.
+# ---------------------------------------------------------------------------
 
-    This is a lightweight, stateless implementation suitable for semantic
-    caching. For production use with large corpora, consider using pre-trained
-    embedding models.
+_minilm_model = None  # type: ignore[var-annotated]
+_minilm_available: bool | None = None  # None = not yet checked
+
+
+def _try_load_minilm() -> bool:
+    """Attempt to import and warm-up the MiniLM model.
+
+    Returns True if the model is ready, False if the dependency is missing.
+    Sets the module-level ``_minilm_model`` and ``_minilm_available`` globals.
+    """
+    global _minilm_model, _minilm_available
+    if _minilm_available is not None:
+        return _minilm_available
+    try:
+        import mlx_embeddings  # noqa: F401 – checked below
+
+        # Apple MLX models are loaded via a model ID string.
+        from mlx_embeddings import load  # type: ignore[import]
+
+        _minilm_model = load("sentence-transformers/all-MiniLM-L6-v2")
+        _minilm_available = True
+    except (ImportError, Exception):  # ImportError or model-load failure
+        _minilm_available = False
+    return _minilm_available  # type: ignore[return-value]
+
+
+def _embed_minilm(text: str) -> np.ndarray:
+    """Encode *text* with MiniLM-L6-v2 via Apple MLX.
+
+    Returns a normalised float32 vector of shape ``(384,)``.
+    """
+    from mlx_embeddings import embed  # type: ignore[import]
+
+    result = embed([text], _minilm_model)
+    # mlx_embeddings returns an mlx.core.array; convert to numpy float32.
+    vec: np.ndarray = np.array(result[0], dtype=np.float32)
+    norm = np.linalg.norm(vec)
+    if norm > 1e-9:
+        vec = vec / norm
+    return vec
+
+
+# ---------------------------------------------------------------------------
+# EmbeddingGenerator
+# ---------------------------------------------------------------------------
+
+_Backend = Literal["hashing", "minilm"]
+
+_HASHING_DIM = 1000
+_MINILM_DIM = 384
+
+
+class EmbeddingGenerator:
+    """Generate deterministic embeddings for text.
+
+    By default (``backend="hashing"``) uses a stateless, fixed-dimension
+    ``HashingVectorizer`` which is lightweight, CPU-only, and requires no extra
+    dependencies.
+
+    When ``backend="minilm"`` is requested *and* ``mlx-embeddings`` is
+    installed, the generator uses ``sentence-transformers/all-MiniLM-L6-v2``
+    via Apple MLX (384-dim, Apple Neural Engine, ~2–4 ms/call warm).  If
+    ``mlx-embeddings`` is not installed the constructor emits a warning and
+    silently falls back to ``"hashing"``.
+
+    The two backends are **not interchangeable**: their output dimensionality
+    differs (1000 vs 384).  Callers that persist vectors on disk (e.g.
+    ``PersistentEmbeddingIndex``) detect a dimension mismatch on load and
+    trigger a full rebuild automatically.
 
     Note: the fixed hashing feature space means distinct short texts can collide
     to the same vector. Exact-match correctness therefore does not rely on the
@@ -38,31 +108,78 @@ class EmbeddingGenerator:
         embeddings_cache: Cache of generated embeddings
     """
 
-    def __init__(self, max_features: int = 1000, max_corpus_size: int = 1000):
-        """Initialize embedding generator.
+    def __init__(
+        self,
+        max_features: int = _HASHING_DIM,
+        max_corpus_size: int = 1000,
+        backend: _Backend = "hashing",
+    ):
+        """Initialise the embedding generator.
 
         Args:
-            max_features: Embedding dimensionality (fixed hashing feature space)
+            max_features: Embedding dimensionality for the *hashing* backend.
+                Ignored when ``backend="minilm"`` (dimensionality is fixed at
+                384 by the model).
             max_corpus_size: Maximum tracked corpus size before LRU eviction.
                 The corpus is bookkeeping only (used for logging / drift
                 monitoring); it no longer influences the embedding.
+            backend: ``"hashing"`` (default) or ``"minilm"``.  When
+                ``"minilm"`` is requested but ``mlx-embeddings`` is absent the
+                generator warns and falls back to ``"hashing"``.
         """
-        self.max_features = max_features
         self.max_corpus_size = max_corpus_size
-        # Stateless + fixed-dimension: no fit, no vocabulary, so transform() is
-        # a pure function of the input text. This is what makes embeddings
-        # deterministic and reproducible across corpus growth and instances.
-        self.vectorizer = HashingVectorizer(
-            n_features=max_features,
-            ngram_range=(1, 2),
-            norm="l2",
-            alternate_sign=False,
-            stop_words="english",
-        )
+
+        # Resolve the backend — fall back gracefully if mlx is missing.
+        resolved_backend: _Backend = backend
+        if backend == "minilm" and not _try_load_minilm():
+            import warnings
+
+            warnings.warn(
+                "mlx-embeddings is not installed or failed to load; "
+                "falling back to 'hashing' backend.  "
+                "Install with: pip install -e '[mlx]'",
+                stacklevel=2,
+            )
+            resolved_backend = "hashing"
+
+        self._backend: _Backend = resolved_backend
+
+        if self._backend == "hashing":
+            self.max_features = max_features
+            # Stateless + fixed-dimension: no fit, no vocabulary, so
+            # transform() is a pure function of the input text.  This is what
+            # makes embeddings deterministic and reproducible across corpus
+            # growth and instances.
+            self.vectorizer = HashingVectorizer(
+                n_features=max_features,
+                ngram_range=(1, 2),
+                norm="l2",
+                alternate_sign=False,
+                stop_words="english",
+            )
+        else:
+            # MiniLM: model is already loaded by _try_load_minilm().
+            self.max_features = _MINILM_DIM
+            self.vectorizer = None  # type: ignore[assignment]
+
         self.corpus: List[str] = []
         self.embeddings_cache: Dict[str, np.ndarray] = {}
-        # No fitting is required for a HashingVectorizer; always "ready".
+        # No fitting is required for HashingVectorizer or MiniLM; always ready.
         self._fitted = True
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+
+    @property
+    def embedding_dim(self) -> int:
+        """Output dimensionality of the current backend.
+
+        Returns:
+            384 for ``"minilm"``, ``max_features`` (default 1000) for
+            ``"hashing"``.
+        """
+        return _MINILM_DIM if self._backend == "minilm" else self.max_features
 
     def fit(self, texts: List[str]) -> None:
         """Record texts into the tracked corpus.
@@ -83,34 +200,36 @@ class EmbeddingGenerator:
         self._fitted = True
 
     def generate(self, text: str, use_cache: bool = True) -> np.ndarray:
-        """Generate a deterministic embedding for text.
+        """Generate a deterministic embedding for *text*.
 
         Args:
             text: Text to generate embedding for
             use_cache: Whether to use cached embeddings
 
         Returns:
-            Numpy array embedding vector of length ``max_features``
+            Numpy array embedding vector of length ``embedding_dim``
         """
         # Handle empty or whitespace-only text: fixed-dimension zero vector.
         if not text or not text.strip():
-            return np.zeros(self.max_features)
+            return np.zeros(self.embedding_dim)
 
         # Check cache first
         if use_cache and text in self.embeddings_cache:
             return self.embeddings_cache[text]
 
-        # Track corpus membership for logging / drift bookkeeping only. This no
-        # longer affects the embedding (the vectorizer is stateless), so it does
-        # NOT reintroduce the corpus-dependent drift that C-5 fixed.
+        # Track corpus membership for logging / drift bookkeeping only.
         if text not in self.corpus:
             if len(self.corpus) >= self.max_corpus_size:
                 removed_text = self.corpus.pop(0)
                 self.embeddings_cache.pop(removed_text, None)
             self.corpus.append(text)
 
-        # Pure transform: identical text -> identical vector, always.
-        embedding = self.vectorizer.transform([text]).toarray()[0]
+        # Produce the embedding via the resolved backend.
+        if self._backend == "minilm":
+            embedding = _embed_minilm(text)
+        else:
+            # Pure transform: identical text -> identical vector, always.
+            embedding = self.vectorizer.transform([text]).toarray()[0]
 
         # Cache if requested
         if use_cache:
@@ -129,6 +248,9 @@ class EmbeddingGenerator:
         """
         if not self._fitted:
             self.fit(texts)
+
+        if self._backend == "minilm":
+            return [self.generate(t, use_cache=False) for t in texts]
 
         embeddings = self.vectorizer.transform(texts).toarray()
         return [embeddings[i] for i in range(len(texts))]
