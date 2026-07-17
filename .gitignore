@@ -55,3 +55,4 @@ docs/knowledge-base/.DS_Store
 
 # Generated reports (delegation demo output)
 reports/
+.bob/kb-index/
