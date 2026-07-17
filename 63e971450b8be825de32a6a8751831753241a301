@@ -1,0 +1,1 @@
+{"id":"08aa4aeb-1bbe-450c-9164-b2c8b98054be","fileUri":"file:///Users/david.leconte/Projects/bob-llmwiki-knowledge-manager/src/embeddings/chunker.py","repoName":"davidleconte/bob-llmwiki-knowledge-manager","branchName":"fix-multilevel-cache-race","toolName":"apply_diff","startLine":174,"endLine":175,"taskId":null,"createdAt":1784325760165}
