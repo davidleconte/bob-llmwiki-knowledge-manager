@@ -171,11 +171,8 @@ class MarkdownChunker:
         ``"<section_slug>-table"`` (``"-table-2"``, ``"-table-3"`` for
         subsequent tables in the same section).
         """
-        tables = _TABLE_RE.findall(body)
-        if not tables:
-            return
-
-        # Re-find as full match objects to get the actual multi-line blocks.
+        # Use finditer directly — findall with a capturing group returns only the
+        # last captured repetition per match (AF-3 fix).
         for i, match in enumerate(_TABLE_RE.finditer(body)):
             table_text = match.group(0).strip()
             if len(table_text) < self._min_chars:
