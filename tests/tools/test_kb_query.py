@@ -335,3 +335,97 @@ class TestMainCLI:
         monkeypatch.setattr(sys, "argv", ["kb", "--kb-path", "/no/such/kb/dir", "stats"])
         with pytest.raises(SystemExit):
             main()
+
+
+# --------------------------------------------------------------------------- #
+# Embedding scorer (P1-1 / ADR-014)
+# --------------------------------------------------------------------------- #
+
+
+class TestEmbeddingScorer:
+    """Tests for the hybrid keyword + embedding scoring path."""
+
+    def test_embedding_weight_zero_uses_keyword_only(self, tmp_path):
+        """Default weight=0.0: no EmbeddingGenerator import, keyword scorer unchanged."""
+        from src.cache.embeddings import EmbeddingGenerator
+
+        _make_kb(tmp_path)
+        (tmp_path / "concepts" / "cache.md").write_text(
+            "# Cache Design\n\nThis document covers cache eviction strategies.\n"
+        )
+        # Provide an embedder but leave weight at 0 — embedding must NOT be called.
+        embedder = EmbeddingGenerator()
+        kb = KnowledgeBaseQuery(str(tmp_path), embedder=embedder, embedding_weight=0.0)
+        result = kb.query("cache eviction")
+        assert result["total_results"] == 1
+        # score must equal pure keyword score (>0 because word matches exist)
+        assert result["results"][0]["score"] > 0
+        # embeddings_cache must be empty: the embedding path was not entered
+        assert embedder.cache_size() == 0
+
+    def test_embedding_weight_nonzero_blends_scores(self, tmp_path):
+        """Weight=0.5: result is a blend; score > 0; embedder was called."""
+        from src.cache.embeddings import EmbeddingGenerator
+
+        _make_kb(tmp_path)
+        body = "# Token Optimization\n\nReducing token counts with caching and compression.\n"
+        (tmp_path / "concepts" / "tokens.md").write_text(body)
+        embedder = EmbeddingGenerator()
+        kb = KnowledgeBaseQuery(str(tmp_path), embedder=embedder, embedding_weight=0.5)
+        result = kb.query("token caching")
+        assert result["total_results"] == 1
+        assert result["results"][0]["score"] > 0
+        # The query "token caching" embedding was cached (use_cache=True for queries)
+        assert embedder.cache_size() >= 1
+
+    def test_embedder_uses_cache_false_for_documents(self, tmp_path):
+        """Document content must NOT be cached (AF-5 memory safety / ADR-014)."""
+        from unittest.mock import MagicMock, patch
+
+        from src.cache.embeddings import EmbeddingGenerator
+
+        _make_kb(tmp_path)
+        doc_content = "# Memory Safety\n\nDocument content that is large and unique.\n"
+        (tmp_path / "concepts" / "memory.md").write_text(doc_content)
+        embedder = EmbeddingGenerator()
+        kb = KnowledgeBaseQuery(str(tmp_path), embedder=embedder, embedding_weight=0.3)
+
+        # Spy on generate() calls to assert use_cache=False for doc content
+        original_generate = embedder.generate
+        calls = []
+
+        def spy_generate(text, use_cache=True):
+            calls.append((text[:50], use_cache))
+            return original_generate(text, use_cache=use_cache)
+
+        with patch.object(embedder, "generate", side_effect=spy_generate):
+            kb.query("memory large document")
+
+        # Exactly two generate() calls per matching document:
+        #   1) query text        → use_cache=True
+        #   2) document content  → use_cache=False  (AF-5 guard)
+        doc_calls = [(txt, cached) for txt, cached in calls if cached is False]
+        assert len(doc_calls) >= 1, "Document embedding must use use_cache=False"
+        query_calls = [(txt, cached) for txt, cached in calls if cached is True]
+        assert len(query_calls) >= 1, "Query embedding should use use_cache=True"
+
+    def test_invalid_embedding_weight_raises(self, tmp_path):
+        """Constructor rejects weight outside [0.0, 1.0]."""
+        from src.cache.embeddings import EmbeddingGenerator
+
+        kb_root = _make_kb(tmp_path)
+        embedder = EmbeddingGenerator()
+        with pytest.raises(ValueError, match="embedding_weight"):
+            KnowledgeBaseQuery(str(kb_root), embedder=embedder, embedding_weight=1.5)
+        with pytest.raises(ValueError, match="embedding_weight"):
+            KnowledgeBaseQuery(str(kb_root), embedder=embedder, embedding_weight=-0.1)
+
+    def test_no_embedder_with_nonzero_weight_uses_keyword_only(self, tmp_path):
+        """embedder=None + embedding_weight=0.5: falls back to keyword (no crash)."""
+        _make_kb(tmp_path)
+        (tmp_path / "concepts" / "x.md").write_text("# Alpha\n\nalpha keyword content\n")
+        # No embedder — weight is non-zero but should be ignored
+        kb = KnowledgeBaseQuery(str(tmp_path), embedding_weight=0.5)
+        result = kb.query("keyword")
+        assert result["total_results"] == 1
+        assert result["results"][0]["score"] > 0

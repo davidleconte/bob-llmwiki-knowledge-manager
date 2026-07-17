@@ -454,3 +454,101 @@ class TestMultiLevelCacheTTL:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+
+
+# --------------------------------------------------------------------------- #
+# P2-3 — Optional L3 (PersistentEmbeddingIndex) integration
+# --------------------------------------------------------------------------- #
+
+
+class TestMultiLevelCacheL3:
+    """L3 optional persistent index (P2-3 / ADR-015 §Decision 4).
+
+    L3 is a **document-reference** namespace, strictly separate from the
+    prompt-response namespace of get()/set().  All L3 access goes through
+    query_l3() which returns (doc_id, score) tuples, never response strings.
+    """
+
+    def test_query_l3_returns_doc_id_and_score(self, tmp_path):
+        """query_l3() returns (doc_id, score) for a matching document."""
+        from src.cache.embeddings import EmbeddingGenerator
+        from src.embeddings.index import PersistentEmbeddingIndex
+
+        embedder = EmbeddingGenerator()
+        idx = PersistentEmbeddingIndex(embedder, tmp_path / "l3-index")
+        idx.index_document("concepts/caching.md", "# Caching\n\nMulti-level strategy L1 L2.")
+        idx.flush()
+
+        cache = MultiLevelCache(l3_index=idx)
+        result = cache.query_l3("multi level cache strategy")
+        # L3 should find "concepts/caching.md" as the top result
+        assert result is not None
+        doc_id, score = result
+        assert doc_id == "concepts/caching.md"
+        assert 0.0 <= score <= 1.0
+        assert cache.l3_hits == 1
+        assert cache.l1_hits == 0
+        assert cache.l2_hits == 0
+
+    def test_get_never_returns_doc_id(self, tmp_path):
+        """get() stays in the prompt-response namespace — never returns a doc_id."""
+        from src.cache.embeddings import EmbeddingGenerator
+        from src.embeddings.index import PersistentEmbeddingIndex
+
+        embedder = EmbeddingGenerator()
+        idx = PersistentEmbeddingIndex(embedder, tmp_path / "l3-index")
+        idx.index_document("concepts/doc.md", "# Doc\n\ncontent")
+        idx.flush()
+
+        cache = MultiLevelCache(l3_index=idx)
+        # get() on a key not in L1/L2 must return None, never a doc_id path
+        result = cache.get("concepts/doc.md query")
+        assert result is None
+        assert cache.misses == 1
+        assert cache.l3_hits == 0
+
+    def test_get_l1_hit_unaffected_by_l3(self, tmp_path):
+        """L1 hit path is unchanged when an L3 index is wired."""
+        from src.cache.embeddings import EmbeddingGenerator
+        from src.embeddings.index import PersistentEmbeddingIndex
+
+        embedder = EmbeddingGenerator()
+        idx = PersistentEmbeddingIndex(embedder, tmp_path / "l3-index")
+        idx.index_document("concepts/doc.md", "# Doc\n\ncontent")
+        idx.flush()
+
+        cache = MultiLevelCache(l3_index=idx)
+        cache.set("exact query", "cached response")
+
+        result = cache.get("exact query")
+        assert result == "cached response"  # prompt response, not a doc_id
+        assert cache.l1_hits == 1
+        assert cache.l3_hits == 0
+
+    def test_no_l3_index_no_regression(self):
+        """Default construction (no L3) behaves identically to pre-P2-3."""
+        cache = MultiLevelCache()
+        assert cache.l3_index is None
+        cache.set("key", "value")
+        assert cache.get("key") == "value"
+        assert cache.l3_hits == 0
+        assert cache.query_l3("key") is None
+
+    def test_clear_resets_l3_hits_not_index(self, tmp_path):
+        """clear() resets l3_hits counter but does NOT clear the disk index."""
+        from src.cache.embeddings import EmbeddingGenerator
+        from src.embeddings.index import PersistentEmbeddingIndex
+
+        embedder = EmbeddingGenerator()
+        idx = PersistentEmbeddingIndex(embedder, tmp_path / "l3-index")
+        idx.index_document("guides/g.md", "# Guide\n\nguide content")
+        idx.flush()
+
+        cache = MultiLevelCache(l3_index=idx)
+        cache.query_l3("guide content")  # explicit L3 query
+        assert cache.l3_hits == 1
+
+        cache.clear()
+        assert cache.l3_hits == 0
+        # Index still intact after clear
+        assert idx.doc_count == 1

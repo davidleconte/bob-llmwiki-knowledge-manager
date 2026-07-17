@@ -1,10 +1,19 @@
-"""Multi-level cache combining L1 (exact) and L2 (semantic) caches with version support.
+"""Multi-level cache combining L1 (exact), L2 (semantic), and optional L3 (persistent).
 
-This module implements a two-level caching strategy:
+This module implements a three-level caching strategy:
 - L1: ExactCache for fast exact matches (<1ms)
 - L2: SemanticCache for semantic similarity matches (<100ms)
+- L3: Optional PersistentEmbeddingIndex (P2-3, ADR-015) — survives process restarts
 
 L2 hits are promoted to L1 for future fast access.
+L3 hits are **not** promoted to L2 (separate namespaces per ADR-015 §Decision 4).
+
+Type contract:
+- ``get()`` / ``set()`` operate on the **prompt-response** namespace (L1+L2 only).
+  They always return a cached *response* string or ``None`` — never a document path.
+- ``query_l3()`` operates on the **document-reference** namespace (L3 only).
+  It returns a ``(doc_id, score)`` tuple or ``None``.  Callers must not mix the
+  two APIs — see ADR-015 §Decision 4 and the L3 type-contract note in INTEGRATIONS.md.
 
 Target metrics:
 - Overall lookup latency: <100ms
@@ -14,7 +23,10 @@ Target metrics:
 """
 
 import time
-from typing import Any, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+
+if TYPE_CHECKING:
+    from src.embeddings.index import PersistentEmbeddingIndex
 
 from src.cache.base import CacheInterface
 from src.cache.exact_cache import ExactCache
@@ -53,6 +65,7 @@ class MultiLevelCache(CacheInterface):
         l2_enabled: bool = True,
         version_support_enabled: bool = True,
         max_versions: int = 5,
+        l3_index: Optional["PersistentEmbeddingIndex"] = None,
     ):
         """Initialize multi-level cache.
 
@@ -90,6 +103,9 @@ class MultiLevelCache(CacheInterface):
         self.promote_l2_hits = promote_l2_hits
         self.l1_enabled = l1_enabled
         self.l2_enabled = l2_enabled
+        # L3: optional persistent index (ADR-015 §P2-3). Not promoted to L2.
+        self.l3_index: Optional["PersistentEmbeddingIndex"] = l3_index
+        self.l3_hits = 0
 
         # Initialize monitoring
         self._logger = get_logger("cache.multi_level")
@@ -113,14 +129,18 @@ class MultiLevelCache(CacheInterface):
         )
 
     def get(self, key: str, version: Optional[str] = None) -> Optional[str]:
-        """Retrieve cached response, trying L1 then L2.
+        """Retrieve cached *response*, trying L1 then L2.
+
+        This method is strictly in the **prompt-response** namespace.  It never
+        touches L3.  Use :meth:`query_l3` to search the persistent document index.
 
         Args:
             key: The cache key (prompt)
             version: Optional version (defaults to current VERSION)
 
         Returns:
-            Cached response if found in L1 or L2, None otherwise
+            Cached response string if found in L1 or L2, ``None`` otherwise.
+            The returned value is always a prompt *response*, never a document path.
         """
         start_time = time.time()
 
@@ -173,7 +193,7 @@ class MultiLevelCache(CacheInterface):
             )
             return result
 
-        # Cache miss
+        # Cache miss (L3 is a separate namespace — use query_l3() for doc search)
         self.misses += 1
         latency_ms = (time.time() - start_time) * 1000
         self._lookup_times.append(time.time() - start_time)
@@ -182,6 +202,40 @@ class MultiLevelCache(CacheInterface):
             "multi_level_miss", version=version or self.VERSION, latency_ms=latency_ms
         )
         return None
+
+    def query_l3(self, query: str, top_k: int = 1) -> Optional[Tuple[str, float]]:
+        """Search the L3 persistent document index.
+
+        This method is strictly in the **document-reference** namespace — entirely
+        separate from the prompt-response namespace of :meth:`get` / :meth:`set`.
+        It returns a ``(doc_id, score)`` pair, **not** a cached response string.
+
+        Returns ``None`` if no L3 index is wired or no results meet the index
+        threshold.  Increments ``l3_hits`` on a successful match.
+
+        Args:
+            query: Free-text query to search the persistent index.
+            top_k: Maximum number of results to retrieve from the index.
+                   Only the best result is returned; ``top_k`` controls the
+                   internal search breadth.
+
+        Returns:
+            ``(doc_id, score)`` for the best match, or ``None`` if no L3 index
+            is attached or the search returns no results.
+        """
+        if self.l3_index is None:
+            return None
+        results = self.l3_index.search(query, top_k=top_k)
+        if not results:
+            return None
+        doc_id, score = results[0]
+        self.l3_hits += 1
+        self._logger.debug(
+            "multi_level_hit",
+            cache_level="L3",
+            score=round(score, 3),
+        )
+        return doc_id, score
 
     def set(
         self,
@@ -205,11 +259,12 @@ class MultiLevelCache(CacheInterface):
             self.l2_cache.set(key, value, version, metadata)
 
     def clear(self) -> None:
-        """Clear both L1 and L2 caches."""
+        """Clear L1 and L2 caches (L3 index is NOT cleared — disk-backed)."""
         self.l1_cache.clear()
         self.l2_cache.clear()
         self.l1_hits = 0
         self.l2_hits = 0
+        self.l3_hits = 0
         self.misses = 0
         self._lookup_times.clear()
 
