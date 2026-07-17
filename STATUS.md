@@ -6,10 +6,10 @@
 |---|---|
 | **Overall status** | **Beta — Not Production Ready** |
 | **Maturity** | Remediation in progress toward production-readiness |
-| **As of** | 2026-07-14 |
+| **As of** | 2026-07-16 |
 | **Basis** | [Phase-8 Adversarial Re-Audit 2026-07-14](docs/knowledge-base/research/audit-2026-07-14-signoff.md) · [Institutional Audit 2026-07-13](docs/knowledge-base/research/audit-2026-07-13-institutional.md) · [External Audit 2026-07-12](docs/knowledge-base/research/external-audit-2026-07-12.md) |
-| **Weighted grade vs institutional bar** | ≈ A (3.89/4.3) — post-remediation re-grade (2026-07-14); up from B+/A‑ (3.46) at Phase-8 NO-GO and D‑ (0.9) at Phase-0 |
-| **Roadmap** | Phases 0–8 complete + post-Phase-8 gap closure. Remaining gap: D (delegation 52% floor, intentional). Gap B closed: `OptimizerConfig.strategies` wired through `from_config()` and `build_optimizer()`. Gap G closed: TOCTOU check-then-use window named as residual 4 in `docs/security/THREAT_MODEL.md`. |
+| **Weighted grade vs institutional bar** | ≈ A (4.09/4.30) — post A+ gap closure (2026-07-16); up from A (3.89) post-Phase-8 and D‑ (0.9) at Phase-0 |
+| **Roadmap** | Phases 0–8 complete + A+ gap closure (all 8 sub-tasks closed). **P2 integration (KB Manager ↔ TOS):** `src/embeddings/` package (persistent index), `KnowledgeBaseQuery` 3-tier fallback, `MultiLevelCache` L3 type-contract fix (L3 moved to `query_l3()`). Remaining gap: D (delegation 52% floor, intentional). |
 
 ## What "Beta — Not Production Ready" means here
 

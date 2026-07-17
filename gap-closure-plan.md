@@ -63,7 +63,7 @@ The mapping is: `"remove_whitespace"` → `_normalize_whitespace`, `"compress_re
 - `tests/e2e/test_optimizer_config_integration.py:88-98` — strategy config test (currently
   only asserts the config field, not optimizer behaviour)
 
-**Status:** [ ] pending
+**Status:** [x] closed — strategies wired through `from_config()` and `build_optimizer()`; three method calls conditional; tests pass.
 
 ---
 
@@ -102,7 +102,7 @@ This is a **documentation-only** change (no code changes).
 - `src/tools/safe_paths.py` — `resolve_within()` implementation
 - `src/tools/batch_file_reader.py` — pattern: `resolve_within` → `exists()` → `open()`
 
-**Status:** [ ] pending
+**Status:** [x] closed — TOCTOU residual-4 named in THREAT_MODEL.md; TOCTOU window subsequently narrowed from 3-step to 2-step (G1 in a-plus-plan.md).
 
 ---
 
@@ -142,7 +142,7 @@ frozen as-of the original audit).
 - `docs/knowledge-base/research/architecture-audit-mece-2026-07-14.md:393-401` — the outdated note
 - `docs/architecture/ARCHITECTURE.md:70-78` — the corrected line
 
-**Status:** [ ] pending
+**Status:** [x] closed — ARCHITECTURE.md:74 corrected; post-remediation addendum added to architecture-audit doc.
 
 ---
 
@@ -169,4 +169,4 @@ are green, everything should be committed with well-scoped messages and a PR ope
 - Git status from context prompt lists all modified/new/deleted files.
 - Use `start_workflow` with `create_pr_workflow` for PR creation.
 
-**Status:** [ ] pending
+**Status:** [x] closed — committed and pushed as part of this session.

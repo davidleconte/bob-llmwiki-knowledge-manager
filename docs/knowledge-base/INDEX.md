@@ -3,7 +3,7 @@
 > ⚠️ **Metrics correction (2026-07-14).** Earlier drafts of this document cited fabricated token-savings/quality figures — "68.96%", "89.3%", "91.80%" — produced by a simulation that never invoked the optimizer. **Those figures are retracted.** The honest, measured figure is **~20% mean optimizer compression** on real prose (manifest-backed: `evaluation/results/validation-2026-07-14/`; see `STATUS.md` and `CHANGELOG.md`). Inline numbers below have been corrected where they appeared.
 
 
-Last Updated: 2026-07-14
+Last Updated: 2026-07-16
 
 ## Quick Navigation
 - [Concepts](./concepts/) - Core concepts and definitions
@@ -12,6 +12,11 @@ Last Updated: 2026-07-14
 - [Research](./research/) - Research notes and findings
 
 ## Recent Additions
+- 2026-07-16: [KB Query Scorer A/B Validation](./research/kb-query-ab-validation-2026-07.md) - Research ⭐ NEW — embedding-only p@3=0.88 vs keyword p@3=0.64; recommends w=0.7 for KBIndexer
+- 2026-07-16: [Multi-Level Caching Architecture Patterns](./concepts/multi-level-caching-architecture-patterns.md) - Concept ⭐ NEW
+- 2026-07-14: [KB-TOS Integration Roadmap (P0/P1/P2)](./guides/kb-tos-integration-roadmap.md) - Guide ⭐ NEW
+- 2026-07-14: [KB Manager ↔ TOS Integration Feasibility Study](./research/kb-tos-integration-feasibility-2026-07-14.md) - Research ⭐ NEW
+- 2026-07-14: [KB-TOS Shared Embedding Layer](./concepts/kb-tos-embedding-layer.md) - Concept ⭐ NEW
 - 2026-07-14: [Post-Remediation Full Audit](./research/audit-2026-07-14-post-remediation.md) - Research ⭐ NEW
 - 2026-07-14: [Full Codebase & Documentation Review](./research/full-codebase-review-2026-07-14.md) - Research
 - 2026-07-14: [Dual System Use Case Example](./guides/dual-system-use-case-example.md) - Guide ⭐ NEW
@@ -55,11 +60,14 @@ Last Updated: 2026-07-14
 ## All Documents
 
 ### Concepts
+- [Multi-Level Caching Architecture Patterns](./concepts/multi-level-caching-architecture-patterns.md) - Comprehensive guide to cache hierarchy patterns: L1/L2/L3 organization, cache-aside/read-through/write-through/write-back patterns, LRU/LFU/FIFO eviction policies, cache coherence, performance characteristics, distributed caching, with examples from CPU caches to CDN to application caches ⭐ NEW
+- [KB-TOS Shared Embedding Layer](./concepts/kb-tos-embedding-layer.md) - Proposed shared infrastructure (`src/embeddings/`) enabling persistent, disk-backed semantic search for both the KB Manager and Token Optimizer. Target architecture for P2. Includes `PersistentEmbeddingIndex`, `FileBackedVectorStore`, `KBIndexer`, and optional L3 cache design. Status: Proposed.
 - [Multi-Level Caching](./concepts/multi-level-caching.md) - Hierarchical caching strategy combining L1 (exact match) and L2 (semantic similarity) caches with automatic promotion
 - [Token Optimization](./concepts/token-optimization.md) - Systematic approach to reducing LLM token consumption through caching, optimization, and truncation
 - [Dependency Analysis](./concepts/dependency-analysis.md) - Python dependency inventory with security audit and recommendations for dependency management
 
 ### Guides
+- [KB-TOS Integration Roadmap (P0/P1/P2)](./guides/kb-tos-integration-roadmap.md) - Grounded P0/P1/P2 integration roadmap and TOS stability gate checklist. **P0 fully closed** (S1–S5 all done). Only S6 (CHANGELOG promotion) and S7 (git tag v1.0) remain (~20 min). P1 KB query engine upgrade design and P2 persistent embedding index scope intact.
 - [Dual System Use Case Example](./guides/dual-system-use-case-example.md) - Real-world example: Enterprise AI Assistant Platform for 200-person engineering team, 12-month implementation, 90.3% cost savings (468,000 BC/year), 2,340% ROI, detailed month-by-month breakdown showing KB Manager (78% savings) + Token Optimizer (12% savings) working together
 - [Using Both Systems Together](./guides/using-both-systems-together.md) - Comprehensive guide for using Token Optimizer and Knowledge Manager simultaneously: integration patterns, use case analysis, workflow examples, cost-benefit analysis, decision matrix, technical limitations, expected combined savings (60-75% in ideal conditions)
 - [Token Optimizer Quick Install](./guides/token-optimizer-quick-install.md) - Fast 5-minute installation and verification guide for Token Optimization System: 3-step install, CLI usage, quick example, troubleshooting, system requirements
@@ -90,6 +98,7 @@ Last Updated: 2026-07-14
 - [Cache API Reference](./references/cache-api.md) - Complete API documentation for all cache classes, methods, and usage examples
 
 ### Research
+- [KB Manager ↔ TOS Integration Feasibility Study](./research/kb-tos-integration-feasibility-2026-07-14.md) - Architecture study of integrating the KB Manager with the Token Optimization System. Identifies 3 real overlap points, 8 challenges (C1–C8), evaluates 4 integration patterns, applies SOLID principles, and produces a verdict: integrate the embedding layer (P1) now; persistent index (P2) after TOS reaches v1.0.
 - [Bobcoin Savings Analysis 2026-07-14](./research/bobcoin-savings-analysis-2026-07-14.md) - Comprehensive analysis of expected Bobcoin savings from both sub-projects: Token Optimizer (~20% measured compression), KB Manager (40-80% structural savings, workload-dependent), combined savings (60-75% in ideal conditions), honest variance reporting, applicability boundaries, and institutional recommendations
 - [README Critical Analysis 2026-07-14](./research/readme-critical-analysis-2026-07-14.md) - Institutional perspective on root README.md: 70% alignment with audit findings, identifies 4 critical misalignments (prominent unverified anecdote, inflated maturity grade, outdated bug count, missing production blockers), provides detailed recommendations for institutional adoption
 - [Senior Expert Institutional Audit 2026-07-14](./research/senior-expert-institutional-audit-2026-07-14.md) - Expert assessment by Senior Master Principal (LLM-Wiki & Token Management) against Tier 1 institutional standards: C+ grade (2.5/4.0 GPA), 60% production readiness, comprehensive dimension-by-dimension analysis with remediation roadmap

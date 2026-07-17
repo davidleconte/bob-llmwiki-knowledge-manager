@@ -35,6 +35,12 @@ Complete API reference for the Token Optimization System.
 - [research_agent](delegation/agents/research_agent.md) - `delegation/agents/research_agent.py`
 - [security_agent](delegation/agents/security_agent.md) - `delegation/agents/security_agent.py`
 
+## Embeddings
+
+- [index](embeddings/index.md) - `embeddings/index.py`
+- [indexer](embeddings/indexer.md) - `embeddings/indexer.py`
+- [store](embeddings/store.md) - `embeddings/store.py`
+
 ## Monitoring
 
 - [cost_reporting](monitoring/cost_reporting.md) - `monitoring/cost_reporting.py`

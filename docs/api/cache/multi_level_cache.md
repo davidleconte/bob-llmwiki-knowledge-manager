@@ -1,12 +1,21 @@
 # multi_level_cache
 
-Multi-level cache combining L1 (exact) and L2 (semantic) caches with version support.
+Multi-level cache combining L1 (exact), L2 (semantic), and optional L3 (persistent).
 
-This module implements a two-level caching strategy:
+This module implements a three-level caching strategy:
 - L1: ExactCache for fast exact matches (<1ms)
 - L2: SemanticCache for semantic similarity matches (<100ms)
+- L3: Optional PersistentEmbeddingIndex (P2-3, ADR-015) — survives process restarts
 
 L2 hits are promoted to L1 for future fast access.
+L3 hits are **not** promoted to L2 (separate namespaces per ADR-015 §Decision 4).
+
+Type contract:
+- ``get()`` / ``set()`` operate on the **prompt-response** namespace (L1+L2 only).
+  They always return a cached *response* string or ``None`` — never a document path.
+- ``query_l3()`` operates on the **document-reference** namespace (L3 only).
+  It returns a ``(doc_id, score)`` tuple or ``None``.  Callers must not mix the
+  two APIs — see ADR-015 §Decision 4 and the L3 type-contract note in INTEGRATIONS.md.
 
 Target metrics:
 - Overall lookup latency: <100ms
@@ -35,7 +44,7 @@ Attributes:
 
 #### Methods
 
-##### `__init__(l1_max_size: int, l2_max_size: int, similarity_threshold: float, promote_l2_hits: bool, l1_ttl_seconds: Optional[float], l2_ttl_seconds: Optional[float], l1_enabled: bool, l2_enabled: bool, version_support_enabled: bool, max_versions: int)`
+##### `__init__(l1_max_size: int, l2_max_size: int, similarity_threshold: float, promote_l2_hits: bool, l1_ttl_seconds: Optional[float], l2_ttl_seconds: Optional[float], l1_enabled: bool, l2_enabled: bool, version_support_enabled: bool, max_versions: int, l3_index: Optional['PersistentEmbeddingIndex'])`
 
 Initialize multi-level cache.
 
@@ -62,14 +71,40 @@ Args:
 
 ##### `get(key: str, version: Optional[str]) -> Optional[str]`
 
-Retrieve cached response, trying L1 then L2.
+Retrieve cached *response*, trying L1 then L2.
+
+This method is strictly in the **prompt-response** namespace.  It never
+touches L3.  Use :meth:`query_l3` to search the persistent document index.
 
 Args:
     key: The cache key (prompt)
     version: Optional version (defaults to current VERSION)
 
 Returns:
-    Cached response if found in L1 or L2, None otherwise
+    Cached response string if found in L1 or L2, ``None`` otherwise.
+    The returned value is always a prompt *response*, never a document path.
+
+
+##### `query_l3(query: str, top_k: int) -> Optional[Tuple[str, float]]`
+
+Search the L3 persistent document index.
+
+This method is strictly in the **document-reference** namespace — entirely
+separate from the prompt-response namespace of :meth:`get` / :meth:`set`.
+It returns a ``(doc_id, score)`` pair, **not** a cached response string.
+
+Returns ``None`` if no L3 index is wired or no results meet the index
+threshold.  Increments ``l3_hits`` on a successful match.
+
+Args:
+    query: Free-text query to search the persistent index.
+    top_k: Maximum number of results to retrieve from the index.
+           Only the best result is returned; ``top_k`` controls the
+           internal search breadth.
+
+Returns:
+    ``(doc_id, score)`` for the best match, or ``None`` if no L3 index
+    is attached or the search returns no results.
 
 
 ##### `set(key: str, value: str, version: Optional[str], metadata: Optional[Dict[str, Any]]) -> None`
@@ -85,7 +120,7 @@ Args:
 
 ##### `clear() -> None`
 
-Clear both L1 and L2 caches.
+Clear L1 and L2 caches (L3 index is NOT cleared — disk-backed).
 
 
 ##### `size() -> int`
