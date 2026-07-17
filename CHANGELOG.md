@@ -69,10 +69,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-The repository grew a second system alongside the Bash KB manager: a Python
-**token-optimization library** (~3,500 lines) plus the phased audit remediation
-(Phases 0–7) that hardened it. None of this is cut as a release yet — it is
-**Beta, Not Production Ready** (see [`STATUS.md`](STATUS.md)).
+- P1-1: KB query hybrid embedding scorer (ADR-014, `EmbeddingGenerator` injection)
+- P1-3: Opt-in context compression in `knowledge-manager` mode
+
+## [1.0.0-tos] - 2026-07-16
+
+The token-optimization library (`src/`) reaches its first stable release.
+Maturity: **Beta** — all correctness bugs resolved, all fabricated figures
+retracted and replaced with manifest-backed measurements. See [`STATUS.md`](STATUS.md).
 
 ### Added
 - **Token-optimization system** (`src/`): multi-level cache (L1 exact + L2
@@ -133,9 +137,6 @@ The repository grew a second system alongside the Bash KB manager: a Python
   it had passed a security audit with zero incidents — none of which was ever
   implemented. The ADR is kept as audit trail with a retraction banner;
   `docs/security/THREAT_MODEL.md` is now canonical.
-
-### Planned
-- Phase 8 — Sign-off: an independent adversarial re-audit.
 
 ---
 

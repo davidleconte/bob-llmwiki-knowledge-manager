@@ -4,7 +4,7 @@
 
 A native **IBM Bob Shell** implementation of Andrej Karpathy's **LLM-Wiki** pattern, engineered for **Bobcoin economy**.
 
-`MIT licensed` · `Native Bob Shell mode` · `No MCP servers` · `No plugins` · `Pattern: LLM-Wiki (Karpathy)`
+`MIT licensed` · `Native Bob modes` · `No MCP servers` · `No plugins` · `Pattern: LLM-Wiki (Karpathy)` · `Bob Shell CLI` · `Bob IDE`
 
 > **What this is.** Every Bob session re-reads and re-reasons about the same codebase — and pays
 > Bobcoins to do it, again and again. The fix isn't a shorter prompt; it's a **memory**. This project turns
@@ -24,6 +24,15 @@ A native **IBM Bob Shell** implementation of Andrej Karpathy's **LLM-Wiki** patt
 They share a repository but are **not integrated**. The Python system is composed behind a single
 `TokenOptimizer` facade and `bob-optimize` CLI (`python -m src`).
 Architecture: [KB Manager — `docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [Python system — `docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md).
+
+### Supported targets
+
+| Target | Activation | Install step | Skill lazy-load | `save_memory` |
+|--------|-----------|--------------|-----------------|---------------|
+| **Bob Shell CLI** | `bob --chat-mode=knowledge-manager` | `scripts/install.sh` | not supported | available |
+| **Bob IDE** | Mode picker → 📚 Knowledge Manager | none — zero steps | `.bob/skills/knowledge-manager/SKILL.md` | not available (file persistence only) |
+
+> **Bob IDE users:** see [`docs/BOB-IDE-GUIDE.md`](docs/BOB-IDE-GUIDE.md) for the full IDE workflow.
 
 ---
 
@@ -62,7 +71,8 @@ knowledge base maintains itself.
 Bob Shell Knowledge Manager is that pattern, built entirely on Bob's **native** capabilities:
 
 - **📚 `knowledge-manager` mode** — structured KB maintainer: concepts / guides / references / research,
-  consistent templates, bidirectional cross-references, `save_memory`, self-updating `INDEX.md`.
+  consistent templates, bidirectional cross-references, `save_memory` *(Bob Shell CLI only — Bob IDE uses
+  file persistence)*, self-updating `INDEX.md`.
 - **🔍 `repo-analyzer` mode** — 7-phase repository audit that runs analysis *scripts* and files digested
   findings into the KB, instead of dragging raw source through the context window.
 - **The schema layer** — your `AGENTS.md` plus the mode definition *are* Karpathy's third layer: stable
@@ -81,7 +91,7 @@ The savings are **structural** — each IBM token-economy principle has a concre
 | **Catalog tax** | Every MCP server re-sends its full tool catalog every turn | Native Bob mode — **no plugin, no MCP** |
 | **Payload tax** | A 2,000-line file attached when 20 lines matter | `repo-analyzer` runs scripts that **summarise**; the KB stores digested reports you *cite*, not raw source |
 | **Compression trap** | Stripping meaning can backfire and *raise* effective cost | Templates **preserve** meaning — rationale, real names, cross-refs |
-| **Short threads** | Turn 15 re-pays 14 turns of stale history | Knowledge persists in KB files + `save_memory`; a fresh thread **retrieves** |
+| **Short threads** | Turn 15 re-pays 14 turns of stale history | Knowledge persists in KB files + `save_memory` *(Bob Shell CLI)* / file persistence *(Bob IDE)*; a fresh thread **retrieves** |
 | **Let caching work** | Reworded prefixes miss the cache | Fixed mode definition + `AGENTS.md` + KB layout = a **cacheable prefix** |
 | **Trim output** | Verbose narration is paid on every reply | Bounded artifacts: templates, `INDEX.md`, reports — not essays |
 
@@ -122,13 +132,25 @@ Start by analyzing the codebase and suggesting 5 initial documents to create.
 The scripts have already filed digested reports into `docs/knowledge-base/`, so Bob proposes documents
 **grounded in evidence it didn't have to re-read**.
 
-> *Optional:* the `knowledge-manager` mode packages this as a one-liner (`./scripts/install.sh`). Not required.
+> *Optional:* the `knowledge-manager` mode packages this as a one-liner (`./scripts/install.sh`) for Bob Shell CLI,
+> or is available immediately via the mode picker in Bob IDE. Not required.
 
 ## 6. Starting a new session (daily use)
 
 Bob Shell sessions start fresh — the mode does not persist between restarts. After the one-time setup above, every new session takes one step.
 
-### Path A — Wrapper script (recommended)
+### Path E — Bob IDE mode picker
+
+No installation or CLI required. The Knowledge Manager mode is bundled in `.bob/custom_modes.yaml`.
+
+1. Open the workspace in Bob IDE (VS Code / Cursor with the Bob extension).
+2. Click the mode picker in the bottom-left status bar (shows the current mode name).
+3. Scroll to **📚 Knowledge Manager** and select it.
+4. Bob IDE loads `.bob/skills/knowledge-manager/SKILL.md` automatically via the `skill` group.
+
+> **Full reference:** [`docs/BOB-IDE-GUIDE.md`](docs/BOB-IDE-GUIDE.md)
+
+### Path A — Wrapper script (Bob Shell CLI, recommended)
 
 ```bash
 alias kb='~/Projects/bob-llmwiki-knowledge-manager/scripts/start-kb.sh'
@@ -139,14 +161,14 @@ kb ~/Projects/other-project # start in a different project
 
 `start-kb.sh` verifies the KB exists, prints the document count, and launches `bob --chat-mode=knowledge-manager`. Add the alias to `~/.zshrc` for one-word daily activation.
 
-### Path B — Direct CLI flag
+### Path B — Direct CLI flag (Bob Shell CLI)
 
 ```bash
 cd ~/your-project
 bob --chat-mode=knowledge-manager
 ```
 
-### Path C — Switch mode inside an existing session
+### Path C — Switch mode inside an existing Bob Shell session
 
 ```text
 /mode knowledge-manager
@@ -174,7 +196,7 @@ Once activated, open with:
 What did we document most recently? Summarise the KB and suggest what to work on next.
 ```
 
-Bob will scan `INDEX.md` (auto-loaded via `.bob/settings.json`), recall any `save_memory` facts from prior sessions, and propose the next logical documents or updates.
+Bob will scan `INDEX.md` (auto-loaded via `.bob/settings.json`), recall any `save_memory` facts from prior sessions *(Bob Shell CLI only — Bob IDE uses file persistence in `docs/knowledge-base/`)*, and propose the next logical documents or updates.
 
 > **Full reference:** [`docs/USAGE.md §0`](docs/USAGE.md#0-starting-a-session) · [`docs/knowledge-base/guides/activating-knowledge-manager-in-new-session.md`](docs/knowledge-base/guides/activating-knowledge-manager-in-new-session.md)
 
@@ -182,8 +204,11 @@ Bob will scan `INDEX.md` (auto-loaded via `.bob/settings.json`), recall any `sav
 
 **Bob Shell Knowledge Manager (the Bash system):**
 - 2 native Bob modes — `knowledge-manager`, `repo-analyzer`
+  - Bob Shell CLI config: `config/custom_modes.yaml` → installed to `~/.bob/custom_modes.yaml`
+  - Bob IDE config: `.bob/custom_modes.yaml` (workspace-level, zero install)
 - 4 document templates — concept · guide · reference · research
-- Knowledge-base structure with self-maintained `INDEX.md` and `save_memory` integration
+- Knowledge-base structure with self-maintained `INDEX.md` and `save_memory` integration *(Bob Shell CLI; Bob IDE uses file persistence)*
+- Bob IDE lazy-load skill: `.bob/skills/knowledge-manager/SKILL.md` — full templates + cross-reference protocol
 - Core scripts — `install`, `init-project`, `validate-kb`, `export-kb` (Markdown / Obsidian / HTML / PDF)
 - Analysis suite — scan, dependencies, metrics, security, test-coverage, git-history, docs, consolidated report
 - 3 worked example knowledge bases — software project, research project, personal wiki
@@ -276,10 +301,11 @@ Local library and CLI — no network service, no stored credentials, no outbound
 ## 12. Documentation
 
 - **[docs/README.md](docs/README.md)** — Diátaxis navigation hub (tutorials, how-to, reference, explanation)
-- **[docs/QUICK_START.md](docs/QUICK_START.md)** — 5-minute getting started (arc42 Tier-1)
-- **[docs/INSTALLATION.md](docs/INSTALLATION.md)** — detailed installation (arc42 Tier-1)
+- **[docs/BOB-IDE-GUIDE.md](docs/BOB-IDE-GUIDE.md)** — Bob IDE complete reference (activation, tool groups, skill, validation, troubleshooting)
+- **[docs/QUICK_START.md](docs/QUICK_START.md)** — 5-minute getting started — Bob Shell CLI and Bob IDE (arc42 Tier-1)
+- **[docs/INSTALLATION.md](docs/INSTALLATION.md)** — detailed installation — Bob Shell CLI and Bob IDE (arc42 Tier-1)
 - **[docs/USAGE.md](docs/USAGE.md)** — usage guide with workflow diagrams (arc42 Tier-1)
-- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — KB Manager architecture (arc42 v2.0, 13 sections, 8+ diagrams)
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — KB Manager architecture (arc42 v2.1, 13 sections, 8+ diagrams)
 - **[docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md)** — Python token-optimizer architecture (arc42 v3.0, 10 sections, 4 diagrams)
 - **[docs/MONITORING.md](docs/MONITORING.md)** — monitoring & observability (arc42 Tier-1)
 - **[docs/security/THREAT_MODEL.md](docs/security/THREAT_MODEL.md)** — STRIDE threat model

@@ -19,6 +19,8 @@ A lightweight knowledge management framework for Bob Shell that provides structu
 - 4 document templates (concept, guide, reference, research)
 - 4 bash automation scripts
 - Example knowledge bases
+- Bob IDE lazy-load skill (`.bob/skills/knowledge-manager/SKILL.md`)
+- Bob IDE workspace mode config (`.bob/custom_modes.yaml`)
 
 ### 2. Token Optimization System (Week 19-20 Implementation)
 
@@ -57,7 +59,9 @@ A parallel sub-agent framework for repository analysis. **This is a separate sys
 
 ### Bob Shell Knowledge Manager
 
-#### Installation
+#### Bob Shell CLI
+
+##### Installation
 
 ```bash
 # Install the knowledge-manager mode to Bob Shell
@@ -65,7 +69,7 @@ cd ~/Projects/bob-llmwiki-knowledge-manager
 ./scripts/install.sh
 ```
 
-#### Initialize in Your Project
+##### Initialize in Your Project
 
 ```bash
 # Create knowledge base structure in your project
@@ -73,7 +77,7 @@ cd ~/Projects/your-project
 ~/Projects/bob-llmwiki-knowledge-manager/scripts/init-project.sh
 ```
 
-#### Usage
+##### Usage
 
 ```bash
 # Start Bob Shell in knowledge-manager mode
@@ -86,12 +90,57 @@ bob --chat-mode=knowledge-manager
 # - "Update [document] with [new information]"
 ```
 
-#### Validate Knowledge Base
+> **Note:** `save_memory` is available in Bob Shell CLI. Bob IDE does not have this tool;
+> use `write_file` to persist knowledge to `docs/knowledge-base/` instead.
+
+##### Validate Knowledge Base
 
 ```bash
 # Validate KB structure and cross-references
 ./scripts/validate-kb.sh
 ```
+
+#### Bob IDE
+
+No install step required. The workspace already contains `.bob/custom_modes.yaml` (with
+the `knowledge-manager` entry) and `.bob/skills/knowledge-manager/SKILL.md` (the
+lazy-load skill). Open this workspace in Bob IDE — the mode is immediately available.
+
+##### Activate the Mode
+
+1. Click the **mode picker** in the bottom-left status bar (or use the command palette).
+2. Scroll to and select **📚 Knowledge Manager**.
+
+##### Load the Skill
+
+The Knowledge Manager skill is lazy-loaded. At the start of a knowledge-management
+session, activate it explicitly:
+
+```
+use_skill("knowledge-manager")
+```
+
+This loads the full document templates, cross-reference protocol, and INDEX.md
+maintenance instructions from `.bob/skills/knowledge-manager/SKILL.md`.
+
+##### Persistence
+
+`save_memory` is **not available** in Bob IDE. Persist all knowledge by writing
+Markdown files directly:
+
+```
+write_file to docs/knowledge-base/<category>/<document>.md
+```
+
+Commit changes to Git to make them durable.
+
+##### Key artefacts
+
+| Artefact | Path | Purpose |
+|---|---|---|
+| Workspace mode config | `.bob/custom_modes.yaml` | Registers `knowledge-manager` mode in Bob IDE |
+| Lazy-load skill | `.bob/skills/knowledge-manager/SKILL.md` | Full templates + cross-reference protocol |
+| Knowledge base root | `docs/knowledge-base/` | All KB documents live here |
 
 ### Token Optimization System
 

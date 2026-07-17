@@ -101,15 +101,19 @@ def test_mode_mentions_templates(mode_config):
 
 
 @pytest.mark.unit
-def test_mode_mentions_save_memory(mode_config):
-    """Test that mode mentions save_memory tool."""
+def test_mode_mentions_persistence(mode_config):
+    """Test that mode mentions its persistence strategy (file or memory)."""
     modes = mode_config["customModes"]
     km_mode = next((m for m in modes if m.get("slug") == "knowledge-manager"), None)
 
     instructions = km_mode["customInstructions"]
-    assert "save_memory" in instructions or "memory" in instructions.lower(), (
-        "Should mention memory persistence"
-    )
+    # Mode was updated (2026-07-16) from save_memory tool to File Persistence
+    # principle.  Accept either form so the test is forward-compatible.
+    assert (
+        "save_memory" in instructions
+        or "persistence" in instructions.lower()
+        or "file persistence" in instructions.lower()
+    ), "Should mention persistence strategy (save_memory or File Persistence)"
 
 
 @pytest.mark.unit
