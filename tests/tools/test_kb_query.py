@@ -492,3 +492,97 @@ class TestGraphScorer:
         with pytest.raises(ValueError, match="graph_weight"):
             KnowledgeBaseQuery(str(kb), graph_weight=1.5)
 
+
+
+# --------------------------------------------------------------------------- #
+# P4 Sub-Task 4 — recency_weight and date_filter
+# --------------------------------------------------------------------------- #
+
+
+class TestRecencyWeight:
+    """P4: recency_weight blends file mtime into result scores."""
+
+    def _kb(self, tmp_path):
+        return _make_kb(tmp_path)
+
+    def test_recency_weight_zero_is_unchanged(self, tmp_path):
+        """recency_weight=0.0 produces identical results to the default."""
+        kb = self._kb(tmp_path)
+        (kb / "concepts" / "caching.md").write_text(
+            "# Caching\n\nMulti-level caching strategy for token optimisation.\n"
+        )
+        baseline = KnowledgeBaseQuery(str(kb)).query("caching")
+        with_recency = KnowledgeBaseQuery(str(kb), recency_weight=0.0).query("caching")
+        for b, r in zip(baseline["results"], with_recency["results"]):
+            assert b["score"] == pytest.approx(r["score"])
+
+    def test_recency_weight_promotes_newer_doc(self, tmp_path):
+        """recency_weight=1.0 ranks the newer of two otherwise-identical docs first."""
+        import os
+        import time
+
+        kb = self._kb(tmp_path)
+        # Write older doc first, touch it to an old timestamp
+        old_doc = kb / "concepts" / "old.md"
+        old_doc.write_text("# Cache\n\nA note about caching strategy.\n")
+        old_time = time.time() - 3600  # 1 hour ago
+        os.utime(old_doc, (old_time, old_time))
+
+        # Write newer doc — has current mtime
+        new_doc = kb / "concepts" / "new.md"
+        new_doc.write_text("# Cache\n\nA note about caching strategy.\n")
+
+        result = KnowledgeBaseQuery(str(kb), recency_weight=1.0).query("caching strategy")
+        files = [r["file"] for r in result["results"]]
+        # "new.md" should outrank "old.md" when recency dominates
+        assert files.index("concepts/new.md") < files.index("concepts/old.md"), (
+            "Newer doc must rank above older doc with recency_weight=1.0"
+        )
+
+    def test_invalid_recency_weight_raises(self, tmp_path):
+        kb = self._kb(tmp_path)
+        with pytest.raises(ValueError, match="recency_weight"):
+            KnowledgeBaseQuery(str(kb), recency_weight=1.5)
+
+
+class TestDateFilter:
+    """P4: date_filter excludes results whose frontmatter date: field doesn't match."""
+
+    def _kb(self, tmp_path):
+        return _make_kb(tmp_path)
+
+    def test_date_filter_excludes_non_matching(self, tmp_path):
+        """A doc with date: 2026-06 is excluded when date_filter='2026-07'."""
+        kb = self._kb(tmp_path)
+        (kb / "research" / "old.md").write_text(
+            "---\ndate: 2026-06-15\n---\n# Old Research\n\nSome research notes here.\n"
+        )
+        (kb / "research" / "new.md").write_text(
+            "---\ndate: 2026-07-10\n---\n# New Research\n\nSome research notes here.\n"
+        )
+        result = KnowledgeBaseQuery(str(kb)).query(
+            "research notes", date_filter="2026-07"
+        )
+        files = [r["file"] for r in result["results"]]
+        assert "research/new.md" in files
+        assert "research/old.md" not in files
+
+    def test_date_filter_none_is_unchanged(self, tmp_path):
+        """date_filter=None returns same results as baseline."""
+        kb = self._kb(tmp_path)
+        (kb / "research" / "a.md").write_text(
+            "---\ndate: 2026-06-01\n---\n# Alpha\n\nAlpha content.\n"
+        )
+        baseline = KnowledgeBaseQuery(str(kb)).query("alpha content")
+        filtered = KnowledgeBaseQuery(str(kb)).query("alpha content", date_filter=None)
+        assert [r["file"] for r in baseline["results"]] == [r["file"] for r in filtered["results"]]
+
+    def test_date_filter_includes_undated_docs(self, tmp_path):
+        """Docs without a date: field are always included (fail-open)."""
+        kb = self._kb(tmp_path)
+        (kb / "concepts" / "no-date.md").write_text(
+            "# No Date\n\nThis document has no frontmatter date field.\n"
+        )
+        result = KnowledgeBaseQuery(str(kb)).query("no date", date_filter="2026-07")
+        files = [r["file"] for r in result["results"]]
+        assert "concepts/no-date.md" in files

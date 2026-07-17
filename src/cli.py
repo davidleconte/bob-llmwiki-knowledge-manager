@@ -114,6 +114,33 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_ghealth.add_argument("--top-k", type=int, default=10, help="Number of hub docs to show")
 
+    # --- KB search command (P4) ---
+    p_kbsearch = sub.add_parser("kb-search", help="Semantic search across the knowledge base")
+    p_kbsearch.add_argument("query", help="Search query")
+    p_kbsearch.add_argument(
+        "--kb-path", default="docs/knowledge-base", help="KB root directory (default: docs/knowledge-base)"
+    )
+    p_kbsearch.add_argument(
+        "--max-results", type=int, default=10, help="Maximum number of results (default: 10)"
+    )
+    p_kbsearch.add_argument(
+        "--recency-weight",
+        type=float,
+        default=0.0,
+        help="Blend weight for recency tiebreaker in [0.0, 1.0] (default: 0.0 = off)",
+    )
+    p_kbsearch.add_argument(
+        "--date-filter",
+        default=None,
+        help="ISO date prefix filter (e.g. '2026-07'); only show matching docs",
+    )
+    p_kbsearch.add_argument(
+        "--categories",
+        nargs="+",
+        default=None,
+        help="Categories to search: concepts guides references research (default: all)",
+    )
+
     return parser
 
 
@@ -242,6 +269,34 @@ def main(argv: Optional[List[str]] = None) -> int:
             },
             as_json,
         )
+
+    elif args.command == "kb-search":
+        from pathlib import Path
+
+        from src.tools.kb_query import KnowledgeBaseQuery
+
+        kbq = KnowledgeBaseQuery(
+            kb_path=args.kb_path,
+            recency_weight=args.recency_weight,
+        )
+        result = kbq.query(
+            args.query,
+            categories=args.categories,
+            max_results=args.max_results,
+            date_filter=args.date_filter,
+        )
+        if as_json:
+            _emit(result, as_json=True)
+        else:
+            results = result.get("results", [])
+            print(f"Query: {args.query}  ({len(results)} results)")
+            for i, r in enumerate(results, 1):
+                print(f"\n{i}. [{r['category']}] {r['title']}")
+                print(f"   file:  {r['file']}")
+                print(f"   score: {r['score']:.2f}  modified: {r.get('last_modified', 'n/a')[:10]}")
+                if "preview" in r:
+                    preview = r["preview"].replace("\n", " ")[:120]
+                    print(f"   {preview}")
 
     return 0
 

@@ -82,6 +82,7 @@ class KnowledgeBaseQuery:
         index: Optional["PersistentEmbeddingIndex"] = None,
         graph: Optional["KnowledgeGraph"] = None,
         graph_weight: float = 0.0,
+        recency_weight: float = 0.0,
     ):
         self.kb_path = Path(kb_path)
         if not self.kb_path.exists():
@@ -93,11 +94,14 @@ class KnowledgeBaseQuery:
             raise ValueError(f"embedding_weight must be in [0.0, 1.0], got {embedding_weight}")
         if graph_weight < 0.0 or graph_weight > 1.0:
             raise ValueError(f"graph_weight must be in [0.0, 1.0], got {graph_weight}")
+        if recency_weight < 0.0 or recency_weight > 1.0:
+            raise ValueError(f"recency_weight must be in [0.0, 1.0], got {recency_weight}")
         self._embedder = embedder
         self._embedding_weight = embedding_weight
         self._index = index  # PersistentEmbeddingIndex | None (P2-2)
         self._graph = graph   # KnowledgeGraph | None (P3)
         self._graph_weight = graph_weight
+        self._recency_weight = recency_weight
 
     def query(
         self,
@@ -105,6 +109,7 @@ class KnowledgeBaseQuery:
         categories: Optional[List[str]] = None,
         max_results: int = 10,
         include_content: bool = False,
+        date_filter: Optional[str] = None,
     ) -> Dict:
         """Query the knowledge base.
 
@@ -122,6 +127,9 @@ class KnowledgeBaseQuery:
             categories: Categories to search (``None`` = all)
             max_results: Maximum number of results
             include_content: Include full content in results
+            date_filter: Optional ISO date prefix (e.g. ``"2026-07"``).  When
+                set, only results whose frontmatter ``date:`` field starts with
+                this string are returned.  ``None`` (default) disables filtering.
 
         Returns:
             Dictionary with search results
@@ -147,6 +155,20 @@ class KnowledgeBaseQuery:
             result["results"] = GraphRanker(self._graph).rerank(
                 result["results"], self._graph_weight
             )
+
+        # --- P4 recency blend (optional, backward-compatible) ---
+        if self._recency_weight > 0.0 and "results" in result and result["results"]:
+            result["results"] = self._apply_recency_blend(
+                result["results"], self._recency_weight
+            )
+
+        # --- P4 date filter (optional, backward-compatible) ---
+        if date_filter is not None and "results" in result:
+            result["results"] = [
+                r for r in result["results"]
+                if _doc_date_matches(r["file"], self.kb_path, date_filter)
+            ]
+            result["total_results"] = len(result["results"])
 
         return result
 
@@ -348,6 +370,45 @@ class KnowledgeBaseQuery:
 
         return score
 
+    def _apply_recency_blend(
+        self, results: List[Dict], weight: float
+    ) -> List[Dict]:
+        """Blend file mtime into result scores (P4 recency tiebreaker).
+
+        Normalises each document's mtime to [0, 1] relative to the newest
+        document in the result set, then blends::
+
+            score = (1 - weight) * base_score + weight * (norm_mtime * 15.0)
+
+        Re-sorts the list descending by blended score.
+
+        Args:
+            results: List of result dicts, each with ``"score"`` and
+                ``"last_modified"`` (ISO datetime string).
+            weight: Blend weight ∈ [0.0, 1.0].
+
+        Returns:
+            The same list with updated ``"score"`` values, re-sorted.
+        """
+        # Parse ISO datetimes to epoch floats
+        epochs = []
+        for r in results:
+            try:
+                epochs.append(datetime.fromisoformat(r["last_modified"]).timestamp())
+            except (KeyError, ValueError):
+                epochs.append(0.0)
+
+        mtime_max = max(epochs) if epochs else 1.0
+        if mtime_max == 0.0:
+            mtime_max = 1.0  # avoid division by zero on all-zero mtimes
+
+        for r, epoch in zip(results, epochs):
+            norm_mtime = epoch / mtime_max
+            r["score"] = (1.0 - weight) * r["score"] + weight * (norm_mtime * 15.0)
+
+        results.sort(key=lambda x: x["score"], reverse=True)
+        return results
+
     def _extract_title(self, content: str) -> str:
         """Extract title from markdown content"""
         lines = content.split("\n")
@@ -539,6 +600,39 @@ class KnowledgeBaseQuery:
             stats["total_lines"] += cat_stats["total_lines"]
 
         return stats
+
+
+# --------------------------------------------------------------------------- #
+# P4 module-level helpers
+# --------------------------------------------------------------------------- #
+
+_DATE_FIELD_RE = re.compile(r"^date:\s*(\S+)", re.MULTILINE)
+
+
+def _doc_date_matches(file_key: str, kb_path: "Path", date_filter: str) -> bool:
+    """Return True if the document's frontmatter ``date:`` field starts with *date_filter*.
+
+    Reads the file from ``kb_path / file_key``.  Returns ``True`` when the
+    ``date:`` field is absent or the file cannot be read (fail-open: don't drop
+    documents we can't inspect).
+
+    Args:
+        file_key: KB-relative path (e.g. ``"research/notes.md"``).
+        kb_path: Path object for the KB root.
+        date_filter: ISO prefix to match against (e.g. ``"2026-07"``).
+
+    Returns:
+        ``True`` if the document matches or cannot be determined.
+    """
+    try:
+        content = (kb_path / file_key).read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return True  # fail-open: include if unreadable
+
+    m = _DATE_FIELD_RE.search(content)
+    if m is None:
+        return True  # no date field: include (don't silently drop undated docs)
+    return m.group(1).startswith(date_filter)
 
 
 def main():
