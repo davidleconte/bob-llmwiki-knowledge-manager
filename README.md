@@ -241,7 +241,89 @@ remain available when you switch back.
 - Truncation — smart budget-fit strategies (lossy; reported separately from compression)
 - Structured monitoring — JSON logging, metrics, health checks, cost tracking
 
-## 8. How it compares
+## 8. Using the Token Optimization System
+
+The Python system (`src/`) is **independent** — it works without a KB, and the KB works without it.
+Install once with `pip install -e ".[dev,monitoring]"`, then use whichever mode fits your workflow.
+
+### Example A — Compress a prompt before sending to an LLM (CLI, zero code)
+
+```bash
+# Shorten a long prompt by ~20%, near-losslessly, directly from the shell
+echo "Your verbose system prompt here..." | bob-optimize optimize -
+
+# Machine-readable output — get compressed text and token counts as JSON
+echo "Your verbose system prompt here..." | bob-optimize optimize - --json
+# → {"optimized_text": "...", "compression_ratio": 0.80,
+#    "token_count_before": 450, "token_count_after": 360}
+
+# Compress a file in-place (preview — prints to stdout, does not overwrite)
+bob-optimize optimize path/to/my-prompt.txt
+```
+
+**Benefit:** ~20% fewer tokens on every LLM call that uses this prompt, at no quality cost
+(whitespace and redundant-phrase removal only). Manifest-backed at
+[`evaluation/results/validation-2026-07-14/`](evaluation/results/validation-2026-07-14/).
+
+---
+
+### Example B — Reuse results across sessions with the cache (Python library)
+
+```python
+from src.facade import TokenOptimizer
+
+optimizer = TokenOptimizer()           # L1 exact cache + L2 semantic cache wired automatically
+
+# First call: optimizer runs, result is cached in L1
+r1 = optimizer.optimize("Summarise the authentication module architecture.")
+print(r1["optimized_text"])            # compressed text
+print(r1["compression_ratio"])         # e.g. 0.80 → ~20% smaller (manifest: evaluation/results/validation-2026-07-14/)
+print(r1["token_count_before"])        # tokens in original
+print(r1["token_count_after"])         # tokens after compression
+
+# Second call with the same prompt: L1 cache hit — optimizer does NOT run
+r2 = optimizer.optimize("Summarise the authentication module architecture.")
+# r2["optimized_text"] == r1["optimized_text"], returned in <1 ms
+
+# Semantically similar prompt: L2 semantic cache hit — still no recompute
+r3 = optimizer.optimize("Give me the architecture summary for the auth module.")
+# L2 hit if cosine similarity ≥ 0.85 against the cached prompt embedding
+```
+
+**Benefit:** Identical or near-identical prompts across a long session are served from cache at
+<1 ms (L1) or <100 ms (L2) — the optimizer runs once, not on every repeated question.
+
+---
+
+### Example C — Compress KB context before injecting it into a prompt (shell script / Bob mode)
+
+When the KB Manager retrieves context (e.g. 3 documents totalling 600 tokens), you can compress
+it before it reaches the LLM, saving ~20% of that input budget:
+
+```bash
+# Retrieve KB context however you prefer, then compress before injecting
+KB_CONTEXT=$(cat docs/knowledge-base/concepts/multi-level-caching.md)
+
+compressed=$(echo "$KB_CONTEXT" | bob-optimize optimize - --json \
+  | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['optimized_text'])" \
+  2>/dev/null)
+
+# Fallback: if bob-optimize is unavailable, use original context unchanged
+CONTEXT_TO_INJECT="${compressed:-$KB_CONTEXT}"
+```
+
+**Benefit:** KB retrieval is never blocked (the fallback keeps working if `bob-optimize` is absent),
+and every token saved on context injection is a token saved on LLM input cost. The
+`knowledge-manager` mode applies this pattern automatically when `bob-optimize` is in `PATH`
+(see [INTEGRATIONS.md §4](INTEGRATIONS.md#4-kb-manager--opt-in-context-compression-p1-3)).
+
+---
+
+> Full API reference, CLI flags, and integration patterns: **[INTEGRATIONS.md](INTEGRATIONS.md)**
+
+---
+
+## 9. How it compares
 
 | | **Karpathy's LLM-Wiki** | **nvk/llm-wiki** | **Bob Shell KM** |
 |---|---|---|---|
@@ -254,7 +336,7 @@ remain available when you switch back.
 | **Production** | Concept | Production | **Beta** |
 | **Reach for it when…** | You want the idea | You want a research hub in Claude Code | **You live in Bob Shell and optimise Bobcoins** |
 
-## 9. Token savings — measured, manifest-backed
+## 10. Token savings — measured, manifest-backed
 
 The optimizer savings below are **measured** over a real corpus and carry a reproducibility manifest.
 Reproduce with `python -m src.validation`; CI re-runs it on every push.
@@ -268,7 +350,7 @@ Reproduce with `python -m src.validation`; CI re-runs it on every push.
   headline is genuine compression, not a measurement artifact.
 
 
-## 10. Maturity and current status
+## 11. Maturity and current status
 
 **Current grade: A (4.09 / 4.30) against institutional Tier-1 vendor standard.**
 Trajectory: D− (0.9) → B+/A− (3.46) → A− (3.70) → A (3.89) → **A (4.09)** across Phases 0–8 + gap-closure sessions.
@@ -305,7 +387,7 @@ Authoritative status: [`STATUS.md`](STATUS.md).
 **Not claimed:** Enterprise SLAs, production support, guaranteed savings percentages,
 automated multi-agent research, or Windows compatibility.
 
-## 11. Security
+## 12. Security
 
 Local library and CLI — no network service, no stored credentials, no outbound traffic
 (except optional tiktoken BPE vocab download on first use).
@@ -316,7 +398,7 @@ Local library and CLI — no network service, no stored credentials, no outbound
 - **In CI:** bandit SAST (medium+, blocking) · CycloneDX SBOM · `pip-audit` (blocking, 0 CVEs) ·
   Dependabot · path-traversal containment in `src/tools/` verified end-to-end.
 
-## 12. Documentation
+## 13. Documentation
 
 - **[docs/README.md](docs/README.md)** — Diátaxis navigation hub (tutorials, how-to, reference, explanation)
 - **[docs/BOB-IDE-GUIDE.md](docs/BOB-IDE-GUIDE.md)** — Bob IDE complete reference (activation, tool groups, skill, validation, troubleshooting)
