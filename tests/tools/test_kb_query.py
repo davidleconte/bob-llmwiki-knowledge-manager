@@ -380,7 +380,7 @@ class TestEmbeddingScorer:
 
     def test_embedder_uses_cache_false_for_documents(self, tmp_path):
         """Document content must NOT be cached (AF-5 memory safety / ADR-014)."""
-        from unittest.mock import MagicMock, patch
+        from unittest.mock import patch
 
         from src.cache.embeddings import EmbeddingGenerator
 

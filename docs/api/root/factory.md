@@ -30,6 +30,11 @@ Build a :class:`PromptOptimizer` from an :class:`OptimizerConfig`.
 :meth:`PromptOptimizer.from_config`. ``cache`` lets the facade share its
 config-built L1 so ``config.cache.l1`` governs the optimize() cache.
 
+Note: L2 (semantic) cache is intentionally *not* shared with the optimizer —
+an L2 hit could return a different prompt's optimized text (wrong content).
+The optimizer uses L1 exact matching only; see the ``TokenOptimizer`` facade
+module docstring for the full ``config.cache.l2*`` scoping explanation.
+
 
 ### `build_truncator() -> Truncator`
 

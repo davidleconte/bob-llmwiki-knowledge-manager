@@ -72,9 +72,7 @@ class KnowledgeBaseQuery:
         self.categories = ["concepts", "guides", "references", "research"]
 
         if embedding_weight < 0.0 or embedding_weight > 1.0:
-            raise ValueError(
-                f"embedding_weight must be in [0.0, 1.0], got {embedding_weight}"
-            )
+            raise ValueError(f"embedding_weight must be in [0.0, 1.0], got {embedding_weight}")
         self._embedder = embedder
         self._embedding_weight = embedding_weight
         self._index = index  # PersistentEmbeddingIndex | None (P2-2)
@@ -217,9 +215,7 @@ class KnowledgeBaseQuery:
                 "title": self._extract_title(content),
                 "score": blended,
                 "matches": self._find_matches(query, content),
-                "last_modified": datetime.fromtimestamp(
-                    md_file.stat().st_mtime
-                ).isoformat(),
+                "last_modified": datetime.fromtimestamp(md_file.stat().st_mtime).isoformat(),
             }
             if include_content:
                 result["content"] = content

@@ -57,6 +57,11 @@ def build_optimizer(
     ``target_reduction``/``min_quality_score``/``strategies`` map 1:1 via
     :meth:`PromptOptimizer.from_config`. ``cache`` lets the facade share its
     config-built L1 so ``config.cache.l1`` governs the optimize() cache.
+
+    Note: L2 (semantic) cache is intentionally *not* shared with the optimizer —
+    an L2 hit could return a different prompt's optimized text (wrong content).
+    The optimizer uses L1 exact matching only; see the ``TokenOptimizer`` facade
+    module docstring for the full ``config.cache.l2*`` scoping explanation.
     """
     return PromptOptimizer.from_config(
         config, model=model, use_cache=use_cache, track_costs=track_costs, cache=cache

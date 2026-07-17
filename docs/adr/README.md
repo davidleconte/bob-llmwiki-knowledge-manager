@@ -32,6 +32,11 @@ Architecture Decision Records document important architectural decisions made du
 - Rationale: Config flows to runtime; single home for config→constructor mapping; shared L1 cache; health checks wired
 - Status: ✅ Accepted
 
+**[016: No TruncationConfig — truncation defaults hard-wired in factory](016-truncation-no-config.md)**
+- Decision: No `TruncationConfig` section in `ConfigSchema`; `build_truncator()` uses hard-wired defaults
+- Rationale: Truncation is lossy with no acceptance gate; misconfiguration risk exceeds benefit; callers control strategy at call-site
+- Status: ✅ Accepted
+
 **[006: Cache Strategy](006-cache-strategy.md)**
 - Decision: In-memory cache over distributed cache
 - Rationale: Lower latency, simpler implementation

@@ -23,7 +23,8 @@ Target metrics:
 """
 
 import time
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from collections import deque
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 
 if TYPE_CHECKING:
     from src.embeddings.index import PersistentEmbeddingIndex
@@ -115,7 +116,7 @@ class MultiLevelCache(CacheInterface):
         self.l1_hits = 0
         self.l2_hits = 0
         self.misses = 0
-        self._lookup_times: list[float] = []
+        self._lookup_times: deque[float] = deque(maxlen=10_000)
 
         self._logger.info(
             "multi_level_cache_initialized",

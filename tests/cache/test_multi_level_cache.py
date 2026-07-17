@@ -368,25 +368,26 @@ class TestMultiLevelCache:
             assert versioned_key in cache.l2_cache.embeddings
 
     def test_l1_fast_l2_fallback(self):
-        """Test that L1 is tried first, then L2."""
+        """Test that L1 is tried first (hit), then L2 serves as fallback on miss.
+
+        The correctness property is: a key stored via set() is retrievable from
+        L1 directly, and also from L2 after L1 is cleared. Wall-clock ordering
+        (l1_time < l2_time) was inherently flaky on loaded CI runners; removed
+        per the Tier-1 architecture review (D1). Latency targets live in the
+        benchmark suite (tests/performance/).
+        """
         cache = MultiLevelCache()
 
         cache.set("key1", "response1")
 
-        # L1 hit should be faster
-        start = time.time()
-        cache.get("key1")
-        l1_time = time.time() - start
+        # L1 hit: value must be returned directly from L1
+        assert cache.get("key1") == "response1", "L1 should return the stored value"
 
-        # Clear L1, force L2
+        # Clear L1, force L2 fallback path
         cache.l1_cache.clear()
 
-        start = time.time()
-        cache.get("key1")
-        l2_time = time.time() - start
-
-        # L1 should be faster than L2
-        assert l1_time < l2_time
+        # L2 fallback: value must still be returned (L2 has it)
+        assert cache.get("key1") == "response1", "L2 fallback should return the stored value"
 
     def test_unicode_handling(self):
         """Test handling of unicode keys."""

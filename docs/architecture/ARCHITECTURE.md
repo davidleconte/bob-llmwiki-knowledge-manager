@@ -123,14 +123,19 @@ flowchart LR
 `ConfigSchema` (`src/config/schema.py`) bundles three dataclasses; the defaults
 that matter to the architecture:
 
-| Section | Field | Default | Effect |
-|---|---|---|---|
-| `CacheConfig` | `l1_max_size` / `l2_max_size` | 1000 / 10000 | L1/L2 capacity |
-| `CacheConfig` | `l2_similarity_threshold` | 0.85 | L2 semantic-hit floor |
-| `OptimizerConfig` | `max_tokens` | 4096 | output cap (a truncation lever) |
-| `OptimizerConfig` | `target_reduction` | 0.3 | compression target ratio |
-| `OptimizerConfig` | `min_quality_score` | 0.8 | reject over-aggressive optimization |
-| `MonitoringConfig` | `health_check_interval` | 60 | health cadence (seconds) |
+| Section | Field | Default | Effect | Scope |
+|---|---|---|---|---|
+| `CacheConfig` | `l1_max_size` | 1000 | L1 capacity | `optimize()` + `cache.get()` |
+| `CacheConfig` | `l2_max_size` | 10000 | L2 capacity | `cache.get()` only¹ |
+| `CacheConfig` | `l2_similarity_threshold` | 0.85 | L2 semantic-hit floor | `cache.get()` only¹ |
+| `OptimizerConfig` | `max_tokens` | 4096 | output cap (a truncation lever) | `optimize()` |
+| `OptimizerConfig` | `target_reduction` | 0.3 | compression target ratio | `optimize()` |
+| `OptimizerConfig` | `min_quality_score` | 0.8 | reject over-aggressive optimization | `optimize()` |
+| `MonitoringConfig` | `health_check_interval` | 60 | health cadence (seconds) | `health()` |
+
+> ¹ **`l2_*` fields do not affect `optimize()`.** The optimizer uses exact (L1) matching only;
+> an L2 semantic hit could return a *different* prompt's optimized text (wrong content). See
+> `src/facade.py` module docstring and §5 below.
 
 `build_cache` maps every `CacheConfig` field onto the cache constructor;
 `build_optimizer` maps `OptimizerConfig` via `PromptOptimizer.from_config`;

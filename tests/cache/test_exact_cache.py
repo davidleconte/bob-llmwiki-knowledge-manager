@@ -261,23 +261,24 @@ class TestExactCache:
 
     @pytest.mark.slow
     def test_performance_lookup_latency(self):
-        """Test that lookup latency is <1ms (target)."""
+        """Test that L1 cache returns correct values for all 100 entries.
+
+        Latency validation (< 1 ms target) lives in the benchmark suite
+        (tests/performance/) which has a saved baseline and a 25% regression
+        threshold. Wall-clock assertions here were inherently flaky on slow CI
+        runners; removed per the Tier-1 architecture review (D1).
+        """
         cache = ExactCache()
 
         # Fill cache with 100 entries
         for i in range(100):
             cache.set(f"key_{i}", f"response_{i}")
 
-        # Measure lookup time
-        start = time.time()
+        # All 100 entries must be retrievable with correct values
         for i in range(100):
-            cache.get(f"key_{i}")
-        end = time.time()
-
-        avg_latency_ms = ((end - start) / 100) * 1000
-
-        # Should be well under 1ms per lookup
-        assert avg_latency_ms < 1.0, f"Lookup latency {avg_latency_ms}ms exceeds 1ms target"
+            assert cache.get(f"key_{i}") == f"response_{i}", (
+                f"key_{i} returned wrong value from L1 cache"
+            )
 
     def test_hash_collision_handling(self):
         """Test that different keys with same hash are handled correctly."""

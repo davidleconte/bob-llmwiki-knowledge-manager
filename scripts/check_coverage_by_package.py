@@ -45,6 +45,7 @@ import sys
 FLOORS = {
     "src/monitoring": 70.0,
     "src/delegation": 52.0,
+    "src/embeddings": 80.0,  # disk-backed index I/O; floor matches the global gate.
     "src/validation": 85.0,
     "src/tools": 85.0,
 }

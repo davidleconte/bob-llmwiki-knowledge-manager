@@ -5,9 +5,15 @@
 # under evaluation/; it is intentionally separate, and is not installed by CI,
 # by the test suite, or by the package.
 #
+# A pinned lockfile (evaluation/requirements.lock.txt) is generated from this
+# file via: uv pip compile evaluation/requirements.txt --universal -o evaluation/requirements.lock.txt
+# The lockfile is audited by the sbom CI job (pip-audit, continue-on-error).
+# Regenerate after updating version floors here.
+#
 # Adversarial Review Framework Dependencies
-# Install with: pip install -r requirements.txt
-# Or with conda + uv: conda run -n ENV_NAME uv pip install -r requirements.txt
+# Install with: pip install -r evaluation/requirements.lock.txt  (pinned, preferred)
+# Or floating:  pip install -r evaluation/requirements.txt
+# Or with uv:   uv pip install -r evaluation/requirements.lock.txt
 
 # Core data analysis
 pandas>=3.0.0

@@ -59,9 +59,9 @@ class KBIndexer:
         total = self._index.rebuild(self._kb_path)
         elapsed_ms = (time.perf_counter() - t0) * 1000
         logger.info(
-            "kb_indexer_sync_complete",
-            total_docs=total,
-            elapsed_ms=round(elapsed_ms, 1),
+            "kb_indexer_sync_complete total_docs=%d elapsed_ms=%.1f",
+            total,
+            elapsed_ms,
         )
         return total
 
@@ -70,7 +70,7 @@ class KBIndexer:
         query_text: str,
         top_k: int = 10,
         embedding_weight: float = 0.7,
-    ) -> list:
+    ) -> dict:
         """Convenience method: sync index then search.
 
         Builds a :class:`~src.tools.kb_query.KnowledgeBaseQuery` with the

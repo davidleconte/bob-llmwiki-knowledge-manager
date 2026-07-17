@@ -86,6 +86,40 @@ class TestFileBackedVectorStore:
         assert result is not None
         np.testing.assert_array_almost_equal(result[0], matrix1)
 
+    def test_save_np_write_failure_raises_and_cleans_temp(self, tmp_path, monkeypatch):
+        """OSError during np.save must re-raise and remove the temp file."""
+        store = self._store()
+        idx = tmp_path / "idx"
+
+        def _fail_save(*args, **kwargs):
+            raise OSError("simulated np.save failure")
+
+        monkeypatch.setattr(np, "save", _fail_save)
+
+        with pytest.raises(OSError, match="simulated"):
+            store.save(idx, np.array([[1.0]], dtype=np.float32), {"doc": {}})
+
+        # The temp file must have been cleaned up
+        remaining = list(idx.glob("*.npy")) if idx.exists() else []
+        assert remaining == [], f"Temp .npy files leaked: {remaining}"
+
+    def test_save_json_write_failure_raises_and_cleans_temp(self, tmp_path, monkeypatch):
+        """OSError during json.dump must re-raise and remove the temp file."""
+        store = self._store()
+        idx = tmp_path / "idx"
+
+        def _fail_dump(*args, **kwargs):
+            raise OSError("simulated json.dump failure")
+
+        monkeypatch.setattr(json, "dump", _fail_dump)
+
+        with pytest.raises(OSError, match="simulated"):
+            store.save(idx, np.array([[1.0]], dtype=np.float32), {"doc": {}})
+
+        # The vectors file was written successfully; only the manifest temp leaked?
+        remaining_json = list(idx.glob("*.json.tmp")) if idx.exists() else []
+        assert remaining_json == [], f"Temp .json.tmp files leaked: {remaining_json}"
+
     def test_delete(self, tmp_path):
         store = self._store()
         idx = tmp_path / "idx"
@@ -213,8 +247,6 @@ class TestKBIndexer:
 
     def test_query_uses_index_fast_path(self, tmp_path):
         """KBIndexer.query() returns results using the persistent index."""
-        from src.tools.kb_query import KnowledgeBaseQuery
-
         kb = _make_kb(tmp_path / "kb")
         (kb / "concepts" / "caching.md").write_text(
             "# Caching Strategy\n\nMulti-level cache with L1 exact and L2 semantic."

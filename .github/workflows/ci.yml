@@ -240,3 +240,11 @@ jobs:
         # --strict: also fails if pip-audit itself encounters an error (e.g. network
         # unavailable, missing metadata) so a broken audit cannot silently pass.
         run: pip-audit --requirement requirements.lock.txt --strict
+      - name: Audit evaluation tooling dependencies (informational)
+        # evaluation/requirements.lock.txt covers the ad-hoc analysis-only deps
+        # (pandas, scipy, matplotlib, seaborn). Not installed by the package or CI
+        # test jobs; audited here for visibility. continue-on-error because these
+        # deps are not on the critical path — a CVE in matplotlib does not block
+        # the project release, but we want to see it.
+        continue-on-error: true
+        run: pip-audit --requirement evaluation/requirements.lock.txt

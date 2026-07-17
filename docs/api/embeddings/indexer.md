@@ -52,7 +52,7 @@ Returns:
     Total number of documents in the index after sync.
 
 
-##### `query(query_text: str, top_k: int, embedding_weight: float) -> list`
+##### `query(query_text: str, top_k: int, embedding_weight: float) -> dict`
 
 Convenience method: sync index then search.
 

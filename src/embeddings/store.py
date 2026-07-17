@@ -39,9 +39,7 @@ class FileBackedVectorStore:
     # Load
     # ---------------------------------------------------------------------- #
 
-    def load(
-        self, index_path: Path
-    ) -> Optional[Tuple[np.ndarray, Dict[str, Any]]]:
+    def load(self, index_path: Path) -> Optional[Tuple[np.ndarray, Dict[str, Any]]]:
         """Load (matrix, manifest) from *index_path*.
 
         Returns ``None`` if the index does not exist or is corrupt (caller

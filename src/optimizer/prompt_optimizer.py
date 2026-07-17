@@ -98,11 +98,15 @@ class PromptOptimizer:
         # "remove_comments" maps to _compress_content (punctuation cleanup +
         # filler/abbreviation removal). OptimizerConfig.__post_init__ is updated
         # to match this three-strategy default.
-        self.strategies: List[str] = strategies if strategies is not None else [
-            "remove_whitespace",
-            "compress_repeated",
-            "remove_comments",
-        ]
+        self.strategies: List[str] = (
+            strategies
+            if strategies is not None
+            else [
+                "remove_whitespace",
+                "compress_repeated",
+                "remove_comments",
+            ]
+        )
 
         self.token_counter = TokenCounter(model=model, track_costs=track_costs)
         # Use only L1 (exact) cache to avoid semantic matches returning a wrong

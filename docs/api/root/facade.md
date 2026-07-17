@@ -8,6 +8,18 @@ checks, so callers (and the CLI) have one entry point instead of wiring each
 component by hand. Build it from the config singleton with
 :meth:`TokenOptimizer.from_config`, or pass an explicit ``ConfigSchema``.
 
+``config.cache`` fields applied by the facade:
+
+- ``config.cache.l1*`` (``l1_max_size``, ``l1_ttl_seconds``, ``l1_enabled``): govern
+  **both** the :attr:`cache` (L1 level) *and* the ``optimize()`` path, because the
+  facade shares the same :class:`~src.cache.exact_cache.ExactCache` instance between
+  both surfaces. Changing ``l1_max_size`` affects how many optimizations are memoised.
+- ``config.cache.l2*`` (``l2_max_size``, ``l2_similarity_threshold``, ``l2_ttl_seconds``,
+  ``l2_enabled``): govern **only** the :attr:`cache` surface (``cache.get()``,
+  ``cache_stats()``). They have **no effect** on ``optimize()`` by design — an L2
+  semantic hit could return a *different* prompt's optimized text, which would be
+  wrong. The optimizer uses exact (L1) matching only.
+
 ``config.monitoring`` fields applied by the facade:
 
 - ``log_level``: passed to the facade's :class:`~src.monitoring.logger.LoggerFactory`
@@ -31,13 +43,16 @@ Unified facade composing the optimizer, caches, truncator and monitoring.
 
 Attributes:
     config: The ``ConfigSchema`` the components were built from.
-    cache: A ``MultiLevelCache`` built from ``config.cache``. Its L1 (exact)
-        level is the *same* instance the optimizer uses for optimize()
-        caching, so ``config.cache.l1`` governs both and they are not
-        disjoint; L2 (semantic) is exercised only through this ``cache``
-        surface directly (optimize() uses L1 only, by design).
+    cache: A ``MultiLevelCache`` built from ``config.cache``. Governs the
+        ``cache.get()`` / ``cache_stats()`` / ``query_l3()`` surfaces.
+        Its L1 (:class:`~src.cache.exact_cache.ExactCache`) is *shared*
+        with :attr:`optimizer`, so ``config.cache.l1*`` settings apply to
+        both. Its L2 (:class:`~src.cache.semantic_cache.SemanticCache`) is
+        **not** used by ``optimize()`` — see the module docstring for the
+        design rationale. ``config.cache.l2*`` settings affect only this
+        attribute, not the optimizer memoisation path.
     optimizer: A ``PromptOptimizer`` built from ``config.optimizer``, sharing
-        this facade's L1 cache.
+        this facade's L1 cache. Its memoisation is L1-only (exact matching).
     truncator: A ``Truncator``.
 
 #### Methods

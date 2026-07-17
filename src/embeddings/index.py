@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import hashlib
 import logging
-import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -61,7 +60,7 @@ class PersistentEmbeddingIndex:
         # In-memory state: parallel lists kept in sync.
         # _doc_ids[i] corresponds to _matrix[i, :].
         self._doc_ids: List[str] = []
-        self._manifest: Dict[str, Any] = {}      # doc_id → {path, mtime, hash}
+        self._manifest: Dict[str, Any] = {}  # doc_id → {path, mtime, hash}
         self._matrix: Optional[np.ndarray] = None  # [N × dim] float32
 
         self._loaded = False
@@ -123,11 +122,7 @@ class PersistentEmbeddingIndex:
             # overwrite with real values when called from KBIndexer.sync()).
             self._doc_ids.append(doc_id)
             new_row = vec.astype(np.float32).reshape(1, -1)
-            self._matrix = (
-                new_row
-                if self._matrix is None
-                else np.vstack([self._matrix, new_row])
-            )
+            self._matrix = new_row if self._matrix is None else np.vstack([self._matrix, new_row])
             if doc_id not in self._manifest:
                 self._manifest[doc_id] = {"path": doc_id, "mtime": 0.0, "hash": ""}
 
@@ -252,6 +247,7 @@ class PersistentEmbeddingIndex:
 # --------------------------------------------------------------------------- #
 # Internal helpers
 # --------------------------------------------------------------------------- #
+
 
 def _content_hash(content: str) -> str:
     """SHA-256 hex digest of UTF-8 *content*, truncated to 16 hex chars."""

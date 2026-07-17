@@ -287,8 +287,14 @@ class TestDelegationCoordinator:
         assert len(coordinator._tasks) == 0
         assert len(coordinator._results) == 0
 
-    def test_parallel_execution_performance(self):
-        """Test that parallel execution is faster than sequential."""
+    def test_parallel_execution_completes_all_tasks(self):
+        """Test that parallel execution completes all submitted tasks.
+
+        The correctness property is: all 3 submitted tasks produce results.
+        Wall-clock timing (< 0.05 s) was inherently flaky on loaded CI runners
+        and on the experimental delegation subsystem; removed per the Tier-1
+        architecture review (D1). Latency benchmarks live in tests/performance/.
+        """
         coordinator = DelegationCoordinator(max_workers=3)
         agent = MockAgent()
         coordinator.register_agent(agent)
@@ -298,14 +304,9 @@ class TestDelegationCoordinator:
         ]
 
         coordinator.add_tasks(tasks)
-
-        start_time = time.time()
         results = coordinator.execute_parallel()
-        execution_time = time.time() - start_time
 
-        # With 3 workers and 3 tasks taking ~0.01s each,
-        # parallel should be ~0.01s, sequential would be ~0.03s
-        assert execution_time < 0.05  # Allow some overhead
+        # All 3 tasks must produce results
         assert len(results) == 3
 
 
