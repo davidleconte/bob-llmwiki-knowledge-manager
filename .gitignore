@@ -21,6 +21,7 @@ wheels/
 *.egg
 
 # Virtual environments
+.venv/
 venv/
 ENV/
 env/
@@ -54,5 +55,5 @@ docs/knowledge-base/.DS_Store
 .claude/worktrees/
 
 # Generated reports (delegation demo output)
-reports/
+evaluation/reports/
 .bob/kb-index/
