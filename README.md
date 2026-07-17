@@ -240,6 +240,7 @@ remain available when you switch back.
 - Prompt optimizer — ~20% mean compression, near-lossless, tiktoken-counted (manifest: `evaluation/results/validation-2026-07-14/manifest.json`)
 - Truncation — smart budget-fit strategies (lossy; reported separately from compression)
 - Structured monitoring — JSON logging, metrics, health checks, cost tracking
+- **Knowledge graph** (`src/graph/`) — property graph over KB documents; orphan/hub detection, multi-hop BFS traversal, PageRank re-ranking; CLI: `bob-optimize graph-build / graph-query / graph-health`
 
 ## 8. Using the Token Optimization System
 
@@ -249,38 +250,90 @@ Install once with `pip install -e ".[dev,monitoring]"`, then use whichever mode 
 ### Optional: MiniLM semantic embedding backend
 
 The KB embedding pipeline supports an optional high-quality semantic backend powered by
-`sentence-transformers/all-MiniLM-L6-v2` (384-dim, Apple Neural Engine, ~2–4 ms/doc warm).
+`sentence-transformers/all-MiniLM-L6-v2` (384-dim, ~2–4 ms/doc warm on Apple Silicon).
 
-```bash
-pip install -e ".[mlx]"   # macOS + Apple Silicon only; safe to omit on any other platform
-```
+`EmbeddingGenerator(backend="minilm")` resolves via a **priority fallback chain**:
+
+1. **`mlx-embeddings`** — Apple MLX, Apple Silicon only, fastest (~2–4 ms warm)
+   `pip install -e ".[mlx]"`
+2. **`sentence-transformers`** — cross-platform CPU/GPU (~5–20 ms warm)
+   `pip install sentence-transformers`
+3. **`"hashing"` fallback** — always available, no deps, 1000-dim bag-of-ngrams
 
 ```python
 from src.cache.embeddings import EmbeddingGenerator
 
-embedder = EmbeddingGenerator(backend="minilm")   # 384-dim semantic vectors
-vec = embedder.generate("your KB document text")  # falls back to HashingVectorizer if mlx absent
+embedder = EmbeddingGenerator(backend="minilm")
+# Resolves: mlx-embeddings first, then sentence-transformers, then hashing
+vec = embedder.generate("your KB document text")  # 384-dim if MiniLM loaded, else 1000-dim
 ```
 
-> **No HuggingFace API key required.** `sentence-transformers/all-MiniLM-L6-v2` is a
-> **public** model. On first use, `mlx-embeddings` downloads it once (~22 MB) to
-> `~/.cache/huggingface/` — the standard HuggingFace Hub cache, persistent across sessions.
-> No account, no token, no configuration needed.
+> **No HuggingFace API key required.** `all-MiniLM-L6-v2` is a public model. On first use,
+> it downloads once (~22 MB) to `~/.cache/huggingface/` and is cached persistently.
 
-| Platform | MiniLM backend | Notes |
-|----------|:--------------:|-------|
-| macOS + Apple Silicon (M1/M2/M3+) | ✅ Full | `pip install -e ".[mlx]"` |
-| macOS + Intel | ⚠️ Falls back silently | `mlx` requires Apple Silicon; HashingVectorizer used instead |
-| Linux (any) | ⚠️ Falls back silently | `mlx` is macOS-only; HashingVectorizer used instead |
+| Platform | MiniLM path | Install |
+|----------|:-----------:|---------|
+| macOS + Apple Silicon (M1/M2/M3+) | ✅ `mlx-embeddings` (fastest) | `pip install -e ".[mlx]"` |
+| macOS + Intel, Linux, any | ✅ `sentence-transformers` | `pip install sentence-transformers` |
+| No optional deps installed | ⚠️ Falls back to `"hashing"` | nothing to install |
 
-**Fallback guarantee:** if `mlx-embeddings` is absent or fails to load, `EmbeddingGenerator`
-emits a `UserWarning` and uses the stateless `HashingVectorizer` (1000-dim, <1 ms, no deps).
+**Fallback guarantee:** if neither optional package is installed, `EmbeddingGenerator`
+emits a `UserWarning` and silently uses `HashingVectorizer` (1000-dim, <1 ms, no deps).
 KB retrieval is **never blocked** by a missing MiniLM installation.
 
-> **Why it matters:** `HashingVectorizer` cosine similarity on semantically related pairs
-> measures ~0.091 (near-zero — tuned for near-duplicate detection, not cross-vocabulary
-> retrieval). MiniLM-L6-v2 measures ~0.78 on the same pairs, enabling genuine semantic KB
-> search. See ADR-014 for the A/B validation results (p@3 = 0.88).
+> **Why it matters:** `HashingVectorizer` p@3=0.60 vs MiniLM-L6-v2 p@3=0.88 on the
+> 25-query KB golden set (live validation, 80-doc corpus). Use MiniLM for best retrieval
+> quality. See ADR-014 and the [graph validation report](docs/knowledge-base/research/graph-validation-2026-07-17.md).
+
+---
+
+### Knowledge Graph (P3)
+
+The graph layer (`src/graph/`) builds a property graph over the KB document corpus for
+structural health analysis, multi-hop traversal, and PageRank-based re-ranking of search
+results. It is **opt-in** and fully backward-compatible.
+
+```python
+from pathlib import Path
+from src.cache.embeddings import EmbeddingGenerator
+from src.embeddings.index import PersistentEmbeddingIndex
+from src.graph.builder import KnowledgeGraphBuilder
+from src.graph.store import GraphStore, DEFAULT_GRAPH_PATH
+from src.tools.kb_query import KnowledgeBaseQuery
+
+KB_PATH = Path("docs/knowledge-base")
+
+# Build embedding index + graph
+embedder = EmbeddingGenerator(backend="minilm")
+index = PersistentEmbeddingIndex(embedder=embedder)
+index.rebuild(KB_PATH)
+
+graph = KnowledgeGraphBuilder(kb_path=KB_PATH, index=index).build()
+GraphStore().save(DEFAULT_GRAPH_PATH, graph)
+
+# Graph-aware KB query
+kb = KnowledgeBaseQuery(KB_PATH, embedder=embedder, embedding_weight=1.0,
+                        graph=graph, graph_weight=0.0)  # graph_weight=0.0 validated safe default
+results = kb.query("caching L1 L2", max_results=10)
+
+# KB health report
+print(f"Orphans: {len(graph.orphans())}")
+for doc, count in graph.hubs(top_k=3):
+    print(f"  {count} inbound: {doc}")
+```
+
+**CLI commands (P3):**
+
+```bash
+bob-optimize graph-build   --kb-path docs/knowledge-base   # build + persist graph
+bob-optimize graph-query   "caching strategy"              # graph-aware search
+bob-optimize graph-health  --kb-path docs/knowledge-base   # orphans, hubs, broken links
+```
+
+**Live validation (80-doc corpus, MiniLM):** 2 836 edges, 39→13 orphans rescued,
+p@3=0.88 — identical with or without graph re-ranking at the validated
+`graph_weight=0.0` default. See [ADR-017](docs/adr/017-knowledge-graph-layer.md) and
+the [validation report](docs/knowledge-base/research/graph-validation-2026-07-17.md).
 
 ### How `bob-optimize` works inside Bob Shell and Bob IDE
 

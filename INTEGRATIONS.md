@@ -130,9 +130,126 @@ for the architecture concept.
 
 ---
 
+## 6. P3 — Knowledge Graph Layer (Shipped — P3 complete)
+
+`src/graph/` provides a pure-Python property graph over KB documents. Four
+capabilities are available independently:
+
+### Graph build
+
+```python
+from pathlib import Path
+from src.cache.embeddings import EmbeddingGenerator
+from src.embeddings.index import PersistentEmbeddingIndex
+from src.graph.builder import KnowledgeGraphBuilder
+from src.graph.store import GraphStore, DEFAULT_GRAPH_PATH
+
+KB_PATH = Path("docs/knowledge-base")
+
+# Build embedding index (P2 prerequisite — skip if already built)
+embedder = EmbeddingGenerator(backend="minilm")   # uses sentence-transformers if mlx absent
+index = PersistentEmbeddingIndex(embedder=embedder)
+index.rebuild(KB_PATH)
+
+# Build graph (explicit + semantic edges)
+builder = KnowledgeGraphBuilder(kb_path=KB_PATH, index=index, semantic_threshold=0.30)
+graph = builder.build()
+
+# Persist to .bob/kb-graph.json
+GraphStore().save(DEFAULT_GRAPH_PATH, graph, {"built_at": "2026-07-17"})
+```
+
+Or from the CLI:
+
+```bash
+bob-optimize graph-build --kb-path docs/knowledge-base
+```
+
+### Graph-aware KB query
+
+```python
+from src.graph.store import GraphStore, DEFAULT_GRAPH_PATH
+from src.tools.kb_query import KnowledgeBaseQuery
+
+# Load persisted graph
+graph = GraphStore().load(DEFAULT_GRAPH_PATH)   # None if not yet built
+
+kb = KnowledgeBaseQuery(
+    "docs/knowledge-base",
+    embedder=embedder,
+    embedding_weight=1.0,
+    graph=graph,
+    graph_weight=0.0,   # validated safe default — see note below
+)
+results = kb.query("caching strategy", max_results=10)
+```
+
+> ⚠️ **`graph_weight=0.0` is the validated default.** On an 80-document corpus
+> with MiniLM embeddings, graph re-ranking at any tested weight (0.1–0.5) produced
+> identical p@3/p@5/p@10 to embedding-only (p@3=0.88, no uplift, no regression).
+> The safe default is `0.0` — do not raise it without re-running the golden-set
+> validation after any embedding model or corpus change. See ADR-017 and
+> [`docs/knowledge-base/research/graph-validation-2026-07-17.md`](docs/knowledge-base/research/graph-validation-2026-07-17.md).
+
+Or from the CLI:
+
+```bash
+bob-optimize graph-query "caching strategy" --kb-path docs/knowledge-base
+```
+
+### KB health analysis
+
+```python
+# Orphaned documents (no inbound links)
+orphans = graph.orphans(edge_types=["explicit"])   # 39 in 80-doc corpus
+print(f"{len(orphans)} orphans: {orphans[:5]}")
+
+# Hub documents (most inbound links)
+for doc_id, count in graph.hubs(top_k=5):
+    print(f"{count:3d} inbound  {doc_id}")
+
+# PageRank scores
+pr = graph.pagerank()
+top5 = sorted(pr.items(), key=lambda x: x[1], reverse=True)[:5]
+```
+
+Or from the CLI:
+
+```bash
+bob-optimize graph-health --kb-path docs/knowledge-base
+```
+
+### Multi-hop traversal
+
+```python
+# All documents within 2 hops of a given document
+neighbourhood = graph.neighbours("concepts/token-optimization.md", depth=2)
+for doc_id, info in neighbourhood.items():
+    print(f"  distance={info['distance']}  {doc_id}")
+
+# Shortest path between two documents
+path = graph.path("concepts/multi-level-caching.md", "guides/setup-token-optimization.md")
+print(" → ".join(path) if path else "no path")
+```
+
+### MiniLM backend note
+
+`EmbeddingGenerator(backend="minilm")` resolves via a priority fallback chain:
+
+1. **`mlx-embeddings`** (Apple Silicon, ~2–4 ms warm): `pip install -e ".[mlx]"`
+2. **`sentence-transformers`** (cross-platform, ~5–20 ms warm): `pip install sentence-transformers`
+3. **`"hashing"` fallback** (no deps, always available)
+
+MiniLM (384-dim dense) delivers p@3=0.88 vs hashing (1000-dim bag-of-ngrams)
+p@3=0.60 on the KB golden set. Use MiniLM for best retrieval quality.
+
+---
+
 ## References
 
-- Architecture: `docs/architecture/ARCHITECTURE.md`
+- Architecture: `docs/architecture/ARCHITECTURE.md` (§3b, §5 graph section)
 - KB integration study: `docs/knowledge-base/research/kb-tos-integration-feasibility-2026-07-14.md`
 - Integration roadmap: `docs/knowledge-base/guides/kb-tos-integration-roadmap.md`
 - ADR-014 (embedding scorer): `docs/adr/014-kb-query-embedding-scorer.md`
+- ADR-017 (knowledge graph): `docs/adr/017-knowledge-graph-layer.md`
+- Graph validation results: `docs/knowledge-base/research/graph-validation-2026-07-17.md`

@@ -57,3 +57,4 @@ docs/knowledge-base/.DS_Store
 # Generated reports (delegation demo output)
 evaluation/reports/
 .bob/kb-index/
+.bob/kb-graph.json

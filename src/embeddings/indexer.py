@@ -91,7 +91,7 @@ class KBIndexer:
         self.sync()
         kb = KnowledgeBaseQuery(
             str(self._kb_path),
-            embedder=self._index._embedder,
+            embedder=self._index.embedder,
             embedding_weight=embedding_weight,
         )
         return kb.query(query_text, max_results=top_k)

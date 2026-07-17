@@ -12,6 +12,12 @@ Fallback chain (ADR-015 §Corruption Recovery)::
     log warning + return empty search results
 
 Nothing in this module blocks the KB query path — every failure degrades silently.
+
+Storage model (AF-1 fix):
+    ``manifest.json`` holds ONLY chunk-level entries — one per vector row.
+    ``staleness.json`` holds file-level mtime/hash sentinels — no vector rows.
+    This keeps ``matrix.shape[0] == len(manifest)`` invariant, which
+    ``FileBackedVectorStore.load()`` enforces as a corruption check.
 """
 
 from __future__ import annotations
@@ -61,7 +67,12 @@ class PersistentEmbeddingIndex:
         # In-memory state: parallel lists kept in sync.
         # _doc_ids[i] corresponds to _matrix[i, :].
         self._doc_ids: List[str] = []
-        self._manifest: Dict[str, Any] = {}  # doc_id → {path, mtime, hash}
+        # _manifest: chunk-level entries only — one per vector row.
+        # Invariant: len(_manifest) == len(_doc_ids) == _matrix.shape[0]
+        self._manifest: Dict[str, Any] = {}
+        # _file_manifest: file-level staleness sentinels — NO vector rows.
+        # Stored in staleness.json, never included in manifest.json.
+        self._file_manifest: Dict[str, Any] = {}
         self._matrix: Optional[np.ndarray] = None  # [N × dim] float32
 
         self._loaded = False
@@ -134,10 +145,11 @@ class PersistentEmbeddingIndex:
         """Full or incremental rebuild from *kb_path*.
 
         Walks all ``*.md`` files in the four KB category directories.  For each
-        file, checks mtime+hash against the manifest.  Changed files are split
-        into structure-aware chunks by :class:`~src.embeddings.chunker.MarkdownChunker`;
-        each chunk becomes an independent index row with a ``file.md#slug``
-        doc_id.  Flushes the updated index to disk afterward.
+        file, checks mtime+hash against the file-level staleness map.  Changed
+        files are split into structure-aware chunks by
+        :class:`~src.embeddings.chunker.MarkdownChunker`; each chunk becomes an
+        independent index row with a ``file.md#slug`` doc_id.  Flushes the
+        updated index to disk afterward.
 
         Args:
             kb_path: Root of the knowledge base (``docs/knowledge-base/``).
@@ -164,9 +176,9 @@ class PersistentEmbeddingIndex:
                 mtime = md_file.stat().st_mtime
                 chash = _content_hash(content)
 
-                # Staleness is checked at the *file* level (mtime + hash),
-                # not per-chunk, so we only re-embed when the file changes.
-                existing = self._manifest.get(file_doc_id, {})
+                # Staleness is checked at the *file* level via _file_manifest
+                # (separate from the chunk manifest — AF-1 fix).
+                existing = self._file_manifest.get(file_doc_id, {})
                 if existing.get("mtime") == mtime and existing.get("hash") == chash:
                     continue  # unchanged — skip all chunks for this file
 
@@ -175,9 +187,9 @@ class PersistentEmbeddingIndex:
                     chunk_doc_id = f"{file_doc_id}#{slug}"
                     self.index_document(chunk_doc_id, chunk_text)
 
-                # Record file-level staleness metadata under the plain file_doc_id
-                # so the next rebuild can skip unchanged files.
-                self._manifest[file_doc_id] = {
+                # Record file-level staleness metadata in _file_manifest
+                # (never written to manifest.json — kept in staleness.json).
+                self._file_manifest[file_doc_id] = {
                     "path": str(md_file),
                     "mtime": mtime,
                     "hash": chash,
@@ -190,33 +202,43 @@ class PersistentEmbeddingIndex:
 
         return len(self._doc_ids)
 
-    def is_stale(self, doc_path: Path) -> bool:
-        """Check whether *doc_path* is newer or changed vs the manifest.
+    def is_stale(self, doc_path: Path, kb_path: Optional[Path] = None) -> bool:
+        """Check whether *doc_path* is newer or changed vs the staleness map.
 
-        Staleness is compared against the **file-level** manifest entry
-        (``file.md``), not against individual chunk entries
-        (``file.md#slug``).  This is correct because ``rebuild()`` writes
-        mtime+hash under the plain file path as the staleness sentinel.
+        Staleness is compared against the file-level ``_file_manifest``
+        (``staleness.json``), not against chunk entries in ``manifest.json``.
 
         Args:
             doc_path: Absolute or relative path to a KB document.
+            kb_path: Root of the knowledge base.  When provided, the key is
+                derived as ``doc_path.relative_to(kb_path)`` (reliable for any
+                KB location).  When ``None``, falls back to the hardcoded
+                ``docs/knowledge-base`` convention (default install only).
 
         Returns:
             ``True`` if the document needs re-indexing, ``False`` if up-to-date.
         """
         self._ensure_loaded()
-        # Normalise to the relative path stored in the manifest.
-        # Strip any #slug fragment that callers might pass in.
-        try:
-            kb_root = self._index_path.parent.parent  # .bob/ → repo root
-            raw_id = str(doc_path.relative_to(kb_root / "docs/knowledge-base"))
-        except ValueError:
-            raw_id = str(doc_path)
 
-        # Strip fragment (e.g. "concepts/a.md#performance-targets" → "concepts/a.md")
-        file_doc_id = raw_id.split("#")[0]
+        # Derive the file_doc_id key used in _file_manifest.
+        # AF-2 fix: accept an explicit kb_path instead of reconstructing it
+        # from the index path (which only works for the default install).
+        if kb_path is not None:
+            try:
+                file_doc_id = str(doc_path.relative_to(kb_path)).split("#")[0]
+            except ValueError:
+                file_doc_id = str(doc_path)
+        else:
+            # Legacy fallback: infer KB root from index path (default layout only)
+            try:
+                kb_root = self._index_path.parent.parent  # .bob/ → repo root
+                file_doc_id = str(
+                    doc_path.relative_to(kb_root / "docs/knowledge-base")
+                ).split("#")[0]
+            except ValueError:
+                file_doc_id = str(doc_path)
 
-        existing = self._manifest.get(file_doc_id)
+        existing = self._file_manifest.get(file_doc_id)
         if existing is None:
             return True
 
@@ -232,21 +254,40 @@ class PersistentEmbeddingIndex:
     def flush(self) -> None:
         """Atomically persist the in-memory index to disk.
 
-        Writes ``vectors.npy`` and ``manifest.json`` under :attr:`_index_path`
+        Writes ``vectors.npy``, ``manifest.json`` (chunks only), and
+        ``staleness.json`` (file-level sentinels) under :attr:`_index_path`
         using the atomic tmp-then-rename pattern (ADR-015 §Corruption Recovery).
         """
         if self._matrix is None or len(self._doc_ids) == 0:
             return
         try:
-            self._store.save(self._index_path, self._matrix, self._manifest)
+            self._store.save(
+                self._index_path,
+                self._matrix,
+                self._manifest,
+                self._file_manifest,
+            )
         except OSError as exc:
             logger.warning("kb_index_flush_failed: %s", exc)
 
     @property
     def doc_count(self) -> int:
-        """Number of documents currently in the in-memory index."""
+        """Number of indexed chunks currently in the in-memory index.
+
+        Note: this counts *chunks* (``file.md#slug`` entries), not source
+        files.  A multi-section document contributes multiple chunks.
+        """
         self._ensure_loaded()
         return len(self._doc_ids)
+
+    @property
+    def embedder(self) -> "EmbeddingGenerator":
+        """The :class:`~src.cache.embeddings.EmbeddingGenerator` used by this index.
+
+        Exposed as a public property so callers (e.g. :class:`KBIndexer`) do
+        not need to access the private ``_embedder`` attribute directly (AF-4 fix).
+        """
+        return self._embedder
 
     # ---------------------------------------------------------------------- #
     # Private helpers
@@ -261,11 +302,12 @@ class PersistentEmbeddingIndex:
         if result is None:
             # New or corrupt index — start empty (rebuild on first explicit call)
             return
-        matrix, manifest = result
+        matrix, manifest, staleness = result
         self._matrix = matrix.astype(np.float32)
-        self._manifest = manifest
+        self._manifest = manifest          # chunk-level entries only
+        self._file_manifest = staleness    # file-level staleness sentinels
         self._doc_ids = list(manifest.keys())
-        logger.debug("kb_index_loaded docs=%d", len(self._doc_ids))
+        logger.debug("kb_index_loaded chunks=%d files=%d", len(self._doc_ids), len(staleness))
 
 
 # --------------------------------------------------------------------------- #

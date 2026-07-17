@@ -69,6 +69,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **P3 — Knowledge Graph Layer** (`src/graph/`): pure-Python property graph over
+  KB documents. `KnowledgeGraph` (adjacency dict, BFS, PageRank), `KnowledgeGraphBuilder`
+  (explicit edges from frontmatter `related:` + inline links; semantic edges via
+  `PersistentEmbeddingIndex` cosine similarity at threshold 0.30), `GraphRanker`
+  (lazy PageRank cache, `rerank()` blend formula), `GraphStore` (atomic JSON
+  persistence to `.bob/kb-graph.json`). All are opt-in; injected into
+  `KnowledgeBaseQuery` via `graph=` / `graph_weight=` parameters (ADR-017).
+- **Graph CLI commands**: `bob-optimize graph-build`, `bob-optimize graph-query`,
+  `bob-optimize graph-health` (KB structural health report: orphans, hubs,
+  broken links, PageRank top-10).
+- **Live validation** (`docs/knowledge-base/research/graph-validation-2026-07-17.md`):
+  80-doc corpus, 2 836 edges (163 explicit + 2 654 semantic), 39→13 orphans rescued
+  by semantic edges, p@3=0.88 with MiniLM (no regression, no uplift from graph
+  re-ranking at any tested weight). Validated defaults: `semantic_threshold=0.30`,
+  `graph_weight=0.0`. See ADR-017.
+
+### Changed
+- **`EmbeddingGenerator(backend="minilm")` fallback chain**: now resolves via
+  `mlx-embeddings` first (Apple Silicon, ~2–4 ms), then `sentence-transformers`
+  as a cross-platform fallback (~5–20 ms), then `"hashing"` if neither is
+  installed. Previously only `mlx-embeddings` activated MiniLM; `sentence-transformers`
+  was installed but silently ignored (`src/cache/embeddings.py`).
+
+### Fixed
+- **AF-1: `FileBackedVectorStore` flush/reload shape mismatch.** `manifest.json`
+  now holds chunk-level entries only; file-level mtime/hash sentinels are written
+  to a separate `staleness.json`. Fixes `load()` returning `None` when chunk and
+  file keys were mixed in one manifest (`src/embeddings/store.py`,
+  `src/embeddings/index.py`).
+- **AF-2: `is_stale()` always returning `True` with non-default KB paths.**
+  Added explicit `kb_path: Optional[Path]` parameter; removed hardcoded
+  `docs/knowledge-base` reconstruction from index path (`src/embeddings/index.py`).
+- **AF-4: Private `_embedder` access in `KBIndexer`.** Replaced with public
+  `embedder` property on `PersistentEmbeddingIndex` (`src/embeddings/index.py`,
+  `src/embeddings/indexer.py`).
+
 - P1-1: KB query hybrid embedding scorer (ADR-014, `EmbeddingGenerator` injection)
 - P1-3: Opt-in context compression in `knowledge-manager` mode
 

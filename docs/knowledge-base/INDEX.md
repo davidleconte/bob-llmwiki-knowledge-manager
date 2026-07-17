@@ -3,7 +3,7 @@
 > ⚠️ **Metrics correction (2026-07-14).** Earlier drafts of this document cited fabricated token-savings/quality figures — "68.96%", "89.3%", "91.80%" — produced by a simulation that never invoked the optimizer. **Those figures are retracted.** The honest, measured figure is **~20% mean optimizer compression** on real prose (manifest-backed: `evaluation/results/validation-2026-07-14/`; see `STATUS.md` and `CHANGELOG.md`). Inline numbers below have been corrected where they appeared.
 
 
-Last Updated: 2026-07-16
+Last Updated: 2026-07-17
 
 ## Quick Navigation
 - [Concepts](./concepts/) - Core concepts and definitions
@@ -12,6 +12,8 @@ Last Updated: 2026-07-16
 - [Research](./research/) - Research notes and findings
 
 ## Recent Additions
+- 2026-07-17: [Knowledge Graph Layer — Live Validation](./research/graph-validation-2026-07-17.md) - Research ⭐ NEW — P3 graph live validation: 80 nodes, 2876 edges, threshold=0.30 confirmed, graph_weight=0.0 default confirmed, 27/40 orphans rescued by semantic edges
+- 2026-07-17: [Adversarial Audit — Embeddings Chunker Integration](./research/adversarial-audit-embeddings-chunker-2026-07-17.md) - Research ⭐ NEW — 2 Critical bugs found and fixed: AF-1 (flush/reload shape mismatch) + AF-2 (is_stale always True); 2 Medium, 2 Low
 - 2026-07-16: [KB Query Scorer A/B Validation](./research/kb-query-ab-validation-2026-07.md) - Research ⭐ NEW — embedding-only p@3=0.88 vs keyword p@3=0.64; recommends w=0.7 for KBIndexer
 - 2026-07-16: [Multi-Level Caching Architecture Patterns](./concepts/multi-level-caching-architecture-patterns.md) - Concept ⭐ NEW
 - 2026-07-14: [KB-TOS Integration Roadmap (P0/P1/P2)](./guides/kb-tos-integration-roadmap.md) - Guide ⭐ NEW
@@ -98,6 +100,7 @@ Last Updated: 2026-07-16
 - [Cache API Reference](./references/cache-api.md) - Complete API documentation for all cache classes, methods, and usage examples
 
 ### Research
+- [Knowledge Graph Layer — Live Validation](./research/graph-validation-2026-07-17.md) - P3 graph build on 80-doc corpus: structural metrics, semantic threshold calibration (0.30 confirmed), golden-set p@3 comparison, ADR-017 validation gate results ⭐ NEW
 - [KB Manager ↔ TOS Integration Feasibility Study](./research/kb-tos-integration-feasibility-2026-07-14.md) - Architecture study of integrating the KB Manager with the Token Optimization System. Identifies 3 real overlap points, 8 challenges (C1–C8), evaluates 4 integration patterns, applies SOLID principles, and produces a verdict: integrate the embedding layer (P1) now; persistent index (P2) after TOS reaches v1.0.
 - [Bobcoin Savings Analysis 2026-07-14](./research/bobcoin-savings-analysis-2026-07-14.md) - Comprehensive analysis of expected Bobcoin savings from both sub-projects: Token Optimizer (~20% measured compression), KB Manager (40-80% structural savings, workload-dependent), combined savings (60-75% in ideal conditions), honest variance reporting, applicability boundaries, and institutional recommendations
 - [README Critical Analysis 2026-07-14](./research/readme-critical-analysis-2026-07-14.md) - Institutional perspective on root README.md: 70% alignment with audit findings, identifies 4 critical misalignments (prominent unverified anecdote, inflated maturity grade, outdated bug count, missing production blockers), provides detailed recommendations for institutional adoption

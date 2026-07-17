@@ -7,11 +7,16 @@ vector, regardless of corpus history or which instance produced it. (A prior
 TF-IDF implementation refit on every newly-seen text, making embeddings drift
 with the corpus -- see C-5.)
 
-An optional MiniLM-L6-v2 backend (384-dim, Apple Neural Engine) is available
-via ``backend="minilm"``.  It requires the ``mlx-embeddings`` package (install
-with ``pip install -e ".[mlx]"``).  When the package is absent the constructor
-silently falls back to the ``"hashing"`` backend so CI and non-Apple platforms
-are unaffected.
+An optional MiniLM-L6-v2 backend (384-dim) is available via ``backend="minilm"``.
+It is activated by **either** of two optional packages (checked in order):
+
+1. ``mlx-embeddings`` — Apple MLX, Apple Silicon only, ~2–4 ms/call warm.
+   Install with ``pip install -e ".[mlx]"``.
+2. ``sentence-transformers`` — cross-platform, CPU/GPU, ~5–20 ms/call warm.
+   Install with ``pip install sentence-transformers``.
+
+When neither package is installed the constructor warns and silently falls back
+to the ``"hashing"`` backend so CI and non-Apple platforms are unaffected.
 """
 
 from __future__ import annotations
@@ -24,45 +29,72 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 
 # ---------------------------------------------------------------------------
-# MiniLM lazy singleton — loaded once on first use, never on import.
+# MiniLM backend resolution — tries mlx-embeddings first (Apple MLX),
+# then sentence-transformers (cross-platform).  Falls back to "hashing" when
+# neither is installed.
 # ---------------------------------------------------------------------------
 
 _minilm_model = None  # type: ignore[var-annotated]
 _minilm_available: bool | None = None  # None = not yet checked
+_minilm_backend: str = ""  # "mlx" | "st" | ""
 
 
 def _try_load_minilm() -> bool:
-    """Attempt to import and warm-up the MiniLM model.
+    """Attempt to load MiniLM from mlx-embeddings, then sentence-transformers.
 
-    Returns True if the model is ready, False if the dependency is missing.
-    Sets the module-level ``_minilm_model`` and ``_minilm_available`` globals.
+    Returns True if the model is ready via either backend.
+    Sets the module-level ``_minilm_model``, ``_minilm_available``, and
+    ``_minilm_backend`` globals.
     """
-    global _minilm_model, _minilm_available
+    global _minilm_model, _minilm_available, _minilm_backend
     if _minilm_available is not None:
         return _minilm_available
-    try:
-        import mlx_embeddings  # noqa: F401 – checked below
 
-        # Apple MLX models are loaded via a model ID string.
+    # 1. Try Apple MLX (preferred on Apple Silicon)
+    try:
+        import mlx_embeddings  # noqa: F401
+
         from mlx_embeddings import load  # type: ignore[import]
 
         _minilm_model = load("sentence-transformers/all-MiniLM-L6-v2")
+        _minilm_backend = "mlx"
         _minilm_available = True
-    except (ImportError, Exception):  # ImportError or model-load failure
-        _minilm_available = False
-    return _minilm_available  # type: ignore[return-value]
+        return True
+    except (ImportError, Exception):
+        pass
+
+    # 2. Fall back to sentence-transformers (cross-platform)
+    try:
+        from sentence_transformers import SentenceTransformer  # type: ignore[import]
+
+        _minilm_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+        _minilm_backend = "st"
+        _minilm_available = True
+        return True
+    except (ImportError, Exception):
+        pass
+
+    _minilm_available = False
+    return False
 
 
 def _embed_minilm(text: str) -> np.ndarray:
-    """Encode *text* with MiniLM-L6-v2 via Apple MLX.
+    """Encode *text* with MiniLM-L6-v2 via the resolved backend.
 
     Returns a normalised float32 vector of shape ``(384,)``.
+    Dispatches to Apple MLX or sentence-transformers depending on which
+    backend was loaded by ``_try_load_minilm()``.
     """
-    from mlx_embeddings import embed  # type: ignore[import]
+    if _minilm_backend == "mlx":
+        from mlx_embeddings import embed  # type: ignore[import]
 
-    result = embed([text], _minilm_model)
-    # mlx_embeddings returns an mlx.core.array; convert to numpy float32.
-    vec: np.ndarray = np.array(result[0], dtype=np.float32)
+        result = embed([text], _minilm_model)
+        vec: np.ndarray = np.array(result[0], dtype=np.float32)
+    else:
+        # sentence-transformers backend
+        arr = _minilm_model.encode([text])  # type: ignore[union-attr]
+        vec = np.array(arr[0], dtype=np.float32)
+
     norm = np.linalg.norm(vec)
     if norm > 1e-9:
         vec = vec / norm

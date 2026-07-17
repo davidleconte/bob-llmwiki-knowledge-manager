@@ -46,9 +46,10 @@ class TestFileBackedVectorStore:
         result = store.load(tmp_path / "idx")
 
         assert result is not None
-        loaded_mat, loaded_man = result
+        loaded_mat, loaded_man, loaded_staleness = result
         np.testing.assert_array_almost_equal(loaded_mat, matrix)
         assert loaded_man == manifest
+        assert loaded_staleness == {}  # no staleness file written → empty dict
 
     def test_load_missing_returns_none(self, tmp_path):
         assert self._store().load(tmp_path / "nonexistent") is None
@@ -175,12 +176,62 @@ class TestPersistentEmbeddingIndex:
         assert idx.doc_count == 1
 
     def test_is_stale_new_doc(self, tmp_path):
-        """A document not in the manifest is always stale."""
+        """A document not in the staleness map is always stale."""
+        kb = _make_kb(tmp_path / "kb")
         idx = self._index(tmp_path)
-        _make_kb(tmp_path / "kb")
-        doc = tmp_path / "kb" / "concepts" / "new.md"
+        doc = kb / "concepts" / "new.md"
         doc.write_text("# New\n\ncontent")
-        assert idx.is_stale(doc) is True
+        assert idx.is_stale(doc, kb_path=kb) is True
+
+    def test_is_stale_false_after_rebuild(self, tmp_path):
+        """After rebuild(), is_stale() returns False for unchanged docs."""
+        kb = _make_kb(tmp_path / "kb")
+        doc = kb / "concepts" / "a.md"
+        doc.write_text(
+            "## Section One\n\nThis section covers the alpha concept in sufficient detail.\n"
+        )
+        idx = self._index(tmp_path)
+        idx.rebuild(kb)
+        assert idx.is_stale(doc, kb_path=kb) is False
+
+    def test_is_stale_true_after_modification(self, tmp_path):
+        """After modifying a file, is_stale() returns True."""
+        kb = _make_kb(tmp_path / "kb")
+        doc = kb / "concepts" / "a.md"
+        doc.write_text(
+            "## Section One\n\nThis section covers the alpha concept in sufficient detail.\n"
+        )
+        idx = self._index(tmp_path)
+        idx.rebuild(kb)
+
+        doc.write_text("## Section One\n\nModified content that is different now.\n")
+        assert idx.is_stale(doc, kb_path=kb) is True
+
+    def test_rebuild_then_flush_then_reload_search_works(self, tmp_path):
+        """Regression for AF-1: rebuild() + flush() must produce a loadable index.
+
+        Before the AF-1 fix, flush() wrote a manifest.json with both chunk-level
+        and file-level keys, so matrix.shape[0] != len(manifest) and load()
+        returned None — making the persistent index permanently inert.
+        """
+        kb = _make_kb(tmp_path / "kb")
+        (kb / "concepts" / "a.md").write_text(
+            "## Alpha Topic\n\nThis section covers the alpha concept in sufficient detail.\n"
+        )
+        embedder = EmbeddingGenerator()
+        idx1 = PersistentEmbeddingIndex(embedder, tmp_path / "idx")
+        n1 = idx1.rebuild(kb)
+        assert n1 >= 1, "rebuild() must index at least one chunk"
+        idx1.flush()
+
+        # Load in a brand-new instance — must NOT start empty
+        idx2 = PersistentEmbeddingIndex(embedder, tmp_path / "idx")
+        assert idx2.doc_count >= 1, (
+            "AF-1 regression: index was empty after flush() + reload(); "
+            "manifest.json likely had extra file-level keys causing shape mismatch"
+        )
+        results = idx2.search("alpha concept", top_k=1)
+        assert len(results) >= 1, "search() must return results after reload"
 
     def test_rebuild_from_kb(self, tmp_path):
         """rebuild() indexes all .md files and returns the chunk count."""

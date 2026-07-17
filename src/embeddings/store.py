@@ -21,15 +21,19 @@ logger = logging.getLogger(__name__)
 # Filenames inside the index directory (ADR-015 §Decision 1)
 VECTORS_FILE = "vectors.npy"
 MANIFEST_FILE = "manifest.json"
+STALENESS_FILE = "staleness.json"
 
 
 class FileBackedVectorStore:
-    """Atomic read/write of a (matrix, manifest) pair to disk.
+    """Atomic read/write of a (matrix, manifest, staleness) triple to disk.
 
     Storage layout (ADR-015)::
 
         <index_path>/vectors.npy      float32 matrix  [N × embedding_dim]
-        <index_path>/manifest.json    {doc_id: {path, mtime, content_hash}}
+        <index_path>/manifest.json    {chunk_doc_id: {path, mtime, hash}}
+                                      — one entry per vector row (chunks only)
+        <index_path>/staleness.json   {file_doc_id: {path, mtime, hash}}
+                                      — file-level staleness sentinels only
 
     All writes are atomic: data is written to a temp file in the same directory
     then renamed, so a crash mid-write leaves the previous version intact.
@@ -39,21 +43,26 @@ class FileBackedVectorStore:
     # Load
     # ---------------------------------------------------------------------- #
 
-    def load(self, index_path: Path) -> Optional[Tuple[np.ndarray, Dict[str, Any]]]:
-        """Load (matrix, manifest) from *index_path*.
+    def load(
+        self, index_path: Path
+    ) -> Optional[Tuple[np.ndarray, Dict[str, Any], Dict[str, Any]]]:
+        """Load (matrix, chunk_manifest, staleness) from *index_path*.
 
         Returns ``None`` if the index does not exist or is corrupt (caller
         should treat this as a cache-miss and trigger a full rebuild).
 
         Args:
-            index_path: Directory containing ``vectors.npy`` and
-                ``manifest.json``.
+            index_path: Directory containing ``vectors.npy``,
+                ``manifest.json``, and optionally ``staleness.json``.
 
         Returns:
-            ``(matrix, manifest)`` tuple, or ``None`` on any error.
+            ``(matrix, chunk_manifest, staleness)`` tuple, or ``None`` on
+            any error.  *staleness* is an empty dict when ``staleness.json``
+            is absent (graceful upgrade from old index layout).
         """
         vectors_path = index_path / VECTORS_FILE
         manifest_path = index_path / MANIFEST_FILE
+        staleness_path = index_path / STALENESS_FILE
 
         if not vectors_path.exists() or not manifest_path.exists():
             return None
@@ -66,7 +75,9 @@ class FileBackedVectorStore:
             logger.warning("kb_index_load_failed path=%s error=%s", index_path, exc)
             return None
 
-        # Sanity check: rows must match manifest entries
+        # Sanity check: rows must match chunk manifest entries exactly.
+        # staleness.json entries are NOT counted here — they are file-level
+        # sentinels and have no corresponding vector row.
         if matrix.ndim != 2 or matrix.shape[0] != len(manifest):
             logger.warning(
                 "kb_index_shape_mismatch path=%s rows=%s manifest_entries=%d",
@@ -76,7 +87,19 @@ class FileBackedVectorStore:
             )
             return None
 
-        return matrix, manifest
+        staleness: Dict[str, Any] = {}
+        if staleness_path.exists():
+            try:
+                with open(staleness_path, "r", encoding="utf-8") as f:
+                    staleness = json.load(f)
+            except Exception as exc:
+                logger.warning(
+                    "kb_index_staleness_load_failed path=%s error=%s", index_path, exc
+                )
+                # Non-fatal: a missing staleness map causes a full re-index on
+                # next rebuild, which is safe.
+
+        return matrix, manifest, staleness
 
     # ---------------------------------------------------------------------- #
     # Save
@@ -87,16 +110,22 @@ class FileBackedVectorStore:
         index_path: Path,
         matrix: np.ndarray,
         manifest: Dict[str, Any],
+        staleness: Optional[Dict[str, Any]] = None,
     ) -> None:
-        """Atomically write *matrix* and *manifest* to *index_path*.
+        """Atomically write *matrix*, *manifest*, and *staleness* to *index_path*.
 
         Uses a write-to-temp-then-rename pattern so a crash mid-write leaves
         the previous index intact (ADR-015 §Corruption Recovery).
 
         Args:
             index_path: Target directory (created if absent).
-            matrix: float32 embedding matrix [N × dim].
-            manifest: ``{doc_id: {path, mtime, content_hash}}`` mapping.
+            matrix: float32 embedding matrix [N × dim].  Rows must correspond
+                1-to-1 with *manifest* entries (chunk-level only).
+            manifest: ``{chunk_doc_id: {path, mtime, hash}}`` mapping.
+                Must contain exactly ``matrix.shape[0]`` entries.
+            staleness: ``{file_doc_id: {path, mtime, hash}}`` mapping of
+                file-level staleness sentinels (no vector rows).  Written to
+                ``staleness.json`` when provided.
 
         Raises:
             OSError: If the directory cannot be created or the rename fails.
@@ -119,7 +148,7 @@ class FileBackedVectorStore:
                 pass
             raise
 
-        # Write manifest atomically
+        # Write chunk manifest atomically
         man_fd, man_tmp = tempfile.mkstemp(dir=str(index_path), suffix=".json.tmp")
         try:
             with os.fdopen(man_fd, "w", encoding="utf-8") as f:
@@ -132,7 +161,26 @@ class FileBackedVectorStore:
                 pass
             raise
 
-        logger.debug("kb_index_saved docs=%d path=%s", len(manifest), index_path)
+        # Write file-level staleness sentinels atomically (separate file)
+        if staleness is not None:
+            sta_fd, sta_tmp = tempfile.mkstemp(dir=str(index_path), suffix=".json.tmp")
+            try:
+                with os.fdopen(sta_fd, "w", encoding="utf-8") as f:
+                    json.dump(staleness, f, indent=2)
+                os.replace(sta_tmp, str(index_path / STALENESS_FILE))
+            except Exception:
+                try:
+                    os.unlink(sta_tmp)
+                except OSError:
+                    pass
+                raise
+
+        logger.debug(
+            "kb_index_saved chunks=%d files=%d path=%s",
+            len(manifest),
+            len(staleness) if staleness else 0,
+            index_path,
+        )
 
     # ---------------------------------------------------------------------- #
     # Delete

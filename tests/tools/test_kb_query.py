@@ -429,3 +429,66 @@ class TestEmbeddingScorer:
         result = kb.query("keyword")
         assert result["total_results"] == 1
         assert result["results"][0]["score"] > 0
+
+
+# --------------------------------------------------------------------------- #
+# Graph scorer (P3)
+# --------------------------------------------------------------------------- #
+
+
+class TestGraphScorer:
+    """Tests for the graph= / graph_weight= parameters (ADR-017 Decision 7)."""
+
+    def _kb(self, tmp_path):
+        kb = _make_kb(tmp_path)
+        (kb / "concepts" / "hub.md").write_text(
+            "# Hub Document\n\nThis is the hub concept with rich content.\n"
+        )
+        (kb / "guides" / "spoke.md").write_text(
+            "# Spoke Guide\n\nhub guide content explanation\n"
+        )
+        return kb
+
+    def test_graph_weight_zero_leaves_scores_unchanged(self, tmp_path):
+        """graph_weight=0.0 must produce identical results to no-graph baseline."""
+        from src.graph.graph import KnowledgeGraph
+
+        kb = self._kb(tmp_path)
+        g = KnowledgeGraph()
+        g.add_node("concepts/hub.md", title="Hub")
+        g.add_node("guides/spoke.md", title="Spoke")
+
+        baseline = KnowledgeBaseQuery(str(kb)).query("hub")
+        with_graph = KnowledgeBaseQuery(str(kb), graph=g, graph_weight=0.0).query("hub")
+
+        assert [r["file"] for r in baseline["results"]] == [r["file"] for r in with_graph["results"]]
+        for b, w in zip(baseline["results"], with_graph["results"]):
+            assert b["score"] == pytest.approx(w["score"])
+
+    def test_graph_none_with_nonzero_weight_uses_similarity_only(self, tmp_path):
+        """graph=None disables re-ranking even when graph_weight > 0."""
+        kb = self._kb(tmp_path)
+        result = KnowledgeBaseQuery(str(kb), graph=None, graph_weight=0.5).query("hub")
+        assert result["total_results"] >= 1
+        # No graph_score field in results (graph path never activated)
+        for r in result["results"]:
+            assert "graph_score" not in r
+
+    def test_graph_reranking_adds_graph_score_field(self, tmp_path):
+        """When graph re-ranking is active, results gain a graph_score field."""
+        from src.graph.graph import KnowledgeGraph
+
+        kb = self._kb(tmp_path)
+        g = KnowledgeGraph()
+        g.add_node("concepts/hub.md", title="Hub")
+        g.add_node("guides/spoke.md", title="Spoke")
+        g.add_edge("guides/spoke.md", "concepts/hub.md", "explicit", 1.0)
+
+        result = KnowledgeBaseQuery(str(kb), graph=g, graph_weight=0.3).query("hub")
+        assert all("graph_score" in r for r in result["results"])
+
+    def test_invalid_graph_weight_raises(self, tmp_path):
+        kb = self._kb(tmp_path)
+        with pytest.raises(ValueError, match="graph_weight"):
+            KnowledgeBaseQuery(str(kb), graph_weight=1.5)
+

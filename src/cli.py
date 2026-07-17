@@ -77,6 +77,43 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("health", help="Run health checks")
     sub.add_parser("config", help="Show the effective configuration")
 
+    # --- KB graph commands (ADR-017) ---
+    p_gbuild = sub.add_parser("graph-build", help="Build KB knowledge graph and save to disk")
+    p_gbuild.add_argument("--kb-path", default="docs/knowledge-base", help="KB root directory")
+    p_gbuild.add_argument(
+        "--graph-path", default=".bob/kb-graph.json", help="Output graph file"
+    )
+    p_gbuild.add_argument(
+        "--semantic-threshold",
+        type=float,
+        default=0.3,
+        help="Min cosine similarity for a semantic edge (default: 0.3)",
+    )
+    p_gbuild.add_argument(
+        "--with-semantic",
+        action="store_true",
+        help="Derive semantic edges from the embedding index (requires .bob/kb-index/)",
+    )
+
+    p_gquery = sub.add_parser("graph-query", help="Show neighbourhood context for a KB document")
+    p_gquery.add_argument("doc_id", help="KB-relative doc id (e.g. concepts/caching.md)")
+    p_gquery.add_argument("--depth", type=int, default=1, help="BFS depth (default: 1)")
+    p_gquery.add_argument(
+        "--graph-path", default=".bob/kb-graph.json", help="Graph file (default: .bob/kb-graph.json)"
+    )
+    p_gquery.add_argument(
+        "--edge-types",
+        nargs="+",
+        default=None,
+        help="Edge types to traverse: explicit semantic broken (default: all)",
+    )
+
+    p_ghealth = sub.add_parser("graph-health", help="Show KB graph health (orphans, hubs, stats)")
+    p_ghealth.add_argument(
+        "--graph-path", default=".bob/kb-graph.json", help="Graph file (default: .bob/kb-graph.json)"
+    )
+    p_ghealth.add_argument("--top-k", type=int, default=10, help="Number of hub docs to show")
+
     return parser
 
 
@@ -107,6 +144,104 @@ def main(argv: Optional[List[str]] = None) -> int:
         _emit(facade.health(), as_json)
     elif args.command == "config":
         _emit(get_config(args.environment).get_all(), as_json)
+
+    elif args.command == "graph-build":
+        from pathlib import Path
+
+        from src.graph.builder import KnowledgeGraphBuilder, build_graph_metadata
+        from src.graph.store import GraphStore
+
+        kb_path = Path(args.kb_path)
+        graph_path = Path(args.graph_path)
+        threshold = args.semantic_threshold
+
+        index = None
+        if args.with_semantic:
+            try:
+                from src.cache.embeddings import EmbeddingGenerator
+                from src.embeddings.index import PersistentEmbeddingIndex
+                from src.embeddings.indexer import KBIndexer
+
+                embedder = EmbeddingGenerator()
+                idx = PersistentEmbeddingIndex(embedder)
+                KBIndexer(kb_path, idx).sync()
+                index = idx
+            except Exception as exc:
+                print(f"Warning: could not load embedding index ({exc}). Semantic edges skipped.",
+                      file=sys.stderr)
+
+        builder = KnowledgeGraphBuilder(kb_path, index=index, semantic_threshold=threshold)
+        graph = builder.build()
+        meta = build_graph_metadata(kb_path, threshold)
+        GraphStore().save(graph_path, graph, metadata=meta)
+
+        _emit(
+            {
+                "nodes": graph.node_count,
+                "edges": graph.edge_count,
+                "graph_path": str(graph_path),
+                "semantic_threshold": threshold,
+            },
+            as_json,
+        )
+
+    elif args.command == "graph-query":
+        from pathlib import Path
+
+        from src.graph.ranker import GraphRanker
+        from src.graph.store import GraphStore
+
+        graph_path = Path(args.graph_path)
+        graph = GraphStore().load(graph_path)
+        if graph is None:
+            print(f"Error: graph not found at {graph_path}. Run 'bob-optimize graph-build' first.",
+                  file=sys.stderr)
+            return 1
+
+        ranker = GraphRanker(graph)
+        ctx = ranker.neighbourhood_context(
+            args.doc_id, depth=args.depth, edge_types=args.edge_types
+        )
+        node = graph.get_node(args.doc_id)
+        _emit(
+            {
+                "doc_id": args.doc_id,
+                "title": node.title if node else args.doc_id,
+                "depth": args.depth,
+                "neighbours": ctx,
+            },
+            as_json,
+        )
+
+    elif args.command == "graph-health":
+        from pathlib import Path
+
+        from src.graph.store import GraphStore
+
+        graph_path = Path(args.graph_path)
+        graph = GraphStore().load(graph_path)
+        if graph is None:
+            print(f"Error: graph not found at {graph_path}. Run 'bob-optimize graph-build' first.",
+                  file=sys.stderr)
+            return 1
+
+        orphans = graph.orphans(edge_types=["explicit"])
+        hubs = graph.hubs(top_k=args.top_k)
+        pr = graph.pagerank()
+
+        _emit(
+            {
+                "node_count": graph.node_count,
+                "edge_count": graph.edge_count,
+                "orphan_count": len(orphans),
+                "orphans": orphans,
+                "top_hubs": [
+                    {"doc_id": doc_id, "inbound_edges": count, "pagerank": round(pr.get(doc_id, 0.0), 6)}
+                    for doc_id, count in hubs
+                ],
+            },
+            as_json,
+        )
 
     return 0
 

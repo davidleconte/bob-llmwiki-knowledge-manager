@@ -37,9 +37,17 @@ Complete API reference for the Token Optimization System.
 
 ## Embeddings
 
+- [chunker](embeddings/chunker.md) - `embeddings/chunker.py`
 - [index](embeddings/index.md) - `embeddings/index.py`
 - [indexer](embeddings/indexer.md) - `embeddings/indexer.py`
 - [store](embeddings/store.md) - `embeddings/store.py`
+
+## Graph
+
+- [builder](graph/builder.md) - `graph/builder.py`
+- [graph](graph/graph.md) - `graph/graph.py`
+- [ranker](graph/ranker.md) - `graph/ranker.py`
+- [store](graph/store.md) - `graph/store.py`
 
 ## Monitoring
 

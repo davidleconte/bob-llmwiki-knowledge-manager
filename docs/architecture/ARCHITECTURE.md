@@ -1,6 +1,6 @@
 # Architecture
 
-**Status:** Current (authoritative) · **Last updated:** 2026-07-14 · **Maturity:** see [`STATUS.md`](../../STATUS.md)
+**Status:** Current (authoritative) · **Last updated:** 2026-07-17 · **Maturity:** see [`STATUS.md`](../../STATUS.md)
 
 This is the **single authoritative architecture document** for the Python
 token-optimization system in this repository. It supersedes
@@ -78,7 +78,44 @@ Not shown, deliberately separate:
   (`MarkdownChunker`, `PersistentEmbeddingIndex`, `KBIndexer`). Opt-in, not on
   the `optimize()` request path; injected into `KnowledgeBaseQuery` when a
   persistent index is needed (ADR-015). Stores `[N × dim]` float32 vectors in
-  `.bob/kb-index/`. See §5 for the embedding backend details.
+  `.bob/kb-index/` (split: `manifest.json` for chunk rows, `staleness.json` for
+  file-level mtime/hash sentinels). See §5 for details.
+- **`src/graph/`** — the KB knowledge-graph layer (P3). `KnowledgeGraphBuilder`
+  derives a property graph over KB documents from explicit frontmatter links and
+  semantic cosine similarity; `GraphRanker` provides PageRank-based re-ranking;
+  `GraphStore` persists the graph atomically to `.bob/kb-graph.json`. Opt-in;
+  injected into `KnowledgeBaseQuery` via `graph=` parameter (ADR-017). See §3b
+  and §5 for details.
+
+### KB subsystem overview (opt-in, not on the optimize() path)
+
+```mermaid
+flowchart TD
+    subgraph kb_files [KB documents]
+        MDF["*.md files\ndocs/knowledge-base/"]
+    end
+    subgraph indexing [Embedding index — P2]
+        CHK["MarkdownChunker\n## boundaries + GFM tables"]
+        EMB["EmbeddingGenerator\nmlx-embeddings → sentence-transformers → hashing"]
+        IDX["PersistentEmbeddingIndex\nvectors.npy + manifest.json + staleness.json\n.bob/kb-index/"]
+        MDF --> CHK --> EMB --> IDX
+    end
+    subgraph graph_layer [Knowledge graph — P3]
+        BLD["KnowledgeGraphBuilder\nexplicit edges: frontmatter related + inline links\nsemantic edges: cosine ≥ 0.30"]
+        GR["KnowledgeGraph\nnodes + edges + PageRank"]
+        GST["GraphStore\n.bob/kb-graph.json"]
+        MDF --> BLD
+        IDX --> BLD
+        BLD --> GR --> GST
+    end
+    subgraph query [KB query path]
+        KBQ["KnowledgeBaseQuery\nkeyword · embedding · graph — all optional"]
+        RNK["GraphRanker\nrerank: final = 1-w*similarity + w*pagerank*15"]
+        IDX -->|"index= P2"| KBQ
+        GR -->|"graph= P3"| RNK --> KBQ
+        KBQ --> RES["ranked results"]
+    end
+```
 
 ## 3. Runtime dataflow
 
@@ -108,6 +145,43 @@ sequenceDiagram
 The facade's public surface — each method backs a CLI subcommand
 (`src/facade.py:87`): `optimize`, `truncate`, `count`, `cache_stats`, `metrics`,
 `cost_report`, `health`.
+
+## 3b. KB query dataflow (P2 + P3, opt-in)
+
+The KB query path is **not** on the `optimize()` request path. It is a separate
+opt-in pipeline, activated by injecting an `index` (P2) and/or `graph` (P3) into
+`KnowledgeBaseQuery`.
+
+```mermaid
+sequenceDiagram
+    participant U as Caller / CLI
+    participant KBQ as KnowledgeBaseQuery
+    participant IDX as PersistentEmbeddingIndex
+    participant GR as GraphRanker
+    participant KG as KnowledgeGraph
+
+    U->>KBQ: query(text, max_results=10)
+    alt P2 index injected
+        KBQ->>IDX: search(text, top_k=40)
+        IDX-->>KBQ: chunk-level candidates with cosine scores
+        KBQ->>KBQ: keyword tie-break + blend at embedding_weight
+    else keyword-only fallback
+        KBQ->>KBQ: full filesystem scan + keyword scoring
+    end
+    alt P3 graph injected and graph_weight > 0
+        KBQ->>GR: rerank(results, weight)
+        GR->>KG: pagerank_scores() -- lazy-cached
+        KG-->>GR: dict doc_id to score
+        GR->>GR: final = 1-w * similarity + w * pagerank * 15.0
+        GR-->>KBQ: re-ranked results
+    end
+    KBQ-->>U: top-k ranked results
+```
+
+CLI entry points (added in P3):
+- `bob-optimize graph-build` — builds and persists the graph
+- `bob-optimize graph-query <text>` — graph-aware KB search
+- `bob-optimize graph-health` — orphan/hub/broken-link report
 
 ## 4. Configuration → runtime
 
@@ -152,20 +226,60 @@ that matter to the architecture:
   (exact-key fast path) and **L2** `SemanticCache` (cosine similarity via
   `EmbeddingGenerator`, hit floor 0.85). A hit returns a stored result for 0 tokens.
   Deterministic; the C-5 colliding-key correctness bug is fixed.
-  `EmbeddingGenerator` supports two backends:
-  - `"hashing"` (default) — stateless `HashingVectorizer`, 1000-dim, <1 ms, no extra
-    dependencies, works on all platforms.
-  - `"minilm"` (optional) — `sentence-transformers/all-MiniLM-L6-v2` via
-    `mlx-embeddings`, 384-dim, ~2–4 ms warm, Apple Silicon only
-    (`pip install -e ".[mlx]"`). Falls back silently to `"hashing"` when
-    `mlx-embeddings` is absent. No HuggingFace API key required (public model;
-    first-use downloads ~22 MB to `~/.cache/huggingface/`). See ADR-014.
+  `EmbeddingGenerator` supports two backends resolved via a priority fallback chain:
+  - `"hashing"` (default / final fallback) — stateless `HashingVectorizer`, 1000-dim,
+    <1 ms, no extra dependencies, all platforms.
+  - `"minilm"` (optional) — `sentence-transformers/all-MiniLM-L6-v2`, 384-dim. Loaded
+    via **`mlx-embeddings`** first (Apple Silicon, ~2–4 ms warm,
+    `pip install -e ".[mlx]"`), then via **`sentence-transformers`** as a cross-platform
+    fallback (~5–20 ms, `pip install sentence-transformers`). Falls back silently to
+    `"hashing"` when neither is installed. MiniLM p@3=0.88 vs hashing p@3=0.60 on the
+    KB golden set. See ADR-014.
 - **KB Embedding Index (`src/embeddings/`).** Disk-backed semantic search layer for
   KB documents (opt-in, not on the `optimize()` path). `MarkdownChunker` splits `.md`
   files on `##`-boundaries and extracts GFM tables as standalone chunks, each assigned
   a `file.md#slug` doc_id. `PersistentEmbeddingIndex` stores an `[N × dim]` float32
-  matrix in `.bob/kb-index/` with incremental mtime/hash rebuild. `KBIndexer` drives
-  the sync. Injected into `KnowledgeBaseQuery` via `index=` parameter. See ADR-015.
+  matrix in `.bob/kb-index/` with incremental mtime/hash rebuild — **split storage**:
+  `manifest.json` holds chunk-level vector rows only; `staleness.json` holds file-level
+  mtime/hash sentinels (AF-1 fix; ensures `matrix.shape[0] == len(manifest)` invariant).
+  `KBIndexer` drives the sync. Injected into `KnowledgeBaseQuery` via `index=` parameter.
+  See ADR-015.
+- **Knowledge Graph (`src/graph/`).** Pure-Python property graph over KB documents
+  (opt-in, not on the `optimize()` path). Four modules:
+  - `graph.py` — `KnowledgeGraph` (adjacency dict, BFS traversal, PageRank power
+    method, `orphans()`, `hubs()`), `NodeProps` (title, category, tags, date, status),
+    `Edge` (source, target, type, weight, label).
+  - `builder.py` — `KnowledgeGraphBuilder`: walks KB filesystem, parses frontmatter
+    `related:` lists and inline `[text](path)` links for **explicit** edges; queries
+    `PersistentEmbeddingIndex` per document and applies max-aggregation to derive
+    **semantic** edges above `semantic_threshold=0.30`. Broken links detected and stored
+    as type `"broken"` (weight 0.0, excluded from PageRank).
+  - `ranker.py` — `GraphRanker`: lazy PageRank cache (damping=0.85, tol=1e-6),
+    `rerank()` blend formula: `final = (1-w)*similarity + w*pagerank*PAGERANK_SCALE`
+    where `PAGERANK_SCALE = 15.0`. Default `graph_weight=0.0` (ADR-017 validated:
+    p@3 neutral on this corpus; safe default pending a richer corpus or model change).
+  - `store.py` — `GraphStore`: atomic `os.replace`-based JSON persistence to
+    `.bob/kb-graph.json`. See ADR-017.
+
+  ```mermaid
+  flowchart TD
+      subgraph build [Graph build -- KnowledgeGraphBuilder]
+          MDF["KB *.md files"] --> FM["parse frontmatter related + inline links"]
+          FM --> EX["explicit edges\nweight=1.0"]
+          MDF --> QRY["PersistentEmbeddingIndex.search\nper-document content as query"]
+          QRY --> AGG["max-aggregate chunk scores\nper document pair"]
+          AGG --> SEM["semantic edges\ncosine >= 0.30, weight=score"]
+          EX --> GR["KnowledgeGraph\nnodes + edges"]
+          SEM --> GR
+      end
+      subgraph persist [Persistence]
+          GR --> GST["GraphStore\n.bob/kb-graph.json\natomic os.replace"]
+      end
+      subgraph rank [Re-ranking -- GraphRanker]
+          GR --> PR["pagerank() power method\ndamping=0.85 tol=1e-6"]
+          PR --> BL["rerank(results, weight)\nfinal = 1-w*sim + w*PR*15.0"]
+      end
+  ```
 - **Optimizer (`src/optimizer/`).** `PromptOptimizer` applies whitespace
   normalization and redundancy removal to `target_reduction`, gated by
   `min_quality_score`. `TokenCounter` counts real tokens via tiktoken, with a
@@ -226,9 +340,12 @@ Verifiable acceptance criteria for the system's cross-cutting quality attributes
 
 ## 9. Where to go next
 
-- Decisions and their rationale: [`../adr/`](../adr/README.md) (ADR 001–013).
-- Per-module API: [`../api/`](../api/README.md) (generated, drift-checked).
+- Decisions and their rationale: [`../adr/`](../adr/README.md) (ADR 001–017).
+- Per-module API: [`../api/`](../api/README.md) (generated, drift-checked; includes `src/graph/`).
 - Maturity, coverage, and the measured savings snapshot: [`STATUS.md`](../../STATUS.md).
+- KB integration guide: [`../../INTEGRATIONS.md`](../../INTEGRATIONS.md) (P1–P3 code examples).
+- Knowledge graph design: [`../adr/017-knowledge-graph-layer.md`](../adr/017-knowledge-graph-layer.md) (ADR-017).
+- Graph live validation results: [`../knowledge-base/research/graph-validation-2026-07-17.md`](../knowledge-base/research/graph-validation-2026-07-17.md).
 
 ---
 

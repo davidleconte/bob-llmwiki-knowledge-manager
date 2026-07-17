@@ -37,6 +37,11 @@ Architecture Decision Records document important architectural decisions made du
 - Rationale: Truncation is lossy with no acceptance gate; misconfiguration risk exceeds benefit; callers control strategy at call-site
 - Status: ✅ Accepted
 
+**[017: Knowledge Graph Layer](017-knowledge-graph-layer.md)**
+- Decision: Pure-Python property graph (`src/graph/`) with file-level nodes, two edge types (explicit + semantic), JSON persistence, optional injection into `KnowledgeBaseQuery`
+- Rationale: Multi-hop traversal, orphan detection, and PageRank re-ranking without external graph library dependencies
+- Status: ✅ Accepted
+
 **[006: Cache Strategy](006-cache-strategy.md)**
 - Decision: In-memory cache over distributed cache
 - Rationale: Lower latency, simpler implementation
