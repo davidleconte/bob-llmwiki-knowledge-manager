@@ -281,9 +281,7 @@ class TestPersistentEmbeddingIndex:
         idx.rebuild(kb)
 
         # Change content (different hash)
-        doc.write_text(
-            "## Revised\n\nCompletely different topic now with enough chars to index.\n"
-        )
+        doc.write_text("## Revised\n\nCompletely different topic now with enough chars to index.\n")
         n = idx.rebuild(kb)
         assert n >= 1  # at least one chunk remains after re-index
 
@@ -403,6 +401,7 @@ def test_content_hash_stable():
 def test_content_hash_differs():
     assert _content_hash("a") != _content_hash("b")
 
+
 # --------------------------------------------------------------------------- #
 # MarkdownChunker
 # --------------------------------------------------------------------------- #
@@ -413,6 +412,7 @@ class TestMarkdownChunker:
 
     def _chunker(self):
         from src.embeddings.chunker import MarkdownChunker
+
         return MarkdownChunker()
 
     def test_no_headings_yields_preamble(self):
@@ -441,7 +441,9 @@ class TestMarkdownChunker:
         assert "configuration-options" in slugs
 
     def test_slug_normalisation(self):
-        content = "## L1 / L2 Cache Strategy\n\nDescription goes here with enough text to pass minimum.\n"
+        content = (
+            "## L1 / L2 Cache Strategy\n\nDescription goes here with enough text to pass minimum.\n"
+        )
         chunks = list(self._chunker().chunk("a.md", content))
         slugs = [s for s, _ in chunks]
         assert "l1-l2-cache-strategy" in slugs
@@ -454,7 +456,9 @@ class TestMarkdownChunker:
         assert all(t for _, t in chunks)  # any yielded chunk has non-empty text
 
     def test_preamble_below_min_skipped(self):
-        content = "Short.\n\n## Real Section\n\nThis section has enough content to be indexed properly.\n"
+        content = (
+            "Short.\n\n## Real Section\n\nThis section has enough content to be indexed properly.\n"
+        )
         chunks = list(self._chunker().chunk("a.md", content))
         slugs = [s for s, _ in chunks]
         assert "preamble" not in slugs  # too short
@@ -499,12 +503,11 @@ class TestMarkdownChunker:
             "## Beta\n\nSecond section with enough content to index properly.\n"
         )
         from src.embeddings.chunker import MarkdownChunker
+
         chunker = MarkdownChunker()
         doc_ids = [
-            f"concepts/test.md#{slug}"
-            for slug, _ in chunker.chunk("concepts/test.md", content)
+            f"concepts/test.md#{slug}" for slug, _ in chunker.chunk("concepts/test.md", content)
         ]
         assert all("#" in d for d in doc_ids)
         assert any("alpha" in d for d in doc_ids)
         assert any("beta" in d for d in doc_ids)
-

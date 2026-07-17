@@ -80,9 +80,7 @@ def build_parser() -> argparse.ArgumentParser:
     # --- KB graph commands (ADR-017) ---
     p_gbuild = sub.add_parser("graph-build", help="Build KB knowledge graph and save to disk")
     p_gbuild.add_argument("--kb-path", default="docs/knowledge-base", help="KB root directory")
-    p_gbuild.add_argument(
-        "--graph-path", default=".bob/kb-graph.json", help="Output graph file"
-    )
+    p_gbuild.add_argument("--graph-path", default=".bob/kb-graph.json", help="Output graph file")
     p_gbuild.add_argument(
         "--semantic-threshold",
         type=float,
@@ -99,7 +97,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_gquery.add_argument("doc_id", help="KB-relative doc id (e.g. concepts/caching.md)")
     p_gquery.add_argument("--depth", type=int, default=1, help="BFS depth (default: 1)")
     p_gquery.add_argument(
-        "--graph-path", default=".bob/kb-graph.json", help="Graph file (default: .bob/kb-graph.json)"
+        "--graph-path",
+        default=".bob/kb-graph.json",
+        help="Graph file (default: .bob/kb-graph.json)",
     )
     p_gquery.add_argument(
         "--edge-types",
@@ -110,7 +110,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_ghealth = sub.add_parser("graph-health", help="Show KB graph health (orphans, hubs, stats)")
     p_ghealth.add_argument(
-        "--graph-path", default=".bob/kb-graph.json", help="Graph file (default: .bob/kb-graph.json)"
+        "--graph-path",
+        default=".bob/kb-graph.json",
+        help="Graph file (default: .bob/kb-graph.json)",
     )
     p_ghealth.add_argument("--top-k", type=int, default=10, help="Number of hub docs to show")
 
@@ -118,7 +120,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_kbsearch = sub.add_parser("kb-search", help="Semantic search across the knowledge base")
     p_kbsearch.add_argument("query", help="Search query")
     p_kbsearch.add_argument(
-        "--kb-path", default="docs/knowledge-base", help="KB root directory (default: docs/knowledge-base)"
+        "--kb-path",
+        default="docs/knowledge-base",
+        help="KB root directory (default: docs/knowledge-base)",
     )
     p_kbsearch.add_argument(
         "--max-results", type=int, default=10, help="Maximum number of results (default: 10)"
@@ -194,8 +198,10 @@ def main(argv: Optional[List[str]] = None) -> int:
                 KBIndexer(kb_path, idx).sync()
                 index = idx
             except Exception as exc:
-                print(f"Warning: could not load embedding index ({exc}). Semantic edges skipped.",
-                      file=sys.stderr)
+                print(
+                    f"Warning: could not load embedding index ({exc}). Semantic edges skipped.",
+                    file=sys.stderr,
+                )
 
         builder = KnowledgeGraphBuilder(kb_path, index=index, semantic_threshold=threshold)
         graph = builder.build()
@@ -221,8 +227,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         graph_path = Path(args.graph_path)
         graph = GraphStore().load(graph_path)
         if graph is None:
-            print(f"Error: graph not found at {graph_path}. Run 'bob-optimize graph-build' first.",
-                  file=sys.stderr)
+            print(
+                f"Error: graph not found at {graph_path}. Run 'bob-optimize graph-build' first.",
+                file=sys.stderr,
+            )
             return 1
 
         ranker = GraphRanker(graph)
@@ -248,8 +256,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         graph_path = Path(args.graph_path)
         graph = GraphStore().load(graph_path)
         if graph is None:
-            print(f"Error: graph not found at {graph_path}. Run 'bob-optimize graph-build' first.",
-                  file=sys.stderr)
+            print(
+                f"Error: graph not found at {graph_path}. Run 'bob-optimize graph-build' first.",
+                file=sys.stderr,
+            )
             return 1
 
         orphans = graph.orphans(edge_types=["explicit"])
@@ -263,7 +273,11 @@ def main(argv: Optional[List[str]] = None) -> int:
                 "orphan_count": len(orphans),
                 "orphans": orphans,
                 "top_hubs": [
-                    {"doc_id": doc_id, "inbound_edges": count, "pagerank": round(pr.get(doc_id, 0.0), 6)}
+                    {
+                        "doc_id": doc_id,
+                        "inbound_edges": count,
+                        "pagerank": round(pr.get(doc_id, 0.0), 6),
+                    }
                     for doc_id, count in hubs
                 ],
             },

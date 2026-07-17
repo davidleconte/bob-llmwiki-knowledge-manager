@@ -78,8 +78,7 @@ def _parse_frontmatter(content: str) -> Dict[str, Any]:
     related_match = re.search(r"^related:\s*\n((?:\s+-\s+.+\n?)+)", fm_text, re.MULTILINE)
     if related_match:
         result["related"] = [
-            item.strip()
-            for item in _RELATED_ITEM_RE.findall(related_match.group(1))
+            item.strip() for item in _RELATED_ITEM_RE.findall(related_match.group(1))
         ]
 
     return result
@@ -110,7 +109,7 @@ def _normalise_kb_link(raw_link: str, source_doc_id: str) -> Optional[str]:
     if path.startswith("../"):
         # Navigate up from source directory
         segments = (source_dir + "/" + path).split("/")
-        normalised_parts = []
+        normalised_parts: list[str] = []
         for seg in segments:
             if seg == "..":
                 if normalised_parts:

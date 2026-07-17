@@ -70,6 +70,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **P4 — Query quality improvements** (ADR-018):
+  - `KnowledgeBaseQuery(recency_weight=0.0)`: optional recency tiebreaker. Blends
+    relative file mtime into scores (`score = (1-rw)*base + rw*(norm_mtime×15.0)`).
+    Resolves golden-set Miss #3 (`security-scan` recency tie). Default `0.0` is
+    backward-compatible.
+  - `KnowledgeBaseQuery.query(date_filter=None)`: optional ISO date prefix filter
+    (e.g. `"2026-07"`). Includes undated documents (fail-open). Resolves Miss #2
+    (date-based queries). Default `None` is backward-compatible.
+  - **`bob-optimize kb-search`** CLI subcommand: `--recency-weight`, `--date-filter`,
+    `--max-results`, `--categories` (`src/cli.py`).
+- **P4 — Graph NodeProps enrichment** (`src/graph/graph.py`, `src/graph/builder.py`):
+  four new optional fields with backward-compatible defaults:
+  `mtime_epoch` (file mtime), `content_length` (char count),
+  `description` (first paragraph ≤ 200 chars), `related_refs` (raw frontmatter list).
+  `KnowledgeGraphBuilder._add_nodes()` populates all four. Old `.bob/kb-graph.json`
+  files load cleanly via `from_dict()` `.get(key, default)`.
 - **P3 — Knowledge Graph Layer** (`src/graph/`): pure-Python property graph over
   KB documents. `KnowledgeGraph` (adjacency dict, BFS, PageRank), `KnowledgeGraphBuilder`
   (explicit edges from frontmatter `related:` + inline links; semantic edges via
@@ -91,9 +107,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `mlx-embeddings` first (Apple Silicon, ~2–4 ms), then `sentence-transformers`
   as a cross-platform fallback (~5–20 ms), then `"hashing"` if neither is
   installed. Previously only `mlx-embeddings` activated MiniLM; `sentence-transformers`
-  was installed but silently ignored (`src/cache/embeddings.py`).
+  was installed but silently ignored (`src/cache/embeddings.py`). ADR-017 follow-up.
 
 ### Fixed
+- **AF-3: `_extract_tables` used `findall` with capturing group** (truncated to last
+  row). Replaced `findall` guard with `finditer` exclusively (`src/embeddings/chunker.py`).
 - **AF-1: `FileBackedVectorStore` flush/reload shape mismatch.** `manifest.json`
   now holds chunk-level entries only; file-level mtime/hash sentinels are written
   to a separate `staleness.json`. Fixes `load()` returning `None` when chunk and

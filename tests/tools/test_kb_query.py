@@ -444,9 +444,7 @@ class TestGraphScorer:
         (kb / "concepts" / "hub.md").write_text(
             "# Hub Document\n\nThis is the hub concept with rich content.\n"
         )
-        (kb / "guides" / "spoke.md").write_text(
-            "# Spoke Guide\n\nhub guide content explanation\n"
-        )
+        (kb / "guides" / "spoke.md").write_text("# Spoke Guide\n\nhub guide content explanation\n")
         return kb
 
     def test_graph_weight_zero_leaves_scores_unchanged(self, tmp_path):
@@ -461,7 +459,9 @@ class TestGraphScorer:
         baseline = KnowledgeBaseQuery(str(kb)).query("hub")
         with_graph = KnowledgeBaseQuery(str(kb), graph=g, graph_weight=0.0).query("hub")
 
-        assert [r["file"] for r in baseline["results"]] == [r["file"] for r in with_graph["results"]]
+        assert [r["file"] for r in baseline["results"]] == [
+            r["file"] for r in with_graph["results"]
+        ]
         for b, w in zip(baseline["results"], with_graph["results"]):
             assert b["score"] == pytest.approx(w["score"])
 
@@ -491,7 +491,6 @@ class TestGraphScorer:
         kb = self._kb(tmp_path)
         with pytest.raises(ValueError, match="graph_weight"):
             KnowledgeBaseQuery(str(kb), graph_weight=1.5)
-
 
 
 # --------------------------------------------------------------------------- #
@@ -560,9 +559,7 @@ class TestDateFilter:
         (kb / "research" / "new.md").write_text(
             "---\ndate: 2026-07-10\n---\n# New Research\n\nSome research notes here.\n"
         )
-        result = KnowledgeBaseQuery(str(kb)).query(
-            "research notes", date_filter="2026-07"
-        )
+        result = KnowledgeBaseQuery(str(kb)).query("research notes", date_filter="2026-07")
         files = [r["file"] for r in result["results"]]
         assert "research/new.md" in files
         assert "research/old.md" not in files

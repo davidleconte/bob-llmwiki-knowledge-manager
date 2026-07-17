@@ -99,7 +99,7 @@ class KnowledgeBaseQuery:
         self._embedder = embedder
         self._embedding_weight = embedding_weight
         self._index = index  # PersistentEmbeddingIndex | None (P2-2)
-        self._graph = graph   # KnowledgeGraph | None (P3)
+        self._graph = graph  # KnowledgeGraph | None (P3)
         self._graph_weight = graph_weight
         self._recency_weight = recency_weight
 
@@ -152,20 +152,20 @@ class KnowledgeBaseQuery:
         if self._graph is not None and self._graph_weight > 0.0 and "results" in result:
             # Lazy import: only pulled in when the graph path is actually used
             from src.graph.ranker import GraphRanker
+
             result["results"] = GraphRanker(self._graph).rerank(
                 result["results"], self._graph_weight
             )
 
         # --- P4 recency blend (optional, backward-compatible) ---
         if self._recency_weight > 0.0 and "results" in result and result["results"]:
-            result["results"] = self._apply_recency_blend(
-                result["results"], self._recency_weight
-            )
+            result["results"] = self._apply_recency_blend(result["results"], self._recency_weight)
 
         # --- P4 date filter (optional, backward-compatible) ---
         if date_filter is not None and "results" in result:
             result["results"] = [
-                r for r in result["results"]
+                r
+                for r in result["results"]
                 if _doc_date_matches(r["file"], self.kb_path, date_filter)
             ]
             result["total_results"] = len(result["results"])
@@ -370,9 +370,7 @@ class KnowledgeBaseQuery:
 
         return score
 
-    def _apply_recency_blend(
-        self, results: List[Dict], weight: float
-    ) -> List[Dict]:
+    def _apply_recency_blend(self, results: List[Dict], weight: float) -> List[Dict]:
         """Blend file mtime into result scores (P4 recency tiebreaker).
 
         Normalises each document's mtime to [0, 1] relative to the newest

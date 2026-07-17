@@ -103,9 +103,7 @@ class GraphStore:
         }
 
         # Atomic write: temp file in same directory → os.replace()
-        fd, tmp_path = tempfile.mkstemp(
-            dir=str(graph_path.parent), suffix=".json.tmp"
-        )
+        fd, tmp_path = tempfile.mkstemp(dir=str(graph_path.parent), suffix=".json.tmp")
         try:
             with os.fdopen(fd, "w", encoding="utf-8") as f:
                 json.dump(payload, f, indent=2)

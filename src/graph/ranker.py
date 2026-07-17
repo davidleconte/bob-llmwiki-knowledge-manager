@@ -118,14 +118,16 @@ class GraphRanker:
             edges = info.get("edges", [])
             first_edge = edges[0] if edges else None
 
-            output.append({
-                "doc_id": neighbour_id,
-                "title": node.title if node else neighbour_id,
-                "category": node.category if node else "",
-                "distance": info["distance"],
-                "edge_type": first_edge.type if first_edge else "",
-                "edge_weight": round(first_edge.weight, 4) if first_edge else 0.0,
-            })
+            output.append(
+                {
+                    "doc_id": neighbour_id,
+                    "title": node.title if node else neighbour_id,
+                    "category": node.category if node else "",
+                    "distance": info["distance"],
+                    "edge_type": first_edge.type if first_edge else "",
+                    "edge_weight": round(first_edge.weight, 4) if first_edge else 0.0,
+                }
+            )
 
         output.sort(key=lambda x: (x["distance"], x["doc_id"]))
         return output

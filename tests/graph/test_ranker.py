@@ -5,8 +5,7 @@ from __future__ import annotations
 import pytest
 
 from src.graph.graph import KnowledgeGraph
-from src.graph.ranker import PAGERANK_SCALE, GraphRanker
-
+from src.graph.ranker import GraphRanker
 
 # --------------------------------------------------------------------------- #
 # Helpers

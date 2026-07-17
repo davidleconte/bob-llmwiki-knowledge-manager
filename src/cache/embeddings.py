@@ -27,7 +27,6 @@ import numpy as np
 from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-
 # ---------------------------------------------------------------------------
 # MiniLM backend resolution — tries mlx-embeddings first (Apple MLX),
 # then sentence-transformers (cross-platform).  Falls back to "hashing" when
@@ -53,7 +52,6 @@ def _try_load_minilm() -> bool:
     # 1. Try Apple MLX (preferred on Apple Silicon)
     try:
         import mlx_embeddings  # noqa: F401
-
         from mlx_embeddings import load  # type: ignore[import]
 
         _minilm_model = load("sentence-transformers/all-MiniLM-L6-v2")

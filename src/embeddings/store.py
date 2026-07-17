@@ -43,9 +43,7 @@ class FileBackedVectorStore:
     # Load
     # ---------------------------------------------------------------------- #
 
-    def load(
-        self, index_path: Path
-    ) -> Optional[Tuple[np.ndarray, Dict[str, Any], Dict[str, Any]]]:
+    def load(self, index_path: Path) -> Optional[Tuple[np.ndarray, Dict[str, Any], Dict[str, Any]]]:
         """Load (matrix, chunk_manifest, staleness) from *index_path*.
 
         Returns ``None`` if the index does not exist or is corrupt (caller
@@ -93,9 +91,7 @@ class FileBackedVectorStore:
                 with open(staleness_path, "r", encoding="utf-8") as f:
                     staleness = json.load(f)
             except Exception as exc:
-                logger.warning(
-                    "kb_index_staleness_load_failed path=%s error=%s", index_path, exc
-                )
+                logger.warning("kb_index_staleness_load_failed path=%s error=%s", index_path, exc)
                 # Non-fatal: a missing staleness map causes a full re-index on
                 # next rebuild, which is safe.
 

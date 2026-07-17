@@ -84,6 +84,7 @@ class TestMiniLMBackend:
 
         # Simulate mlx-embeddings being absent while keeping sentence-transformers.
         import builtins
+
         real_import = builtins.__import__
 
         def _block_mlx(name, *args, **kwargs):
@@ -109,6 +110,7 @@ class TestMiniLMBackend:
         monkeypatch.setattr(emb_mod, "_minilm_model", None)
 
         import builtins
+
         real_import = builtins.__import__
 
         def _block_mlx(name, *args, **kwargs):
@@ -120,9 +122,11 @@ class TestMiniLMBackend:
 
         if not emb_mod._try_load_minilm():
             import pytest
+
             pytest.skip("sentence-transformers not installed")
 
         import numpy as np
+
         vec = emb_mod._embed_minilm("caching strategy for LLM token optimisation")
         assert vec.shape == (384,), f"Expected (384,), got {vec.shape}"
         norm = float(np.linalg.norm(vec))
@@ -141,6 +145,7 @@ class TestMiniLMBackend:
         monkeypatch.setattr(emb_mod, "_minilm_model", None)
 
         import builtins
+
         real_import = builtins.__import__
 
         def _block_mlx(name, *args, **kwargs):
@@ -154,6 +159,7 @@ class TestMiniLMBackend:
         loaded = emb_mod._try_load_minilm()
         if not loaded:
             import pytest
+
             pytest.skip("sentence-transformers not installed")
 
         gen = emb_mod.EmbeddingGenerator(backend="minilm")

@@ -6,7 +6,6 @@ import pytest
 
 from src.graph.graph import Edge, KnowledgeGraph, NodeProps
 
-
 # --------------------------------------------------------------------------- #
 # Helpers
 # --------------------------------------------------------------------------- #
@@ -46,9 +45,15 @@ class TestNodeProps:
         assert n.tags == []
 
     def test_roundtrip(self):
-        n = NodeProps(title="Test", category="concepts", tags=["a", "b"], date="2026-07-17", type="concept", status="active")
+        n = NodeProps(
+            title="Test",
+            category="concepts",
+            tags=["a", "b"],
+            date="2026-07-17",
+            type="concept",
+            status="active",
+        )
         assert NodeProps.from_dict(n.to_dict()) == n
-
 
     def test_new_fields_have_safe_defaults(self):
         """P4: mtime_epoch, content_length, description, related_refs default correctly."""
@@ -75,13 +80,19 @@ class TestNodeProps:
 
     def test_old_json_missing_new_fields_loads_cleanly(self):
         """P4: from_dict() on old JSON without P4 keys returns safe defaults."""
-        old_json = {"title": "Old Doc", "category": "concepts", "tags": [], "date": "", "type": "", "status": ""}
+        old_json = {
+            "title": "Old Doc",
+            "category": "concepts",
+            "tags": [],
+            "date": "",
+            "type": "",
+            "status": "",
+        }
         n = NodeProps.from_dict(old_json)
         assert n.mtime_epoch == 0.0
         assert n.content_length == 0
         assert n.description == ""
         assert n.related_refs == []
-
 
 
 # --------------------------------------------------------------------------- #

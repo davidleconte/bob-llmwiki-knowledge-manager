@@ -5,14 +5,11 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock
 
-import pytest
-
 from src.graph.builder import (
     KnowledgeGraphBuilder,
     _normalise_kb_link,
     _parse_frontmatter,
 )
-from src.graph.graph import KnowledgeGraph
 
 CATEGORIES = ("concepts", "guides", "references", "research")
 
@@ -110,7 +107,9 @@ class TestNormaliseKBLink:
 class TestAddNodes:
     def test_nodes_created_for_all_md_files(self, tmp_path):
         kb = _make_kb(tmp_path)
-        _write_doc(kb, "concepts/a.md", "---\ntitle: Alpha\ntype: concept\nstatus: active\n---\n# Alpha\n")
+        _write_doc(
+            kb, "concepts/a.md", "---\ntitle: Alpha\ntype: concept\nstatus: active\n---\n# Alpha\n"
+        )
         _write_doc(kb, "guides/b.md", "# Beta\n\nContent")
 
         builder = KnowledgeGraphBuilder(kb)
@@ -146,8 +145,7 @@ class TestAddNodes:
 class TestBuildExplicitFrontmatter:
     def test_related_frontmatter_produces_explicit_edge(self, tmp_path):
         kb = _make_kb(tmp_path)
-        _write_doc(kb, "concepts/a.md",
-                   "---\ntitle: A\nrelated:\n  - ../guides/b.md\n---\n# A\n")
+        _write_doc(kb, "concepts/a.md", "---\ntitle: A\nrelated:\n  - ../guides/b.md\n---\n# A\n")
         _write_doc(kb, "guides/b.md", "# B\n\nContent")
 
         builder = KnowledgeGraphBuilder(kb)
@@ -157,8 +155,9 @@ class TestBuildExplicitFrontmatter:
 
     def test_broken_link_recorded_as_broken_edge(self, tmp_path):
         kb = _make_kb(tmp_path)
-        _write_doc(kb, "concepts/a.md",
-                   "---\ntitle: A\nrelated:\n  - ../guides/nonexistent.md\n---\n# A\n")
+        _write_doc(
+            kb, "concepts/a.md", "---\ntitle: A\nrelated:\n  - ../guides/nonexistent.md\n---\n# A\n"
+        )
 
         builder = KnowledgeGraphBuilder(kb)
         graph = builder.build()
@@ -176,8 +175,11 @@ class TestBuildExplicitFrontmatter:
 class TestBuildExplicitInlineLinks:
     def test_inline_link_produces_explicit_edge(self, tmp_path):
         kb = _make_kb(tmp_path)
-        _write_doc(kb, "guides/setup.md",
-                   "# Setup\n\nSee [Caching Concepts](../concepts/caching.md) for details.")
+        _write_doc(
+            kb,
+            "guides/setup.md",
+            "# Setup\n\nSee [Caching Concepts](../concepts/caching.md) for details.",
+        )
         _write_doc(kb, "concepts/caching.md", "# Caching\n\nContent")
 
         builder = KnowledgeGraphBuilder(kb)
@@ -187,8 +189,9 @@ class TestBuildExplicitInlineLinks:
 
     def test_inline_link_label_preserved(self, tmp_path):
         kb = _make_kb(tmp_path)
-        _write_doc(kb, "guides/setup.md",
-                   "# Setup\n\nSee [Caching Concepts](../concepts/caching.md).")
+        _write_doc(
+            kb, "guides/setup.md", "# Setup\n\nSee [Caching Concepts](../concepts/caching.md)."
+        )
         _write_doc(kb, "concepts/caching.md", "# Caching\n\nContent")
 
         builder = KnowledgeGraphBuilder(kb)
@@ -199,8 +202,7 @@ class TestBuildExplicitInlineLinks:
 
     def test_external_link_ignored(self, tmp_path):
         kb = _make_kb(tmp_path)
-        _write_doc(kb, "guides/setup.md",
-                   "# Setup\n\nSee [GitHub](https://github.com/example).")
+        _write_doc(kb, "guides/setup.md", "# Setup\n\nSee [GitHub](https://github.com/example).")
         builder = KnowledgeGraphBuilder(kb)
         graph = builder.build()
         assert graph.edge_count == 0
@@ -208,9 +210,11 @@ class TestBuildExplicitInlineLinks:
     def test_duplicate_link_not_added_twice(self, tmp_path):
         """A link that appears in both frontmatter and body must only create one edge."""
         kb = _make_kb(tmp_path)
-        _write_doc(kb, "concepts/a.md",
-                   "---\ntitle: A\nrelated:\n  - ../guides/b.md\n---\n"
-                   "# A\n\nSee [B](../guides/b.md).\n")
+        _write_doc(
+            kb,
+            "concepts/a.md",
+            "---\ntitle: A\nrelated:\n  - ../guides/b.md\n---\n# A\n\nSee [B](../guides/b.md).\n",
+        )
         _write_doc(kb, "guides/b.md", "# B\n\nContent")
 
         builder = KnowledgeGraphBuilder(kb)
@@ -296,8 +300,10 @@ class TestBuildSemantic:
         builder = KnowledgeGraphBuilder(kb, index=mock_index, semantic_threshold=0.3)
         graph = builder.build()
         semantic_edges = [
-            e for _, edges in [(d, graph.out_edges(d)) for d, _ in graph.nodes()]
-            for e in edges if e.type == "semantic"
+            e
+            for _, edges in [(d, graph.out_edges(d)) for d, _ in graph.nodes()]
+            for e in edges
+            if e.type == "semantic"
         ]
         assert len(semantic_edges) == 0
 
@@ -306,8 +312,10 @@ class TestBuildSemantic:
         _write_doc(kb, "concepts/a.md", "# A\n\nContent")
         graph = KnowledgeGraphBuilder(kb, index=None).build()
         semantic = [
-            e for _, edges in [(d, graph.out_edges(d)) for d, _ in graph.nodes()]
-            for e in edges if e.type == "semantic"
+            e
+            for _, edges in [(d, graph.out_edges(d)) for d, _ in graph.nodes()]
+            for e in edges
+            if e.type == "semantic"
         ]
         assert len(semantic) == 0
 
@@ -326,6 +334,7 @@ class TestBuilderNodePropsEnrichment:
         kb = _make_kb(tmp_path)
         doc = _write_doc(kb, "concepts/a.md", "# A\n\nSome content here.")
         import time
+
         before = time.time() - 1  # slightly before write
         graph = KnowledgeGraphBuilder(kb).build()
         props = graph.get_node("concepts/a.md")
@@ -380,12 +389,16 @@ class TestBuilderNodePropsEnrichment:
     def test_builder_populates_related_refs(self, tmp_path):
         """related_refs contains the raw related: list from frontmatter."""
         kb = _make_kb(tmp_path)
-        _write_doc(kb, "concepts/a.md", (
-            "---\ntitle: A\nrelated:\n"
-            "  - ../guides/setup.md\n"
-            "  - ../research/notes.md\n"
-            "---\n# A\n\nBody.\n"
-        ))
+        _write_doc(
+            kb,
+            "concepts/a.md",
+            (
+                "---\ntitle: A\nrelated:\n"
+                "  - ../guides/setup.md\n"
+                "  - ../research/notes.md\n"
+                "---\n# A\n\nBody.\n"
+            ),
+        )
         graph = KnowledgeGraphBuilder(kb).build()
         props = graph.get_node("concepts/a.md")
         assert props is not None

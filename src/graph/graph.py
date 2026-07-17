@@ -17,7 +17,6 @@ from collections import deque
 from dataclasses import dataclass, field
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
-
 # --------------------------------------------------------------------------- #
 # Data types
 # --------------------------------------------------------------------------- #
@@ -95,7 +94,7 @@ class Edge:
 
     source: str
     target: str
-    type: str       # "explicit" | "semantic" | "broken"
+    type: str  # "explicit" | "semantic" | "broken"
     weight: float
     label: Optional[str] = None
 
@@ -158,7 +157,9 @@ class KnowledgeGraph:
         if doc_id not in self._nodes:
             self._out[doc_id] = []
             self._in[doc_id] = []
-        self._nodes[doc_id] = NodeProps(**{k: v for k, v in props.items() if k in NodeProps.__dataclass_fields__})  # type: ignore[attr-defined]
+        self._nodes[doc_id] = NodeProps(
+            **{k: v for k, v in props.items() if k in NodeProps.__dataclass_fields__}
+        )  # type: ignore[attr-defined]
 
     def add_edge(
         self,
@@ -328,7 +329,9 @@ class KnowledgeGraph:
         result.sort()
         return result
 
-    def hubs(self, top_k: int = 10, edge_types: Optional[List[str]] = None) -> List[Tuple[str, int]]:
+    def hubs(
+        self, top_k: int = 10, edge_types: Optional[List[str]] = None
+    ) -> List[Tuple[str, int]]:
         """Documents ranked by inbound edge count (descending).
 
         Args:

@@ -1,6 +1,6 @@
 # P4 Plan — Query Quality, MiniLM Wiring, Graph Enrichment, Audit Cleanup
 
-## Status: [ ] in-progress
+## Status: [x] complete — 2026-07-17
 
 ---
 

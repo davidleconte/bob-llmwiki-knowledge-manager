@@ -29,7 +29,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
-from src.cache.embeddings import EmbeddingGenerator, cosine_similarity_vectors
+from src.cache.embeddings import EmbeddingGenerator
 from src.embeddings.chunker import MarkdownChunker
 from src.embeddings.store import FileBackedVectorStore
 
@@ -232,9 +232,9 @@ class PersistentEmbeddingIndex:
             # Legacy fallback: infer KB root from index path (default layout only)
             try:
                 kb_root = self._index_path.parent.parent  # .bob/ → repo root
-                file_doc_id = str(
-                    doc_path.relative_to(kb_root / "docs/knowledge-base")
-                ).split("#")[0]
+                file_doc_id = str(doc_path.relative_to(kb_root / "docs/knowledge-base")).split("#")[
+                    0
+                ]
             except ValueError:
                 file_doc_id = str(doc_path)
 
@@ -304,8 +304,8 @@ class PersistentEmbeddingIndex:
             return
         matrix, manifest, staleness = result
         self._matrix = matrix.astype(np.float32)
-        self._manifest = manifest          # chunk-level entries only
-        self._file_manifest = staleness    # file-level staleness sentinels
+        self._manifest = manifest  # chunk-level entries only
+        self._file_manifest = staleness  # file-level staleness sentinels
         self._doc_ids = list(manifest.keys())
         logger.debug("kb_index_loaded chunks=%d files=%d", len(self._doc_ids), len(staleness))
 

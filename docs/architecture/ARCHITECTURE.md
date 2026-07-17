@@ -146,11 +146,11 @@ The facade's public surface — each method backs a CLI subcommand
 (`src/facade.py:87`): `optimize`, `truncate`, `count`, `cache_stats`, `metrics`,
 `cost_report`, `health`.
 
-## 3b. KB query dataflow (P2 + P3, opt-in)
+## 3b. KB query dataflow (P2 + P3 + P4, opt-in)
 
 The KB query path is **not** on the `optimize()` request path. It is a separate
 opt-in pipeline, activated by injecting an `index` (P2) and/or `graph` (P3) into
-`KnowledgeBaseQuery`.
+`KnowledgeBaseQuery`, and further tuned via P4 scoring parameters.
 
 ```mermaid
 sequenceDiagram
@@ -160,7 +160,7 @@ sequenceDiagram
     participant GR as GraphRanker
     participant KG as KnowledgeGraph
 
-    U->>KBQ: query(text, max_results=10)
+    U->>KBQ: query(text, max_results=10, date_filter=None)
     alt P2 index injected
         KBQ->>IDX: search(text, top_k=40)
         IDX-->>KBQ: chunk-level candidates with cosine scores
@@ -175,13 +175,28 @@ sequenceDiagram
         GR->>GR: final = 1-w * similarity + w * pagerank * 15.0
         GR-->>KBQ: re-ranked results
     end
+    alt P4 recency_weight > 0
+        KBQ->>KBQ: normalise mtime to 0..1 within result set
+        KBQ->>KBQ: final = 1-rw * score + rw * norm_mtime * 15.0
+    end
+    alt P4 date_filter set
+        KBQ->>KBQ: drop results where date != date_filter prefix
+    end
     KBQ-->>U: top-k ranked results
 ```
 
-CLI entry points (added in P3):
+CLI entry points:
 - `bob-optimize graph-build` — builds and persists the graph
-- `bob-optimize graph-query <text>` — graph-aware KB search
+- `bob-optimize graph-query <doc_id>` — neighbourhood context for a document
 - `bob-optimize graph-health` — orphan/hub/broken-link report
+- `bob-optimize kb-search <query>` — KB search with `--recency-weight` / `--date-filter` (P4)
+
+**P4 query parameters** (all default to off, backward-compatible):
+
+| Parameter | Default | Effect |
+|---|---|---|
+| `recency_weight` (constructor) | `0.0` | Blend relative mtime into score |
+| `date_filter` (`query()`) | `None` | ISO prefix filter on frontmatter `date:` |
 
 ## 4. Configuration → runtime
 
@@ -247,8 +262,26 @@ that matter to the architecture:
 - **Knowledge Graph (`src/graph/`).** Pure-Python property graph over KB documents
   (opt-in, not on the `optimize()` path). Four modules:
   - `graph.py` — `KnowledgeGraph` (adjacency dict, BFS traversal, PageRank power
-    method, `orphans()`, `hubs()`), `NodeProps` (title, category, tags, date, status),
+    method, `orphans()`, `hubs()`), `NodeProps` (10 fields — see table below),
     `Edge` (source, target, type, weight, label).
+
+    **NodeProps fields** (P3 original + P4 additions):
+
+    | Field | Type | Default | Source |
+    |---|---|---|---|
+    | `title` | `str` | `"Untitled"` | Frontmatter or `# H1` |
+    | `category` | `str` | `""` | KB directory name |
+    | `tags` | `List[str]` | `[]` | Frontmatter `tags:` |
+    | `date` | `str` | `""` | Frontmatter `date:` |
+    | `type` | `str` | `""` | Frontmatter `type:` |
+    | `status` | `str` | `""` | Frontmatter `status:` |
+    | `mtime_epoch` *(P4)* | `float` | `0.0` | `path.stat().st_mtime` |
+    | `content_length` *(P4)* | `int` | `0` | `len(content)` chars |
+    | `description` *(P4)* | `str` | `""` | First body paragraph ≤ 200 chars |
+    | `related_refs` *(P4)* | `List[str]` | `[]` | Raw frontmatter `related:` list |
+
+    P4 fields have backward-compatible defaults; old `kb-graph.json` files load cleanly.
+
   - `builder.py` — `KnowledgeGraphBuilder`: walks KB filesystem, parses frontmatter
     `related:` lists and inline `[text](path)` links for **explicit** edges; queries
     `PersistentEmbeddingIndex` per document and applies max-aggregation to derive

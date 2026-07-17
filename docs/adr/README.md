@@ -42,6 +42,11 @@ Architecture Decision Records document important architectural decisions made du
 - Rationale: Multi-hop traversal, orphan detection, and PageRank re-ranking without external graph library dependencies
 - Status: ✅ Accepted
 
+**[018: P4 Query Quality](018-p4-query-quality.md)**
+- Decision: Recency tiebreaker (`recency_weight` blend), date-aware filter (`date_filter` prefix), length normalisation deferred
+- Rationale: Addresses 2 of 3 known golden-set misses; backward-compatible (all params default to off); Miss #1 handled adequately by MiniLM at p@3=0.88
+- Status: ✅ Accepted
+
 **[006: Cache Strategy](006-cache-strategy.md)**
 - Decision: In-memory cache over distributed cache
 - Rationale: Lower latency, simpler implementation
@@ -101,8 +106,8 @@ Architecture Decision Records document important architectural decisions made du
 
 ## ADR Statistics
 
-- **Total ADRs:** 13
-- **Status:** 12 accepted, 1 superseded (012)
+- **Total ADRs:** 14 (including ADR-014 KB query embedding scorer, ADR-015 persistent index, ADR-016 truncation)
+- **Status:** 13 accepted, 1 superseded (012)
 - **Coverage:** Technology, Architecture, Algorithms, Quality, Composition patterns
 - **Lines:** ~5,000 total (estimated)
 

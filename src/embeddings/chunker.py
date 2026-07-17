@@ -86,9 +86,7 @@ class MarkdownChunker:
     # Public API
     # ------------------------------------------------------------------
 
-    def chunk(
-        self, _file_path: str, content: str
-    ) -> Generator[Tuple[str, str], None, None]:
+    def chunk(self, _file_path: str, content: str) -> Generator[Tuple[str, str], None, None]:
         """Yield ``(slug, text)`` pairs from *content*.
 
         Args:
@@ -129,9 +127,7 @@ class MarkdownChunker:
     # Private helpers
     # ------------------------------------------------------------------
 
-    def _split_sections(
-        self, content: str
-    ) -> Generator[Tuple[str | None, str], None, None]:
+    def _split_sections(self, content: str) -> Generator[Tuple[str | None, str], None, None]:
         """Split *content* on ``##`` heading boundaries.
 
         Yields ``(heading_text_or_None, body)`` pairs.  The first item has
