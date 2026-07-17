@@ -14,23 +14,23 @@ A native **IBM Bob Shell** implementation of Andrej Karpathy's **LLM-Wiki** patt
 
 ---
 
-## ⚠️ This repository contains two separate systems
+## ℹ️ This repository contains two independently-operable systems
 
 | System | Technology | Status |
 |--------|-----------|--------|
 | **Bob Shell Knowledge Manager** | Bash scripts, YAML, Markdown | Stable v1.0 |
 | **Token Optimization System** (`src/`) | Python 3.11+, tiktoken, scikit-learn | Beta — Not Production Ready |
 
-They share a repository but are **not integrated**. The Python system is composed behind a single
-`TokenOptimizer` facade and `bob-optimize` CLI (`python -m src`).
+Each system works without the other. Three **opt-in** integration points connect them (all fallback-safe — if the Python system is absent, the KB Manager is unaffected): the KB query engine can use the TOS embedding scorer; the `knowledge-manager` mode can compress retrieved context via `bob-optimize`; and a persistent embedding index bridges KB document search with TOS cache infrastructure. See [`INTEGRATIONS.md`](INTEGRATIONS.md).
+
 Architecture: [KB Manager — `docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [Python system — `docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md).
 
 ### Supported targets
 
-| Target | Activation | Install step | Skill lazy-load | `save_memory` |
-|--------|-----------|--------------|-----------------|---------------|
-| **Bob Shell CLI** | `bob --chat-mode=knowledge-manager` | `scripts/install.sh` | not supported | available |
-| **Bob IDE** | Mode picker → 📚 Knowledge Manager | none — zero steps | `.bob/skills/knowledge-manager/SKILL.md` | not available (file persistence only) |
+| Target | Activation | Install step | Skill lazy-load | `save_memory` | **Best for** | **Key trade-off** |
+|--------|-----------|--------------|-----------------|---------------|------------|-----------------|
+| **Bob Shell CLI** | `bob --chat-mode=knowledge-manager` | `scripts/install.sh` | not supported | ✅ available | Daily CLI users; full `save_memory` | One-time install + `~/.zshrc` alias |
+| **Bob IDE** | Mode picker → 📚 Knowledge Manager | none — zero steps | ✅ auto-loaded | ❌ file persistence only | IDE users; zero install | No cross-session `save_memory` facts |
 
 > **Bob IDE users:** see [`docs/BOB-IDE-GUIDE.md`](docs/BOB-IDE-GUIDE.md) for the full IDE workflow.
 
@@ -114,6 +114,13 @@ cd ~/your-project
 "$KM_HOME/scripts/validate-kb.sh"
 ```
 
+> **What `run-full-analysis.sh` produces:** 7 Bash scripts run against your repo and file 7 dated
+> Markdown snapshots into `docs/knowledge-base/research/` (scan, dependencies, metrics, security,
+> test coverage, git history, docs coverage). Bob reads these ~200-line digested reports instead of
+> raw source — that is why the KB session immediately produces grounded suggestions. Start the KB
+> session *after* this step. Re-run it any time to refresh dated snapshots without overwriting prior
+> KB work. Full details: [`docs/knowledge-base/guides/complete-repository-analysis.md`](docs/knowledge-base/guides/complete-repository-analysis.md).
+
 Then, in any Bob mode (Ask, Code, …):
 
 ```text
@@ -129,8 +136,8 @@ Your role:
 Start by analyzing the codebase and suggesting 5 initial documents to create.
 ```
 
-The scripts have already filed digested reports into `docs/knowledge-base/`, so Bob proposes documents
-**grounded in evidence it didn't have to re-read**.
+The scripts have already filed 7 dated research snapshots into `docs/knowledge-base/research/`, so Bob
+proposes documents **grounded in evidence it didn't have to re-read from raw source**.
 
 > *Optional:* the `knowledge-manager` mode packages this as a one-liner (`./scripts/install.sh`) for Bob Shell CLI,
 > or is available immediately via the mode picker in Bob IDE. Not required.
@@ -200,6 +207,20 @@ Bob will scan `INDEX.md` (auto-loaded via `.bob/settings.json`), recall any `sav
 
 > **Full reference:** [`docs/USAGE.md §0`](docs/USAGE.md#0-starting-a-session) · [`docs/knowledge-base/guides/activating-knowledge-manager-in-new-session.md`](docs/knowledge-base/guides/activating-knowledge-manager-in-new-session.md)
 
+### Mode switching and the KB
+
+Switching mode mid-session (e.g. `/mode agent` to write code) does **not** delete or hide KB files — they
+remain on disk exactly as written. What stops is the **maintenance discipline**: templates, bidirectional
+cross-references, and `INDEX.md` updates are enforced by the `knowledge-manager` mode's instructions, not
+by the file system.
+
+**Recommended pattern:** work in `agent` or `plan` mode for code changes, then `/mode knowledge-manager`
+to file what you learned. Findings generated in another mode should be pasted into a new KB document
+rather than assumed to be auto-captured.
+
+`save_memory` facts set in `knowledge-manager` mode *(Bob Shell CLI only)* survive the mode switch and
+remain available when you switch back.
+
 ## 7. What's in the box
 
 **Bob Shell Knowledge Manager (the Bash system):**
@@ -246,9 +267,6 @@ Reproduce with `python -m src.validation`; CI re-runs it on every push.
 - **Null test:** on shuffled input the optimizer's reduction collapses to near zero — confirming the
   headline is genuine compression, not a measurement artifact.
 
-> ⚠️ **Retracted:** the earlier "68.96% / 95% CI [66.42, 71.51] / VALIDATED" figures were fabricated by
-> a simulation that never invoked the optimizer. See
-> [`evaluation/VALIDATION_DISCLAIMER.md`](evaluation/VALIDATION_DISCLAIMER.md).
 
 ## 10. Maturity and current status
 

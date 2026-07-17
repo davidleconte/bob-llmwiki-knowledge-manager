@@ -99,13 +99,34 @@ Subprocess failure **must never block** knowledge retrieval.
 
 ---
 
-## 5. P2 — Persistent Embedding Index (Planned)
+## 5. P2 — Persistent Embedding Index (Shipped — P2 complete)
 
-A `src/embeddings/PersistentEmbeddingIndex` will bridge the in-memory / persistent
-gap between the TOS semantic cache (L2, in-memory only) and the KB Manager's
-session-persistent value. See the concept document:
+`src/embeddings/PersistentEmbeddingIndex` bridges the in-memory TOS semantic cache
+(L2, session-scoped) and the KB Manager's session-persistent document store. The
+package ships three public classes:
 
-`docs/knowledge-base/concepts/kb-tos-embedding-layer.md`
+- **`PersistentEmbeddingIndex`** — disk-backed index; lazy load, incremental rebuild,
+  atomic NumPy writes, mtime/hash staleness detection, corruption recovery.
+- **`KBIndexer`** — wraps the index with a `sync()` + `query()` interface at
+  `embedding_weight=0.7` (A/B-validated; see ADR-014).
+- **`FileBackedVectorStore`** — atomic `os.replace`-based `.npy` / JSON I/O layer.
+
+Wire the index into `KnowledgeBaseQuery` for the P2 fast path:
+
+```python
+from src.embeddings.indexer import KBIndexer
+from src.tools.kb_query import KnowledgeBaseQuery
+
+indexer = KBIndexer("docs/knowledge-base")
+indexer.sync()                          # rebuild any stale document embeddings
+
+kb = KnowledgeBaseQuery("docs/knowledge-base", index=indexer.index)
+results = kb.query("caching strategy")  # index fast-path, keyword tie-breaker
+```
+
+See [`docs/adr/015-persistent-embedding-index.md`](docs/adr/015-persistent-embedding-index.md)
+for design decisions and [`docs/knowledge-base/concepts/kb-tos-embedding-layer.md`](docs/knowledge-base/concepts/kb-tos-embedding-layer.md)
+for the architecture concept.
 
 ---
 

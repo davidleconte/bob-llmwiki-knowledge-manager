@@ -1,33 +1,41 @@
-<svg viewBox="0 0 900 430" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t d">
+<svg viewBox="0 0 960 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t d">
   <title id="t">The compounding-knowledge loop</title>
-  <desc id="d">Bob reads your repository once, files digested knowledge into a version-controlled knowledge base, and every later session retrieves from that knowledge base instead of re-deriving from the repository.</desc>
+  <desc id="d">7 Bash scripts summarise your repository once. Bob Shell digests the summaries and files findings into a version-controlled knowledge base. Every later session retrieves from that knowledge base instead of re-deriving from the repository.</desc>
   <style>
     .node{fill:#ffffff;stroke:#cbd5e2;stroke-width:1.5}
     .kb{fill:#e3f4ee;stroke:#0e8f6b;stroke-width:1.75}
-    .title{fill:#1a2230;font:700 17px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-    .sub{fill:#5b6675;font:400 12.5px system-ui,sans-serif}
-    .lbl{fill:#3d6fa8;font:600 12px ui-monospace,"SF Mono",Menlo,monospace}
+    .scripts{fill:#f3f0ff;stroke:#7c5cd8;stroke-width:1.5}
+    .title{fill:#1a2230;font:700 15px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+    .sub{fill:#5b6675;font:400 12px system-ui,sans-serif}
+    .lbl{fill:#3d6fa8;font:600 11.5px ui-monospace,"SF Mono",Menlo,monospace}
+    .lblp{fill:#7c5cd8;font:600 11.5px ui-monospace,"SF Mono",Menlo,monospace}
     .chip{fill:#e6eef7}
-    .chiptext{fill:#3d6fa8;font:600 12px ui-monospace,Menlo,monospace}
-    .kbtext{fill:#0e8f6b;font:700 15px system-ui,sans-serif}
+    .chiptext{fill:#3d6fa8;font:600 11.5px ui-monospace,Menlo,monospace}
+    .kbtext{fill:#0e8f6b;font:700 14px system-ui,sans-serif}
     .flow{stroke:#3d6fa8;stroke-width:2;fill:none}
+    .flowp{stroke:#7c5cd8;stroke-width:2;fill:none}
     .loop{stroke:#0e8f6b;stroke-width:2;fill:none;stroke-dasharray:6 5}
-    .cap{fill:#5b6675;font:600 13px system-ui,sans-serif}
+    .cap{fill:#5b6675;font:600 12.5px system-ui,sans-serif}
     .accentfill{fill:#3d6fa8}
+    .purplefill{fill:#7c5cd8}
     .kbfill{fill:#0e8f6b}
     @media (prefers-color-scheme:dark){
       .node{fill:#171b22;stroke:#2c3644}
       .kb{fill:#0e211b;stroke:#46d3a4}
+      .scripts{fill:#1c1730;stroke:#b39ddb}
       .title{fill:#e8ecf1}
       .sub{fill:#93a0b1}
       .lbl{fill:#6ea6e6}
+      .lblp{fill:#b39ddb}
       .chip{fill:#17222f}
       .chiptext{fill:#6ea6e6}
       .kbtext{fill:#46d3a4}
       .flow{stroke:#6ea6e6}
+      .flowp{stroke:#b39ddb}
       .loop{stroke:#46d3a4}
       .cap{fill:#93a0b1}
       .accentfill{fill:#6ea6e6}
+      .purplefill{fill:#b39ddb}
       .kbfill{fill:#46d3a4}
     }
   </style>
@@ -35,44 +43,64 @@
     <marker id="ar" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" class="accentfill"/>
     </marker>
+    <marker id="arp" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="purplefill"/>
+    </marker>
     <marker id="arkb" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" class="kbfill"/>
     </marker>
   </defs>
 
   <!-- A: repository -->
-  <rect class="node" x="40" y="46" width="230" height="92" rx="12"/>
-  <text class="title" x="155" y="88" text-anchor="middle">Your repository</text>
-  <text class="sub" x="155" y="110" text-anchor="middle">raw sources · read-only</text>
+  <rect class="node" x="20" y="46" width="190" height="86" rx="12"/>
+  <text class="title" x="115" y="84" text-anchor="middle">Your repository</text>
+  <text class="sub" x="115" y="106" text-anchor="middle">raw sources · read-only</text>
 
-  <!-- A -> B -->
-  <line class="flow" x1="270" y1="92" x2="556" y2="92" marker-end="url(#ar)"/>
-  <text class="lbl" x="413" y="82" text-anchor="middle">read once</text>
+  <!-- A -> Scripts -->
+  <line class="flowp" x1="210" y1="89" x2="282" y2="89" marker-end="url(#arp)"/>
+  <text class="lblp" x="246" y="80" text-anchor="middle">run once</text>
+
+  <!-- Scripts node -->
+  <rect class="scripts" x="288" y="46" width="182" height="86" rx="12"/>
+  <text class="title" x="379" y="78" text-anchor="middle">Scripts (7 Bash)</text>
+  <text class="sub" x="379" y="96" text-anchor="middle">scan · deps · metrics</text>
+  <text class="sub" x="379" y="112" text-anchor="middle">security · tests · git · docs</text>
+
+  <!-- Scripts -> Bob Shell -->
+  <line class="flow" x1="470" y1="89" x2="542" y2="89" marker-end="url(#ar)"/>
+  <text class="lbl" x="506" y="80" text-anchor="middle">digest summaries</text>
 
   <!-- B: Bob Shell -->
-  <rect class="node" x="562" y="46" width="238" height="92" rx="12"/>
-  <text class="title" x="681" y="84" text-anchor="middle">Bob Shell</text>
-  <text class="sub" x="681" y="106" text-anchor="middle">digest · template · cross-link</text>
+  <rect class="node" x="548" y="46" width="210" height="86" rx="12"/>
+  <text class="title" x="653" y="84" text-anchor="middle">Bob Shell</text>
+  <text class="sub" x="653" y="106" text-anchor="middle">template · cross-link · file</text>
 
   <!-- B -> KB (down) -->
-  <line class="flow" x1="681" y1="138" x2="681" y2="212" marker-end="url(#ar)"/>
-  <text class="lbl" x="697" y="180" text-anchor="start">files findings</text>
+  <line class="flow" x1="653" y1="132" x2="653" y2="218" marker-end="url(#ar)"/>
+  <text class="lbl" x="669" y="180" text-anchor="start">files findings</text>
 
   <!-- KB box -->
-  <rect class="kb" x="212" y="218" width="470" height="150" rx="14"/>
-  <text class="kbtext" x="240" y="252">docs/knowledge-base/</text>
-  <rect class="chip" x="240" y="270" width="92" height="26" rx="13"/>
-  <text class="chiptext" x="286" y="287" text-anchor="middle">concepts</text>
-  <rect class="chip" x="342" y="270" width="70" height="26" rx="13"/>
-  <text class="chiptext" x="377" y="287" text-anchor="middle">guides</text>
-  <rect class="chip" x="422" y="270" width="98" height="26" rx="13"/>
-  <text class="chiptext" x="471" y="287" text-anchor="middle">references</text>
-  <text class="sub" x="240" y="326">INDEX.md — self-maintained</text>
-  <text class="sub" x="240" y="348">+ save_memory facts</text>
+  <rect class="kb" x="170" y="224" width="500" height="168" rx="14"/>
+  <text class="kbtext" x="198" y="258">docs/knowledge-base/</text>
+  <!-- 4 category chips -->
+  <rect class="chip" x="198" y="274" width="90" height="26" rx="13"/>
+  <text class="chiptext" x="243" y="291" text-anchor="middle">concepts</text>
+  <rect class="chip" x="298" y="274" width="66" height="26" rx="13"/>
+  <text class="chiptext" x="331" y="291" text-anchor="middle">guides</text>
+  <rect class="chip" x="374" y="274" width="96" height="26" rx="13"/>
+  <text class="chiptext" x="422" y="291" text-anchor="middle">references</text>
+  <rect class="chip" x="480" y="274" width="80" height="26" rx="13"/>
+  <text class="chiptext" x="520" y="291" text-anchor="middle">research</text>
+  <!-- INDEX.md + persistence notes -->
+  <text class="sub" x="198" y="334">INDEX.md — self-maintained</text>
+  <text class="sub" x="198" y="356">+ save_memory facts <tspan font-style="italic">(Bob Shell CLI)</tspan></text>
+  <text class="sub" x="198" y="374">+ file persistence <tspan font-style="italic">(Bob IDE)</tspan></text>
 
-  <!-- return loop: KB -> Bob (next session) -->
-  <path class="loop" d="M682,300 C840,300 840,92 806,92" marker-end="url(#arkb)"/>
+  <!-- return loop: KB -> next session label -> Bob -->
+  <path class="loop" d="M670,308 C860,308 860,89 764,89" marker-end="url(#arkb)"/>
+  <text class="lbl" x="880" y="205" text-anchor="middle" style="fill:#0e8f6b;font:600 11.5px system-ui">↺ next session</text>
+  <text class="lbl" x="880" y="220" text-anchor="middle" style="fill:#0e8f6b;font:400 11px system-ui">retrieves from KB</text>
 
   <!-- caption -->
-  <text class="cap" x="450" y="410" text-anchor="middle">↺  every later session retrieves from the knowledge base — instead of re-deriving from the repository</text>
+  <text class="cap" x="480" y="438" text-anchor="middle">Scripts summarise the repo once · Bob files digested knowledge · every later session retrieves instead of re-deriving</text>
 </svg>
