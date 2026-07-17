@@ -24,6 +24,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
 from src.cache.embeddings import EmbeddingGenerator, cosine_similarity_vectors
+from src.embeddings.chunker import MarkdownChunker
 from src.embeddings.store import FileBackedVectorStore
 
 logger = logging.getLogger(__name__)
@@ -89,10 +90,13 @@ class PersistentEmbeddingIndex:
 
         q_vec = self._embedder.generate(query, use_cache=True)
 
-        scores: List[Tuple[str, float]] = []
-        for i, doc_id in enumerate(self._doc_ids):
-            sim = cosine_similarity_vectors(q_vec, self._matrix[i])
-            scores.append((doc_id, sim))
+        # Vectorised cosine similarity: single BLAS matrix-vector multiply.
+        # Avoids O(N) Python loop; scales to thousands of KB documents without
+        # degrading latency (ADR-015 performance requirement).
+        q_norm = q_vec / (np.linalg.norm(q_vec) + 1e-9)
+        m_norms = np.linalg.norm(self._matrix, axis=1, keepdims=True) + 1e-9
+        sims = (self._matrix / m_norms) @ q_norm  # shape [N]
+        scores: List[Tuple[str, float]] = list(zip(self._doc_ids, sims.tolist()))
 
         scores.sort(key=lambda x: x[1], reverse=True)
         return scores[:top_k]
@@ -105,11 +109,11 @@ class PersistentEmbeddingIndex:
 
         Args:
             doc_id: Unique identifier (typically the KB-relative file path).
-            content: Document text. Truncated to 2000 chars before embedding
+            content: Document text. Truncated to 6000 chars before embedding
                 (consistent with P1-1 ``use_cache=False`` guard, ADR-014).
         """
         # use_cache=False: full document content must not bloat embeddings_cache
-        vec = self._embedder.generate(content[:2000], use_cache=False)
+        vec = self._embedder.generate(content[:6000], use_cache=False)
 
         if doc_id in self._manifest:
             # Update existing row in-place
@@ -130,17 +134,20 @@ class PersistentEmbeddingIndex:
         """Full or incremental rebuild from *kb_path*.
 
         Walks all ``*.md`` files in the four KB category directories.  For each
-        file, re-embeds if the mtime or content hash differs from the manifest.
-        Flushes the updated index to disk afterward.
+        file, checks mtime+hash against the manifest.  Changed files are split
+        into structure-aware chunks by :class:`~src.embeddings.chunker.MarkdownChunker`;
+        each chunk becomes an independent index row with a ``file.md#slug``
+        doc_id.  Flushes the updated index to disk afterward.
 
         Args:
             kb_path: Root of the knowledge base (``docs/knowledge-base/``).
 
         Returns:
-            Number of documents indexed (total corpus size after rebuild).
+            Number of chunk-level rows in the index after rebuild.
         """
         self._ensure_loaded()
         categories = ["concepts", "guides", "references", "research"]
+        chunker = MarkdownChunker()
         updated = 0
 
         for cat in categories:
@@ -148,7 +155,7 @@ class PersistentEmbeddingIndex:
             if not cat_path.exists():
                 continue
             for md_file in sorted(cat_path.glob("*.md")):
-                doc_id = str(md_file.relative_to(kb_path))
+                file_doc_id = str(md_file.relative_to(kb_path))
                 try:
                     content = md_file.read_text(encoding="utf-8")
                 except Exception:
@@ -157,12 +164,20 @@ class PersistentEmbeddingIndex:
                 mtime = md_file.stat().st_mtime
                 chash = _content_hash(content)
 
-                existing = self._manifest.get(doc_id, {})
+                # Staleness is checked at the *file* level (mtime + hash),
+                # not per-chunk, so we only re-embed when the file changes.
+                existing = self._manifest.get(file_doc_id, {})
                 if existing.get("mtime") == mtime and existing.get("hash") == chash:
-                    continue  # unchanged — skip
+                    continue  # unchanged — skip all chunks for this file
 
-                self.index_document(doc_id, content)
-                self._manifest[doc_id] = {
+                # Re-embed all chunks for this file.
+                for slug, chunk_text in chunker.chunk(file_doc_id, content):
+                    chunk_doc_id = f"{file_doc_id}#{slug}"
+                    self.index_document(chunk_doc_id, chunk_text)
+
+                # Record file-level staleness metadata under the plain file_doc_id
+                # so the next rebuild can skip unchanged files.
+                self._manifest[file_doc_id] = {
                     "path": str(md_file),
                     "mtime": mtime,
                     "hash": chash,
@@ -178,6 +193,11 @@ class PersistentEmbeddingIndex:
     def is_stale(self, doc_path: Path) -> bool:
         """Check whether *doc_path* is newer or changed vs the manifest.
 
+        Staleness is compared against the **file-level** manifest entry
+        (``file.md``), not against individual chunk entries
+        (``file.md#slug``).  This is correct because ``rebuild()`` writes
+        mtime+hash under the plain file path as the staleness sentinel.
+
         Args:
             doc_path: Absolute or relative path to a KB document.
 
@@ -185,14 +205,18 @@ class PersistentEmbeddingIndex:
             ``True`` if the document needs re-indexing, ``False`` if up-to-date.
         """
         self._ensure_loaded()
-        # Normalise to the relative path stored in the manifest
+        # Normalise to the relative path stored in the manifest.
+        # Strip any #slug fragment that callers might pass in.
         try:
             kb_root = self._index_path.parent.parent  # .bob/ → repo root
-            doc_id = str(doc_path.relative_to(kb_root / "docs/knowledge-base"))
+            raw_id = str(doc_path.relative_to(kb_root / "docs/knowledge-base"))
         except ValueError:
-            doc_id = str(doc_path)
+            raw_id = str(doc_path)
 
-        existing = self._manifest.get(doc_id)
+        # Strip fragment (e.g. "concepts/a.md#performance-targets" → "concepts/a.md")
+        file_doc_id = raw_id.split("#")[0]
+
+        existing = self._manifest.get(file_doc_id)
         if existing is None:
             return True
 

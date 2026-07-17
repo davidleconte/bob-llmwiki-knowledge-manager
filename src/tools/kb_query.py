@@ -265,7 +265,7 @@ class KnowledgeBaseQuery:
         q_vec = self._embedder.generate(query, use_cache=True)
         # use_cache=False: document content is large and unique; caching it
         # would grow embeddings_cache without bound (AF-5 / ADR-014).
-        c_vec = self._embedder.generate(content[:2000], use_cache=False)
+        c_vec = self._embedder.generate(content[:6000], use_cache=False)
         # Rescale cosine similarity [0, 1] → [0, 15] to match keyword range.
         embed_score = cosine_similarity_vectors(q_vec, c_vec) * 15.0
 
