@@ -27,8 +27,12 @@ privileges**. It:
 - reads and stores **no credentials, API keys, or secrets**
   (`src/config/manager.py:149` is the only `os.environ` access, and it reads
   only `CONFIG_`-prefixed overrides);
-- makes **no outbound network calls** from `src/` except tiktoken's optional
-  first-use vocabulary download (`src/optimizer/token_counter.py:38-46`);
+- makes **no outbound network calls** from `src/` except two optional first-use
+  downloads: tiktoken's BPE vocabulary (`src/optimizer/token_counter.py:38-46`),
+  and the `sentence-transformers/all-MiniLM-L6-v2` model via `mlx-embeddings`
+  (`src/cache/embeddings.py:49`) — triggered at most once per machine, cached to
+  `~/.cache/huggingface/`, and **only** when `EmbeddingGenerator(backend="minilm")`
+  is called with `[mlx]` installed; never triggered by default configuration or CI;
 - persists the cache **entirely in memory** (`src/cache/exact_cache.py:66`,
   `src/cache/semantic_cache.py:86`) — no disk writes, no serialization.
 

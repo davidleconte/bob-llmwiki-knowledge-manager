@@ -20,9 +20,18 @@ The current version is defined once, in [`pyproject.toml`](pyproject.toml)
 (`bob-optimize` / `python -m src`) for token optimization — caching, prompt
 optimization, and truncation — plus a set of local knowledge-base tooling
 scripts. It is **not** a hosted or multi-tenant network service: it opens no
-listening socket, stores no credentials, and (apart from tiktoken's optional
-first-use vocabulary download) makes no outbound network calls. The realistic
-threat surface is therefore local — see the full analysis in
+listening socket, stores no credentials, and makes no outbound network calls
+except two optional first-use downloads:
+
+- **tiktoken BPE vocabulary** (`src/optimizer/token_counter.py:38-46`) — fetched
+  on first token-count if absent from the local tiktoken cache.
+- **`sentence-transformers/all-MiniLM-L6-v2` model** (`src/cache/embeddings.py:49`)
+  — fetched once (~22 MB, cached to `~/.cache/huggingface/`) **only** when
+  `EmbeddingGenerator(backend="minilm")` is called with `[mlx]` installed.
+  Never triggered by default configuration, by CI, or by any code path that uses
+  the default `"hashing"` backend. No API key required; the model is public.
+
+The realistic threat surface is therefore local — see the full analysis in
 [`docs/security/THREAT_MODEL.md`](docs/security/THREAT_MODEL.md).
 
 ## Reporting a vulnerability

@@ -74,6 +74,11 @@ Not shown, deliberately separate:
   per-package floor of 85% (`scripts/check_coverage_by_package.py`).
 - **`src/delegation/`** — an **experimental**, layering-clean subsystem that is
   *not* wired into the facade (see [`../../src/delegation/EXPERIMENTAL.md`](../../src/delegation/EXPERIMENTAL.md)).
+- **`src/embeddings/`** — the KB persistent embedding index subsystem
+  (`MarkdownChunker`, `PersistentEmbeddingIndex`, `KBIndexer`). Opt-in, not on
+  the `optimize()` request path; injected into `KnowledgeBaseQuery` when a
+  persistent index is needed (ADR-015). Stores `[N × dim]` float32 vectors in
+  `.bob/kb-index/`. See §5 for the embedding backend details.
 
 ## 3. Runtime dataflow
 
@@ -144,9 +149,23 @@ that matter to the architecture:
 ## 5. Components
 
 - **Cache (`src/cache/`).** `MultiLevelCache` orchestrates **L1** `ExactCache`
-  (exact-key fast path) and **L2** `SemanticCache` (TF-IDF similarity, hit floor
-  0.85). A hit returns a stored result for 0 tokens. Deterministic (stateless
-  `HashingVectorizer`); the C-5 colliding-key correctness bug is fixed.
+  (exact-key fast path) and **L2** `SemanticCache` (cosine similarity via
+  `EmbeddingGenerator`, hit floor 0.85). A hit returns a stored result for 0 tokens.
+  Deterministic; the C-5 colliding-key correctness bug is fixed.
+  `EmbeddingGenerator` supports two backends:
+  - `"hashing"` (default) — stateless `HashingVectorizer`, 1000-dim, <1 ms, no extra
+    dependencies, works on all platforms.
+  - `"minilm"` (optional) — `sentence-transformers/all-MiniLM-L6-v2` via
+    `mlx-embeddings`, 384-dim, ~2–4 ms warm, Apple Silicon only
+    (`pip install -e ".[mlx]"`). Falls back silently to `"hashing"` when
+    `mlx-embeddings` is absent. No HuggingFace API key required (public model;
+    first-use downloads ~22 MB to `~/.cache/huggingface/`). See ADR-014.
+- **KB Embedding Index (`src/embeddings/`).** Disk-backed semantic search layer for
+  KB documents (opt-in, not on the `optimize()` path). `MarkdownChunker` splits `.md`
+  files on `##`-boundaries and extracts GFM tables as standalone chunks, each assigned
+  a `file.md#slug` doc_id. `PersistentEmbeddingIndex` stores an `[N × dim]` float32
+  matrix in `.bob/kb-index/` with incremental mtime/hash rebuild. `KBIndexer` drives
+  the sync. Injected into `KnowledgeBaseQuery` via `index=` parameter. See ADR-015.
 - **Optimizer (`src/optimizer/`).** `PromptOptimizer` applies whitespace
   normalization and redundancy removal to `target_reduction`, gated by
   `min_quality_score`. `TokenCounter` counts real tokens via tiktoken, with a

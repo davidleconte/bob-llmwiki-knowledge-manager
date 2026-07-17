@@ -246,6 +246,42 @@ remain available when you switch back.
 The Python system (`src/`) is **independent** — it works without a KB, and the KB works without it.
 Install once with `pip install -e ".[dev,monitoring]"`, then use whichever mode fits your workflow.
 
+### Optional: MiniLM semantic embedding backend
+
+The KB embedding pipeline supports an optional high-quality semantic backend powered by
+`sentence-transformers/all-MiniLM-L6-v2` (384-dim, Apple Neural Engine, ~2–4 ms/doc warm).
+
+```bash
+pip install -e ".[mlx]"   # macOS + Apple Silicon only; safe to omit on any other platform
+```
+
+```python
+from src.cache.embeddings import EmbeddingGenerator
+
+embedder = EmbeddingGenerator(backend="minilm")   # 384-dim semantic vectors
+vec = embedder.generate("your KB document text")  # falls back to HashingVectorizer if mlx absent
+```
+
+> **No HuggingFace API key required.** `sentence-transformers/all-MiniLM-L6-v2` is a
+> **public** model. On first use, `mlx-embeddings` downloads it once (~22 MB) to
+> `~/.cache/huggingface/` — the standard HuggingFace Hub cache, persistent across sessions.
+> No account, no token, no configuration needed.
+
+| Platform | MiniLM backend | Notes |
+|----------|:--------------:|-------|
+| macOS + Apple Silicon (M1/M2/M3+) | ✅ Full | `pip install -e ".[mlx]"` |
+| macOS + Intel | ⚠️ Falls back silently | `mlx` requires Apple Silicon; HashingVectorizer used instead |
+| Linux (any) | ⚠️ Falls back silently | `mlx` is macOS-only; HashingVectorizer used instead |
+
+**Fallback guarantee:** if `mlx-embeddings` is absent or fails to load, `EmbeddingGenerator`
+emits a `UserWarning` and uses the stateless `HashingVectorizer` (1000-dim, <1 ms, no deps).
+KB retrieval is **never blocked** by a missing MiniLM installation.
+
+> **Why it matters:** `HashingVectorizer` cosine similarity on semantically related pairs
+> measures ~0.091 (near-zero — tuned for near-duplicate detection, not cross-vocabulary
+> retrieval). MiniLM-L6-v2 measures ~0.78 on the same pairs, enabling genuine semantic KB
+> search. See ADR-014 for the A/B validation results (p@3 = 0.88).
+
 ### How `bob-optimize` works inside Bob Shell and Bob IDE
 
 `bob-optimize` is a **pre-processing step** — it compresses text before it reaches the LLM, saving
@@ -423,7 +459,15 @@ automated multi-agent research, or Windows compatibility.
 ## 12. Security
 
 Local library and CLI — no network service, no stored credentials, no outbound traffic
-(except optional tiktoken BPE vocab download on first use).
+except two optional first-use downloads:
+
+- **tiktoken BPE vocabulary** (`src/optimizer/token_counter.py:38-46`) — fetched on first
+  token-count if the local cache is absent; never triggered in tests.
+- **`sentence-transformers/all-MiniLM-L6-v2` model** via `mlx-embeddings`
+  (`src/cache/embeddings.py:49`) — fetched once (~22 MB) to `~/.cache/huggingface/` when
+  `EmbeddingGenerator(backend="minilm")` is called for the first time. **Only triggered if
+  `[mlx]` is installed and `backend="minilm"` is used explicitly. Never triggered by default
+  configuration or on CI.**
 
 - **Report a vulnerability:** [`SECURITY.md`](SECURITY.md) — GitHub Private Vulnerability Reporting.
 - **Threat model:** [`docs/security/THREAT_MODEL.md`](docs/security/THREAT_MODEL.md) — STRIDE analysis;

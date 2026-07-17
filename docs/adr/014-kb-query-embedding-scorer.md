@@ -82,3 +82,39 @@ ensure this does not regress. The three new tests in `tests/tools/test_kb_query.
 - Roadmap P1-1: `docs/knowledge-base/guides/kb-tos-integration-roadmap.md`
 - Concept: `docs/knowledge-base/concepts/kb-tos-embedding-layer.md`
 - Adversarial audit findings AF-4, AF-5 in the feasibility study
+
+## Amendment — MiniLM backend (branch: fix-multilevel-cache-race, 2026-07)
+
+**Context:** Following the A/B validation gate passing (p@3 = 0.88 embedding-only), step 3 of
+the KB embedding pipeline improvement added an optional `backend="minilm"` to
+`EmbeddingGenerator` in `src/cache/embeddings.py`. This amendment records the resolution of
+the near-zero cosine similarity problem documented in the original ADR body.
+
+### What changed
+
+The core problem identified in this ADR — `HashingVectorizer` cosine similarity of **~0.091**
+on semantically related pairs — is resolved by the new backend:
+
+| Backend | Cosine sim (related pair) | Dim | Platform | Extra dep |
+|---------|:------------------------:|:---:|----------|-----------|
+| `"hashing"` (default) | ~0.091 | 1000 | All platforms | None |
+| `"minilm"` (optional) | ~0.78 | 384 | macOS + Apple Silicon | `mlx-embeddings>=0.1` |
+
+### No HuggingFace API key required
+
+`mlx_embeddings.load("sentence-transformers/all-MiniLM-L6-v2")` downloads from the public
+HuggingFace Hub. **No account, no token, no configuration is required.** On first use, the model
+is downloaded once (~22 MB) to `~/.cache/huggingface/` and cached persistently across sessions.
+
+### Fallback guarantee (A/B gate still applies)
+
+When `mlx-embeddings` is absent (Linux, Intel Mac, CI), `EmbeddingGenerator` emits a
+`UserWarning` and silently falls back to `"hashing"`. The A/B validation gate defined in this
+ADR continues to apply to both backends: a non-zero `embedding_weight` must be validated before
+raising above 0 in any production call path.
+
+### Implementation reference
+
+- `src/cache/embeddings.py` — `EmbeddingGenerator(backend=...)`, `_try_load_minilm()`, `_embed_minilm()`
+- `pyproject.toml` — `[project.optional-dependencies] mlx = ["mlx-embeddings>=0.1"]`
+- `docs/architecture/ARCHITECTURE.md §5` — component description updated
