@@ -159,7 +159,7 @@ class KnowledgeGraph:
             self._in[doc_id] = []
         self._nodes[doc_id] = NodeProps(
             **{k: v for k, v in props.items() if k in NodeProps.__dataclass_fields__}
-        )  # type: ignore[attr-defined]
+        )
 
     def add_edge(
         self,

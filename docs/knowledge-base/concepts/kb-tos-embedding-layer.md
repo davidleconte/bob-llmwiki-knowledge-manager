@@ -10,6 +10,8 @@ related:
   - ../guides/kb-tos-integration-roadmap.md
   - multi-level-caching.md
   - token-optimization.md
+  - knowledge-graph-layer.md
+  - delegation-analysis-pipeline.md
 ---
 
 # KB-TOS Shared Embedding Layer

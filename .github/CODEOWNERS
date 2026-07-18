@@ -11,3 +11,6 @@
 /src/tools/safe_paths.py @davidleconte
 /.github/               @davidleconte
 /scripts/check_*.py     @davidleconte
+
+# Experimental delegation module — separate problem domain, layering-clean.
+/src/delegation/        @davidleconte

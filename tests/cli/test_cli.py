@@ -117,3 +117,136 @@ class TestModuleEntryPoint:
         )
         assert proc.returncode == 0, proc.stderr
         assert json.loads(proc.stdout)["tokens"] > 0
+
+
+class TestKbStatusCommand:
+    """Tests for the kb-status subcommand."""
+
+    def test_kb_status_json_returns_dict(self, capsys, tmp_path):
+        """kb-status --json returns a JSON dict with integration keys."""
+        out = _run_json(
+            capsys,
+            [
+                "--json",
+                "kb-status",
+                "--kb-path",
+                str(tmp_path / "kb"),
+                "--index-path",
+                str(tmp_path / "idx"),
+                "--graph-path",
+                str(tmp_path / "graph.json"),
+            ],
+        )
+        assert isinstance(out, dict)
+        assert "kb_path" in out
+
+    def test_kb_status_human_readable(self, capsys, tmp_path):
+        """kb-status without --json exits 0 and prints something."""
+        rc = main(
+            [
+                "kb-status",
+                "--kb-path",
+                str(tmp_path / "kb"),
+                "--index-path",
+                str(tmp_path / "idx"),
+                "--graph-path",
+                str(tmp_path / "graph.json"),
+            ]
+        )
+        assert rc == 0
+
+
+class TestAnalyzeCommand:
+    """Tests for the analyze subcommand."""
+
+    def test_analyze_json_returns_pipeline_result(self, capsys, tmp_path):
+        """analyze --json returns a JSON dict with agents_run key."""
+        from unittest.mock import patch
+
+        from src.delegation.base import SubAgentResult, SubAgentStatus
+
+        fake_results = {
+            f"{t}-task": SubAgentResult(
+                agent_id=f"{t}-1",
+                agent_type=t,
+                status=SubAgentStatus.SUCCESS,
+                data={"target": "src/cache", "score": 80.0},
+                execution_time_ms=50.0,
+                token_count=100,
+            )
+            for t in (
+                "research",
+                "security",
+                "quality",
+                "performance",
+                "architecture",
+                "documentation",
+            )
+        }
+        stats = {
+            "total_tasks": 6,
+            "completed_tasks": 6,
+            "failed_tasks": 0,
+            "success_rate": 1.0,
+            "total_execution_time_ms": 300.0,
+            "parallel_execution_time_ms": 250.0,
+            "parallelization_factor": 4.0,
+            "total_tokens": 600,
+            "registered_agents": 6,
+            "start_time": "2026-07-17T00:00:00+00:00",
+            "end_time": "2026-07-17T00:00:01+00:00",
+        }
+
+        def _fake_optimize(text: str, **_kw):
+            n = len(text) // 4
+            return {
+                "optimized_text": text[: int(len(text) * 0.8)],
+                "compression_ratio": 0.8,
+                "original_tokens": n,
+                "optimized_tokens": int(n * 0.8),
+                "savings_percentage": 20.0,
+            }
+
+        with (
+            patch("src.delegation.pipeline.DelegationCoordinator") as MockCoord,
+            patch("src.delegation.pipeline.TokenOptimizer") as MockOpt,
+        ):
+            inst = MockCoord.return_value
+            inst.execute_parallel.return_value = fake_results
+            inst.get_statistics.return_value = stats
+            MockOpt.return_value.optimize.side_effect = _fake_optimize
+
+            out = _run_json(
+                capsys,
+                [
+                    "--json",
+                    "analyze",
+                    "src/cache",
+                    "--output-dir",
+                    str(tmp_path / "out"),
+                    "--kb-path",
+                    str(tmp_path / "kb"),
+                ],
+            )
+
+        assert isinstance(out, dict)
+        assert out.get("agents_run") == 6
+        assert out.get("agents_succeeded") == 6
+
+    def test_analyze_path_traversal_returns_error_json(self, capsys, tmp_path):
+        """analyze --json with a path-traversal target returns an error key (exit 1)."""
+        rc = main(
+            [
+                "--json",
+                "analyze",
+                "../../../etc/passwd",
+                "--output-dir",
+                str(tmp_path / "out"),
+                "--kb-path",
+                str(tmp_path / "kb"),
+            ]
+        )
+        assert rc == 1
+        captured = capsys.readouterr().out
+        err = json.loads(captured)
+        assert "error" in err

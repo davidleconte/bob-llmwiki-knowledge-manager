@@ -197,7 +197,7 @@ pytest tests/monitoring/ -v
 
 ## Related Documentation
 
-- [Token Optimization System Architecture](../architecture/ACTUAL_SYSTEM_ARCHITECTURE.md)
+- [Token Optimization System Architecture](../architecture/ARCHITECTURE.md)
 - [Testing Strategy ADR](../adr/010-testing-strategy.md)
 - [API Documentation](../api/README.md)
 

@@ -5,6 +5,7 @@ Enables parallel analysis through specialized sub-agents
 
 from .base import SubAgent, SubAgentPriority, SubAgentResult, SubAgentStatus, SubAgentTask
 from .coordinator import DelegationCoordinator
+from .pipeline import AnalysisPipelineResult, analyze_and_ingest
 from .registry import SubAgentRegistry
 
 __all__ = [
@@ -15,6 +16,8 @@ __all__ = [
     "SubAgentStatus",
     "DelegationCoordinator",
     "SubAgentRegistry",
+    "analyze_and_ingest",
+    "AnalysisPipelineResult",
 ]
 
 __version__ = "1.0.0"

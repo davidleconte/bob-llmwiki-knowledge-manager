@@ -1,68 +1,70 @@
 # store
 
-`GraphStore` — atomic JSON persistence for `KnowledgeGraph`.
+GraphStore — atomic JSON persistence for :class:`~src.graph.graph.KnowledgeGraph`.
 
-Reads and writes a single `.bob/kb-graph.json` file using an
-atomic `os.replace()` pattern: the graph is serialised to a temp file in
-the same directory, then atomically renamed over the target. This prevents
-a partial write from corrupting the stored graph.
+Mirrors the atomic write pattern of :class:`~src.embeddings.store.FileBackedVectorStore`
+(write-to-temp-then-rename) so a crash mid-write leaves the previous version intact.
 
-Design decisions: ADR-017 (`docs/adr/017-knowledge-graph-layer.md`).
+Design decisions: ADR-017 Decision 4.
 
 ## Constants
 
-- `DEFAULT_GRAPH_PATH` — Default path for the persisted graph file:
-  `Path(".bob/kb-graph.json")`.
+- `DEFAULT_GRAPH_PATH`
 
 ## Classes
 
 ### `GraphStore`
 
-Atomic JSON persistence for `KnowledgeGraph`.
+Atomic read/write of :class:`~src.graph.graph.KnowledgeGraph` to JSON.
 
-**Constructor:**
+Storage layout (ADR-017)::
 
-```python
-GraphStore()
-```
+    .bob/kb-graph.json   — single flat JSON file
+        {
+          "nodes": {doc_id: NodeProps dict, ...},
+          "edges": [Edge dict, ...],
+          "metadata": {...}
+        }
 
-No arguments — the path is passed to each method call.
+Writes are atomic: data goes to a temp file in the same directory then
+``os.replace()`` (rename) so no partial file is ever visible.
 
-**Methods:**
+#### Methods
 
-#### `load(graph_path: Path = DEFAULT_GRAPH_PATH) -> Optional[KnowledgeGraph]`
+##### `load(graph_path: Path) -> Optional[KnowledgeGraph]`
 
-Load a `KnowledgeGraph` from `graph_path`.
+Load a :class:`~src.graph.graph.KnowledgeGraph` from *graph_path*.
 
-Returns `None` (with a warning log) if the file does not exist, cannot be
-parsed as JSON, or cannot be deserialised into a `KnowledgeGraph`. The caller
-should treat `None` as "graph not yet built" and call `save()` after a fresh
-build.
+Returns ``None`` if the file does not exist or is corrupt.
 
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `graph_path` | `Path` | `DEFAULT_GRAPH_PATH` | Path to `kb-graph.json` |
+Args:
+    graph_path: Path to the ``kb-graph.json`` file.
 
-#### `save(graph_path: Path, graph: KnowledgeGraph, metadata: Optional[Dict[str, Any]] = None) -> None`
+Returns:
+    Loaded :class:`~src.graph.graph.KnowledgeGraph` or ``None``.
 
-Atomically write `graph` to `graph_path`.
 
-Creates parent directories if they do not exist. The `metadata` dict
-(e.g. `built_at`, `kb_path`, `semantic_threshold`) is stored under
-the `"metadata"` key alongside the graph nodes and edges.
+##### `save(graph_path: Path, graph: KnowledgeGraph, metadata: Optional[Dict[str, Any]]) -> None`
 
-Raises `OSError` if the directory cannot be created or the rename fails.
+Atomically write *graph* to *graph_path*.
 
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `graph_path` | `Path` | required | Target `kb-graph.json` path |
-| `graph` | `KnowledgeGraph` | required | Graph to serialise |
-| `metadata` | `Optional[Dict[str, Any]]` | `None` | Optional build metadata |
+Creates parent directories if they do not exist.
 
-#### `delete(graph_path: Path = DEFAULT_GRAPH_PATH) -> None`
+Args:
+    graph_path: Target ``kb-graph.json`` path.
+    graph: Graph to serialise.
+    metadata: Optional dict stored under the ``"metadata"`` key
+        (e.g. build timestamp, kb_path, semantic_threshold).
 
-Remove `graph_path`. No-op if the file is absent.
+Raises:
+    OSError: If the directory cannot be created or the rename fails.
 
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `graph_path` | `Path` | `DEFAULT_GRAPH_PATH` | Path to remove |
+
+##### `delete(graph_path: Path) -> None`
+
+Remove *graph_path*. No-op if absent.
+
+Args:
+    graph_path: Path to the ``kb-graph.json`` file.
+
+

@@ -24,6 +24,7 @@ Complete API reference for the Token Optimization System.
 
 - [base](delegation/base.md) - `delegation/base.py`
 - [coordinator](delegation/coordinator.md) - `delegation/coordinator.py`
+- [pipeline](delegation/pipeline.md) - `delegation/pipeline.py`
 - [registry](delegation/registry.md) - `delegation/registry.py`
 
 ## Delegation/Agents

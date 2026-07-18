@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bob-llmwiki-knowledge-manager"
-version = "1.0.0"
+version = "1.1.0"
 description = "Bob Shell Knowledge Manager - LLM-Wiki pattern implementation for IBM Bob Shell"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -40,12 +40,17 @@ dev = [
     "ruff>=0.6.0",
     "mypy>=1.11.0",
     "bandit>=1.7",
+    # Cross-platform MiniLM backend (CPU + GPU, all OS).
+    # Tests that exercise the sentence-transformers fallback path are now
+    # always-active (no pytest.skip) because this dep is always installed.
+    # The mlx extra remains for Apple Silicon users who want the ANE backend.
+    "sentence-transformers>=3.0",
 ]
 monitoring = [
     "psutil>=5.9.0",
 ]
 # Apple Neural Engine MiniLM backend — macOS + Apple Silicon only.
-# Safe to omit: EmbeddingGenerator silently falls back to "hashing" when absent.
+# Safe to omit: EmbeddingGenerator silently falls back to sentence-transformers.
 mlx = [
     "mlx-embeddings>=0.1",
 ]
@@ -175,14 +180,10 @@ ignore = ["E501"]
 # parse them); the supported *runtime* floor is still 3.11.
 python_version = "3.12"
 files = ["src"]
-# Excluded from the type gate:
-# - src/delegation: the orphaned, experimental subsystem (see
-#   scripts/check_coverage_by_package.py). Per the Phase-4 decision it stays a
-#   separate, layering-clean subsystem (not facade-wired), so it is not typed now.
-# - src/tools: operational CLI utilities relocated out of scripts/ in Phase 4 to
-#   kill the src->scripts layering violation; tooling, not runtime library, and
-#   untyped while under scripts/ — excluding preserves that status quo.
-exclude = "^src/(delegation|tools)/"
+# All src/ packages are now covered (G-2 gap closure 2026-07-18):
+# - src/delegation typed cleanly (0 errors); activation via ADR-019.
+# - src/tools typed cleanly after adding explicit Dict[str, Any] annotations
+#   to component_analyzer.py and kb_query.py.
 ignore_missing_imports = true
 warn_unused_ignores = true
 warn_redundant_casts = true

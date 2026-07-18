@@ -31,7 +31,7 @@ class ResearchAgent(SubAgent):
             max_cache_size=1000,
         )
         try:
-            self.kb = KnowledgeBaseQuery(kb_path)
+            self.kb: KnowledgeBaseQuery | None = KnowledgeBaseQuery(kb_path)
         except ValueError:
             self.kb = None
 

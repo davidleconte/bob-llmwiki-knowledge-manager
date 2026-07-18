@@ -7,7 +7,7 @@
 implementation: `.bob/skills/knowledge-manager/SKILL.md` and `.bob/custom_modes.yaml`
 (workspace entry, `execute`/`skill` groups, verified on Bob IDE 1.121.0+bob2.0.1).
 Not to be confused with the Python token-optimization system (`src/`), which is documented in
-[`docs/architecture/ARCHITECTURE.md`](architecture/ARCHITECTURE.md).
+[`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md).
 
 ---
 

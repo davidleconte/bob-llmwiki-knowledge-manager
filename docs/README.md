@@ -42,16 +42,24 @@ Bob Shell KB manager:
 - [Installation](INSTALLATION.md) · [Usage](USAGE.md) · [Workflows](WORKFLOWS.md) · [Customization](CUSTOMIZATION.md)
 - [Repository analysis workflow](REPOSITORY_ANALYSIS_WORKFLOW.md) · [Complete repository analysis](knowledge-base/guides/complete-repository-analysis.md)
 - [Bob Shell UI integration](knowledge-base/guides/bob-shell-ui-integration.md)
+- **Full-stack setup** — [`scripts/setup.sh`](../scripts/setup.sh) installs Python extras, builds the embedding index, and validates the stack in one step.
+
+Delegation analysis pipeline:
+
+- `bob-optimize analyze <target>` — runs 6 parallel agents, compresses each report with `TokenOptimizer`, writes KB research docs.
+- `bob-optimize kb-status` — shows embedding backend, index freshness, and compression availability.
+- See [ADR-019](adr/019-delegation-pipeline-activation.md) for design rationale.
 
 ## Reference
 
 *Information-oriented — precise, dry, structured.*
 
 - **[API reference](api/README.md)** — generated from source docstrings, CI-checked for freshness.
-- **[Architecture Decision Records](adr/README.md)** — ADR 001–012.
+- **[Architecture Decision Records](adr/README.md)** — ADR-001 through ADR-019 (ADR-012 superseded).
 - **[Architecture](architecture/ARCHITECTURE.md)** — the authoritative system architecture (also explanation).
-- **CLI** — [`src/cli.py`](../src/cli.py): `optimize`, `truncate`, `count`, `cache-stats`, `cost-report`, `metrics`, `health`, `config`.
+- **CLI** — [`src/cli.py`](../src/cli.py): `optimize`, `truncate`, `count`, `cache-stats`, `cost-report`, `metrics`, `health`, `config`, `kb-status`, `analyze`, `kb-search`, `kb-index`, `graph-build`, `graph-query`, `graph-health`.
 - **Configuration** — [`src/config/schema.py`](../src/config/schema.py) (typed defaults).
+- **SLA** — [`docs/SLA.md`](SLA.md) — latency, throughput, quality, and concurrency targets.
 - **Validation harness** — [`src/validation/README.md`](../src/validation/README.md) (`python -m src.validation`).
 - **Cache API** — [cache-api.md](knowledge-base/references/cache-api.md).
 - **Security policy** — [`SECURITY.md`](../SECURITY.md) (vulnerability disclosure).
@@ -68,6 +76,17 @@ Bob Shell KB manager:
 - **Design** — [Design document](archive/DESIGN_DOCUMENT.md) · [MECE framework](archive/MECE_FRAMEWORK.md) · [Comparison with alternatives](archive/COMPARISON.md)
 - **Savings methodology** — [KB savings estimation methodology](knowledge-base/references/kb-savings-estimation-methodology.md).
 - **The Complete Guide (book)** — [table of contents](archive/BOOK_TABLE_OF_CONTENTS.md) (long-form narrative; historical — metrics retracted).
+
+---
+
+## Documentation Map
+
+Two systems share this repository. Use this map to reach the right architecture doc:
+
+| System | Architecture doc | Scope |
+|---|---|---|
+| **Bob Shell KB Manager** (Bash, ~500 lines) | [`docs/kb-manager/ARCHITECTURE.md`](kb-manager/ARCHITECTURE.md) | arc42 v2.1 — mode, templates, scripts, deployment |
+| **Python Token Optimizer** (`src/`, Python) | [`docs/architecture/ARCHITECTURE.md`](architecture/ARCHITECTURE.md) | Facade, cache, optimizer, KB pipeline, validation |
 
 ---
 

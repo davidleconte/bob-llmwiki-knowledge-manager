@@ -28,7 +28,7 @@ import re
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from src.tools.safe_paths import resolve_within
 
@@ -180,7 +180,7 @@ class KnowledgeBaseQuery:
         include_content: bool,
     ) -> Dict:
         """Full filesystem scan — keyword (+ optional P1 embedding) scoring."""
-        all_results = []
+        all_results: list[Dict[str, Any]] = []
 
         for category in categories:
             category_path = self.kb_path / category
@@ -214,7 +214,7 @@ class KnowledgeBaseQuery:
                 except Exception:
                     continue
 
-        all_results.sort(key=lambda x: x["score"], reverse=True)
+        all_results.sort(key=lambda x: float(x["score"]), reverse=True)
         return {
             "query": query,
             "categories_searched": categories,
@@ -570,7 +570,12 @@ class KnowledgeBaseQuery:
 
     def get_statistics(self) -> Dict:
         """Get knowledge base statistics"""
-        stats = {"categories": {}, "total_documents": 0, "total_size_bytes": 0, "total_lines": 0}
+        stats: Dict[str, Any] = {
+            "categories": {},
+            "total_documents": 0,
+            "total_size_bytes": 0,
+            "total_lines": 0,
+        }
 
         for category in self.categories:
             cat_path = self.kb_path / category
@@ -579,7 +584,11 @@ class KnowledgeBaseQuery:
 
             md_files = list(cat_path.glob("*.md"))
 
-            cat_stats = {"document_count": len(md_files), "total_size": 0, "total_lines": 0}
+            cat_stats: Dict[str, Any] = {
+                "document_count": len(md_files),
+                "total_size": 0,
+                "total_lines": 0,
+            }
 
             for md_file in md_files:
                 try:

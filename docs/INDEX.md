@@ -1,13 +1,13 @@
-# Token Optimization System - Documentation Index
+# Token Optimization System — Documentation Index
 
-> **Looking for the docs?** The primary entry point is now the Diátaxis-organized
+> **Looking for the docs?** The primary entry point is the Diátaxis-organized
 > **[documentation home](README.md)** (Tutorials · How-to · Reference · Explanation).
-> This page is the older exhaustive index, kept for completeness; some figures
-> below are dated — the canonical status is always [`STATUS.md`](../STATUS.md).
+> This page is the exhaustive index, kept for completeness; canonical status is
+> always [`STATUS.md`](../STATUS.md).
 
-**Version:** 2.0  
-**Last Updated:** 2026-07-12  
-**Status:** Beta — Not Production Ready (remediation in progress; see [Institutional Audit 2026-07-13](knowledge-base/research/audit-2026-07-13-institutional.md))
+**Version:** 3.0
+**Last Updated:** 2026-07-18
+**Status:** Beta — Not Production Ready (A+; all structural gaps closed — see [`STATUS.md`](../STATUS.md))
 
 ---
 
@@ -16,7 +16,6 @@
 - [README](../README.md) - Project overview and getting started
 - [CHANGELOG](../CHANGELOG.md) - Version history and changes
 - [Architecture](architecture/ARCHITECTURE.md) - Authoritative system architecture
-- [Project Status](project-management/PROJECT_STATUS.md) - Current project status
 - [API Reference](api/README.md) - Complete API documentation
 - [Monitoring Guide](MONITORING.md) - Observability and metrics
 - [Security Policy](../SECURITY.md) - Vulnerability disclosure
@@ -32,36 +31,30 @@
 - **[CHANGELOG](../CHANGELOG.md)** - Version history and release notes
 - **[MONITORING](MONITORING.md)** - Monitoring, logging, and health checks
 
-### 2. User Guides
+### 2. Quick Start Guides
 
 **Location:** `docs/`
 
-- **[Quick Start Guide](QUICK_START.md)** - 5-minute getting started guide
-- **[Installation Guide](INSTALLATION.md)** - Detailed installation instructions
-- **[Usage Guide](USAGE.md)** - Comprehensive usage examples
-- **[Customization Guide](CUSTOMIZATION.md)** - Customization options
-- **[Workflows Guide](WORKFLOWS.md)** - Common workflows and patterns
-- **[Repository Analysis Workflow](REPOSITORY_ANALYSIS_WORKFLOW.md)** - Token-efficient repo analysis
-- **[Workflow Automation Plan](WORKFLOW_AUTOMATION_PLAN.md)** - Automation strategy
-- **[Phase 1 Implementation Complete](archive/PHASE1_IMPLEMENTATION_COMPLETE.md)** - Automated scripts ready
-- **[Phase 2 Implementation Complete](archive/PHASE2_IMPLEMENTATION_COMPLETE.md)** - repo-analyzer mode ready
-- **[Phase 3 Implementation Complete](archive/PHASE3_IMPLEMENTATION_COMPLETE.md)** - Enhanced utilities ready
-- **[Phase 4 Implementation Complete](archive/PHASE4_IMPLEMENTATION_COMPLETE.md)** - Sub-agent delegation ready
+- **[Quick Start Guide](QUICK_START.md)** — 5-minute getting started guide
+- **[Installation Guide](INSTALLATION.md)** — Detailed installation instructions
+- **[Usage Guide](USAGE.md)** — Comprehensive usage examples
+- **[Customization Guide](CUSTOMIZATION.md)** — Customization options
+- **[Workflows Guide](WORKFLOWS.md)** — Common workflows and patterns
+- **[Repository Analysis Workflow](REPOSITORY_ANALYSIS_WORKFLOW.md)** — Token-efficient repo analysis
 
-### 3. Testing & Validation ⭐ NEW
+### 3. Testing & Validation
 
 **Location:** `evaluation/`
 
-- **[Test Results Final](../evaluation/TEST_RESULTS_FINAL.md)** - Complete test execution results (317 tests, 310+ passing)
-- **[Honest Assessment](../evaluation/HONEST_ASSESSMENT.md)** - 15-page critical analysis with real measurements
-- **[Token Savings Test Plan](TOKEN_SAVINGS_TEST_PLAN.md)** - Comprehensive validation methodology (390 tests planned)
-- **[Validation Report (Phase 5, measured)](../evaluation/results/validation-2026-07-14/report.json)** - real, manifest-backed run (`report.json` + `manifest.json`); the earlier `validation_report.json` (68.96%) is retracted/fabricated
+- **[Honest Assessment](../evaluation/HONEST_ASSESSMENT.md)** - Critical analysis with real measurements
+- **[Token Savings Test Plan](TOKEN_SAVINGS_TEST_PLAN.md)** - Validation methodology
+- **[Validation Report (Phase 5, measured)](../evaluation/results/validation-2026-07-14/report.json)** — manifest-backed run (`report.json` + `manifest.json`); the earlier `validation_report.json` (68.96%) is retracted/fabricated
 
 **Key Findings:**
-- ✅ 310+ tests passing (see [STATUS.md](../STATUS.md) for the current coverage snapshot; the single home for the gate is `pyproject.toml`)
-- ✅ Token savings **measured** (Phase 5): ~20% optimizer compression on real in-repo docs — manifest-backed, see `evaluation/results/validation-2026-07-14/`; the earlier 68.96% is retracted
-- ✅ Production readiness: 7/10 (beta-ready, needs hardening)
-- ⚠️ Phase 4 theoretical only (needs 3-6 months work)
+- ✅ 1053+ tests passing — see [STATUS.md](../STATUS.md) for the current live snapshot; gate is `pyproject.toml`
+- ✅ Token savings **measured**: ~20% mean optimizer compression (95% CI [19%, 21%], N=183) — manifest-backed at `evaluation/results/validation-2026-07-14/`; the earlier 68.96% is retracted
+- ✅ A+ (4.30/4.30) — all 4 structural gaps closed (SLA v1.0, sentence-transformers, full mypy scope, CODEOWNERS)
+- ✅ Delegation pipeline wired: `bob-optimize analyze` (ADR-019)
 - ⚠️ Mock-based testing (no real LLM API integration)
 
 ### 4. Architecture Documentation
@@ -72,125 +65,148 @@
 #### Current Architecture
 
 - **[Architecture](architecture/ARCHITECTURE.md)** ⭐ — the single authoritative
-  architecture document: components, runtime dataflow, config→runtime, and the
-  validation harness, with mermaid diagrams.
+  architecture document (v3.0): components, runtime dataflow, config→runtime,
+  KB subsystems (P2 embeddings, P3 graph, P4 query quality), delegation pipeline
+  (ADR-019), validation harness, SLA, and glossary.
+- **[Bob Shell KB Manager Architecture](kb-manager/ARCHITECTURE.md)** — arc42 v2.1
+  for the Bash product: mode, templates, scripts, deployment.
 
 #### Superseded / Deprecated
 
-- **[Actual System Architecture](architecture/ACTUAL_SYSTEM_ARCHITECTURE.md)** — v1.0, superseded by ARCHITECTURE.md
-- **[Unified Architecture](architecture/UNIFIED_ARCHITECTURE.md)** — v2.0, superseded (predates the Phase-4 facade)
-- **[Master Architecture](architecture/MASTER.md)** - Original design (deprecated)
-- **[Quality Attributes](architecture/QUALITY_ATTRIBUTES.md)** - Quality goals (deprecated)
-- **[Documentation Plan](architecture/DOCUMENTATION_PLAN.md)** - Planning doc (deprecated)
+- **[Actual System Architecture](architecture/deprecated/ACTUAL_SYSTEM_ARCHITECTURE.md)** — v1.0, superseded by ARCHITECTURE.md
+- **[Unified Architecture](architecture/deprecated/UNIFIED_ARCHITECTURE.md)** — v2.0, superseded (predates the Phase-4 facade)
+- **[Master Architecture](architecture/deprecated/MASTER.md)** — Original design (deprecated)
+- **[Quality Attributes](architecture/deprecated/QUALITY_ATTRIBUTES.md)** — Quality goals (deprecated; metrics retracted)
+- **[Documentation Plan](architecture/deprecated/DOCUMENTATION_PLAN.md)** — Planning doc (deprecated)
 
 **Note:** the deprecated documents describe an earlier or planned system. Refer to [ARCHITECTURE.md](architecture/ARCHITECTURE.md) for the current implementation.
 
-### 3. API Reference
+### 5. API Reference
 
-**Location:** `docs/api/`  
+**Location:** `docs/api/`
 **Overview:** [API Reference](api/README.md)
 
-Auto-generated API documentation from source code:
+Auto-generated API documentation from source code (see [full API reference](api/README.md)):
 
 #### Cache Module
-- [base](api/cache/base.md) - Base cache interface
-- [embeddings](api/cache/embeddings.md) - Embedding generation
-- [exact_cache](api/cache/exact_cache.md) - Exact match caching
-- [multi_level_cache](api/cache/multi_level_cache.md) - L1/L2 cache system
-- [semantic_cache](api/cache/semantic_cache.md) - Semantic similarity caching
+- [base](api/cache/base.md) — Base cache interface
+- [embeddings](api/cache/embeddings.md) — Embedding generation (`EmbeddingGenerator`, backend fallback chain)
+- [exact_cache](api/cache/exact_cache.md) — L1 exact match caching
+- [multi_level_cache](api/cache/multi_level_cache.md) — L1/L2 cache orchestration
+- [semantic_cache](api/cache/semantic_cache.md) — L2 semantic similarity caching
+
+#### Config Module
+- [schema](api/config/schema.md) — `ConfigSchema` (single home for all defaults)
+- [manager](api/config/manager.md) — `ConfigManager` singleton
+- [validator](api/config/validator.md) — Config validation
+
+#### Delegation Module
+- [pipeline](api/delegation/pipeline.md) — `AnalysisPipeline` — 6-agent parallel analysis → KB ingestion
+- [coordinator](api/delegation/coordinator.md) — `DelegationCoordinator` — parallel execution
+- [base](api/delegation/base.md) — `SubAgentBase`, `SubAgentTask`, `SubAgentResult`
+- [registry](api/delegation/registry.md) — `SubAgentRegistry` — agent management
+- Agents: [security](api/delegation/agents/security_agent.md) · [performance](api/delegation/agents/performance_agent.md) · [quality](api/delegation/agents/quality_agent.md) · [architecture](api/delegation/agents/architecture_agent.md) · [documentation](api/delegation/agents/documentation_agent.md) · [research](api/delegation/agents/research_agent.md)
+
+#### Embeddings Module (P2 KB Index)
+- [chunker](api/embeddings/chunker.md) — `MarkdownChunker` — `##`-boundary splitting + GFM tables
+- [index](api/embeddings/index.md) — `PersistentEmbeddingIndex` — disk-backed vector index
+- [indexer](api/embeddings/indexer.md) — `KBIndexer` — sync + query interface
+- [store](api/embeddings/store.md) — `FileBackedVectorStore` — atomic `.npy`/JSON I/O
+
+#### Graph Module (P3 Knowledge Graph)
+- [graph](api/graph/graph.md) — `KnowledgeGraph`, `NodeProps`, `Edge`
+- [builder](api/graph/builder.md) — `KnowledgeGraphBuilder` — explicit + semantic edges
+- [ranker](api/graph/ranker.md) — `GraphRanker` — PageRank re-ranking
+- [store](api/graph/store.md) — `GraphStore` — atomic JSON persistence
 
 #### Monitoring Module
-- [health](api/monitoring/health.md) - Health checking system
-- [logger](api/monitoring/logger.md) - Structured logging
-- [metrics](api/monitoring/metrics.md) - Metrics collection
+- [health](api/monitoring/health.md) — Health checking system
+- [logger](api/monitoring/logger.md) — Structured logging (`StructuredLogger`)
+- [metrics](api/monitoring/metrics.md) — Metrics collection (`MetricsCollector`)
+- [cost_tracker](api/monitoring/cost_tracker.md) — Bobcoin cost tracking
+- [cost_reporting](api/monitoring/cost_reporting.md) — Cost reports
 
 #### Optimizer Module
-- [prompt_optimizer](api/optimizer/prompt_optimizer.md) - Prompt optimization
-- [token_counter](api/optimizer/token_counter.md) - Token counting
+- [prompt_optimizer](api/optimizer/prompt_optimizer.md) — Prompt optimization
+- [token_counter](api/optimizer/token_counter.md) — Token counting (tiktoken + fallback)
 
 #### Truncation Module
-- [strategies](api/truncation/strategies.md) - Truncation strategies
-- [truncator](api/truncation/truncator.md) - Text truncation
+- [strategies](api/truncation/strategies.md) — Truncation strategies
+- [truncator](api/truncation/truncator.md) — Text truncation
 
-### 4. Architecture Decision Records (ADRs)
+#### Tools Module
+- [kb_query](api/tools/kb_query.md) — `KnowledgeBaseQuery` — 3-tier hybrid search
+- [component_analyzer](api/tools/component_analyzer.md) — Static component analysis
+- [batch_file_reader](api/tools/batch_file_reader.md) — Batch file reading with path containment
+- [safe_paths](api/tools/safe_paths.md) — Path-traversal containment (`resolve_within`)
 
-**Location:** `docs/adr/`  
+#### Root / Facade
+- [facade](api/root/facade.md) — `TokenOptimizer` facade
+- [factory](api/root/factory.md) — Builder functions
+- [cli](api/root/cli.md) — `bob-optimize` CLI subcommands
+- [pricing](api/root/pricing.md) — Model rates + Bobcoin conversion
+
+### 6. Architecture Decision Records (ADRs)
+
+**Location:** `docs/adr/`
 **Overview:** [ADR README](adr/README.md)
 
-12 ADRs documenting key architectural decisions:
+19 ADRs documenting key architectural decisions (ADR-012 superseded):
 
-- **Technology:** Python choice, token counting
-- **Architecture:** Caching strategy, sync vs async
-- **Algorithms:** TF-IDF scoring, semantic similarity, batch processing
-- **Quality:** Error handling, testing strategy, monitoring, security
+| Category | ADRs |
+|---|---|
+| Technology | 001 Python, 008 Token counting |
+| Architecture | 002/006 Caching, 007 Sync vs async, 013 Facade/factory, 016 Truncation config, 017 Knowledge graph, 018 Query quality, 019 Delegation pipeline |
+| Algorithms | 003 TF-IDF, 004 Semantic similarity, 005 Batch processing, 014 KB embedding scorer, 015 Persistent embedding index |
+| Quality | 009 Error handling, 010 Testing, 011 Monitoring, ~~012~~ Security (superseded by THREAT_MODEL.md) |
 
-### 5. Project Management
+### 7. User Guides
 
-**Location:** `docs/project-management/`  
-**Overview:** [Project Management README](project-management/README.md)
+- **[Installation](INSTALLATION.md)** — Setup and installation
+- **[Quick Start](QUICK_START.md)** — Getting started guide
+- **[Usage](USAGE.md)** — Detailed usage instructions
+- **[Workflows](WORKFLOWS.md)** — Common workflows
+- **[Repository Analysis Workflow](REPOSITORY_ANALYSIS_WORKFLOW.md)** — Token-efficient repository audit workflow
+- **[Customization](CUSTOMIZATION.md)** — Configuration and customization
+- **[Bob IDE Guide](BOB-IDE-GUIDE.md)** — Bob IDE mode picker, skill activation, persistence
+- **[SLA](SLA.md)** — Latency/throughput targets and measurement methodology
+- **[Comparison](archive/COMPARISON.md)** — Comparison with alternatives (archived)
 
-#### Planning Documents
-**Location:** `docs/project-management/planning/`
-
-- DOCUMENTATION_GAP_ANALYSIS.md
-- DOCUMENTATION_REORGANIZATION_PLAN.md
-- TOKEN_OPTIMIZATION_IMPLEMENTATION_PLAN.md
-- WEEK_19_COMPLETION_SUMMARY.md
-- WEEK_20_IMPLEMENTATION_PLAN.md
-
-#### Review Documents
-**Location:** `docs/project-management/reviews/`
-
-- ARCHITECTURE_AUDIT_FINAL.md
-- ARCHITECTURE_AUDIT_REPORT_REVISED.md
-- ARCHITECTURE_AUDIT_REPORT.md
-- PROJECT_AUDIT_REPORT.md
-
-### 6. User Guides
-
-- **[Installation](INSTALLATION.md)** - Setup and installation
-- **[Quick Start](QUICK_START.md)** - Getting started guide
-- **[Usage](USAGE.md)** - Detailed usage instructions
-- **[Workflows](WORKFLOWS.md)** - Common workflows
-- **[Repository Analysis Workflow](REPOSITORY_ANALYSIS_WORKFLOW.md)** - Token-efficient repository audit workflow
-- **[Workflow Automation Plan](WORKFLOW_AUTOMATION_PLAN.md)** - Automation, sub-agents, and mode enhancements
-- **[Customization](CUSTOMIZATION.md)** - Configuration and customization
-- **[Comparison](COMPARISON.md)** - Comparison with alternatives
-
-### 7. Configuration
+### 8. Configuration
 
 **Location:** `config/`
 
-- **custom_modes.yaml** - Custom mode configurations
-- **settings.json** - System settings
-- **templates/** - Document templates (concept, guide, reference, research)
+- **custom_modes.yaml** — Custom mode configurations
+- **settings.json** — System settings
+- **templates/** — Document templates (concept, guide, reference, research)
 
-### 8. Examples
+### 9. Examples
 
 **Location:** `examples/`
 
-- **personal-wiki/** - Personal knowledge base example
-- **research-project/** - Research project example
-- **software-project/** - Software project example
+- **personal-wiki/** — Personal knowledge base example
+- **research-project/** — Research project example
+- **software-project/** — Software project example
 
-### 9. Evaluation
+### 10. Evaluation
 
 **Location:** `evaluation/`
 
-- **Test Data:** Control and treatment task data
-- **Results:** Comparison results and analysis
-- **Reports:** Feature audit and analysis reports
-- **Scripts:** Data collection and analysis scripts
+- **`results/validation-2026-07-14/`** — Authoritative manifest-backed measurement run (`report.json` + `manifest.json`)
+- **`VALIDATION_DISCLAIMER.md`** — Retraction notice for the fabricated 68.96% figure
+- **`HONEST_ASSESSMENT.md`** — Critical analysis with real measurements
 
-### 10. Scripts
+### 11. Scripts
 
 **Location:** `scripts/`
 
-- **export-kb.sh** - Knowledge base export
-- **init-project.sh** - Project initialization
-- **install.sh** - Installation
-- **validate-kb.sh** - Knowledge base validation
-- **generate_api_docs.py** - API documentation generator
+- **setup.sh** — Full-stack setup: Python extras + embedding index build + stack validation
+- **install.sh** — Install knowledge-manager mode into Bob Shell global config
+- **init-project.sh** — Scaffold KB directory structure in a target project
+- **validate-kb.sh** — Validate KB structure and broken links
+- **export-kb.sh** — Export KB to multiple formats (markdown, Obsidian, HTML, PDF)
+- **generate_api_docs.py** — Auto-generate `docs/api/` from source docstrings
+- **check_coverage_by_package.py** — Per-package coverage floor enforcement
 
 ---
 
@@ -198,40 +214,52 @@ Auto-generated API documentation from source code:
 
 ### Completed Components ✅
 
-| Component | Status | Tests | Documentation |
-|-----------|--------|-------|---------------|
-| **Token Counter** | ✅ Complete | 27 passing | [API](api/optimizer/token_counter.md) |
-| **Prompt Optimizer** | ✅ Complete | 26 passing | [API](api/optimizer/prompt_optimizer.md) |
-| **Truncation** | ✅ Complete | 38 passing | [API](api/truncation/) |
-| **Cache System** | ✅ Complete | 45+ passing | [API](api/cache/) |
-| **Monitoring** | ✅ Complete | 69+ passing | [Guide](MONITORING.md) |
-| **API Docs** | ✅ Complete | 12 modules | [Index](api/README.md) |
+| Component | Package | CLI entry points | Documentation |
+|---|---|---|---|
+| **Token Counter** | `src/optimizer/` | `bob-optimize count` | [API](api/optimizer/token_counter.md) |
+| **Prompt Optimizer** | `src/optimizer/` | `bob-optimize optimize` | [API](api/optimizer/prompt_optimizer.md) |
+| **Truncation** | `src/truncation/` | `bob-optimize truncate` | [API](api/truncation/) |
+| **Cache System** | `src/cache/` | `bob-optimize cache-stats` | [API](api/cache/) |
+| **Config** | `src/config/` | `bob-optimize config` | [API](api/config/) |
+| **Monitoring** | `src/monitoring/` | `bob-optimize health`, `metrics`, `cost-report` | [Guide](MONITORING.md) |
+| **KB Embedding Index (P2)** | `src/embeddings/` | `bob-optimize kb-index` | [API](api/embeddings/) |
+| **Knowledge Graph (P3)** | `src/graph/` | `bob-optimize graph-build/query/health` | [API](api/graph/) |
+| **KB Search (P4)** | `src/tools/kb_query.py` | `bob-optimize kb-search`, `kb-status` | [API](api/tools/kb_query.md) |
+| **Delegation Pipeline** | `src/delegation/` | `bob-optimize analyze` | [API](api/delegation/) · [ADR-019](adr/019-delegation-pipeline-activation.md) |
+| **Validation Harness** | `src/validation/` | `python -m src.validation` | [API](api/validation/) |
+| **API Docs** | `docs/api/` | `scripts/generate_api_docs.py` | [Index](api/README.md) |
 
-### Week 20 Progress
-
-- **Days 1-2:** Documentation rewrite ✅
-- **Days 3-5:** Monitoring & API docs ✅
-- **Days 6-10:** Production validation (pending user action)
+> Current test counts and coverage: see [`STATUS.md`](../STATUS.md) (single source of truth).
 
 ---
 
 ## Key Features
 
-### Monitoring & Observability
+### Token Optimization
+- **Prompt compression** — ~20% mean on real prose (manifest-backed, null-test validated)
+- **Multi-level cache** — L1 exact (SHA-256, O(1)) + L2 semantic (TF-IDF cosine)
+- **Intelligent truncation** — lossy budget-fit (4 strategies), reported separately
 
-- **Structured Logging** - JSON-formatted logs with automatic enrichment
-- **Metrics Collection** - Cache, optimization, and truncation metrics
-- **Health Checking** - Component and system health monitoring
-- **Performance Tracking** - Latency percentiles (p50, p95, p99)
+### Knowledge Base Intelligence
+- **Persistent embedding index (P2)** — `sentence-transformers` / `mlx-embeddings` / hashing fallback
+- **Knowledge graph (P3)** — PageRank re-ranking, orphan detection, hub analysis
+- **Query quality (P4)** — recency weighting, date filtering, hybrid keyword+embedding scoring
+
+### Analysis Pipeline
+- **Delegation pipeline** — 6 parallel agents (security, performance, quality, architecture, documentation, research) → TokenOptimizer → KB ingestion via `bob-optimize analyze`
+
+### Monitoring & Observability
+- **Structured Logging** — JSON-formatted logs with automatic enrichment
+- **Metrics Collection** — Cache, optimization, and truncation metrics
+- **Health Checking** — Component and system health monitoring
+- **Cost Tracking** — Bobcoin budget + spend reporting
 
 See [MONITORING.md](MONITORING.md) for details.
 
 ### API Documentation
-
-- **Auto-generated** - Extracted from source code docstrings
-- **Type Hints** - Full type annotations
-- **Examples** - Usage examples in docstrings
-- **Organized** - By module (cache, monitoring, optimizer, truncation)
+- **Auto-generated** — Extracted from source code docstrings (CI-checked for drift)
+- **Type-annotated** — Full type annotations, mypy-clean
+- **Organized** — By module (14 packages)
 
 See [API Reference](api/README.md) for details.
 
@@ -240,81 +268,91 @@ See [API Reference](api/README.md) for details.
 ## Navigation by Role
 
 ### Developers
-1. Start with [Quick Start](QUICK_START.md)
+1. Start with [Quick Start](QUICK_START.md) (Bob Shell KB) or the [optimize-a-prompt tutorial](tutorials/optimize-a-prompt.md) (Python TOS)
 2. Review [API Reference](api/README.md)
 3. Check the [Architecture](architecture/ARCHITECTURE.md)
 4. See [Usage Guide](USAGE.md) for examples
 
-### DevOps/SRE
+### DevOps / SRE
 1. Review [Monitoring Guide](MONITORING.md)
 2. Check [Installation](INSTALLATION.md)
 3. See [Health Checking](api/monitoring/health.md)
-4. Review metrics in [Metrics API](api/monitoring/metrics.md)
+4. Review [SLA](SLA.md) for latency/throughput targets
 
 ### Architects
 1. Read the [Architecture](architecture/ARCHITECTURE.md)
 2. Review [ADRs](adr/README.md)
-3. Check component specifications in [API docs](api/README.md)
+3. See [STRIDE Threat Model](security/THREAT_MODEL.md)
+4. Check the [SLA](SLA.md) for quality scenarios
 
-### Project Managers
-1. Check [Project Status](project-management/PROJECT_STATUS.md)
-2. Review [Week 20 Plan](project-management/planning/WEEK_20_IMPLEMENTATION_PLAN.md)
-3. See [Completion Summary](project-management/planning/WEEK_19_COMPLETION_SUMMARY.md)
+### Contributors
+1. Read [CONTRIBUTING.md](../CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md)
+2. Check [GOVERNANCE.md](../GOVERNANCE.md)
+3. Review [STATUS.md](../STATUS.md) for the current maturity/coverage baseline
 
 ---
 
 ## Getting Started
 
-1. **Installation**
-   ```bash
-   pip install -e ".[dev,monitoring]"
-   ```
+**One-step full-stack setup (recommended):**
 
-2. **Basic Usage**
-   ```python
-   from src.optimizer import PromptOptimizer
-   from src.monitoring import get_logger, get_metrics_collector
-   
-   # Initialize
-   optimizer = PromptOptimizer()
-   logger = get_logger("main")
-   metrics = get_metrics_collector()
-   
-   # Optimize prompt
-   result = optimizer.optimize("Your prompt here")
-   logger.info("optimization_complete", savings=result["savings"])
-   ```
+```bash
+cd ~/Projects/bob-llmwiki-knowledge-manager
+./scripts/setup.sh
+```
 
-3. **Enable Monitoring**
-   ```python
-   from src.monitoring import configure_logging, configure_health_checker
-   
-   configure_logging(log_level="INFO", log_dir=Path("logs"))
-   configure_health_checker(optimizer=optimizer)
-   ```
+**Manual installation (Python extras only):**
 
-See [Quick Start](QUICK_START.md) for more details.
+```bash
+pip install -e ".[dev,monitoring]"
+```
+
+**Optimize a prompt (CLI):**
+
+```bash
+echo "Your long prompt here" | bob-optimize optimize -
+```
+
+**Optimize a prompt (Python library):**
+
+```python
+from src.facade import TokenOptimizer
+
+optimizer = TokenOptimizer()
+result = optimizer.optimize("Your prompt here")
+print(result["optimized_text"])        # compressed text
+print(result["compression_ratio"])     # e.g. 0.80 → 20% smaller
+```
+
+**Run a repository analysis:**
+
+```bash
+bob-optimize analyze src/ --kb-path docs/knowledge-base --output-dir /tmp/analysis
+```
+
+See [Quick Start](QUICK_START.md) for the Bob Shell KB Manager onboarding.
 
 ---
 
 ## Documentation Standards
 
 - **Format:** Markdown with Mermaid diagrams
-- **Style:** Clear, concise, example-driven
-- **Structure:** Hierarchical with cross-references
-- **Maintenance:** Auto-generated where possible (API docs)
+- **Style:** Clear, concise, example-driven (arc42 / Tier-1)
+- **Structure:** Diátaxis quadrants (Tutorials · How-to · Reference · Explanation)
+- **Maintenance:** API docs auto-generated from source (CI-checked for drift)
+- **Honesty:** All performance/savings figures must cite a reproducible manifest
 
 ---
 
 ## Version History
 
 | Version | Date | Changes |
-|---------|------|---------|
+|---|---|---|
+| 3.0 | 2026-07-18 | Added embeddings/graph/delegation modules; fixed stale links; updated component table |
 | 2.0 | 2026-07-12 | Added monitoring, API docs, reorganized structure |
 | 1.0 | 2026-07-12 | Initial release with core implementation |
 
 ---
 
-**Last Updated:** 2026-07-12  
-**Status:** Beta — Not Production Ready (remediation in progress; see [Institutional Audit 2026-07-13](knowledge-base/research/audit-2026-07-13-institutional.md))  
-**Next:** Production validation (Week 20 Days 6-10)
+**Last Updated:** 2026-07-18
+**Status:** Beta — Not Production Ready; A+ (4.30/4.30) — see [`STATUS.md`](../STATUS.md)

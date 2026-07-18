@@ -287,7 +287,7 @@ Include examples.
 - [Performance Benchmarks](../research/performance-benchmarks.md) - Real-world measurements
 
 ## References
-- [System Architecture](../../architecture/ACTUAL_SYSTEM_ARCHITECTURE.md) - Complete technical design
+- [System Architecture](../../architecture/ARCHITECTURE.md) - Complete technical design
 - [ADR-001: Python Choice](../../adr/001-python-choice.md) - Language selection rationale
 - [ADR-008: Token Counting](../../adr/008-token-counting.md) - Token counting strategy
 - [Design Document](../../archive/DESIGN_DOCUMENT.md) - Original system design (archived; metrics retracted)

@@ -379,10 +379,10 @@ Context Truncation:      5.6ms (6%)
 - [Setup Guide](../guides/setup-token-optimization.md) - Installation instructions
 
 ## References
-- [System Architecture](../../architecture/ACTUAL_SYSTEM_ARCHITECTURE.md) - Technical design
+- [System Architecture](../../architecture/ARCHITECTURE.md) - Technical design
 - [Test Suite](../../../tests/) - All benchmark tests
 - [ADR-010: Testing Strategy](../../adr/010-testing-strategy.md) - Testing approach
-- [Project Status](../../project-management/PROJECT_STATUS.md) - Current status
+- [Project Status](../../../STATUS.md) - Current status (canonical)
 
 ---
 *Last Updated: 2026-07-13*

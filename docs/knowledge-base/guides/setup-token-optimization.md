@@ -404,7 +404,7 @@ After successful setup:
 - [Performance Benchmarks](../research/performance-benchmarks.md) - Real-world performance data
 
 ## References
-- [System Architecture](../../architecture/ACTUAL_SYSTEM_ARCHITECTURE.md) - Technical architecture
+- [System Architecture](../../architecture/ARCHITECTURE.md) - Technical architecture
 - [pyproject.toml](../../../pyproject.toml) - Complete dependency list (single home)
 - [Test Suite](../../../tests/) - All test files
 

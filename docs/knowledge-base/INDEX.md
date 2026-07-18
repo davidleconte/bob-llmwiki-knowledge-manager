@@ -1,9 +1,8 @@
 # Knowledge Base Index
 
-> ⚠️ **Metrics correction (2026-07-14).** Earlier drafts of this document cited fabricated token-savings/quality figures — "68.96%", "89.3%", "91.80%" — produced by a simulation that never invoked the optimizer. **Those figures are retracted.** The honest, measured figure is **~20% mean optimizer compression** on real prose (manifest-backed: `evaluation/results/validation-2026-07-14/`; see `STATUS.md` and `CHANGELOG.md`). Inline numbers below have been corrected where they appeared.
+> ⚠️ **Metrics correction (2026-07-14).** Earlier drafts cited fabricated figures — "68.96%", "89.3%", "91.80%". **Those are retracted.** The honest, measured figure is **~20% mean optimizer compression** on real prose (manifest-backed: `evaluation/results/validation-2026-07-14/`; see `STATUS.md`).
 
-
-Last Updated: 2026-07-17
+Last Updated: 2026-07-18
 
 ## Quick Navigation
 - [Concepts](./concepts/) - Core concepts and definitions
@@ -12,7 +11,11 @@ Last Updated: 2026-07-17
 - [Research](./research/) - Research notes and findings
 
 ## Recent Additions
-- 2026-07-17: [Knowledge Graph Layer — Live Validation](./research/graph-validation-2026-07-17.md) - Research ⭐ NEW — P3 graph live validation: 80 nodes, 2876 edges, threshold=0.30 confirmed, graph_weight=0.0 default confirmed, 27/40 orphans rescued by semantic edges
+- 2026-07-18: [Knowledge Graph Layer](./concepts/knowledge-graph-layer.md) - Concept ⭐ NEW — property graph architecture, 4 modules, NodeProps model, edge types, benefits table (orphan detection, hubs, broken links, PageRank re-ranking)
+- 2026-07-18: [Delegation Analysis Pipeline](./concepts/delegation-analysis-pipeline.md) - Concept ⭐ NEW — 6 parallel agents, thin connector pattern, KB-aware execution, token-compressed output, CLI usage
+- 2026-07-18: [Knowledge Graph Usage Guide](./guides/knowledge-graph-usage-guide.md) - Guide ⭐ NEW — 5-step workflow: build index → build graph → health report → fix orphans → query; troubleshooting; best practices
+- 2026-07-17: [Delegation Pipeline Activation](../adr/019-delegation-pipeline-activation.md) - ADR-019 — delegation module activated as analysis pipeline; `bob-optimize analyze`; coverage floor 52% → 70%; 84% measured
+- 2026-07-17: [Knowledge Graph Layer — Live Validation](./research/graph-validation-2026-07-17.md) - Research — P3 graph live validation: 80 nodes, 2876 edges, threshold=0.30 confirmed, graph_weight=0.0 default confirmed, 27/40 orphans rescued by semantic edges
 - 2026-07-17: [Adversarial Audit — Embeddings Chunker Integration](./research/adversarial-audit-embeddings-chunker-2026-07-17.md) - Research ⭐ NEW — 2 Critical bugs found and fixed: AF-1 (flush/reload shape mismatch) + AF-2 (is_stale always True); 2 Medium, 2 Low
 - 2026-07-16: [KB Query Scorer A/B Validation](./research/kb-query-ab-validation-2026-07.md) - Research ⭐ NEW — embedding-only p@3=0.88 vs keyword p@3=0.64; recommends w=0.7 for KBIndexer
 - 2026-07-16: [Multi-Level Caching Architecture Patterns](./concepts/multi-level-caching-architecture-patterns.md) - Concept ⭐ NEW
@@ -62,14 +65,17 @@ Last Updated: 2026-07-17
 ## All Documents
 
 ### Concepts
-- [Multi-Level Caching Architecture Patterns](./concepts/multi-level-caching-architecture-patterns.md) - Comprehensive guide to cache hierarchy patterns: L1/L2/L3 organization, cache-aside/read-through/write-through/write-back patterns, LRU/LFU/FIFO eviction policies, cache coherence, performance characteristics, distributed caching, with examples from CPU caches to CDN to application caches ⭐ NEW
-- [KB-TOS Shared Embedding Layer](./concepts/kb-tos-embedding-layer.md) - Proposed shared infrastructure (`src/embeddings/`) enabling persistent, disk-backed semantic search for both the KB Manager and Token Optimizer. Target architecture for P2. Includes `PersistentEmbeddingIndex`, `FileBackedVectorStore`, `KBIndexer`, and optional L3 cache design. Status: Proposed.
+- [Knowledge Graph Layer](./concepts/knowledge-graph-layer.md) - P3 property graph over KB documents: 4 modules (graph · builder · ranker · store), NodeProps model, explicit + semantic + broken edge types, orphan/hub/broken-link detection, PageRank re-ranking, benefits table ⭐ NEW
+- [Delegation Analysis Pipeline](./concepts/delegation-analysis-pipeline.md) - 6 parallel analysis agents (Security · Performance · Quality · Architecture · Documentation · Research), thin connector pattern, KB-aware execution order, token-compressed output, `bob-optimize analyze` CLI ⭐ NEW
+- [Multi-Level Caching Architecture Patterns](./concepts/multi-level-caching-architecture-patterns.md) - Comprehensive guide to cache hierarchy patterns: L1/L2/L3 organization, eviction policies, distributed caching, with examples from CPU caches to CDN to application caches
+- [KB-TOS Shared Embedding Layer](./concepts/kb-tos-embedding-layer.md) - P2 shared infrastructure (`src/embeddings/`): `PersistentEmbeddingIndex`, `FileBackedVectorStore`, `KBIndexer`, persistent disk-backed semantic search for KB Manager and Token Optimizer
 - [Multi-Level Caching](./concepts/multi-level-caching.md) - Hierarchical caching strategy combining L1 (exact match) and L2 (semantic similarity) caches with automatic promotion
 - [Token Optimization](./concepts/token-optimization.md) - Systematic approach to reducing LLM token consumption through caching, optimization, and truncation
 - [Dependency Analysis](./concepts/dependency-analysis.md) - Python dependency inventory with security audit and recommendations for dependency management
 
 ### Guides
-- [KB-TOS Integration Roadmap (P0/P1/P2)](./guides/kb-tos-integration-roadmap.md) - Grounded P0/P1/P2 integration roadmap and TOS stability gate checklist. **P0 fully closed** (S1–S5 all done). Only S6 (CHANGELOG promotion) and S7 (git tag v1.0) remain (~20 min). P1 KB query engine upgrade design and P2 persistent embedding index scope intact.
+- [Knowledge Graph Usage Guide](./guides/knowledge-graph-usage-guide.md) - 5-step workflow: build embedding index → build graph → run health report → fix orphans → query; CLI and Python API; troubleshooting (T1–T4); best practices ⭐ NEW
+- [KB-TOS Integration Roadmap (P0/P1/P2)](./guides/kb-tos-integration-roadmap.md) - Grounded P0/P1/P2 integration roadmap; P0 fully closed; P1 and P2 scope intact
 - [Dual System Use Case Example](./guides/dual-system-use-case-example.md) - Real-world example: Enterprise AI Assistant Platform for 200-person engineering team, 12-month implementation, 90.3% cost savings (468,000 BC/year), 2,340% ROI, detailed month-by-month breakdown showing KB Manager (78% savings) + Token Optimizer (12% savings) working together
 - [Using Both Systems Together](./guides/using-both-systems-together.md) - Comprehensive guide for using Token Optimizer and Knowledge Manager simultaneously: integration patterns, use case analysis, workflow examples, cost-benefit analysis, decision matrix, technical limitations, expected combined savings (60-75% in ideal conditions)
 - [Token Optimizer Quick Install](./guides/token-optimizer-quick-install.md) - Fast 5-minute installation and verification guide for Token Optimization System: 3-step install, CLI usage, quick example, troubleshooting, system requirements
@@ -118,7 +124,7 @@ Last Updated: 2026-07-17
 - [Phase 2 Concurrency Test Results](./research/phase2-concurrency-test-results.md) - Comprehensive concurrency testing results revealing and fixing thread-safety issues
 - [Phase 2 Performance Baseline Results](./research/phase2-performance-baseline-results.md) - Performance baseline measurements showing 19-79x faster than targets
 - [Phase 1 Lessons Learned 2026-07-13](./research/phase1-lessons-learned-2026-07-13.md) - Key lessons from Phase 1 implementation: TDD effectiveness, configuration validation, integration testing, thread safety, versioning complexity, and recommendations for Phase 2
-- [Delegation Integration Analysis 2026-07-13](./research/delegation-integration-analysis-2026-07-13.md) - Analysis of delegation module revealing 28% orphaned code, 0% test coverage, and experimental status with no integration into core system
+- [Delegation Integration Analysis 2026-07-13](./research/delegation-integration-analysis-2026-07-13.md) - ⚠️ **Superseded by ADR-019** — original analysis concluded "keep as separate system"; delegation module is now integrated as analysis pipeline (see `src/delegation/pipeline.py`, `bob-optimize analyze`)
 - [Coverage Measurement 2026-07-13](./research/coverage-measurement-2026-07-13.md) - Real code coverage measurement revealing 49% actual coverage vs claimed 98.4% pass rate, with 28% orphaned code identified
 - [External Audit 2026-07-12](./research/external-audit-2026-07-12.md) - Independent external audit identifying critical findings, fabricated metrics, and documentation drift with recommended remediation
 - [Cost Tracking Lessons Learned](./research/cost-tracking-lessons-learned.md) - Key lessons learned from implementing the comprehensive Bobcoin cost tracking system with KB savings estimation

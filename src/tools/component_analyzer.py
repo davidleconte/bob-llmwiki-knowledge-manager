@@ -7,7 +7,7 @@ Analyzes code components with specialized strategies
 import json
 import re
 from pathlib import Path
-from typing import Dict, List, Literal
+from typing import Any, Dict, List, Literal
 
 from src.tools.safe_paths import resolve_within
 
@@ -339,8 +339,8 @@ class ComponentAnalyzer:
     def _analyze_functions(self, content: str, file_path: Path) -> Dict:
         """Analyze functions in code"""
         lines = content.split("\n")
-        functions = []
-        current_func = None
+        functions: list[Dict[str, Any]] = []
+        current_func: Dict[str, Any] | None = None
         indent_level = 0
 
         for line_num, line in enumerate(lines, 1):

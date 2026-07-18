@@ -67,9 +67,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bash syntax validation for all scripts
 - Example knowledge base integrity checks
 
-## [Unreleased]
+## [1.1.0] - 2026-07-18
+
+> **Branch:** `fix-multilevel-cache-race` — all items below are shipped on this branch.
 
 ### Added
+- **sentence-transformers added to `dev` extras** (`pyproject.toml`): cross-platform
+  MiniLM backend is now always available in the dev venv. The previously-skipped
+  `TestMiniLMBackend` tests (`test_minilm_st_fallback_activates`,
+  `test_minilm_st_vector_shape_and_norm`, `test_minilm_generator_backend_property`)
+  now run unconditionally and pass. `uv.lock` updated (sentence-transformers 5.6.0).
+
+- **Load/soak test suite + formal SLA** (`tests/load/test_load_soak.py`, `docs/SLA.md`):
+  - `docs/SLA.md` — SLA v1.0: latency p99 targets per component (L1 hit ≤ 750 µs,
+    cold pipeline ≤ 3.5 ms, token count 1K ≤ 1.8 ms), throughput targets (≥ 50 req/s
+    single-thread, ≥ 100 req/s combined 4-thread), concurrency and quality SLAs.
+  - `tests/load/test_load_soak.py` — 8 tests: sustained throughput, 4-thread
+    concurrent throughput + corruption check, L1 bulk-fill, deadlock-free concurrent
+    writes, post-write hit-rate, 60-s soak (marked `slow`). All 7 non-soak tests pass
+    locally asserting (`LOAD_TEST_ASSERT=1`), beating SLA targets by orders of magnitude
+    on cache-hit path (~58 000 req/s vs 50 req/s SLA target).
+  - **`load` CI job** added to `.github/workflows/ci.yml` — informational (non-blocking)
+    on CI; asserting on developer hardware with `LOAD_TEST_ASSERT=1`.
+
+
+- **G-2 gap closed: mypy full-scope type coverage** — removed `exclude = "^src/(delegation|tools)/"` from `[tool.mypy]`; fixed all resulting type errors across `src/cache/embeddings.py`, `src/graph/graph.py`, `src/cli.py`, `src/tools/component_analyzer.py`, `src/tools/kb_query.py`, `src/delegation/agents/security_agent.py`, and `src/delegation/agents/research_agent.py`. `src/` now type-checks clean (0 errors; `[annotation-unchecked]` notes only) under `--ignore-missing-imports`.
+- **G-4 gap closed: CODEOWNERS covers `src/delegation/`** — added `/src/delegation/ @davidleconte` entry to `.github/CODEOWNERS`.
+
+- **Gap-fix: Delegation Analysis Pipeline** (ADR-019, `src/delegation/pipeline.py`):
+  - `src/delegation/pipeline.py` — thin connector (~175 lines) running 6 parallel
+    agents, compressing each report through `TokenOptimizer`, and writing KB
+    research documents to `output_dir`.
+  - **`bob-optimize analyze <target>`** CLI subcommand: `--kb-path`, `--output-dir`,
+    `--workers`, `--depth`, `--no-compress`. Path-traversal containment enforced.
+  - **`bob-optimize kb-status`** CLI subcommand: reports embedding backend,
+    index freshness, compression availability, and doc counts in JSON or
+    human-readable form.
+  - Per-agent coverage floor raised 52% → 70% in
+    `scripts/check_coverage_by_package.py`; measured at 84% after adding
+    `tests/delegation/test_pipeline.py` (9 tests) and
+    `tests/delegation/test_agents_containment.py` (10 smoke + containment tests).
+  - `scripts/setup.sh` — one-step full-stack setup: Python extras, embedding
+    index build, stack validation.
+
+- **Gap-fix: KB Manager architecture doc consolidation** (Sub-Task 7):
+  - `docs/ARCHITECTURE.md` (KB Manager arc42 document) renamed to
+    `docs/kb-manager/ARCHITECTURE.md` to eliminate the dual-architecture-doc
+    navigation confusion identified in the gap audit.
+  - Cross-references in `README.md`, `docs/architecture/ARCHITECTURE.md`,
+    `docs/README.md`, and `AGENTS.md` updated.
+  - `tests/test_workflows.py::test_documentation_files_exist` updated to
+    assert the new path.
+
 - **P4 — Query quality improvements** (ADR-018):
   - `KnowledgeBaseQuery(recency_weight=0.0)`: optional recency tiebreaker. Blends
     relative file mtime into scores (`score = (1-rw)*base + rw*(norm_mtime×15.0)`).

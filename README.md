@@ -23,7 +23,7 @@ A native **IBM Bob Shell** implementation of Andrej Karpathy's **LLM-Wiki** patt
 
 Each system works without the other. Three **opt-in** integration points connect them (all fallback-safe — if the Python system is absent, the KB Manager is unaffected): the KB query engine can use the TOS embedding scorer; the `knowledge-manager` mode can compress retrieved context via `bob-optimize`; and a persistent embedding index bridges KB document search with TOS cache infrastructure. See [`INTEGRATIONS.md`](INTEGRATIONS.md).
 
-Architecture: [KB Manager — `docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [Python system — `docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md).
+Architecture: [KB Manager — `docs/kb-manager/ARCHITECTURE.md`](docs/kb-manager/ARCHITECTURE.md) · [Python system — `docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md).
 
 ### Supported targets
 
@@ -98,6 +98,11 @@ The savings are **structural** — each IBM token-economy principle has a concre
 ## 5. Get started in 5 minutes (one-time setup)
 
 No custom mode required. Point three scripts at your project, then let any Bob mode do the thinking.
+
+> **Full-stack setup (recommended):** Run `./scripts/setup.sh` once from the repo
+> root. It installs the Token Optimization System, builds the KB embedding index,
+> and prints an integration health report (`bob-optimize kb-status`). The KB Manager
+> works without it — setup.sh only activates the optional Python integrations.
 
 ```bash
 # 0 · Set once, to wherever you cloned this repo
@@ -293,6 +298,36 @@ The graph layer (`src/graph/`) builds a property graph over the KB document corp
 structural health analysis, multi-hop traversal, and PageRank-based re-ranking of search
 results. It is **opt-in** and fully backward-compatible.
 
+#### Implementation
+
+Four modules, each independently usable:
+
+| Module | Class | Responsibility |
+|--------|-------|----------------|
+| `src/graph/graph.py` | `KnowledgeGraph` | Adjacency dict, BFS traversal, PageRank (power method, damping=0.85), `orphans()`, `hubs()` |
+| `src/graph/builder.py` | `KnowledgeGraphBuilder` | Parses frontmatter `related:` + inline `[text](path)` links for **explicit** edges; queries `PersistentEmbeddingIndex` to derive **semantic** edges at cosine ≥ 0.30 |
+| `src/graph/ranker.py` | `GraphRanker` | Lazy PageRank cache; `rerank()` blend: `final = (1-w)·similarity + w·pagerank·15.0` |
+| `src/graph/store.py` | `GraphStore` | Atomic `os.replace`-based JSON persistence to `.bob/kb-graph.json` |
+
+Each KB document becomes a **node** with 10 properties (`NodeProps`): title, category, tags, date, type, status, mtime, content length, description, and raw related-refs. Edges carry a type (`explicit` or `semantic`), a weight (1.0 or cosine score), and an optional label.
+
+#### Benefits
+
+| Benefit | What it solves | Measured result |
+|---------|----------------|-----------------|
+| **Orphan detection** | Documents with no inbound links are invisible to retrieval — they can never be surfaced by a KB query | 80-doc corpus: 39 orphans identified; semantic edges rescued 26 of them (reduced to 13 explicit orphans) |
+| **Hub identification** | High-pagerank documents are the conceptual anchors of the KB — surfacing them improves query relevance | `graph.hubs(top_k=5)` returns the 5 documents most-cited by others |
+| **Broken-link detection** | Cross-references to deleted or renamed files silently rot | Builder stores type `"broken"` edges (weight 0.0, excluded from PageRank); `graph-health` reports them |
+| **Multi-hop traversal** | Related documents two or more hops away are invisible to keyword + embedding search | `graph.neighbours(doc_id, depth=2)` returns all documents within N hops with their distance |
+| **PageRank re-ranking** | Embedding similarity alone treats every document as equally authoritative | `GraphRanker.rerank()` blends cosine similarity with PageRank score; default `graph_weight=0.0` (safe — no regression observed on the current corpus; raise only after re-running the golden set) |
+| **Structural health CLI** | No visibility into KB connectivity without querying every file manually | `bob-optimize graph-health` prints orphan count, hub list, broken links, and PageRank top-10 in one command |
+
+> **`graph_weight=0.0` is the validated default.** Live validation on an 80-doc corpus with MiniLM
+> showed no uplift and no regression from graph re-ranking at any tested weight (0.1–0.5): p@3
+> remained 0.88 with or without graph. The graph adds value through structural analysis (orphan/hub
+> detection), not through score blending, on the current corpus size. See
+> [ADR-017](docs/adr/017-knowledge-graph-layer.md).
+
 ```python
 from pathlib import Path
 from src.cache.embeddings import EmbeddingGenerator
@@ -474,8 +509,8 @@ Reproduce with `python -m src.validation`; CI re-runs it on every push.
 
 ## 11. Maturity and current status
 
-**Current grade: A (4.09 / 4.30) against institutional Tier-1 vendor standard.**
-Trajectory: D− (0.9) → B+/A− (3.46) → A− (3.70) → A (3.89) → **A (4.09)** across Phases 0–8 + gap-closure sessions.
+**Current grade: A+ (4.30 / 4.30) against institutional Tier-1 vendor standard.**
+Trajectory: D− (0.9) → B+/A− (3.46) → A− (3.70) → A (3.89) → A (4.09) → **A+ (4.30)** across Phases 0–8 + all 4 structural gaps closed (2026-07-18).
 Authoritative status: [`STATUS.md`](STATUS.md).
 
 **What "Beta — Not Production Ready" means here:**
@@ -483,12 +518,12 @@ Authoritative status: [`STATUS.md`](STATUS.md).
 | Dimension | Grade | Notes |
 |-----------|:-----:|-------|
 | Product Integrity & Claims | **A+** | All fabricated metrics retracted and permanently recorded; every published number manifest-backed; machine-validated by CI |
-| Architecture & Design | **A** | Facade holds no logic; factory is single config→constructor home; all config fields wired (`version_support_enabled`, `max_versions`, `log_level`, `metrics_enabled`); `health_check_interval` documented as deferred |
-| Code Correctness | **A** | C1–C8 + RLock fixed; behavioral regression tests for each; zero `# type: ignore` in `src/`; TOCTOU window narrowed 3-step → 2-step |
-| Testing & Verification | **A−** | 907 passed · 87.1% coverage (gate ≥80%) · `@pytest.mark.slow` on wall-clock latency tests · delegation floor frozen at 52% (documented, intentional) |
+| Architecture & Design | **A+** | Facade holds no logic; factory is single config→constructor home; all config fields wired; SLA v1.0 + load tests + `sentence-transformers` in dev extras (G-1/G-3 closed) |
+| Code Correctness | **A+** | C1–C8 + RLock fixed; behavioral regression tests for each; zero `# type: ignore` in `src/`; full mypy scope including `src/delegation/` + `src/tools/` (G-2 closed) |
+| Testing & Verification | **A+** | 1053+ passed · ≥80% coverage gate · per-package floors · delegation floor 70%, measured 84% (ADR-019); load/soak suite (8 tests) |
 | Build, Release & Supply-Chain | **A+** | `uv sync --frozen` in CI · `pip-audit --strict` · 0 CVEs · bandit SAST blocking · CycloneDX SBOM · 3.11+3.12 matrix |
-| Documentation | **A+** | Two authoritative arc42 documents · 13 ADRs · 41 API docs CI-drift-checked · STRIDE threat model grounded in `path:line` citations |
-| Governance & Compliance | **A** | 12-artifact community health · STRIDE TOCTOU narrowed to two-step · all governance validators in CI |
+| Documentation | **A+** | Two authoritative arc42 documents · 19 ADRs (ADR-012 superseded) · 41 API docs CI-drift-checked · STRIDE threat model grounded in `path:line` citations · formal SLA |
+| Governance & Compliance | **A+** | 12-artifact community health · CODEOWNERS covers all packages (G-4 closed) · STRIDE TOCTOU narrowed · all governance validators in CI |
 
 **Suitable for:**
 - ✅ Development, testing, and research environments
@@ -502,7 +537,7 @@ Authoritative status: [`STATUS.md`](STATUS.md).
 
 **Known limitations:**
 - Most tests use tiktoken for token counting, not real LLM APIs
-- Sub-agent delegation (`src/delegation/`) is experimental and intentionally not wired into the facade
+- Sub-agent delegation (`src/delegation/`) is an analysis pipeline (not on the `optimize()` request path); activated via `bob-optimize analyze`
 - TTL-based cache eviction is lazy (on-read), not proactive
 - `psutil` is optional; some monitoring features degrade without it
 
@@ -535,11 +570,12 @@ except two optional first-use downloads:
 - **[docs/QUICK_START.md](docs/QUICK_START.md)** — 5-minute getting started — Bob Shell CLI and Bob IDE (arc42 Tier-1)
 - **[docs/INSTALLATION.md](docs/INSTALLATION.md)** — detailed installation — Bob Shell CLI and Bob IDE (arc42 Tier-1)
 - **[docs/USAGE.md](docs/USAGE.md)** — usage guide with workflow diagrams (arc42 Tier-1)
-- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — KB Manager architecture (arc42 v2.1, 13 sections, 8+ diagrams)
-- **[docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md)** — Python token-optimizer architecture (arc42 v3.0, 10 sections, 4 diagrams)
+- **[docs/kb-manager/ARCHITECTURE.md](docs/kb-manager/ARCHITECTURE.md)** — KB Manager architecture (arc42 v2.1, 13 sections, 8+ diagrams)
+- **[docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md)** — Python token-optimizer architecture (arc42 v3.0, 11 sections, 5 diagrams)
 - **[docs/MONITORING.md](docs/MONITORING.md)** — monitoring & observability (arc42 Tier-1)
+- **[docs/SLA.md](docs/SLA.md)** — SLA v1.0: latency, throughput, quality, concurrency targets
 - **[docs/security/THREAT_MODEL.md](docs/security/THREAT_MODEL.md)** — STRIDE threat model
-- **[docs/adr/](docs/adr/)** — 13 Architecture Decision Records
+- **[docs/adr/](docs/adr/)** — 19 Architecture Decision Records (ADR-012 superseded)
 - **[STATUS.md](STATUS.md)** — canonical maturity status (single source of truth)
 
 ## References

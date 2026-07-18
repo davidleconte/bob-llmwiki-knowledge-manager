@@ -1,7 +1,7 @@
 # Architecture Documentation
 
-**Last Updated:** July 14, 2026  
-**Status:** A (3.89/4.30) — see [STATUS.md](../../STATUS.md)
+**Last Updated:** July 17, 2026
+**Status:** A+ — see [STATUS.md](../../STATUS.md)
 
 ---
 
@@ -36,9 +36,12 @@ This is the **master architecture reference** (v3.0, 2026-07-14) that explains:
    - Cross-cutting invariants (single-home, layering, manifest-backed)
    - Deployment view and glossary
 
-2. **[docs/adr/](../adr/)** — Architecture Decision Records (13 ADRs)
+2. **[docs/adr/](../adr/)** — Architecture Decision Records (ADR-001 through ADR-019)
    - Key decisions: Python choice, caching strategy, TF-IDF, semantic similarity, monitoring, security
    - ADR-013: Facade/factory pattern (Phase-4 composition decision)
+   - ADR-019: Delegation pipeline activation (analysis pipeline → KB ingestion)
+
+> **mypy note (post G-2 gap closure, 2026-07-17):** `src/delegation/` and `src/tools/` are now fully included in the mypy scope — the previous `exclude` directive has been removed. `src/` type-checks clean (0 errors; only `[annotation-unchecked]` advisory notes for untyped function bodies remain, which are acceptable and not counted as errors).
 
 3. **[docs/security/THREAT_MODEL.md](../security/THREAT_MODEL.md)** — STRIDE threat model
    - Trust boundaries and data flows
@@ -127,7 +130,7 @@ See [deprecated/README.md](deprecated/README.md) for details.
 
 **Step 3:** Review Architecture Decision Records
 - See [docs/adr/](../adr/) for design decisions
-- 13 ADRs covering key architectural choices
+- 19 ADRs covering key architectural choices
 
 ### For Maintainers
 
@@ -167,7 +170,7 @@ See [deprecated/README.md](deprecated/README.md) for details.
 **Purpose:** Reduce LLM token costs through caching and optimization  
 **Technology:** Python 3.11+, tiktoken, scikit-learn, numpy  
 **Complexity:** ~5,400 logical lines  
-**Status:** A (3.89/4.30) — see [STATUS.md](../../STATUS.md)
+**Status:** A+ (4.30/4.30) — see [STATUS.md](../../STATUS.md)
 
 **Key Components:**
 - Multi-level caching (L1: exact, L2: semantic)
@@ -178,14 +181,15 @@ See [deprecated/README.md](deprecated/README.md) for details.
 
 **Documentation:** See [ARCHITECTURE.md](ARCHITECTURE.md)
 
-### Delegation Module (Experimental)
+### Delegation Module (Analysis Pipeline)
 
-**Purpose:** Parallel code repository analysis  
-**Technology:** Python 3.11+, ThreadPoolExecutor  
-**Complexity:** ~1,588 lines  
-**Status:** Experimental (~52.9% coverage, intentionally not integrated — separate problem domain)
+**Purpose:** Parallel code repository analysis → KB ingestion
+**Technology:** Python 3.11+, ThreadPoolExecutor
+**Complexity:** ~1,588 lines
+**Status:** Integrated — analysis pipeline (84% coverage, 70% floor; ADR-019)
 
-**Documentation:** See [src/delegation/EXPERIMENTAL.md](../../src/delegation/EXPERIMENTAL.md)
+**CLI:** `bob-optimize analyze <target> [--kb-path] [--output-dir] [--workers] [--depth] [--no-compress]`
+**Documentation:** [src/delegation/EXPERIMENTAL.md](../../src/delegation/EXPERIMENTAL.md) · [ADR-019](../adr/019-delegation-pipeline-activation.md)
 
 ---
 
@@ -194,7 +198,7 @@ See [deprecated/README.md](deprecated/README.md) for details.
 ### Architecture
 
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** — Master reference (authoritative)
-- **[docs/adr/](../adr/)** — Architecture Decision Records (13 ADRs)
+- **[docs/adr/](../adr/)** — Architecture Decision Records (ADR-001–019)
 - **[docs/security/THREAT_MODEL.md](../security/THREAT_MODEL.md)** — STRIDE threat model
 
 ### Implementation
@@ -206,7 +210,6 @@ See [deprecated/README.md](deprecated/README.md) for details.
 ### Project Management
 
 - **[STATUS.md](../../STATUS.md)** — Canonical maturity status (single source of truth)
-- **[docs/project-management/PROJECT_STATUS.md](../project-management/PROJECT_STATUS.md)** — Phase tracking
 - **[docs/knowledge-base/guides/audit-remediation-status.md](../knowledge-base/guides/audit-remediation-status.md)** — Audit remediation
 
 ### User Documentation
@@ -224,7 +227,7 @@ See [deprecated/README.md](deprecated/README.md) for details.
 
 **Accuracy (as of 2026-07-14):**
 - `ARCHITECTURE.md`: authoritative (v3.0, verified against source)
-- `docs/adr/`: 13 ADRs, principles in force; implementation-status notes on ADR-002–005 where class names evolved
+- `docs/adr/`: 19 ADRs, principles in force; ADR-012 superseded; implementation-status notes on ADR-002–005 where class names evolved
 - `THREAT_MODEL.md`: exemplary — STRIDE, grounded in code, path:line citations
 - Deprecated docs: historical reference only
 

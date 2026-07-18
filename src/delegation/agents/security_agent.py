@@ -77,7 +77,12 @@ class SecurityAgent(SubAgent):
             security_data = analysis.get("security", {})
 
             # Categorize issues by severity
-            issues_by_severity = {"critical": [], "high": [], "medium": [], "low": []}
+            issues_by_severity: Dict[str, list] = {
+                "critical": [],
+                "high": [],
+                "medium": [],
+                "low": [],
+            }
 
             for issue in security_data.get("issues", []):
                 severity = issue.get("severity", "low")

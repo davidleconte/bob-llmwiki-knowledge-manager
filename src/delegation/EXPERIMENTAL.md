@@ -1,12 +1,12 @@
-# ⚠️ EXPERIMENTAL: Delegation Module
+# Delegation Module — Analysis Pipeline
 
-**Status:** Experimental / Not Integrated (intentionally — see below)
-**Coverage:** unit-tested (coordinator + base); held at a **52% per-package floor** in `scripts/check_coverage_by_package.py`. Agents are intentionally not integration-tested. Not integrated with the optimizer, by design.
-**Last Updated:** 2026-07-14
+**Status:** Integrated — Analysis Pipeline (see ADR-019)
+**Coverage:** coordinator + base unit-tested; pipeline integration-tested; held at a **70% per-package floor** in `scripts/check_coverage_by_package.py`.
+**Last Updated:** 2026-07-17
 
 ## Overview
 
-This module implements a **parallel sub-agent delegation framework** for repository analysis. It is **NOT integrated** with the core token optimization system and serves a completely different purpose.
+This module implements a **parallel sub-agent delegation framework** for repository analysis. It is integrated with the Token Optimization System via `src/delegation/pipeline.py` — see ADR-019 for the design rationale.
 
 ## Purpose
 
@@ -54,31 +54,29 @@ tasks = [
 results = coordinator.execute_parallel()
 ```
 
-## Why Not Integrated?
+## Integration with Token Optimization System
 
-The delegation module and token optimizer solve **different problems**:
+The delegation module solves a **different but complementary problem** to the token optimizer:
 
 | Aspect | Delegation Module | Token Optimizer |
 |--------|------------------|-----------------|
 | **Purpose** | Repository analysis | Prompt optimization |
 | **Input** | Code directories | Text prompts |
-| **Output** | Analysis reports | Optimized prompts |
+| **Output** | Analysis reports (compressed) | Optimized prompts |
 | **Execution** | Parallel (ThreadPool) | Sequential |
 | **Latency** | Seconds to minutes | Milliseconds |
-| **Use Case** | CI/CD analysis | LLM cost reduction |
+| **Use Case** | KB ingestion / repo audit | LLM cost reduction |
 
-**Integration would add complexity without benefit.**
-
-See: `docs/knowledge-base/research/delegation-integration-analysis-2026-07-13.md`
+The **integration surface** is `src/delegation/pipeline.py`: each agent's output is compressed by `TokenOptimizer` before being written as a KB research document. The two systems remain **layering-clean** and independently testable. See ADR-019 for the rationale.
 
 ## Current Status
 
 - ✅ **Functional:** All agents work correctly
 - ✅ **Documented:** Clear examples and API docs
-- ✅ **Unit-tested:** `tests/delegation/` covers the coordinator + base types (~54% floor); the `agents/*` subpackage is intentionally not integration-tested
-- ✅ **Layering-clean (Phase 4):** the shared analysis utilities the agents use now live in `src/tools/` (imported as `from src.tools.…`); the old `src/ -> scripts/` import (audit finding B3) is gone
-- ❌ **Not Used:** Only in demo script
-- ❌ **Not Integrated:** Separate from core system, **by design** (Phase-4 decision — not facade-wired)
+- ✅ **Tested:** `tests/delegation/` — 55 tests covering coordinator, base types, pipeline, and all 6 agent classes (containment + success path); **84% coverage** vs 70% floor
+- ✅ **Layering-clean (Phase 4):** shared utilities live in `src/tools/` (`from src.tools.…`); the `src/ → scripts/` import gap (audit finding B3) is gone
+- ✅ **Production pipeline:** `src/delegation/pipeline.py` — parallel analysis → TokenOptimizer compression → KB ingestion
+- ✅ **CLI entry point:** `bob-optimize analyze <target> [--kb-path] [--output-dir] [--workers] [--depth] [--no-compress]`
 
 ## Future Possibilities
 
@@ -111,11 +109,11 @@ If you want to work on this module:
    ```
 
 2. **Run existing tests:**
-   ```bash
-   uv run pytest tests/delegation/ -v
-   # Covers: coordinator, base types, documentation-agent containment
-   # Target floor: 52% (scripts/check_coverage_by_package.py)
-   ```
+    ```bash
+    python3 -m pytest tests/delegation/ -v
+    # Covers: coordinator, base types, pipeline, and all 6 agent classes
+    # Current coverage: 84% — floor: 70% (scripts/check_coverage_by_package.py)
+    ```
 
 3. **Add agent tests (if raising the floor):**
    ```bash
@@ -133,10 +131,11 @@ If you want to work on this module:
 
 ## Maintenance
 
-This module is **maintained but not actively developed**. It works correctly but is not part of the core system.
+This module is **maintained and integrated** as an optional analysis pipeline. The core `src/delegation/pipeline.py` connector and the `bob-optimize analyze` CLI are the primary entry points.
 
 **Contact:** See project maintainers
 
 ---
 
-**Remember:** This is a separate system. Do not assume it's integrated with the token optimizer.
+**Pipeline entry point:** `bob-optimize analyze <target>` — runs 6 agents in parallel, compresses each report, writes KB research docs.
+**ADR:** [ADR-019: Delegation Pipeline Activation](../../docs/adr/019-delegation-pipeline-activation.md)

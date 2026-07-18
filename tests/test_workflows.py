@@ -191,11 +191,16 @@ def test_documentation_files_exist(project_root):
         "USAGE.md",
         "CUSTOMIZATION.md",
         "WORKFLOWS.md",
-        "ARCHITECTURE.md",
     ]
     for doc in required_docs:
         doc_path = docs_dir / doc
         assert doc_path.exists(), f"Documentation {doc} should exist"
+
+    # ARCHITECTURE.md was moved to docs/kb-manager/ in Sub-Task 7 to avoid
+    # the dual-architecture-doc confusion identified in the gap-fix audit.
+    assert (docs_dir / "kb-manager" / "ARCHITECTURE.md").exists(), (
+        "ARCHITECTURE.md should exist under docs/kb-manager/"
+    )
 
     # COMPARISON.md was moved to docs/archive/ when the docs/ root was curated.
     assert (docs_dir / "archive" / "COMPARISON.md").exists(), (

@@ -645,7 +645,7 @@ def safe_set(key, value):
 - [Performance Benchmarks](../research/performance-benchmarks.md) - Real-world measurements
 
 ## References
-- [System Architecture](../../architecture/ACTUAL_SYSTEM_ARCHITECTURE.md) - Complete architecture
+- [System Architecture](../../architecture/ARCHITECTURE.md) - Complete architecture
 - [ADR-002: Caching Strategy](../../adr/002-caching-strategy.md) - Design decisions
 - [Source Code](../../../src/cache/) - Implementation files
 

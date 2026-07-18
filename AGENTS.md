@@ -43,7 +43,7 @@ A parallel sub-agent framework for repository analysis. **This is a separate sys
 **Purpose:** Parallel code repository analysis  
 **Technology:** Python 3.11+, ThreadPoolExecutor  
 **Complexity:** ~1,588 lines of Python code  
-**Status:** Experimental, orphaned (not wired into runtime), demo-only. Held at a 52% per-package coverage floor (measured ~53%; `scripts/check_coverage_by_package.py` is the single home for the floor). Per the Phase-4 decision it stays a **separate, layering-clean subsystem** (not facade-wired — it solves a different problem domain); its only Phase-4 change was the B3 layering fix (shared utilities moved to `src/tools/`).  
+**Status:** Functional and integrated (`src/delegation/pipeline.py` wires the 6 agents into the `bob-optimize analyze` CLI). Held at a 70% per-package coverage floor (measured 84%; `scripts/check_coverage_by_package.py` is the single home for the floor). Stays a **separate, layering-clean subsystem** (separate problem domain from the token optimizer); its Phase-4 change was the B3 layering fix (shared utilities moved to `src/tools/`).
 
 **Key Components:**
 - DelegationCoordinator (parallel execution)
@@ -64,8 +64,11 @@ A parallel sub-agent framework for repository analysis. **This is a separate sys
 ##### Installation
 
 ```bash
-# Install the knowledge-manager mode to Bob Shell
+# Full-stack setup (installs TOS, builds KB index, prints integration status)
 cd ~/Projects/bob-llmwiki-knowledge-manager
+./scripts/setup.sh
+
+# Bob Shell CLI mode only (no Python required):
 ./scripts/install.sh
 ```
 
@@ -321,22 +324,23 @@ metrics.record_optimization(1000, 800, 10.0)
 - **[docs/USAGE.md](docs/USAGE.md)** - Usage guide with examples
 - **[docs/CUSTOMIZATION.md](docs/CUSTOMIZATION.md)** - Customization options
 - **[docs/WORKFLOWS.md](docs/WORKFLOWS.md)** - Common workflows
-- **[docs/COMPARISON.md](docs/COMPARISON.md)** - Comparison with LLM-Wiki
+- **[docs/archive/COMPARISON.md](docs/archive/COMPARISON.md)** — Comparison with LLM-Wiki (archived)
 
 ### Token Optimization System Documentation
 
-- **[docs/architecture/ACTUAL_SYSTEM_ARCHITECTURE.md](docs/architecture/ACTUAL_SYSTEM_ARCHITECTURE.md)** - Current implementation
-- **[docs/MONITORING.md](docs/MONITORING.md)** - Monitoring and observability
-- **[docs/api/README.md](docs/api/README.md)** - Auto-generated API reference
-- **[docs/adr/](docs/adr/)** - Architecture Decision Records (12 ADRs)
-- **[docs/INDEX.md](docs/INDEX.md)** - Complete documentation index
+- **[docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md)** — Authoritative architecture (v3.0: facade, cache, KB subsystems, delegation, validation)
+- **[docs/MONITORING.md](docs/MONITORING.md)** — Monitoring and observability
+- **[docs/SLA.md](docs/SLA.md)** — SLA v1.0: latency, throughput, quality, concurrency targets
+- **[docs/api/README.md](docs/api/README.md)** — Auto-generated API reference
+- **[docs/adr/](docs/adr/)** — Architecture Decision Records (ADR-001–019; ADR-012 superseded)
+- **[docs/INDEX.md](docs/INDEX.md)** — Complete documentation index
 
 ### Important Notes
 
-1. **Deprecated Docs:** Files in `docs/architecture/deprecated/` describe the original planned architecture (not implemented) - ignore them
-2. **Current Architecture:** Always refer to `ACTUAL_SYSTEM_ARCHITECTURE.md` for Token Optimization System implementation
-3. **Dual Nature:** This repository contains both the simple KB framework AND the Python optimization system
-4. **Optional Dependencies:** psutil is optional for Token Optimization System; gracefully degrades without it
+1. **Deprecated Docs:** Files in `docs/architecture/deprecated/` describe an earlier or planned system — use `docs/architecture/ARCHITECTURE.md` for the current system.
+2. **Current Architecture:** Always refer to `docs/architecture/ARCHITECTURE.md` for the Token Optimization System implementation.
+3. **Dual Nature:** This repository contains both the simple KB framework AND the Python optimization system.
+4. **Optional Dependencies:** psutil is optional for Token Optimization System; gracefully degrades without it.
 
 ---
 
@@ -402,14 +406,14 @@ See: `docs/knowledge-base/research/external-audit-2026-07-12.md` for complete au
 ### Token Optimization System
 - **Implementation:** Cache/optimizer/truncation/monitoring composed behind a unified `TokenOptimizer` facade + `bob-optimize` CLI (`python -m src`); config is wired to the runtime (Phase 4, done)
 - **Tests / Coverage:** see [`STATUS.md`](STATUS.md) (gate >=80%, enforced by `pyproject.toml`)
-- **Maturity:** Beta — Not Production Ready (≈D- vs the institutional bar; [`STATUS.md`](STATUS.md) is authoritative)
-- **Known Issues:** Phases 0–7 done (correctness incl. the C-5 collision, coverage gate, supply-chain, integration, real manifest-backed validation, the documentation layer — one architecture doc, Diátaxis spine, drift-checked API docs, and the generic "one home per value" validator — and governance: `SECURITY.md`, a STRIDE threat model that supersedes the fabricated ADR-012, the community-health set, path-traversal containment in `src/tools/`, and bandit + Dependabot security CI). The savings headline is measured (~20% optimizer compression, N=183; see `evaluation/results/validation-2026-07-14/`)
-- **Next:** Phase 8 — Sign-off (independent adversarial re-audit; each dimension A/A+)
+- **Maturity:** Beta — Not Production Ready (see [`STATUS.md`](STATUS.md), authoritative; grade A+ vs institutional bar 2026-07-17)
+- **Known Issues:** Phases 0–8 done + all 4 A+ structural gaps closed. The savings headline is measured (~20% optimizer compression, N=183; see `evaluation/results/validation-2026-07-14/`)
+- **Next:** Production readiness — load testing, SLA definition, Windows CI
 
-### Delegation Module (Experimental)
-- **Status:** Functional but intentionally not integrated (separate problem domain); layering-clean since Phase 4 (shared utils moved to `src/tools/`)
-- **Coverage:** ~53% (unit-tested coordinator/base; `agents/*` intentionally not integration-tested), held at a 52% per-package floor
-- **Purpose:** Parallel repository analysis (separate use case)
+### Delegation Module
+- **Status:** Functional and integrated (`bob-optimize analyze`); layering-clean (shared utils in `src/tools/`)
+- **Coverage:** 84% measured (floor 70%; `scripts/check_coverage_by_package.py` is the single home for the floor)
+- **Purpose:** Parallel repository analysis (separate problem domain from token optimizer)
 - **Note:** See `src/delegation/EXPERIMENTAL.md` for details
 
 ---

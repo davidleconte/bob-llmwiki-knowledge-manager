@@ -15,6 +15,12 @@ Fallback chain (ADR-015 §Corruption Recovery)::
 
 Nothing in this module blocks the KB query path — every failure degrades silently.
 
+Storage model (AF-1 fix):
+    ``manifest.json`` holds ONLY chunk-level entries — one per vector row.
+    ``staleness.json`` holds file-level mtime/hash sentinels — no vector rows.
+    This keeps ``matrix.shape[0] == len(manifest)`` invariant, which
+    ``FileBackedVectorStore.load()`` enforces as a corruption check.
+
 ## Constants
 
 - `DEFAULT_INDEX_PATH`
@@ -73,7 +79,7 @@ Does **not** flush to disk — call :meth:`flush` or use
 
 Args:
     doc_id: Unique identifier (typically the KB-relative file path).
-    content: Document text. Truncated to 2000 chars before embedding
+    content: Document text. Truncated to 6000 chars before embedding
         (consistent with P1-1 ``use_cache=False`` guard, ADR-014).
 
 
@@ -82,22 +88,32 @@ Args:
 Full or incremental rebuild from *kb_path*.
 
 Walks all ``*.md`` files in the four KB category directories.  For each
-file, re-embeds if the mtime or content hash differs from the manifest.
-Flushes the updated index to disk afterward.
+file, checks mtime+hash against the file-level staleness map.  Changed
+files are split into structure-aware chunks by
+:class:`~src.embeddings.chunker.MarkdownChunker`; each chunk becomes an
+independent index row with a ``file.md#slug`` doc_id.  Flushes the
+updated index to disk afterward.
 
 Args:
     kb_path: Root of the knowledge base (``docs/knowledge-base/``).
 
 Returns:
-    Number of documents indexed (total corpus size after rebuild).
+    Number of chunk-level rows in the index after rebuild.
 
 
-##### `is_stale(doc_path: Path) -> bool`
+##### `is_stale(doc_path: Path, kb_path: Optional[Path]) -> bool`
 
-Check whether *doc_path* is newer or changed vs the manifest.
+Check whether *doc_path* is newer or changed vs the staleness map.
+
+Staleness is compared against the file-level ``_file_manifest``
+(``staleness.json``), not against chunk entries in ``manifest.json``.
 
 Args:
     doc_path: Absolute or relative path to a KB document.
+    kb_path: Root of the knowledge base.  When provided, the key is
+        derived as ``doc_path.relative_to(kb_path)`` (reliable for any
+        KB location).  When ``None``, falls back to the hardcoded
+        ``docs/knowledge-base`` convention (default install only).
 
 Returns:
     ``True`` if the document needs re-indexing, ``False`` if up-to-date.
@@ -107,12 +123,24 @@ Returns:
 
 Atomically persist the in-memory index to disk.
 
-Writes ``vectors.npy`` and ``manifest.json`` under :attr:`_index_path`
+Writes ``vectors.npy``, ``manifest.json`` (chunks only), and
+``staleness.json`` (file-level sentinels) under :attr:`_index_path`
 using the atomic tmp-then-rename pattern (ADR-015 §Corruption Recovery).
 
 
 ##### `doc_count() -> int`
 
-Number of documents currently in the in-memory index.
+Number of indexed chunks currently in the in-memory index.
+
+Note: this counts *chunks* (``file.md#slug`` entries), not source
+files.  A multi-section document contributes multiple chunks.
+
+
+##### `embedder() -> 'EmbeddingGenerator'`
+
+The :class:`~src.cache.embeddings.EmbeddingGenerator` used by this index.
+
+Exposed as a public property so callers (e.g. :class:`KBIndexer`) do
+not need to access the private ``_embedder`` attribute directly (AF-4 fix).
 
 

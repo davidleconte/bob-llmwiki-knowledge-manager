@@ -155,7 +155,7 @@ result = cache.get(new_query)  # None (miss both L1 and L2)
 - [Performance Benchmarks](../research/performance-benchmarks.md) - Real-world performance data
 
 ## References
-- [System Architecture](../../architecture/ACTUAL_SYSTEM_ARCHITECTURE.md) - Complete system design
+- [System Architecture](../../architecture/ARCHITECTURE.md) - Complete system design
 - [ADR-002: Caching Strategy](../../adr/002-caching-strategy.md) - Architecture decision
 - [ADR-006: Cache Strategy](../../adr/006-cache-strategy.md) - Multi-level design rationale
 

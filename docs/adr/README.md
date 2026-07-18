@@ -1,6 +1,6 @@
 # Architecture Decision Records (ADRs)
 
-This directory contains all Architecture Decision Records for the HCD LLM Optimization System.
+This directory contains all Architecture Decision Records for the Bob Shell Knowledge Manager and Token Optimization System.
 
 ## What are ADRs?
 
@@ -104,10 +104,15 @@ Architecture Decision Records document important architectural decisions made du
   [STRIDE Threat Model](../security/THREAT_MODEL.md) and
   [SECURITY.md](../../SECURITY.md).
 
+**[019: Delegation Pipeline Activation](019-delegation-pipeline-activation.md)**
+- Decision: Activate `src/delegation/` as parallel analysis pipeline via `src/delegation/pipeline.py`
+- Rationale: Thin connector (~175 lines) unlocks "repo analysis → KB ingestion" with token compression
+- Status: ✅ Accepted
+
 ## ADR Statistics
 
-- **Total ADRs:** 14 (including ADR-014 KB query embedding scorer, ADR-015 persistent index, ADR-016 truncation)
-- **Status:** 13 accepted, 1 superseded (012)
+- **Total ADRs:** 19 (ADR-001 through ADR-019; ADR-012 superseded)
+- **Status:** 18 accepted, 1 superseded (012)
 - **Coverage:** Technology, Architecture, Algorithms, Quality, Composition patterns
 - **Lines:** ~5,000 total (estimated)
 

@@ -1,8 +1,8 @@
 # Component Documentation
 
-**Status:** Moved to Deprecated  
-**Date:** July 13, 2026  
-**Reason:** Original component specifications described planned system that was not implemented
+**Status:** Redirects to current documentation
+**Date:** July 13, 2026 (last updated: July 18, 2026)
+**Reason:** Original component specifications described a planned system that was not implemented
 
 ---
 
@@ -12,15 +12,17 @@ All component specifications have been **moved to the deprecated folder** becaus
 
 ### Where to Find Current Documentation
 
-**For Actual Implementation:** See [ACTUAL_SYSTEM_ARCHITECTURE.md](../ACTUAL_SYSTEM_ARCHITECTURE.md)
+**For the authoritative architecture:** See [ARCHITECTURE.md](../ARCHITECTURE.md)
 
-This document contains:
-- **Section 2:** Cache System (L1 ExactCache, L2 SemanticCache, MultiLevelCache)
-- **Section 3:** Optimizer System (TokenCounter, PromptOptimizer)
-- **Section 4:** Truncation System (4 strategies, Truncator)
-- **Section 5:** Integration & Data Flow
-- **Section 6:** Performance Characteristics
-- **Section 7:** Testing Strategy
+This document covers:
+- **§2:** Component overview (cache, optimizer, truncator, monitoring, KB subsystems)
+- **§3:** Runtime dataflow (facade → factory → components)
+- **§3b:** KB query dataflow (embeddings P2, graph P3, query quality P4)
+- **§4:** Configuration → runtime wiring (`ConfigSchema` → factory → constructors)
+- **§5:** Per-component details (Cache, KB Embedding Index, Knowledge Graph, Optimizer, Truncation, Monitoring, Pricing)
+- **§6:** Validation harness (`python -m src.validation`)
+- **§7:** Cross-cutting invariants (CI-enforced)
+- **§8:** Quality scenarios
 
 ---
 
@@ -31,13 +33,13 @@ Original component specifications (5,534 lines total) have been moved to:
 **Location:** [deprecated/](../deprecated/)
 
 **Contents:**
-- BATCH.md (828 lines) - Batch processing (not implemented)
-- CACHE.md (670 lines) - Original cache design (implemented differently)
-- FORMATTER.md (750 lines) - Format control (not implemented)
-- INTEGRATION.md (858 lines) - Integration layer (not implemented)
-- MONITORING.md (873 lines) - Original monitoring (implemented differently)
-- OPTIMIZER.md (698 lines) - Original optimizer (implemented differently)
-- TRUNCATION.md (751 lines) - Original truncation (implemented differently)
+- BATCH.md (828 lines) — Batch processing (not implemented)
+- CACHE.md (670 lines) — Original cache design (implemented differently)
+- FORMATTER.md (750 lines) — Format control (not implemented)
+- INTEGRATION.md (858 lines) — Integration layer (not implemented)
+- MONITORING.md (873 lines) — Original monitoring (implemented differently)
+- OPTIMIZER.md (698 lines) — Original optimizer (implemented differently)
+- TRUNCATION.md (751 lines) — Original truncation (implemented differently)
 
 **Why Deprecated:** See [deprecated/README.md](../deprecated/README.md)
 
@@ -47,22 +49,28 @@ Original component specifications (5,534 lines total) have been moved to:
 
 ### Current Architecture
 
-1. **System Overview:** [ACTUAL_SYSTEM_ARCHITECTURE.md](../ACTUAL_SYSTEM_ARCHITECTURE.md)
-2. **Cache Layer:** [ACTUAL_SYSTEM_ARCHITECTURE.md#2-layer-1-cache-system](../ACTUAL_SYSTEM_ARCHITECTURE.md#2-layer-1-cache-system)
-3. **Optimizer Layer:** [ACTUAL_SYSTEM_ARCHITECTURE.md#3-layer-2-optimizer-system](../ACTUAL_SYSTEM_ARCHITECTURE.md#3-layer-2-optimizer-system)
-4. **Truncation Layer:** [ACTUAL_SYSTEM_ARCHITECTURE.md#4-layer-3-truncation-system](../ACTUAL_SYSTEM_ARCHITECTURE.md#4-layer-3-truncation-system)
-5. **Monitoring:** [docs/MONITORING.md](../../MONITORING.md)
+1. **System Overview:** [ARCHITECTURE.md](../ARCHITECTURE.md) — authoritative, v3.0
+2. **Cache Layer:** [ARCHITECTURE.md §5](../ARCHITECTURE.md#5-components) — `src/cache/`
+3. **KB Embedding Index:** [ARCHITECTURE.md §5](../ARCHITECTURE.md#5-components) — `src/embeddings/`
+4. **Knowledge Graph:** [ARCHITECTURE.md §5](../ARCHITECTURE.md#5-components) — `src/graph/`
+5. **Optimizer Layer:** [ARCHITECTURE.md §5](../ARCHITECTURE.md#5-components) — `src/optimizer/`
+6. **Truncation Layer:** [ARCHITECTURE.md §5](../ARCHITECTURE.md#5-components) — `src/truncation/`
+7. **Monitoring:** [docs/MONITORING.md](../../MONITORING.md)
+8. **Delegation Pipeline:** [ARCHITECTURE.md §2](../ARCHITECTURE.md#2-component-overview) — `src/delegation/`
 
-### Source Code
+### Source Code (current test counts — see `pytest tests/ -v` for live counts)
 
-- **Cache:** `src/cache/` (5 modules, 122 tests)
-- **Optimizer:** `src/optimizer/` (2 modules, 53 tests)
-- **Truncation:** `src/truncation/` (2 modules, 38 tests)
-- **Monitoring:** `src/monitoring/` (4 modules, 91 tests)
+- **Cache:** `src/cache/` (5 modules)
+- **Embeddings:** `src/embeddings/` (4 modules — P2 KB index)
+- **Graph:** `src/graph/` (4 modules — P3 knowledge graph)
+- **Optimizer:** `src/optimizer/` (2 modules)
+- **Truncation:** `src/truncation/` (2 modules)
+- **Monitoring:** `src/monitoring/` (5 modules)
+- **Delegation:** `src/delegation/` (pipeline + 6 agents — ADR-019)
 
 ### Architecture Decisions
 
-- **ADRs:** [docs/adr/](../../adr/) (12 decision records)
+- **ADRs:** [docs/adr/](../../adr/) (ADR-001 through ADR-019; ADR-012 superseded)
 - **Design Rationale:** See individual ADRs for component decisions
 
 ---
@@ -75,25 +83,25 @@ Original component specifications (5,534 lines total) have been moved to:
 - Format validation
 - Batch processing
 
-### Actual Implementation (Week 19-20)
-- 11 components across 3 layers
-- Simple layered architecture
-- Direct component usage
-- Deferred batch processing
+### Actual Implementation
+- 14 packages (`cache`, `config`, `delegation`, `embeddings`, `graph`, `monitoring`, `optimizer`, `tools`, `truncation`, `validation` + facade/factory/cli/pricing at root)
+- Facade + factory composition pattern (ADR-013)
+- Layered architecture with clean `src/ → scripts/` boundary
+- KB subsystems: persistent embedding index (P2), knowledge graph (P3), query quality (P4)
+- Delegation analysis pipeline (ADR-019): 6 parallel agents → TokenOptimizer → KB ingestion
 
-**Result:** Simpler, faster, more maintainable system
+**Result:** Simpler, faster, more maintainable system than the original plan
 
 ---
 
 ## Related Documentation
 
-- **Current Architecture:** [ACTUAL_SYSTEM_ARCHITECTURE.md](../ACTUAL_SYSTEM_ARCHITECTURE.md)
+- **Current Architecture:** [ARCHITECTURE.md](../ARCHITECTURE.md) — authoritative, v3.0
 - **Deprecated Specs:** [deprecated/](../deprecated/)
-- **Project Status:** [docs/project-management/PROJECT_STATUS.md](../../project-management/PROJECT_STATUS.md)
 - **Gap Analysis:** [docs/knowledge-base/research/external-audit-2026-07-12.md](../../knowledge-base/research/external-audit-2026-07-12.md)
 
 ---
 
-**Last Updated:** July 13, 2026  
-**Maintained By:** Architecture Team  
+**Last Updated:** July 18, 2026
+**Maintained By:** Architecture Team
 **Purpose:** Redirect to current documentation

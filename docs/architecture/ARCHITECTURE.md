@@ -1,6 +1,6 @@
 # Architecture
 
-**Status:** Current (authoritative) · **Last updated:** 2026-07-17 · **Maturity:** see [`STATUS.md`](../../STATUS.md)
+**Status:** Current (authoritative) · **Last updated:** 2026-07-18 · **Maturity:** see [`STATUS.md`](../../STATUS.md)
 
 This is the **single authoritative architecture document** for the Python
 token-optimization system in this repository. It supersedes
@@ -12,8 +12,9 @@ records live in [`../adr/`](../adr/); the generated API reference in
 
 > The repository also ships a separate Bash product, the **Bob Shell Knowledge
 > Manager** (~500 lines), whose architecture is documented in
-> [`../ARCHITECTURE.md`](../ARCHITECTURE.md). The two share a repo but are not one
-> system. This document is about the Python token-optimization system (`src/`).
+> [`docs/kb-manager/ARCHITECTURE.md`](../kb-manager/ARCHITECTURE.md). The two share
+> a repo but are not one system. This document is about the Python
+> token-optimization system (`src/`).
 
 ---
 
@@ -72,8 +73,11 @@ Not shown, deliberately separate:
   analyzer, KB query) relocated out of `scripts/` in Phase 4 to keep the
   `src → scripts` layering clean. Included in the coverage and type gates with a
   per-package floor of 85% (`scripts/check_coverage_by_package.py`).
-- **`src/delegation/`** — an **experimental**, layering-clean subsystem that is
-  *not* wired into the facade (see [`../../src/delegation/EXPERIMENTAL.md`](../../src/delegation/EXPERIMENTAL.md)).
+- **`src/delegation/`** — the parallel analysis pipeline subsystem (ADR-019).
+  `src/delegation/pipeline.py` is the integration surface: it runs 6 agents in
+  parallel (`DelegationCoordinator`), compresses each report through `TokenOptimizer`,
+  and writes KB research documents to `output_dir`. Accessed via `bob-optimize analyze`.
+  Coverage floor 70%; measured 84% (see [`../../src/delegation/EXPERIMENTAL.md`](../../src/delegation/EXPERIMENTAL.md)).
 - **`src/embeddings/`** — the KB persistent embedding index subsystem
   (`MarkdownChunker`, `PersistentEmbeddingIndex`, `KBIndexer`). Opt-in, not on
   the `optimize()` request path; injected into `KnowledgeBaseQuery` when a
@@ -373,16 +377,18 @@ Verifiable acceptance criteria for the system's cross-cutting quality attributes
 
 ## 9. Where to go next
 
-- Decisions and their rationale: [`../adr/`](../adr/README.md) (ADR 001–017).
-- Per-module API: [`../api/`](../api/README.md) (generated, drift-checked; includes `src/graph/`).
+- Decisions and their rationale: [`../adr/`](../adr/README.md) (ADR 001–019).
+- Per-module API: [`../api/`](../api/README.md) (generated, drift-checked; includes `src/graph/` and `src/delegation/`).
 - Maturity, coverage, and the measured savings snapshot: [`STATUS.md`](../../STATUS.md).
-- KB integration guide: [`../../INTEGRATIONS.md`](../../INTEGRATIONS.md) (P1–P3 code examples).
+- KB integration guide: [`../../INTEGRATIONS.md`](../../INTEGRATIONS.md) (P1–P3 + delegation code examples).
 - Knowledge graph design: [`../adr/017-knowledge-graph-layer.md`](../adr/017-knowledge-graph-layer.md) (ADR-017).
+- Delegation pipeline design: [`../adr/019-delegation-pipeline-activation.md`](../adr/019-delegation-pipeline-activation.md) (ADR-019).
 - Graph live validation results: [`../knowledge-base/research/graph-validation-2026-07-17.md`](../knowledge-base/research/graph-validation-2026-07-17.md).
+- SLA: [`../SLA.md`](../SLA.md) — latency/throughput targets, measurement methodology.
 
 ---
 
-## 9. Deployment
+## 10. Deployment
 
 **Runtime context:** Local Python library and CLI. No server, no daemon, no container
 required. Single-user, single-process.
@@ -393,7 +399,7 @@ required. Single-user, single-process.
 | **OS** | macOS, Linux | CI matrix (ubuntu-latest, macOS available); Bash scripts are macOS/Linux only |
 | **Core deps** | `numpy ≥ 1.24`, `scikit-learn ≥ 1.3`, `tiktoken ≥ 0.5` | `pyproject.toml:dependencies` |
 | **Optional deps** | `psutil` (system metrics in health checks); gracefully absent if not installed | `pyproject.toml:[optional-dependencies].monitoring` |
-| **Concurrency** | Single-process, synchronous. `ThreadPoolExecutor` used only in `src/delegation/` (experimental, not on the optimise path) | `src/facade.py` — all operations sync |
+| **Concurrency** | Single-process, synchronous. `ThreadPoolExecutor` used only in `src/delegation/` (analysis pipeline, not on the `optimize()` path) | `src/facade.py` — all operations sync |
 | **Persistence** | In-memory only. No disk cache, no database, no external state store | `src/cache/exact_cache.py`, `src/cache/semantic_cache.py` |
 | **Network** | None required at runtime. `tiktoken` downloads its BPE vocabulary on first use (one-time, cacheable offline) | `src/optimizer/token_counter.py` |
 | **Install** | `pip install -e ".[dev,monitoring]"` or `uv sync` | `pyproject.toml` |
@@ -401,7 +407,7 @@ required. Single-user, single-process.
 
 ---
 
-## 10. Glossary
+## 11. Glossary
 
 | Term | Definition | Source |
 |---|---|---|

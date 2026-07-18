@@ -9,12 +9,41 @@ vector, regardless of corpus history or which instance produced it. (A prior
 TF-IDF implementation refit on every newly-seen text, making embeddings drift
 with the corpus -- see C-5.)
 
-For production, can be extended to use:
-- OpenAI embeddings
-- Sentence transformers
-- Custom embedding models
+An optional MiniLM-L6-v2 backend (384-dim) is available via ``backend="minilm"``.
+It is activated by **either** of two optional packages (checked in order):
+
+1. ``mlx-embeddings`` — Apple MLX, Apple Silicon only, ~2–4 ms/call warm.
+   Install with ``pip install -e ".[mlx]"``.
+2. ``sentence-transformers`` — cross-platform, CPU/GPU, ~5–20 ms/call warm.
+   Install with ``pip install sentence-transformers``.
+
+When neither package is installed the constructor warns and silently falls back
+to the ``"hashing"`` backend so CI and non-Apple platforms are unaffected.
+
+## Constants
+
+- `_HASHING_DIM`
+- `_MINILM_DIM`
 
 ## Functions
+
+### `_try_load_minilm() -> bool`
+
+Attempt to load MiniLM from mlx-embeddings, then sentence-transformers.
+
+Returns True if the model is ready via either backend.
+Sets the module-level ``_minilm_model``, ``_minilm_available``, and
+``_minilm_backend`` globals.
+
+
+### `_embed_minilm(text: str) -> np.ndarray`
+
+Encode *text* with MiniLM-L6-v2 via the resolved backend.
+
+Returns a normalised float32 vector of shape ``(384,)``.
+Dispatches to Apple MLX or sentence-transformers depending on which
+backend was loaded by ``_try_load_minilm()``.
+
 
 ### `cosine_similarity_vectors(vec1: np.ndarray, vec2: np.ndarray) -> float`
 
@@ -32,11 +61,22 @@ Returns:
 
 ### `EmbeddingGenerator`
 
-Generate deterministic embeddings for text using a HashingVectorizer.
+Generate deterministic embeddings for text.
 
-This is a lightweight, stateless implementation suitable for semantic
-caching. For production use with large corpora, consider using pre-trained
-embedding models.
+By default (``backend="hashing"``) uses a stateless, fixed-dimension
+``HashingVectorizer`` which is lightweight, CPU-only, and requires no extra
+dependencies.
+
+When ``backend="minilm"`` is requested *and* ``mlx-embeddings`` is
+installed, the generator uses ``sentence-transformers/all-MiniLM-L6-v2``
+via Apple MLX (384-dim, Apple Neural Engine, ~2–4 ms/call warm).  If
+``mlx-embeddings`` is not installed the constructor emits a warning and
+silently falls back to ``"hashing"``.
+
+The two backends are **not interchangeable**: their output dimensionality
+differs (1000 vs 384).  Callers that persist vectors on disk (e.g.
+``PersistentEmbeddingIndex``) detect a dimension mismatch on load and
+trigger a full rebuild automatically.
 
 Note: the fixed hashing feature space means distinct short texts can collide
 to the same vector. Exact-match correctness therefore does not rely on the
@@ -50,15 +90,29 @@ Attributes:
 
 #### Methods
 
-##### `__init__(max_features: int, max_corpus_size: int)`
+##### `__init__(max_features: int, max_corpus_size: int, backend: _Backend)`
 
-Initialize embedding generator.
+Initialise the embedding generator.
 
 Args:
-    max_features: Embedding dimensionality (fixed hashing feature space)
+    max_features: Embedding dimensionality for the *hashing* backend.
+        Ignored when ``backend="minilm"`` (dimensionality is fixed at
+        384 by the model).
     max_corpus_size: Maximum tracked corpus size before LRU eviction.
         The corpus is bookkeeping only (used for logging / drift
         monitoring); it no longer influences the embedding.
+    backend: ``"hashing"`` (default) or ``"minilm"``.  When
+        ``"minilm"`` is requested but ``mlx-embeddings`` is absent the
+        generator warns and falls back to ``"hashing"``.
+
+
+##### `embedding_dim() -> int`
+
+Output dimensionality of the current backend.
+
+Returns:
+    384 for ``"minilm"``, ``max_features`` (default 1000) for
+    ``"hashing"``.
 
 
 ##### `fit(texts: List[str]) -> None`
@@ -75,14 +129,14 @@ Args:
 
 ##### `generate(text: str, use_cache: bool) -> np.ndarray`
 
-Generate a deterministic embedding for text.
+Generate a deterministic embedding for *text*.
 
 Args:
     text: Text to generate embedding for
     use_cache: Whether to use cached embeddings
 
 Returns:
-    Numpy array embedding vector of length ``max_features``
+    Numpy array embedding vector of length ``embedding_dim``
 
 
 ##### `generate_batch(texts: List[str]) -> List[np.ndarray]`

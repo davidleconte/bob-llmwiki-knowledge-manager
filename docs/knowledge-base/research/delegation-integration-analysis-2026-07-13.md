@@ -2,7 +2,7 @@
 title: "Delegation Module Integration Analysis"
 date: 2026-07-13
 type: research
-status: complete
+status: superseded
 tags: [delegation, architecture, integration, analysis]
 related:
   - codebase-analysis-2026-07-14.md
@@ -12,9 +12,16 @@ related:
 
 # Delegation Module Integration Analysis
 
-**Date:** 2026-07-13  
-**Status:** Research Complete  
-**Decision:** Keep as Separate System
+> ⚠️ **Superseded (2026-07-17).** This document concluded "Keep as Separate System."
+> That decision was reversed in the gap-fix phase: the delegation module is now
+> integrated as an analysis pipeline via `src/delegation/pipeline.py` (ADR-019).
+> The 28% orphaned-code and 0% agent-coverage figures cited below were correct as of
+> 2026-07-13; both are now remediated (84% coverage, 70% floor). See:
+> - [ADR-019: Delegation Pipeline Activation](../../adr/019-delegation-pipeline-activation.md)
+> - [src/delegation/EXPERIMENTAL.md](../../../../src/delegation/EXPERIMENTAL.md)
+
+**Date:** 2026-07-13
+**Status:** ~~Research Complete — Decision: Keep as Separate System~~ **Superseded — see ADR-019**
 
 ## Executive Summary
 

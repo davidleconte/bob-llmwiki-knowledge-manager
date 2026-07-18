@@ -9,7 +9,9 @@ related:
   - ./kb-query-ab-validation-2026-07.md
   - ./adversarial-audit-embeddings-chunker-2026-07-17.md
   - ../concepts/kb-tos-embedding-layer.md
+  - ../concepts/knowledge-graph-layer.md
   - ../guides/kb-tos-integration-roadmap.md
+  - ../guides/knowledge-graph-usage-guide.md
 ---
 
 # Knowledge Graph Layer — Live Validation — July 2026

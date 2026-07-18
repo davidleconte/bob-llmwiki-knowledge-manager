@@ -3,7 +3,8 @@ name: CI
 # CI: tests + coverage gate on the supported Python matrix (3.11, 3.12), enforced
 # lint (ruff) and type (mypy) gates, the flag-gated e2e suite, the Phase-5
 # manifest-backed validation harness (null + manifest + tiktoken gates), benchmark
-# regression trending, and a CycloneDX SBOM + dependency audit. The coverage gate,
+# regression trending, a CycloneDX SBOM + dependency audit, and a load/soak job
+# (informational on CI — asserting on local developer hardware). The coverage gate,
 # per-package floors, and the status "one home per value" validator run in `test`;
 # the layering gate, the manifest-backed-savings guard, the generic
 # "one home per value" value-homes validator, the API-doc freshness check, and the
@@ -208,6 +209,28 @@ jobs:
             echo "No benchmark baseline yet — establishing first snapshot."
             uv run pytest tests/performance/ --benchmark-only --benchmark-autosave
           fi
+
+  load:
+    name: load + soak (informational)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install (locked from uv.lock — load)
+        run: uv sync --frozen --extra dev --extra monitoring
+      - name: Pre-warm tiktoken cache
+        run: uv run python -c "import tiktoken; tiktoken.encoding_for_model('gpt-4')"
+      - name: Run load tests (informational — non-asserting on CI)
+        # LOAD_TEST_ASSERT defaults to 0 on CI (CI env var is set). Metrics are
+        # collected and printed; latency assertions are NOT blocking so shared-vCPU
+        # noise cannot fail the build. The 60-second soak is excluded from CI.
+        # Run locally with LOAD_TEST_ASSERT=1 to enforce SLA targets from docs/SLA.md.
+        run: uv run pytest tests/load/ -v -s -m "not slow" --tb=short
 
   sbom:
     name: SBOM + dependency audit

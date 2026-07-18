@@ -44,7 +44,7 @@ import sys
 #   the most security-relevant code and must not silently regress.
 FLOORS = {
     "src/monitoring": 70.0,
-    "src/delegation": 52.0,
+    "src/delegation": 70.0,  # raised 52→70 (ADR-019): pipeline.py activated + test_pipeline.py added
     "src/embeddings": 80.0,  # disk-backed index I/O; floor matches the global gate.
     "src/validation": 85.0,
     "src/tools": 85.0,

@@ -21,7 +21,7 @@ to the ``"hashing"`` backend so CI and non-Apple platforms are unaffected.
 
 from __future__ import annotations
 
-from typing import Dict, List, Literal
+from typing import Dict, List, Literal, Optional
 
 import numpy as np
 from sklearn.feature_extraction.text import HashingVectorizer
@@ -33,7 +33,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 # neither is installed.
 # ---------------------------------------------------------------------------
 
-_minilm_model = None  # type: ignore[var-annotated]
+_minilm_model: object = None
 _minilm_available: bool | None = None  # None = not yet checked
 _minilm_backend: str = ""  # "mlx" | "st" | ""
 
@@ -52,7 +52,7 @@ def _try_load_minilm() -> bool:
     # 1. Try Apple MLX (preferred on Apple Silicon)
     try:
         import mlx_embeddings  # noqa: F401
-        from mlx_embeddings import load  # type: ignore[import]
+        from mlx_embeddings import load
 
         _minilm_model = load("sentence-transformers/all-MiniLM-L6-v2")
         _minilm_backend = "mlx"
@@ -63,7 +63,7 @@ def _try_load_minilm() -> bool:
 
     # 2. Fall back to sentence-transformers (cross-platform)
     try:
-        from sentence_transformers import SentenceTransformer  # type: ignore[import]
+        from sentence_transformers import SentenceTransformer
 
         _minilm_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
         _minilm_backend = "st"
@@ -84,13 +84,13 @@ def _embed_minilm(text: str) -> np.ndarray:
     backend was loaded by ``_try_load_minilm()``.
     """
     if _minilm_backend == "mlx":
-        from mlx_embeddings import embed  # type: ignore[import]
+        from mlx_embeddings import embed
 
         result = embed([text], _minilm_model)
         vec: np.ndarray = np.array(result[0], dtype=np.float32)
     else:
         # sentence-transformers backend
-        arr = _minilm_model.encode([text])  # type: ignore[union-attr]
+        arr = _minilm_model.encode([text])  # type: ignore[attr-defined]
         vec = np.array(arr[0], dtype=np.float32)
 
     norm = np.linalg.norm(vec)
@@ -173,6 +173,7 @@ class EmbeddingGenerator:
             resolved_backend = "hashing"
 
         self._backend: _Backend = resolved_backend
+        self.vectorizer: Optional[HashingVectorizer] = None
 
         if self._backend == "hashing":
             self.max_features = max_features
@@ -190,7 +191,7 @@ class EmbeddingGenerator:
         else:
             # MiniLM: model is already loaded by _try_load_minilm().
             self.max_features = _MINILM_DIM
-            self.vectorizer = None  # type: ignore[assignment]
+            self.vectorizer = None
 
         self.corpus: List[str] = []
         self.embeddings_cache: Dict[str, np.ndarray] = {}
@@ -259,6 +260,7 @@ class EmbeddingGenerator:
             embedding = _embed_minilm(text)
         else:
             # Pure transform: identical text -> identical vector, always.
+            assert self.vectorizer is not None  # set in __init__ for hashing backend
             embedding = self.vectorizer.transform([text]).toarray()[0]
 
         # Cache if requested
@@ -282,6 +284,7 @@ class EmbeddingGenerator:
         if self._backend == "minilm":
             return [self.generate(t, use_cache=False) for t in texts]
 
+        assert self.vectorizer is not None  # set in __init__ for hashing backend
         embeddings = self.vectorizer.transform(texts).toarray()
         return [embeddings[i] for i in range(len(texts))]
 
