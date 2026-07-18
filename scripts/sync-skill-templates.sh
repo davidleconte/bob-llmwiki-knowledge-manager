@@ -65,9 +65,12 @@ for NAME in concept guide reference research; do
     HEADING="${TEMPLATE_HEADING[$NAME]}"
     TMPL_CONTENT=$(cat "$TMPL_FILE")
 
-    # Use Python to do the multi-line block replacement
+    # Use Python to do the multi-line block replacement.
+    # Idempotency: SHA256 the current block vs the template; skip if equal.
+    # set -e is disabled around the python call so exit 2/3 don't abort here.
+    set +e
     python3 - "$SKILL_FILE" "$HEADING" "$TMPL_CONTENT" <<'PYEOF'
-import sys, re
+import sys, re, hashlib
 
 skill_path = sys.argv[1]
 heading    = sys.argv[2]
@@ -75,38 +78,39 @@ new_block  = sys.argv[3]
 
 text = open(skill_path).read()
 
-# Pattern: match the ````markdown ... ```` block under ### <Heading> (...)
-# We look for the heading line, skip to the next ````markdown fence, then
-# capture everything up to the closing ```` on its own line.
 pattern = (
-    r'(###\s+' + re.escape(heading) + r'[^\n]*\n\n)'   # heading + blank
+    r'(###\s+' + re.escape(heading) + r'[^\n]*\n\n)'   # heading + blank line
     r'(````markdown\n)'                                  # opening fence
     r'(.*?)'                                             # current block content
     r'(````)'                                            # closing fence
 )
-replacement = r'\g<1>\g<2>' + re.escape(new_block).replace(r'\n', '\n') + r'\n\g<4>'
 
-new_text, n = re.subn(pattern, replacement, text, count=1, flags=re.DOTALL)
-
-# re.escape is overkill on replacement side — use a plain substitution instead
-if n == 0:
+m = re.search(pattern, text, flags=re.DOTALL)
+if not m:
     sys.exit(2)   # heading not found
 
-# Redo without re.escape on the replacement content
+current_block = m.group(3).rstrip('\n')
+if hashlib.sha256(current_block.encode()).hexdigest() == \
+   hashlib.sha256(new_block.encode()).hexdigest():
+    sys.exit(3)   # already up to date — no write needed
+
 def replacer(m):
     return m.group(1) + m.group(2) + new_block + '\n' + m.group(4)
 
 new_text = re.sub(pattern, replacer, text, count=1, flags=re.DOTALL)
-
 open(skill_path, 'w').write(new_text)
 sys.exit(0)
 PYEOF
     PY_EXIT=$?
+    set -e
     if [[ $PY_EXIT -eq 0 ]]; then
         echo -e "${GREEN}✅ Synced: ${NAME} template → SKILL.md${NC}"
         UPDATED=$((UPDATED + 1))
     elif [[ $PY_EXIT -eq 2 ]]; then
         echo -e "${YELLOW}⚠️  Heading '### ${HEADING}' not found in SKILL.md — skipping ${NAME}${NC}"
+        SKIPPED=$((SKIPPED + 1))
+    elif [[ $PY_EXIT -eq 3 ]]; then
+        echo -e "${CYAN}⏭  Already current: ${NAME} template${NC}"
         SKIPPED=$((SKIPPED + 1))
     else
         echo -e "${YELLOW}⚠️  Python error for ${NAME} template — skipping${NC}"
