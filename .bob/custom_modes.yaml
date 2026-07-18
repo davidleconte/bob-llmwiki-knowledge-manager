@@ -21243,7 +21243,7 @@ customModes:
   #   - 'save_memory' ref removed from customInstructions (no such tool in Bob IDE;
   #     persistence is done by writing markdown files)
   - slug: knowledge-manager
-    name: "\U0001F4DA Knowledge Manager"
+    name: "\U0001F9E0 Mnemox Knowledge Builder"
     description: Maintain a structured, compounding markdown knowledge base for your codebase
     roleDefinition: >-
       You are a knowledge management specialist who helps organize, document, and maintain
@@ -21299,6 +21299,21 @@ customModes:
       ### Skill Activation
       For full template text, workflow steps, and cross-reference protocol, activate:
         use_skill("knowledge-manager")
+
+      ### Mnemox Command Protocol
+      When the user types "mnemox", "mnemox your workspace", "mnemox this workspace",
+      "mnemox this project", or "initialise mnemox":
+
+      1. Check for docs/knowledge-base/INDEX.md.
+         ABSENT  → Init path: run `bash scripts/mnemox.sh --init` (no auto-commit).
+         PRESENT → Update path: choose sub-mode from user intent:
+           - "mnemox" / "mnemox your workspace" / no qualifier → run `bash scripts/mnemox.sh --full`
+           - "mnemox --quick" / "quick" / "no analysis"        → run `bash scripts/mnemox.sh --quick`
+           - "mnemox --full" / "full"                          → run `bash scripts/mnemox.sh --full`
+           After the script: parse MNEMOX_LESSONS_NOTE=<path> from stdout, read that file,
+           and synthesise the top 3-5 findings IN THIS SESSION without waiting for a follow-up.
+      2. MNEMOX_HOME resolution: env var first, then --km-home flag, then cwd.
+      3. All steps are idempotent — running mnemox twice is always safe.
     groups:
       - read
       - - edit

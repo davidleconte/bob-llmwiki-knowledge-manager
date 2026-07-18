@@ -247,7 +247,7 @@ p@3=0.60 on the KB golden set. Use MiniLM for best retrieval quality.
 
 ## References
 
-- Architecture: `docs/architecture/ARCHITECTURE.md` (§3b, §5 graph section)
+- Architecture: `docs/architecture/architecture.md` (§3b, §5 graph section)
 - KB integration study: `docs/knowledge-base/research/kb-tos-integration-feasibility-2026-07-14.md`
 - Integration roadmap: `docs/knowledge-base/guides/kb-tos-integration-roadmap.md`
 - ADR-014 (embedding scorer): `docs/adr/014-kb-query-embedding-scorer.md`

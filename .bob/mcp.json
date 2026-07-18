@@ -22,7 +22,7 @@
       "headers": {
         "Authorization": "Bearer YOUR-OAUTH-ACCESS-TOKEN-HERE"
       },
-      "disabled": false,
+      "disabled": true,
       "alwaysAllow": [
         "atlassianUserInfo",
         "getAccessibleAtlassianResources",

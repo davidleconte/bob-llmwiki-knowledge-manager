@@ -78,8 +78,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `test_minilm_st_vector_shape_and_norm`, `test_minilm_generator_backend_property`)
   now run unconditionally and pass. `uv.lock` updated (sentence-transformers 5.6.0).
 
-- **Load/soak test suite + formal SLA** (`tests/load/test_load_soak.py`, `docs/SLA.md`):
-  - `docs/SLA.md` — SLA v1.0: latency p99 targets per component (L1 hit ≤ 750 µs,
+- **Load/soak test suite + formal SLA** (`tests/load/test_load_soak.py`, `docs/sla.md`):
+  - `docs/sla.md` — SLA v1.0: latency p99 targets per component (L1 hit ≤ 750 µs,
     cold pipeline ≤ 3.5 ms, token count 1K ≤ 1.8 ms), throughput targets (≥ 50 req/s
     single-thread, ≥ 100 req/s combined 4-thread), concurrency and quality SLAs.
   - `tests/load/test_load_soak.py` — 8 tests: sustained throughput, 4-thread
@@ -112,9 +112,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Gap-fix: KB Manager architecture doc consolidation** (Sub-Task 7):
   - `docs/ARCHITECTURE.md` (KB Manager arc42 document) renamed to
-    `docs/kb-manager/ARCHITECTURE.md` to eliminate the dual-architecture-doc
+    `docs/kb-manager/architecture.md` to eliminate the dual-architecture-doc
     navigation confusion identified in the gap audit.
-  - Cross-references in `README.md`, `docs/architecture/ARCHITECTURE.md`,
+  - Cross-references in `README.md`, `docs/architecture/architecture.md`,
     `docs/README.md`, and `AGENTS.md` updated.
   - `tests/test_workflows.py::test_documentation_files_exist` updated to
     assert the new path.
@@ -332,7 +332,7 @@ retracted and replaced with manifest-backed measurements. See [`STATUS.md`](STAT
   at that point and that `embedding_generator` must not re-acquire it.
 
 ### Security
-- **STRIDE threat model** (Phase 7): [`docs/security/THREAT_MODEL.md`](docs/security/THREAT_MODEL.md)
+- **STRIDE threat model** (Phase 7): [`docs/security/threat-model.md`](docs/security/threat-model.md)
   — a real, code-grounded analysis (trust boundaries, honest N/A calls, a
   residual-risk register) that supersedes the fabricated ADR-012 security stack.
 - **Path-traversal containment** (Phase 7): the `src/tools` read helpers
@@ -352,7 +352,7 @@ retracted and replaced with manifest-backed measurements. See [`STATUS.md`](STAT
   documented an auth / AES-256 / RBAC / rate-limit / audit-log stack and asserted
   it had passed a security audit with zero incidents — none of which was ever
   implemented. The ADR is kept as audit trail with a retraction banner;
-  `docs/security/THREAT_MODEL.md` is now canonical.
+  `docs/security/threat-model.md` is now canonical.
 
 ---
 

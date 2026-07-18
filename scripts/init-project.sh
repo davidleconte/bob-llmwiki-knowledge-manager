@@ -17,10 +17,10 @@ fi
 echo "📁 Creating directory structure..."
 mkdir -p docs/knowledge-base/{concepts,guides,references,research}
 
-# Create INDEX.md
-echo "📝 Creating INDEX.md..."
+# Create index.md
+echo "📝 Creating index.md..."
 TODAY=$(date +%Y-%m-%d)
-cat > docs/knowledge-base/INDEX.md <<INDEXEOF
+cat > docs/knowledge-base/index.md <<INDEXEOF
 # Knowledge Base Index
 
 Last Updated: $TODAY
@@ -84,7 +84,7 @@ if [ ! -f ".bob/settings.json" ]; then
     cat > .bob/settings.json << 'SETTINGSEOF'
 {
   "context": {
-    "fileName": ["CONTEXT.md", "docs/knowledge-base/INDEX.md"]
+    "fileName": ["CONTEXT.md", "docs/knowledge-base/index.md"]
   }
 }
 SETTINGSEOF
@@ -126,7 +126,7 @@ What do we know about [topic]?
 
 **Maintenance:**
 \`\`\`
-Review all documents created this week and ensure proper cross-referencing and INDEX.md is current.
+Review all documents created this week and ensure proper cross-referencing and index.md is current.
 \`\`\`
 
 ## KB summary
@@ -161,9 +161,9 @@ echo ""
 echo "Directory structure:"
 echo "  ."
 echo "  ├── CONTEXT.md            ← auto-loaded context for every session"
-echo "  ├── .bob/settings.json    ← tells Bob to load CONTEXT.md + INDEX.md"
+echo "  ├── .bob/settings.json    ← tells Bob to load CONTEXT.md + index.md"
 echo "  └── docs/knowledge-base/"
-echo "      ├── INDEX.md"
+echo "      ├── index.md"
 echo "      ├── concepts/"
 echo "      ├── guides/"
 echo "      ├── references/"

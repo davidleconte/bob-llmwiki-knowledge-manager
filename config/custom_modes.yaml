@@ -156,7 +156,7 @@ customModes:
       - browser
 
   - slug: knowledge-manager
-    name: 📚 Knowledge Manager
+    name: 🧠 Mnemox Knowledge Builder
     roleDefinition: >-
       You are a knowledge management specialist who helps organize, document, and maintain
       structured knowledge bases. You excel at researching topics, creating comprehensive
@@ -167,7 +167,7 @@ customModes:
       - docs/knowledge-base/guides/ - How-to guides and tutorials
       - docs/knowledge-base/references/ - API docs and specifications
       - docs/knowledge-base/research/ - Research notes and findings
-      - docs/knowledge-base/INDEX.md - Master index of all content
+      - docs/knowledge-base/index.md - Master index of all content
     
     whenToUse: >-
       Use this mode when you need to:

@@ -60,19 +60,63 @@ fi
 
 echo ""
 echo "✅ Bob Shell CLI installation complete!"
+
+# ── Install mnemox shell function ─────────────────────────────────────────────
+# Resolve the KM repo path (this script lives in <KM_HOME>/scripts/)
+KM_INSTALL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+MNEMOX_SHELL_FILE="$BOB_CONFIG/mnemox.sh"
+
+cat > "$MNEMOX_SHELL_FILE" << MNEMOXEOF
+# Mnemox Knowledge Builder — shell integration
+# Installed by scripts/install.sh from: $KM_INSTALL_DIR
+# Override MNEMOX_HOME at any time by exporting a different value.
+export MNEMOX_HOME="${KM_INSTALL_DIR}"
+mnemox() { bash "\$MNEMOX_HOME/scripts/mnemox.sh" "\$@"; }
+MNEMOXEOF
+
+echo ""
+echo "✅ mnemox command installed → $MNEMOX_SHELL_FILE"
+echo "   MNEMOX_HOME default: $KM_INSTALL_DIR"
+echo ""
+
+# Check if source line already exists in common shell rc files
+SOURCE_LINE="source \"$MNEMOX_SHELL_FILE\""
+RC_HINT_SHOWN=false
+for RC_FILE in "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.bash_profile"; do
+    if [[ -f "$RC_FILE" ]] && grep -qF "$MNEMOX_SHELL_FILE" "$RC_FILE" 2>/dev/null; then
+        RC_HINT_SHOWN=true
+        break
+    fi
+done
+
+if [[ "$RC_HINT_SHOWN" == false ]]; then
+    echo "──────────────────────────────────────────────────────────────────────────"
+    echo "To activate the 'mnemox' command in your terminal, add this line to your"
+    echo "shell config (~/.zshrc or ~/.bashrc):"
+    echo ""
+    echo "  $SOURCE_LINE"
+    echo ""
+    echo "Then reload your shell: source ~/.zshrc  (or open a new terminal)"
+    echo "──────────────────────────────────────────────────────────────────────────"
+fi
+
 echo ""
 echo "Next steps (Bob Shell CLI):"
-echo "1. Initialize a knowledge base in your project:"
-echo "   cd ~/Projects/your-project"
-echo "   ~/Projects/bob-llmwiki-knowledge-manager/scripts/init-project.sh"
+echo "1. Activate mnemox in your terminal (see above), then:"
+echo "   cd ~/your-project && mnemox"
 echo ""
-echo "2. Start Bob Shell in knowledge-manager mode:"
+echo "2. Or use the three-script path directly:"
+echo "   cd ~/Projects/your-project"
+echo "   $KM_INSTALL_DIR/scripts/init-project.sh"
+echo ""
+echo "3. Start Bob Shell in 🧠 Mnemox Knowledge Builder mode:"
 echo "   bob --chat-mode=knowledge-manager"
 echo ""
 echo "──────────────────────────────────────────────────────────────────────────"
 echo "Bob IDE users: no install needed."
 echo "  - Open this workspace in Bob IDE."
-echo "  - The 'Knowledge Manager' and 'Repository Analyzer' modes appear"
-echo "    in the mode picker immediately (hot-reload from .bob/custom_modes.yaml)."
-echo "  - To activate workflow instructions, run: use_skill(\"knowledge-manager\")"
+echo "  - The '🧠 Mnemox Knowledge Builder' mode appears in the mode picker"
+echo "    immediately (hot-reload from .bob/custom_modes.yaml)."
+echo "  - Type 'mnemox your workspace' in the chat to initialise or update."
+echo "  - To load templates: use_skill(\"knowledge-manager\")"
 echo "──────────────────────────────────────────────────────────────────────────"
