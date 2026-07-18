@@ -131,7 +131,7 @@ cp config/templates/concept.md docs/knowledge-base/concepts/my-concept.md
 vim docs/knowledge-base/concepts/my-concept.md
 
 # Update INDEX.md
-echo "- [My Concept](concepts/my-concept.md)" >> docs/knowledge-base/INDEX.md
+echo "- [My Concept](concepts/my-concept.md)" >> docs/knowledge-base/index.md
 ```
 
 ### Task 2: Test Token Optimization (2 minutes)

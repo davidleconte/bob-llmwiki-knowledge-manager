@@ -184,24 +184,24 @@ the C-dimension baseline as verified.
 ### Sub-task C1 — Add quality scenario for correctness baseline to ARCHITECTURE.md
 
 **Intent:**
-The arc42 §8 quality scenarios in `docs/architecture/ARCHITECTURE.md` cover
+The arc42 §8 quality scenarios in `docs/architecture/architecture.md` cover
 performance and availability. They do not explicitly cite the C1–C8 correctness
 baseline as a verifiable quality requirement with a test reference. Adding it makes
 the correctness posture auditable by an external reviewer without reading test files.
 
 **Expected Outcomes:**
-- `docs/architecture/ARCHITECTURE.md §8` (quality scenarios) gains one scenario:
+- `docs/architecture/architecture.md §8` (quality scenarios) gains one scenario:
   "Correctness: all C1–C8 correctness bugs fixed; each has a behavioral regression
   test that fails on revert. Verified by `uv run pytest tests/ -k regression -v`."
 - No code changes.
 
 **Todo List:**
-1. Read `docs/architecture/ARCHITECTURE.md §8` quality scenarios section.
+1. Read `docs/architecture/architecture.md §8` quality scenarios section.
 2. Append one correctness quality scenario with the C1–C8 citation and the test command.
 3. Run `python3 scripts/generate_api_docs.py --check` — docs-only change; must pass.
 
 **Relevant Context:**
-- `docs/architecture/ARCHITECTURE.md` — §8 quality scenarios
+- `docs/architecture/architecture.md` — §8 quality scenarios
 - `CHANGELOG.md` — C1–C8 fix record
 
 **Status:** [x] closed — QS-5 row added to ARCHITECTURE.md §8 quality scenarios table citing C1–C8 and the regression test command.
@@ -396,7 +396,7 @@ entirely (let `open()` raise `FileNotFoundError` and convert it to an error dict
 4. In each tool: replace `if not full_path.exists(): return {"error": "File not found"}`
    with a `try/except (FileNotFoundError, OSError)` wrapping the `open()` call,
    returning the same error dict on exception.
-5. Update `docs/security/THREAT_MODEL.md` residual-4: note the window is now
+5. Update `docs/security/threat-model.md` residual-4: note the window is now
    two-step (resolve → open); the TOCTOU window cannot be fully eliminated without
    `O_NOFOLLOW` semantics, but swapping a valid path between resolve and open now
    requires replacing the target within a single syscall context — a significantly
@@ -411,7 +411,7 @@ entirely (let `open()` raise `FileNotFoundError` and convert it to an error dict
 - `src/tools/batch_file_reader.py:45-75`
 - `src/tools/component_analyzer.py:38-60`
 - `src/tools/kb_query.py:245-265`
-- `docs/security/THREAT_MODEL.md:158-179` — residual-4 to update
+- `docs/security/threat-model.md:158-179` — residual-4 to update
 
 **Status:** [x] closed — TOCTOU 3-step→2-step narrowed in all three tools; `THREAT_MODEL.md` residual-4 updated; regression tests added.
 

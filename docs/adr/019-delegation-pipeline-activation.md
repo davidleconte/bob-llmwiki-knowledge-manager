@@ -112,7 +112,7 @@ each subsystem independently testable and independently deployable.
 
 ### Neutral
 
-- The `src/delegation/EXPERIMENTAL.md` status is updated from "Experimental / Not
+- The `src/delegation/experimental.md` status is updated from "Experimental / Not
   Integrated" to "Integrated — Analysis Pipeline".
 - ADR count moves from 18 to 19.
 
@@ -149,6 +149,6 @@ bob-optimize analyze src/cache --output-dir /tmp/delegation-test --kb-path docs/
 ## References
 
 - [`docs/knowledge-base/research/delegation-integration-analysis-2026-07-13.md`](../../docs/knowledge-base/research/delegation-integration-analysis-2026-07-13.md)
-- [`src/delegation/EXPERIMENTAL.md`](../../src/delegation/EXPERIMENTAL.md) (updated)
+- [`src/delegation/experimental.md`](../../src/delegation/experimental.md) (updated)
 - [ADR-013: Facade and Factory Pattern](013-facade-factory-pattern.md)
 - [ADR-014: KB Query Embedding Scorer](014-kb-query-embedding-scorer.md)

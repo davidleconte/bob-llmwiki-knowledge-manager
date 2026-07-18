@@ -357,7 +357,7 @@ Files updated for Phase 2:
 1. **config/custom_modes.yaml** - Added repo-analyzer mode
 2. **docs/PHASE2_IMPLEMENTATION_COMPLETE.md** - This document
 3. **README.md** - Will be updated with mode information
-4. **docs/INDEX.md** - Will be updated with Phase 2 docs
+4. **docs/index.md** - Will be updated with Phase 2 docs
 
 ---
 

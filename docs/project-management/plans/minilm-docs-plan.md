@@ -27,7 +27,7 @@ The `EmbeddingGenerator` class gained an optional `backend="minilm"` parameter t
 **Non-goals:**
 - No code changes of any kind.
 - No new ADR (the design choice is already in ADR-014 context; the MiniLM addition is an implementation detail, not a new architectural decision).
-- No changes to `docs/INSTALLATION.md` (that document is scoped to the Bash KB Manager only; Python TOS install is already covered in §8 of README.md).
+- No changes to `docs/installation.md` (that document is scoped to the Bash KB Manager only; Python TOS install is already covered in §8 of README.md).
 - No creation of a new `docs/INSTALLATION_PYTHON_SYSTEM.md` — the scope is *documenting the MiniLM feature*, not writing a full Python system install guide (that is a separate, larger effort).
 
 ---
@@ -65,7 +65,7 @@ The `EmbeddingGenerator` class gained an optional `backend="minilm"` parameter t
 
 ---
 
-### Sub-task 2 — Update `docs/architecture/ARCHITECTURE.md §5`
+### Sub-task 2 — Update `docs/architecture/architecture.md §5`
 
 **Status:** `[ ] pending`
 
@@ -90,8 +90,8 @@ Additionally, the §2 component diagram shows no `src/embeddings/` subsystem at 
 3. In `§2` "Not shown, deliberately separate" list, add `src/embeddings/` — the KB persistent embedding index and MarkdownChunker subsystem (opt-in, not on the `optimize()` request path).
 
 **Relevant Context:**
-- `docs/architecture/ARCHITECTURE.md:146-159` — existing §5 Components section
-- `docs/architecture/ARCHITECTURE.md:66-77` — existing "Not shown" list in §2
+- `docs/architecture/architecture.md:146-159` — existing §5 Components section
+- `docs/architecture/architecture.md:66-77` — existing "Not shown" list in §2
 - `src/cache/embeddings.py:73-80` — `EmbeddingGenerator.__init__` showing both backends
 - `src/embeddings/index.py`, `src/embeddings/chunker.py`, `src/embeddings/indexer.py` — the subsystem being documented
 - ADR-014 and ADR-015 for decision rationale (already written; just reference them)
@@ -130,7 +130,7 @@ ADR-014 was written before the MiniLM backend existed. It correctly documents th
 
 ---
 
-### Sub-task 4 — Update `SECURITY.md` and `docs/security/THREAT_MODEL.md`
+### Sub-task 4 — Update `SECURITY.md` and `docs/security/threat-model.md`
 
 **Status:** `[ ] pending`
 
@@ -146,12 +146,12 @@ This is not a security vulnerability — it is a public model download, no diffe
 
 **Todo List:**
 1. In `SECURITY.md` (line ~24), update the parenthetical "(apart from tiktoken's optional first-use vocabulary download)" to read: "(apart from two optional first-use downloads: tiktoken BPE vocabulary, and the `sentence-transformers/all-MiniLM-L6-v2` model when `EmbeddingGenerator(backend="minilm")` is used — both downloads only occur on first use and only if the respective feature is activated; the default configuration makes neither call)".
-2. In `docs/security/THREAT_MODEL.md` §Deployment context (line ~31), update the bullet "makes **no outbound network calls** from `src/` except tiktoken's optional first-use vocabulary download" to add: "and, optionally, the `sentence-transformers/all-MiniLM-L6-v2` model download via `mlx-embeddings` (`src/cache/embeddings.py:49`) when `backend="minilm"` is used — triggered at most once per machine, cached to `~/.cache/huggingface/`, and never triggered by the default `"hashing"` backend or on CI."
+2. In `docs/security/threat-model.md` §Deployment context (line ~31), update the bullet "makes **no outbound network calls** from `src/` except tiktoken's optional first-use vocabulary download" to add: "and, optionally, the `sentence-transformers/all-MiniLM-L6-v2` model download via `mlx-embeddings` (`src/cache/embeddings.py:49`) when `backend="minilm"` is used — triggered at most once per machine, cached to `~/.cache/huggingface/`, and never triggered by the default `"hashing"` backend or on CI."
 3. Verify that no other section of `THREAT_MODEL.md` references "single outbound path" or equivalent — if found, update to "two optional outbound paths".
 
 **Relevant Context:**
 - `SECURITY.md:23-26` — the paragraph to update
-- `docs/security/THREAT_MODEL.md:28-31` — the bullet to update
+- `docs/security/threat-model.md:28-31` — the bullet to update
 - `src/cache/embeddings.py:49` — the `load()` call (exact line reference for the threat model citation)
 - `src/optimizer/token_counter.py:38-46` — the tiktoken download (existing reference in THREAT_MODEL.md, do not remove)
 
@@ -171,9 +171,9 @@ Sub-tasks are independent. Suggested order: 1 → 2 → 3 → 4.
 | File | Sub-task | Change type |
 |------|----------|-------------|
 | `README.md` | 1 | Update §8 and §12 |
-| `docs/architecture/ARCHITECTURE.md` | 2 | Update §2 and §5 |
+| `docs/architecture/architecture.md` | 2 | Update §2 and §5 |
 | `docs/adr/014-kb-query-embedding-scorer.md` | 3 | Append amendment section |
 | `SECURITY.md` | 4 | Update one paragraph |
-| `docs/security/THREAT_MODEL.md` | 4 | Update one bullet |
+| `docs/security/threat-model.md` | 4 | Update one bullet |
 
 **No new files created.** Five targeted edits to existing documents.

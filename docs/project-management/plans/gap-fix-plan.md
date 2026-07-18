@@ -13,7 +13,7 @@
 | Gap 1 | Opt-in integration is silent — users get p@3=0.60 when p@3=0.88 is available | `setup.sh` + `kb-status` CLI subcommand | Low — purely additive |
 | Gap 2A | Delegation module is dead weight with no production use | `src/delegation/pipeline.py` connector (~60 lines) + `bob-optimize analyze` CLI subcommand | Medium — new module, needs tests + ADR |
 | Gap 2B | Delegation coverage floor at 52% with no path to raise it | Integration tests for `pipeline.py`, raise floor to 70% | Low |
-| Gap 3 | Two `ARCHITECTURE.md` files in overlapping paths cause navigation confusion | Rename `docs/ARCHITECTURE.md` → `docs/kb-manager/ARCHITECTURE.md` + update all cross-references | Low — file rename + reference updates |
+| Gap 3 | Two `ARCHITECTURE.md` files in overlapping paths cause navigation confusion | Rename `docs/ARCHITECTURE.md` → `docs/kb-manager/architecture.md` + update all cross-references | Low — file rename + reference updates |
 
 ---
 
@@ -353,7 +353,7 @@ from src.delegation.pipeline import analyze_and_ingest, AnalysisPipelineResult
 **Expected Outcomes:**
 - `docs/adr/019-delegation-pipeline-activation.md` exists and is valid ADR format
 - `docs/adr/README.md` updated to list ADR-019
-- `src/delegation/EXPERIMENTAL.md` status section updated to reflect "now integrated as pipeline"
+- `src/delegation/experimental.md` status section updated to reflect "now integrated as pipeline"
 
 **ADR content spec:**
 ```markdown
@@ -393,40 +393,40 @@ src/delegation/ but is no longer "experimental" — it has a production use case
 **Todo list:**
 - [ ] Create `docs/adr/019-delegation-pipeline-activation.md` with content above
 - [ ] Add ADR-019 entry to `docs/adr/README.md` table
-- [ ] Update `src/delegation/EXPERIMENTAL.md` status header: change "Experimental / Not Integrated" to "Integrated — Analysis Pipeline" and update the status checklist
+- [ ] Update `src/delegation/experimental.md` status header: change "Experimental / Not Integrated" to "Integrated — Analysis Pipeline" and update the status checklist
 
 **Status:** `[ ] pending`
 
 ---
 
-## Sub-Task 7 — Rename `docs/ARCHITECTURE.md` → `docs/kb-manager/ARCHITECTURE.md`
+## Sub-Task 7 — Rename `docs/ARCHITECTURE.md` → `docs/kb-manager/architecture.md`
 
 **Intent:** Eliminate the filename collision between the two ARCHITECTURE.md files. Zero content changes — purely a structural rename + cross-reference update.
 
 **Expected Outcomes:**
 - `docs/ARCHITECTURE.md` no longer exists
-- `docs/kb-manager/ARCHITECTURE.md` exists with identical content
-- All cross-references updated (README.md, AGENTS.md, docs/INDEX.md, docs/README.md)
+- `docs/kb-manager/architecture.md` exists with identical content
+- All cross-references updated (README.md, AGENTS.md, docs/index.md, docs/README.md)
 - `grep -r "docs/ARCHITECTURE.md" .` returns 0 results (except git history)
 - Navigation: `docs/README.md` has a clear "Documentation map" routing contributors to the correct file
 
 **Files to update:**
-- `README.md` line 26: `[KB Manager — docs/ARCHITECTURE.md]` → `[KB Manager — docs/kb-manager/ARCHITECTURE.md]`
+- `README.md` line 26: `[KB Manager — docs/ARCHITECTURE.md]` → `[KB Manager — docs/kb-manager/architecture.md]`
 - `AGENTS.md` documentation table: update `docs/ARCHITECTURE.md` reference
-- `docs/INDEX.md`: update entry for KB Manager architecture
+- `docs/index.md`: update entry for KB Manager architecture
 - `docs/README.md`: add "Documentation map" section routing to both architecture docs
-- `docs/architecture/ARCHITECTURE.md` line 15: update the "Not to be confused with" cross-reference
-- `docs/kb-manager/ARCHITECTURE.md` (the renamed file) line 10: update the self-reference
+- `docs/architecture/architecture.md` line 15: update the "Not to be confused with" cross-reference
+- `docs/kb-manager/architecture.md` (the renamed file) line 10: update the self-reference
 
 **Todo list:**
 - [ ] Create `docs/kb-manager/` directory
-- [ ] Move `docs/ARCHITECTURE.md` to `docs/kb-manager/ARCHITECTURE.md` (content unchanged)
-- [ ] Update internal self-reference in `docs/kb-manager/ARCHITECTURE.md` line 10 (path to architecture/ARCHITECTURE.md is still valid as relative path `../architecture/ARCHITECTURE.md`)
+- [ ] Move `docs/ARCHITECTURE.md` to `docs/kb-manager/architecture.md` (content unchanged)
+- [ ] Update internal self-reference in `docs/kb-manager/architecture.md` line 10 (path to architecture/ARCHITECTURE.md is still valid as relative path `../architecture/ARCHITECTURE.md`)
 - [ ] Update `README.md` line 26 cross-reference
 - [ ] Update `AGENTS.md` documentation table cross-reference
-- [ ] Update `docs/INDEX.md` entry
+- [ ] Update `docs/index.md` entry
 - [ ] Update `docs/README.md` — add "Documentation Map" section
-- [ ] Update `docs/architecture/ARCHITECTURE.md` line 15 cross-reference: `[docs/ARCHITECTURE.md]` → `[docs/kb-manager/ARCHITECTURE.md]`
+- [ ] Update `docs/architecture/architecture.md` line 15 cross-reference: `[docs/ARCHITECTURE.md]` → `[docs/kb-manager/architecture.md]`
 - [ ] Run `grep -r "docs/ARCHITECTURE.md" --include="*.md" .` to confirm no remaining references
 
 **Status:** `[ ] pending`
@@ -481,7 +481,7 @@ Sub-Task 8 (CI validation)      — depends on all above
 | `src/cli.py` | Add `kb-status` and `analyze` subcommand parsers + handlers |
 | `src/delegation/pipeline.py` | New file — analysis pipeline connector |
 | `src/delegation/__init__.py` | Export `analyze_and_ingest`, `AnalysisPipelineResult` |
-| `src/delegation/EXPERIMENTAL.md` | Update status header |
+| `src/delegation/experimental.md` | Update status header |
 | `scripts/setup.sh` | New file — full-stack setup script |
 | `scripts/check_coverage_by_package.py` | Raise delegation floor 52 → 70 |
 | `tests/cli/test_cli.py` | Add `test_kb_status_json`, `test_analyze_json` |
@@ -489,10 +489,10 @@ Sub-Task 8 (CI validation)      — depends on all above
 | `docs/adr/019-delegation-pipeline-activation.md` | New ADR |
 | `docs/adr/README.md` | Add ADR-019 entry |
 | `docs/ARCHITECTURE.md` | Deleted (renamed) |
-| `docs/kb-manager/ARCHITECTURE.md` | New location (moved, content unchanged) |
+| `docs/kb-manager/architecture.md` | New location (moved, content unchanged) |
 | `README.md` | Update cross-reference line 26, add setup.sh to §5 |
 | `AGENTS.md` | Update architecture doc reference |
-| `docs/INDEX.md` | Update KB Manager architecture entry |
+| `docs/index.md` | Update KB Manager architecture entry |
 | `docs/README.md` | Add Documentation Map section |
-| `docs/architecture/ARCHITECTURE.md` | Update cross-reference line 15 |
+| `docs/architecture/architecture.md` | Update cross-reference line 15 |
 | `docs/api/` | Regenerated (adds pipeline module) |

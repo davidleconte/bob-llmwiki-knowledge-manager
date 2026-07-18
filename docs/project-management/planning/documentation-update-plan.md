@@ -17,7 +17,7 @@ Six surfaces need updating. They fall into two groups:
 
 **Group A — Living technical docs (require new Mermaid diagrams)**
 
-1. `docs/architecture/ARCHITECTURE.md` — the single authoritative architecture document. Missing the entire graph package in §2 component overview, §3 runtime dataflow, and §5 components. All four existing diagrams need a companion graph-layer diagram added. New diagrams: a full-system component flowchart (adding `src/graph/`), a KB query graph-aware sequence diagram, and a Document → Chunk → Embedding → Graph pipeline flowchart.
+1. `docs/architecture/architecture.md` — the single authoritative architecture document. Missing the entire graph package in §2 component overview, §3 runtime dataflow, and §5 components. All four existing diagrams need a companion graph-layer diagram added. New diagrams: a full-system component flowchart (adding `src/graph/`), a KB query graph-aware sequence diagram, and a Document → Chunk → Embedding → Graph pipeline flowchart.
 
 2. `docs/api/` — auto-generated API reference. `src/graph/` (7 exported symbols across 4 modules) and `src/embeddings/chunker.py` are entirely absent. `docs/api/README.md` must be updated. Individual API doc files must be generated for `graph/builder`, `graph/graph`, `graph/ranker`, `graph/store`, and `embeddings/chunker`.
 
@@ -41,7 +41,7 @@ Six surfaces need updating. They fall into two groups:
 
 ### Sub-Task 1: Architecture document — add graph layer to all sections and diagrams
 
-**Intent:** Make `docs/architecture/ARCHITECTURE.md` accurate for the P3 state of the codebase. Every section that describes the component landscape must acknowledge `src/graph/`. Three new Mermaid diagrams must be published.
+**Intent:** Make `docs/architecture/architecture.md` accurate for the P3 state of the codebase. Every section that describes the component landscape must acknowledge `src/graph/`. Three new Mermaid diagrams must be published.
 
 **Expected Outcomes:**
 - §2 component overview: `src/graph/` appears in the "Not shown, deliberately separate" list alongside `src/embeddings/` (same opt-in, injection-pattern status).
@@ -87,7 +87,7 @@ A flowchart from raw KB documents to the persisted graph:
 - All edges + nodes → `KnowledgeGraph` → `GraphStore` → `.bob/kb-graph.json`
 
 **Todo List:**
-1. Read the current §2, §3, §5 of `docs/architecture/ARCHITECTURE.md` to see exact line numbers.
+1. Read the current §2, §3, §5 of `docs/architecture/architecture.md` to see exact line numbers.
 2. Add `src/graph/` to the "Not shown, deliberately separate" paragraph after `src/embeddings/`.
 3. Add Diagram A (KB subsystem flowchart) after the existing §2 flowchart, in a new "KB subsystem" subheading.
 4. Add Diagram B (graph-aware query sequence) as §3b after the existing §3 sequenceDiagram.
@@ -98,7 +98,7 @@ A flowchart from raw KB documents to the persisted graph:
 9. Update `Last updated` date to `2026-07-17`.
 
 **Relevant Context:**
-- `docs/architecture/ARCHITECTURE.md` — current file; all existing diagrams are valid Mermaid
+- `docs/architecture/architecture.md` — current file; all existing diagrams are valid Mermaid
 - `src/graph/__init__.py` — exported symbols and module docstring
 - `src/graph/builder.py` — `_CATEGORIES`, `_normalise_kb_link`, `KnowledgeGraphBuilder.build()`
 - `src/graph/ranker.py` — `PAGERANK_SCALE = 15.0`, `rerank()` blend formula
@@ -240,7 +240,7 @@ A flowchart from raw KB documents to the persisted graph:
 **Relevant Context:**
 - `README.md` — needs reading past line 120 to confirm exact section names and line numbers
 - `src/cli.py` — `graph-build`, `graph-query`, `graph-health` argument parser entries
-- `docs/architecture/ARCHITECTURE.md §5` — MiniLM backend description to mirror
+- `docs/architecture/architecture.md §5` — MiniLM backend description to mirror
 
 **Status:** [ ] pending
 

@@ -7,7 +7,7 @@
 implementation: `.bob/skills/knowledge-manager/SKILL.md` and `.bob/custom_modes.yaml`
 (workspace entry, `execute`/`skill` groups, verified on Bob IDE 1.121.0+bob2.0.1).
 Not to be confused with the Python token-optimization system (`src/`), which is documented in
-[`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md).
+[`docs/architecture/architecture.md`](../architecture/ARCHITECTURE.md).
 
 ---
 
@@ -230,7 +230,7 @@ sequenceDiagram
         S-->>U: warning prompt (continue y/N)
     end
     S->>FS: mkdir -p docs/knowledge-base/{concepts,guides,references,research}
-    S->>FS: write docs/knowledge-base/INDEX.md (template with placeholders)
+    S->>FS: write docs/knowledge-base/index.md (template with placeholders)
     S->>FS: mkdir -p .bob/
     S->>FS: write .bob/settings.json (auto-loads INDEX.md as context)
     S->>FS: append KB entry to .gitignore (if .gitignore exists)
@@ -253,7 +253,7 @@ sequenceDiagram
     BOB->>BOB: research topic (web/context/tools)
     BOB->>FS: write docs/knowledge-base/concepts/docker-containers.md
     BOB->>MEM: save_memory("Docker concept documented at concepts/docker-containers.md")
-    BOB->>FS: read/update docs/knowledge-base/INDEX.md
+    BOB->>FS: read/update docs/knowledge-base/index.md
     BOB-->>U: "Created concepts/docker-containers.md · INDEX.md updated"
 ```
 
@@ -487,7 +487,7 @@ standard resume prompts; `INDEX.md` provides the current document registry.
 `scripts/start-kb.sh` is the recommended daily-driver for starting a KB session. It
 verifies the KB is initialised, prints the document count, and then `exec`s
 `bob --chat-mode=knowledge-manager`. See
-[`docs/USAGE.md §0`](USAGE.md#0-starting-a-session) for all activation paths and the
+[`docs/usage.md §0`](USAGE.md#0-starting-a-session) for all activation paths and the
 standard resume prompt.
 
 ### Version control compatibility
@@ -563,7 +563,7 @@ the KB files exist but are just static Markdown.
 
 ### KM-ADR-005: INDEX.md as auto-loaded context
 
-**Decision:** `settings.json` declares `docs/knowledge-base/INDEX.md` as a context
+**Decision:** `settings.json` declares `docs/knowledge-base/index.md` as a context
 file that Bob Shell loads at every session start.  
 **Context:** Without the index in context, Bob would need to search the filesystem at
 the start of every query to know what documents exist.  
@@ -625,5 +625,5 @@ A stale `INDEX.md` degrades query quality.
 ---
 
 *Authoritative architecture document for the Bob Shell Knowledge Manager component.*  
-*Python token-optimization system: see [`docs/architecture/ARCHITECTURE.md`](architecture/ARCHITECTURE.md).*  
+*Python token-optimization system: see [`docs/architecture/architecture.md`](architecture/ARCHITECTURE.md).*  
 *Maintained by: Architecture Team · Last reviewed: 2026-07-14*

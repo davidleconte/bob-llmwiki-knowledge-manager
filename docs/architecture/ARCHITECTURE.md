@@ -12,7 +12,7 @@ records live in [`../adr/`](../adr/); the generated API reference in
 
 > The repository also ships a separate Bash product, the **Bob Shell Knowledge
 > Manager** (~500 lines), whose architecture is documented in
-> [`docs/kb-manager/ARCHITECTURE.md`](../kb-manager/ARCHITECTURE.md). The two share
+> [`docs/kb-manager/architecture.md`](../kb-manager/ARCHITECTURE.md). The two share
 > a repo but are not one system. This document is about the Python
 > token-optimization system (`src/`).
 
@@ -77,7 +77,7 @@ Not shown, deliberately separate:
   `src/delegation/pipeline.py` is the integration surface: it runs 6 agents in
   parallel (`DelegationCoordinator`), compresses each report through `TokenOptimizer`,
   and writes KB research documents to `output_dir`. Accessed via `bob-optimize analyze`.
-  Coverage floor 70%; measured 84% (see [`../../src/delegation/EXPERIMENTAL.md`](../../src/delegation/EXPERIMENTAL.md)).
+  Coverage floor 70%; measured 84% (see [`../../src/delegation/experimental.md`](../../src/delegation/experimental.md)).
 - **`src/embeddings/`** — the KB persistent embedding index subsystem
   (`MarkdownChunker`, `PersistentEmbeddingIndex`, `KBIndexer`). Opt-in, not on
   the `optimize()` request path; injected into `KnowledgeBaseQuery` when a

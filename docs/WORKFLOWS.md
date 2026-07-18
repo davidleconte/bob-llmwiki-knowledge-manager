@@ -8,7 +8,7 @@
 | **Scope** | End-to-end operational workflows for the Bob Shell LLM Wiki Knowledge Manager — covering document creation, project onboarding, KB maintenance, and research documentation. Each workflow is grounded in the system's actual mode configuration ([`config/custom_modes.yaml`](../config/custom_modes.yaml)) and supporting scripts ([`scripts/validate-kb.sh`](../scripts/validate-kb.sh), [`scripts/export-kb.sh`](../scripts/export-kb.sh)). |
 
 > **Scope note — Bob Shell CLI:** These workflows are written for Bob Shell CLI (`bob --chat-mode=knowledge-manager`).
-> **Bob IDE users:** activate via the mode picker (📚 Knowledge Manager) and see [docs/BOB-IDE-GUIDE.md](BOB-IDE-GUIDE.md).
+> **Bob IDE users:** activate via the mode picker (🧠 Mnemox Knowledge Builder) and see [docs/bob-ide-guide.md](BOB-IDE-GUIDE.md).
 > Key difference: `save_memory` is **not available** in Bob IDE — all persistence is via `write_file` to `docs/knowledge-base/`.
 
 ---
@@ -73,7 +73,7 @@ The operator opens Bob Shell and wants to research a topic, capture new knowledg
 |---|-----------|
 | P1 | Bob Shell is installed and the `knowledge-manager` custom mode is available in `config/custom_modes.yaml` |
 | P2 | `docs/knowledge-base/` exists with the four standard subdirectories (`concepts/`, `guides/`, `references/`, `research/`) |
-| P3 | `docs/knowledge-base/INDEX.md` exists |
+| P3 | `docs/knowledge-base/index.md` exists |
 | P4 | The operator has activated the `knowledge-manager` mode in the Bob Shell UI |
 
 ### End-to-End Flowchart
@@ -404,7 +404,7 @@ The table below expands each step with what Bob does internally and what the ope
 
 | | Detail |
 |--|--------|
-| **What Bob does** | Opens `docs/knowledge-base/INDEX.md`, adds an entry for the new document under the correct category heading, and increments the Statistics counter. |
+| **What Bob does** | Opens `docs/knowledge-base/index.md`, adds an entry for the new document under the correct category heading, and increments the Statistics counter. |
 | **What the operator sees** | Bob confirms: *"INDEX.md updated — total documents: N."* The INDEX.md now lists the new document with a relative link. |
 | **Anti-pattern** | Skipping this step causes INDEX.md drift — the index becomes stale and search-by-index fails. See §7, Anti-pattern 2. |
 | **Verification** | Run `scripts/validate-kb.sh` at any time to confirm INDEX.md completeness and check for broken links. |
@@ -556,7 +556,7 @@ A Bob Shell tool call that performs a full-text search across files in the works
 ---
 
 **INDEX.md**
-A special Markdown file located at `docs/knowledge-base/INDEX.md` that serves as the human-readable navigation hub for the entire KB. It contains a Quick Navigation section (links to the four category directories), an All Documents section (one entry per document, grouped by category), and a Statistics block (document counts). Examples:  [`examples/personal-wiki/docs/knowledge-base/INDEX.md`](../examples/personal-wiki/docs/knowledge-base/INDEX.md) and [`examples/software-project/docs/knowledge-base/INDEX.md`](../examples/software-project/docs/knowledge-base/INDEX.md). INDEX.md is updated in Step 7 of every document creation workflow.
+A special Markdown file located at `docs/knowledge-base/index.md` that serves as the human-readable navigation hub for the entire KB. It contains a Quick Navigation section (links to the four category directories), an All Documents section (one entry per document, grouped by category), and a Statistics block (document counts). Examples:  [`examples/personal-wiki/docs/knowledge-base/index.md`](../examples/personal-wiki/docs/knowledge-base/index.md) and [`examples/software-project/docs/knowledge-base/index.md`](../examples/software-project/docs/knowledge-base/index.md). INDEX.md is updated in Step 7 of every document creation workflow.
 
 ---
 

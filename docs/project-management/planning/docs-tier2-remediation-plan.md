@@ -28,7 +28,7 @@ File 1: `docs/knowledge-base/guides/token-optimizer-quick-install.md:179`
 - This contradicts the grade and misrepresents "60% production ready" when STATUS.md
   says Beta maturity (not a % figure)
 
-File 2: `docs/REPOSITORY_ANALYSIS_WORKFLOW.md`
+File 2: `docs/repository-analysis-workflow.md`
 - No retraction banner, no frontmatter
 - Created 2026-07-12; references "Token Optimization System (caching & optimization)"
   alongside KB Manager as two integrated tools — implies they are integrated (they are not)
@@ -44,7 +44,7 @@ File 2: `docs/REPOSITORY_ANALYSIS_WORKFLOW.md`
 1. Read `docs/knowledge-base/guides/token-optimizer-quick-install.md:170-200` fully.
 2. Update lines 177-185 to replace the stale C+ grade with: link to STATUS.md for
    current grade; remove "60% production readiness" (not a metric STATUS.md uses).
-3. Read `docs/REPOSITORY_ANALYSIS_WORKFLOW.md` fully.
+3. Read `docs/repository-analysis-workflow.md` fully.
 4. Add YAML frontmatter (title, date: 2026-07-12, status: reference, category: guide).
 5. Add a "**Note:**" callout near line 12 clarifying the two systems are NOT integrated
    (they work together but remain independent), consistent with docs/README.md.
@@ -53,7 +53,7 @@ File 2: `docs/REPOSITORY_ANALYSIS_WORKFLOW.md`
 
 **Relevant Context:**
 - `docs/knowledge-base/guides/token-optimizer-quick-install.md:170-185` — stale status
-- `docs/REPOSITORY_ANALYSIS_WORKFLOW.md:1-20` — missing frontmatter + integration claim
+- `docs/repository-analysis-workflow.md:1-20` — missing frontmatter + integration claim
 - `STATUS.md` — authoritative grade
 - `docs/README.md` — canonical dual-system framing
 
@@ -116,9 +116,9 @@ documents harder to navigate and inconsistent with the knowledge-base/ standard.
 Files that need frontmatter added:
 
 **docs/ root (3 files):**
-- `docs/TOKEN_SAVINGS_TEST_PLAN.md` — historical, needs `status: superseded`
-- `docs/WORKFLOW_AUTOMATION_PLAN.md` — historical, needs `status: historical`
-- `docs/REPOSITORY_ANALYSIS_WORKFLOW.md` — reference guide (handled in ST-1 if
+- `docs/token-savings-test-plan.md` — historical, needs `status: superseded`
+- `docs/workflow-automation-plan.md` — historical, needs `status: historical`
+- `docs/repository-analysis-workflow.md` — reference guide (handled in ST-1 if
   not already done there)
 
 **docs/project-management/phases/ (5 files):**
@@ -162,7 +162,7 @@ Files that need frontmatter added:
 1. For each file: read lines 1-5 to determine if frontmatter already present and
    what existing header line is.
 2. Insert frontmatter block before line 1. Do not remove or reorder existing content.
-3. For `docs/TOKEN_SAVINGS_TEST_PLAN.md`: add `status: superseded`,
+3. For `docs/token-savings-test-plan.md`: add `status: superseded`,
    `superseded_by: evaluation/results/validation-2026-07-14/`
 4. For all `project-management/phases/*`: add `status: historical`,
    `superseded_by: docs/knowledge-base/research/audit-2026-07-14-signoff.md`

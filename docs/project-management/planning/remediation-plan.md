@@ -27,7 +27,7 @@ The Phase-8 adversarial sign-off audit (NO-GO verdict, grade B+/A−) identified
 1. `yourusername` placeholder URLs survive in several live docs (not just `INSTALLATION.md`)
 2. `README2.md` and `README3.md` are duplicate root files that should not exist
 3. `STATUS.md` maturity table still shows `≈ D‑` grade, which is stale vs. the verified B+/A− re-grade
-4. `docs/knowledge-base/INDEX.md:136` contains a `yourusername` link
+4. `docs/knowledge-base/index.md:136` contains a `yourusername` link
 5. `docs/knowledge-base/guides/setup-token-optimization.md:24` contains a `yourusername` clone URL
 6. `docs/BOOK_CHAPTER_08.md` lines 38, 426, 428 contain `yourusername` URLs
 7. The 82-file grep list for `68.96|89.3%|91.80` reveals many files now carry banners or are frozen research — but it is worth verifying the gate works correctly against a sample
@@ -49,11 +49,11 @@ The correct real GitHub URL (from `pyproject.toml:54`) is:
 The `pyproject.toml` was corrected in a prior phase to use `davidleconte` as the GitHub owner. Several documentation files still contain the old `yourusername` placeholder. These are the only live surfaces remaining with broken links.
 
 **Affected files (verified by grep):**
-- `docs/INSTALLATION.md` — lines 18, 189
+- `docs/installation.md` — lines 18, 189
 - `docs/BOOK_CHAPTER_08.md` — lines 38, 426, 428
 - `docs/knowledge-base/guides/setup-token-optimization.md` — line 24 (clone URL)
 - `docs/knowledge-base/guides/token-optimizer-quick-install.md` — line 27
-- `docs/knowledge-base/INDEX.md` — line 136 (footer link)
+- `docs/knowledge-base/index.md` — line 136 (footer link)
 
 **Expected Outcomes**  
 - `grep -r "yourusername" --include="*.md" .` (excluding `.claude/`) returns zero matches
@@ -91,7 +91,7 @@ The `pyproject.toml` was corrected in a prior phase to use `davidleconte` as the
 **Relevant Context**
 - Both files are listed as untracked in the git status snapshot at the start of this conversation
 - `README.md` is the authoritative file (declared in `AGENTS.md`, `pyproject.toml:9`, and `check_status_consistency.py`)
-- `docs/knowledge-base/INDEX.md:20` links to `README3.md` — this must be updated before deletion
+- `docs/knowledge-base/index.md:20` links to `README3.md` — this must be updated before deletion
 
 ---
 

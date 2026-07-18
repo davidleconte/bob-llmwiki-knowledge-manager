@@ -90,7 +90,7 @@ environment for your workflow.
 | Dimension | Bob Shell CLI | Bob IDE |
 |---|---|---|
 | Installation | `scripts/install.sh` → `~/.bob/custom_modes.yaml` | Open workspace — zero steps |
-| Mode activation | `bob --chat-mode=knowledge-manager` | Mode picker → 📚 Knowledge Manager |
+| Mode activation | `bob --chat-mode=knowledge-manager` | Mode picker → 🧠 Mnemox Knowledge Builder |
 | Config file | `~/.bob/custom_modes.yaml` | `.bob/custom_modes.yaml` (workspace) |
 | Shell group name | `command` | `execute` |
 | Web group name | `browser` | not supported |

@@ -225,7 +225,7 @@ def build_cache(config: CacheConfig) -> MultiLevelCache:
 - `src/facade.py` — TokenOptimizer implementation
 - `src/factory.py` — builder functions
 - `src/config/schema.py` — ConfigSchema, CacheConfig, OptimizerConfig, MonitoringConfig
-- `docs/architecture/ARCHITECTURE.md §3` — sequence diagram showing optimize() path through facade
+- `docs/architecture/architecture.md §3` — sequence diagram showing optimize() path through facade
 - ADR-002: Caching strategy (what the factory builds for the cache)
 - ADR-011: Monitoring (health checks wired by the facade)
 - `docs/knowledge-base/research/architecture-audit-mece-2026-07-14.md` — audit finding that prompted this ADR

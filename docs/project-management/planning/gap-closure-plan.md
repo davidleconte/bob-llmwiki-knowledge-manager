@@ -79,7 +79,7 @@ between validation and open. This is explicitly a LOW residual in the local-CLI 
 This is a **documentation-only** change (no code changes).
 
 **Expected Outcomes:**
-- `docs/security/THREAT_MODEL.md` residual register gains a 4th entry explicitly named
+- `docs/security/threat-model.md` residual register gains a 4th entry explicitly named
   "TOCTOU: check-then-use window in path validation".
 - The entry names the exact window (`resolve_within` → `.exists()` → file open), gives the
   severity in local-CLI context (Low — operator owns the filesystem), and notes the hosted
@@ -91,14 +91,14 @@ This is a **documentation-only** change (no code changes).
 2. Read `src/tools/batch_file_reader.py`, `src/tools/component_analyzer.py`,
    `src/tools/kb_query.py` to identify where the three-step pattern (validate → exists →
    open) occurs.
-3. Append a 4th residual entry to `docs/security/THREAT_MODEL.md §Residual risks`,
+3. Append a 4th residual entry to `docs/security/threat-model.md §Residual risks`,
    citing the specific file:line for each step.
 4. Update `STATUS.md:12` roadmap entry to mark Gap G closed.
 5. Run: `python3 scripts/check_status_consistency.py` — must pass.
 6. Run all gate scripts to confirm green.
 
 **Relevant Context:**
-- `docs/security/THREAT_MODEL.md:135-158` — residual risks section (3 current entries)
+- `docs/security/threat-model.md:135-158` — residual risks section (3 current entries)
 - `src/tools/safe_paths.py` — `resolve_within()` implementation
 - `src/tools/batch_file_reader.py` — pattern: `resolve_within` → `exists()` → `open()`
 
@@ -114,7 +114,7 @@ This is a **documentation-only** change (no code changes).
 > "Dimension 4 is held at B+ because `ARCHITECTURE.md:74` still incorrectly states
 > `src/tools/` is 'excluded from coverage gates'"
 
-That claim is now **false** — `docs/architecture/ARCHITECTURE.md:73-74` currently reads:
+That claim is now **false** — `docs/architecture/architecture.md:73-74` currently reads:
 > "Included in the coverage and type gates with a per-package floor of 85%"
 
 The exclusion claim was corrected (last session). The frozen audit note needs an addendum so
@@ -132,7 +132,7 @@ frozen as-of the original audit).
 **Todo List:**
 1. Read `docs/knowledge-base/research/architecture-audit-mece-2026-07-14.md:370-415` to
    see the exact existing post-remediation note structure.
-2. Read `docs/architecture/ARCHITECTURE.md:70-78` to confirm line 74's current content.
+2. Read `docs/architecture/architecture.md:70-78` to confirm line 74's current content.
 3. Append a second addendum block (clearly labelled with a new date/phase) below the
    existing post-remediation note, noting: (a) `ARCHITECTURE.md:74` was corrected, (b)
    Dimension 4 moves from B+ to A, (c) new estimated weighted score ~3.75 (A).
@@ -140,7 +140,7 @@ frozen as-of the original audit).
 
 **Relevant Context:**
 - `docs/knowledge-base/research/architecture-audit-mece-2026-07-14.md:393-401` — the outdated note
-- `docs/architecture/ARCHITECTURE.md:70-78` — the corrected line
+- `docs/architecture/architecture.md:70-78` — the corrected line
 
 **Status:** [x] closed — ARCHITECTURE.md:74 corrected; post-remediation addendum added to architecture-audit doc.
 

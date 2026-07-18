@@ -78,7 +78,7 @@ The `sbom` job (lines 215–237) already installs `uv` separately for lock opera
 **Status:** `[ ] pending`
 
 **Intent**  
-`README2.md` and `README3.md` at the repo root are orphaned duplicates. `README2.md` is an alternative "dual-system" framing; `README3.md` is a near-copy of `README.md`. Neither is referenced from any live index (the `docs/knowledge-base/INDEX.md` link was removed in a prior session). `README.md` is the declared authoritative file per `pyproject.toml:9`, `AGENTS.md`, and `check_status_consistency.py`. These files should not exist.
+`README2.md` and `README3.md` at the repo root are orphaned duplicates. `README2.md` is an alternative "dual-system" framing; `README3.md` is a near-copy of `README.md`. Neither is referenced from any live index (the `docs/knowledge-base/index.md` link was removed in a prior session). `README.md` is the declared authoritative file per `pyproject.toml:9`, `AGENTS.md`, and `check_status_consistency.py`. These files should not exist.
 
 **Expected Outcomes**
 - `ls *.md` at repo root shows only `README.md`, `AGENTS.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `GOVERNANCE.md`, `SECURITY.md`, `SUPPORT.md`, `CODE_OF_CONDUCT.md`, `LICENSE` (and `STATUS.md`, `remediation-plan.md`, `a-minus-to-a-plan.md`)
@@ -91,7 +91,7 @@ The `sbom` job (lines 215–237) already installs `uv` separately for lock opera
 
 **Relevant Context**
 - Both files were untracked in the original git status snapshot (not committed; safe to delete)
-- `docs/knowledge-base/INDEX.md` link to `README3.md` was already removed in a prior session
+- `docs/knowledge-base/index.md` link to `README3.md` was already removed in a prior session
 - `docs/knowledge-base/research/full-codebase-review-2026-07-14.md:182` mentions the broken clone URL in `README2`/`README3` as a historical audit note — this is a frozen research doc, not a live link
 
 ---
@@ -139,13 +139,13 @@ The `docs/` root currently contains 35 files. Only 7 are the live Diátaxis spin
 | `docs/README.md` | 68 | `MECE_FRAMEWORK.md` → `archive/MECE_FRAMEWORK.md` |
 | `docs/README.md` | 68 | `COMPARISON.md` → `archive/COMPARISON.md` |
 | `docs/README.md` | 70 | `BOOK_TABLE_OF_CONTENTS.md` → `archive/BOOK_TABLE_OF_CONTENTS.md` |
-| `docs/INDEX.md` | 46–49 | `PHASE1/2/3/4_IMPLEMENTATION_COMPLETE.md` → `archive/PHASE*.md` |
+| `docs/index.md` | 46–49 | `PHASE1/2/3/4_IMPLEMENTATION_COMPLETE.md` → `archive/PHASE*.md` |
 | `docs/knowledge-base/concepts/token-optimization.md` | 293 | `../../DESIGN_DOCUMENT.md` → `../../archive/DESIGN_DOCUMENT.md` |
 
 **Expected Outcomes**
 - `ls docs/*.md` shows only the 13 live files listed above
 - `docs/archive/` exists and contains 22 archived files
-- All 4 links in `docs/README.md` and 4 links in `docs/INDEX.md` and 1 link in `token-optimization.md` are updated
+- All 4 links in `docs/README.md` and 4 links in `docs/index.md` and 1 link in `token-optimization.md` are updated
 - `python3 scripts/generate_api_docs.py --check` still passes (API docs are in `docs/api/`, unaffected)
 - `python3 scripts/check_savings_claims.py` still passes (all archived files already have banners)
 - `python3 scripts/check_status_consistency.py` still passes
@@ -154,7 +154,7 @@ The `docs/` root currently contains 35 files. Only 7 are the live Diátaxis spin
 1. Create `docs/archive/` directory by writing a `docs/archive/README.md` marker file (explains what archive contains)
 2. Move the 22 files (use shell `mv` or write_file equivalent — agent mode has shell access)
 3. Update the 4 links in `docs/README.md` (lines 68, 70)
-4. Update the 4 links in `docs/INDEX.md` (lines 46–49)
+4. Update the 4 links in `docs/index.md` (lines 46–49)
 5. Update the 1 link in `docs/knowledge-base/concepts/token-optimization.md` (line 293)
 6. Run `python3 scripts/check_savings_claims.py`, `python3 scripts/check_status_consistency.py`, and `python3 scripts/generate_api_docs.py --check`
 

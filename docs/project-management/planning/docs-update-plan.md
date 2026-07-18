@@ -3,7 +3,7 @@
 ## Scope Decisions (confirmed 2026-07-16)
 
 - **`docs/COMPARISON.md`** — included for completeness check (Sub-Task 8).
-- **New document** — `docs/BOB-IDE-GUIDE.md` to be created as the canonical Bob IDE
+- **New document** — `docs/bob-ide-guide.md` to be created as the canonical Bob IDE
   reference. Sub-Task 1 (README.md) links to it; Sub-Tasks 3–5 cross-reference it
   rather than duplicating IDE content inline.
 
@@ -60,7 +60,7 @@ must reflect this.
 **Expected outcomes:**
 - README has a clear "Supported targets" section or table distinguishing Bob Shell CLI and Bob IDE.
 - `save_memory` is either removed or annotated as Bob Shell CLI-only.
-- Bob IDE activation (`mode picker → 📚 Knowledge Manager`) is documented alongside
+- Bob IDE activation (`mode picker → 🧠 Mnemox Knowledge Builder`) is documented alongside
   `bob --chat-mode=knowledge-manager`.
 - `.bob/skills/knowledge-manager/SKILL.md` is mentioned as the lazy-load skill for IDE.
 - No broken cross-references introduced.
@@ -98,7 +98,7 @@ knowledge-manager session.
 **Expected outcomes:**
 - Section has two clearly labelled sub-sections: "Bob Shell CLI" and "Bob IDE".
 - CLI sub-section: `scripts/install.sh`, `bob --chat-mode=knowledge-manager`.
-- IDE sub-section: open workspace → mode picker → `📚 Knowledge Manager`; no install step;
+- IDE sub-section: open workspace → mode picker → `🧠 Mnemox Knowledge Builder`; no install step;
   reference to `.bob/custom_modes.yaml` and `.bob/skills/knowledge-manager/SKILL.md`.
 - Any `save_memory` references are annotated CLI-only.
 - The `scripts/init-project.sh` heredoc fix is not explicitly documented here (it is an
@@ -114,7 +114,7 @@ knowledge-manager session.
 
 ---
 
-## Sub-Task 3 — docs/QUICK_START.md: Add Bob IDE activation path
+## Sub-Task 3 — docs/quick-start.md: Add Bob IDE activation path
 
 **Status:** `[x] done`
 
@@ -125,7 +125,7 @@ installation and a different activation method. The flowchart and Step 1 section
 branch explicitly.
 
 **Relevant context:**
-- File: `docs/QUICK_START.md`
+- File: `docs/quick-start.md`
 - Mermaid flowchart: lines ~30-51 (flowchart TD Start → Q1 → S1 …)
 - §3 "Step 1: Install the mode (~2 min)": CLI-only
 - §7 Troubleshooting: CLI-only
@@ -135,7 +135,7 @@ branch explicitly.
 - Prerequisites table gains a "Bob IDE" row (VS Code / Cursor / Bob IDE extension).
 - Flowchart branches at start: "Using Bob Shell CLI?" vs "Using Bob IDE?".
 - Step 1 has a "Bob IDE users" callout box: "No install needed. Open the workspace →
-  mode picker → 📚 Knowledge Manager. Then skip to Step 3."
+  mode picker → 🧠 Mnemox Knowledge Builder. Then skip to Step 3."
 - Troubleshooting section adds a "Bob IDE" sub-section with the mode-picker-not-showing fix
   (reload config or trivial edit of `.bob/custom_modes.yaml`).
 - No existing CLI content removed.
@@ -149,7 +149,7 @@ branch explicitly.
 
 ---
 
-## Sub-Task 4 — docs/INSTALLATION.md: Add Bob IDE installation section
+## Sub-Task 4 — docs/installation.md: Add Bob IDE installation section
 
 **Status:** `[x] done`
 
@@ -160,7 +160,7 @@ attempt to run CLI scripts that are irrelevant to their workflow. A dedicated Bo
 section is needed, including scope clarification at the top.
 
 **Relevant context:**
-- File: `docs/INSTALLATION.md`
+- File: `docs/installation.md`
 - §1 scope header: L1-6
 - Main install procedure: L32-50
 - Verification steps: L206-209
@@ -172,7 +172,7 @@ section is needed, including scope clarification at the top.
 - Scope header explicitly states: "Bob Shell CLI installation. For Bob IDE, see §X."
 - New section "Bob IDE Installation" documents: open workspace, mode picker, `use_skill`,
   reference to `.bob/custom_modes.yaml` and `.bob/skills/knowledge-manager/SKILL.md`.
-- Verification steps section adds IDE verification (mode picker shows 📚 Knowledge Manager;
+- Verification steps section adds IDE verification (mode picker shows 🧠 Mnemox Knowledge Builder;
   four validation prompts from the validation plan).
 - `scripts/init-project.sh` usage instructions remain accurate (no `<< WORD` space in any
   documentation examples — but there were none; the fix was in the script itself).
@@ -186,7 +186,7 @@ section is needed, including scope clarification at the top.
 
 ---
 
-## Sub-Task 5 — docs/USAGE.md: Add Bob IDE activation path and fix save_memory references
+## Sub-Task 5 — docs/usage.md: Add Bob IDE activation path and fix save_memory references
 
 **Status:** `[x] done`
 
@@ -197,7 +197,7 @@ environment and will believe `save_memory` is available to them. This is the hig
 practical guide; the gap is HIGH priority.
 
 **Relevant context:**
-- File: `docs/USAGE.md`
+- File: `docs/usage.md`
 - Paths A–D: lines ~37-87
 - `save_memory` mentions: L98, L140, and elsewhere
 - "Tool bindings" paragraph: L113-114
@@ -218,7 +218,7 @@ practical guide; the gap is HIGH priority.
 
 ---
 
-## Sub-Task 6 — docs/WORKFLOWS.md and docs/CUSTOMIZATION.md: Scope annotations
+## Sub-Task 6 — docs/workflows.md and docs/customization.md: Scope annotations
 
 **Status:** `[x] done`
 
@@ -228,8 +228,8 @@ that need scope annotations. Neither requires structural changes — only target
 clarifications and a scope note at the top of each.
 
 **Relevant context:**
-- `docs/WORKFLOWS.md`: `save_memory` at L89, L199, L290, L382, L545; all workflows assume CLI.
-- `docs/CUSTOMIZATION.md`: scope header assumes CLI; resolution chain diagram missing IDE level.
+- `docs/workflows.md`: `save_memory` at L89, L199, L290, L382, L545; all workflows assume CLI.
+- `docs/customization.md`: scope header assumes CLI; resolution chain diagram missing IDE level.
 
 **Expected outcomes:**
 - Each file has a scope note in its header: "These instructions apply to Bob Shell CLI.
@@ -240,37 +240,37 @@ clarifications and a scope note at the top of each.
   `.bob/custom_modes.yaml` being the IDE equivalent.
 
 **Todo list:**
-- [ ] Add scope note to top of `docs/WORKFLOWS.md`.
-- [ ] Annotate all `save_memory` references in `docs/WORKFLOWS.md` as CLI-only.
-- [ ] Add scope note to top of `docs/CUSTOMIZATION.md`.
-- [ ] Add IDE note to resolution chain diagram in `docs/CUSTOMIZATION.md`.
+- [ ] Add scope note to top of `docs/workflows.md`.
+- [ ] Annotate all `save_memory` references in `docs/workflows.md` as CLI-only.
+- [ ] Add scope note to top of `docs/customization.md`.
+- [ ] Add IDE note to resolution chain diagram in `docs/customization.md`.
 
 ---
 
-## Sub-Task 7 — docs/ARCHITECTURE.md and docs/INDEX.md: Low-priority cross-reference updates
+## Sub-Task 7 — docs/ARCHITECTURE.md and docs/index.md: Low-priority cross-reference updates
 
 **Status:** `[x] done`
 
 **Intent:**
 These files need minor additions only: a cross-reference to the new `.bob/skills/`
-artefact in ARCHITECTURE.md, and a navigation note for IDE users in docs/INDEX.md.
+artefact in ARCHITECTURE.md, and a navigation note for IDE users in docs/index.md.
 
 **Relevant context:**
 - `docs/ARCHITECTURE.md`: L5-8 scope, L84 memory constraint.
-- `docs/INDEX.md`: L1-6 navigation header.
+- `docs/index.md`: L1-6 navigation header.
 
 **Expected outcomes:**
 - ARCHITECTURE.md scope section adds: "Bob IDE-compatible implementation:
   `.bob/skills/knowledge-manager/SKILL.md`."
 - ARCHITECTURE.md memory constraint (L84) notes: "CLI: `save_memory` tool; IDE:
   file persistence only."
-- docs/INDEX.md navigation header adds a sentence: "Bob IDE users: the Knowledge Manager
+- docs/index.md navigation header adds a sentence: "Bob IDE users: the Knowledge Manager
   mode and skill are in `.bob/custom_modes.yaml` and `.bob/skills/knowledge-manager/SKILL.md`."
 
 **Todo list:**
 - [ ] Add IDE cross-reference to scope section in `docs/ARCHITECTURE.md`.
 - [ ] Update memory constraint note in `docs/ARCHITECTURE.md`.
-- [ ] Add IDE navigation sentence to `docs/INDEX.md`.
+- [ ] Add IDE navigation sentence to `docs/index.md`.
 
 
 ## Sub-Task 8 — docs/COMPARISON.md: Completeness check and CLI vs IDE comparison
@@ -292,7 +292,7 @@ currently contains.
 | Dimension | Bob Shell CLI | Bob IDE |
 |---|---|---|
 | Installation | `scripts/install.sh` → `~/.bob/custom_modes.yaml` | Open workspace — zero steps |
-| Mode activation | `bob --chat-mode=knowledge-manager` | Mode picker → 📚 Knowledge Manager |
+| Mode activation | `bob --chat-mode=knowledge-manager` | Mode picker → 🧠 Mnemox Knowledge Builder |
 | Shell group name | `command` | `execute` |
 | Web group name | `browser` | not supported |
 | Skill lazy-load | not supported | `skill` group + `use_skill()` |
@@ -321,7 +321,7 @@ preserved unchanged.
 
 ---
 
-## Sub-Task 9 — docs/BOB-IDE-GUIDE.md: Create canonical Bob IDE reference document
+## Sub-Task 9 — docs/bob-ide-guide.md: Create canonical Bob IDE reference document
 
 **Status:** `[x] done`
 
@@ -332,23 +332,23 @@ IDE equivalent of QUICK_START.md + INSTALLATION.md combined, written specificall
 the Bob IDE context.
 
 **Relevant context:**
-- New file: `docs/BOB-IDE-GUIDE.md`
+- New file: `docs/bob-ide-guide.md`
 - All facts below are machine-verified in this session on Bob IDE 1.121.0+bob2.0.1:
   - Workspace modes: `.bob/custom_modes.yaml` (appended — 68+2 modes, hot-reload)
   - Groups: `execute`, `skill` (not `command`/`browser`)
   - Skill: `.bob/skills/knowledge-manager/SKILL.md` (name=knowledge-manager, 9 triggers)
-  - Mode picker: bottom-left status bar, shows 📚 Knowledge Manager
+  - Mode picker: bottom-left status bar, shows 🧠 Mnemox Knowledge Builder
   - Validation: T2-A (shell), T2-D (read), T4-D (customInstructions) all confirmed pass
   - `save_memory` not available; file persistence via `write_file` only
   - MCP errors at startup (external-llm, swift-info, carbon-mcp, techzone, atlassian)
     are pre-existing and do not affect knowledge-manager mode operation
 
 **Expected outcomes:**
-- `docs/BOB-IDE-GUIDE.md` exists with the following sections:
+- `docs/bob-ide-guide.md` exists with the following sections:
   1. Overview — what Bob IDE mode support provides vs Bob Shell CLI
   2. Prerequisites — Bob IDE version, workspace requirements
   3. Installation — zero-step; confirm `.bob/custom_modes.yaml` is present
-  4. Activation — mode picker location, scrolling to 📚 Knowledge Manager
+  4. Activation — mode picker location, scrolling to 🧠 Mnemox Knowledge Builder
   5. Tool groups — `execute`, `skill`, `read`, `edit[\.md$]` and what each enables
   6. Skill activation — `use_skill("knowledge-manager")`, when to call it, what it loads
   7. Persistence — no `save_memory`; write to `docs/knowledge-base/`; commit to git
@@ -360,7 +360,7 @@ the Bob IDE context.
 - Cross-references to README.md, QUICK_START.md, and INSTALLATION.md are included.
 
 **Todo list:**
-- [ ] Create `docs/BOB-IDE-GUIDE.md` with all 10 sections above.
+- [ ] Create `docs/bob-ide-guide.md` with all 10 sections above.
 - [ ] Use only machine-verified facts (no claims about untested behaviour).
 - [ ] Add cross-reference from this file back to QUICK_START.md and INSTALLATION.md.
 - [ ] Ensure README.md Sub-Task 1 link target matches the filename created here.
@@ -379,7 +379,7 @@ These rules must hold across every file touched. Check each before marking a sub
 | Terminology | "Bob Shell CLI" for the terminal binary; "Bob IDE" for VS Code/Cursor extension |
 | Group names | CLI files: `command`/`browser`; IDE files: `execute`/`skill` |
 | save_memory | Never presented as available in Bob IDE; always annotated CLI-only |
-| Activation | CLI: `bob --chat-mode=knowledge-manager`; IDE: mode picker → 📚 Knowledge Manager |
+| Activation | CLI: `bob --chat-mode=knowledge-manager`; IDE: mode picker → 🧠 Mnemox Knowledge Builder |
 | Skill reference | `.bob/skills/knowledge-manager/SKILL.md` referenced wherever IDE workflow is described |
 | No broken links | Every internal `[text](path)` link verified to resolve after edits |
 | Code blocks tested | No new code block added unless the command has been verified in the session |
@@ -416,6 +416,6 @@ print('OK' if not issues else f'{len(issues)} broken links')
 "
 
 # 4. .bob/skills/knowledge-manager/SKILL.md is referenced in at least README and AGENTS.md
-grep -l "knowledge-manager/SKILL" README.md AGENTS.md docs/QUICK_START.md \
-  docs/INSTALLATION.md docs/USAGE.md
+grep -l "knowledge-manager/SKILL" README.md AGENTS.md docs/quick-start.md \
+  docs/installation.md docs/usage.md
 ```

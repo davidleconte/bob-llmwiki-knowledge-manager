@@ -117,4 +117,4 @@ raising above 0 in any production call path.
 
 - `src/cache/embeddings.py` — `EmbeddingGenerator(backend=...)`, `_try_load_minilm()`, `_embed_minilm()`
 - `pyproject.toml` — `[project.optional-dependencies] mlx = ["mlx-embeddings>=0.1"]`
-- `docs/architecture/ARCHITECTURE.md §5` — component description updated
+- `docs/architecture/architecture.md §5` — component description updated

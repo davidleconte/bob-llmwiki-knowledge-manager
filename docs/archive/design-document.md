@@ -17,7 +17,7 @@
 >   was **never built** (the same fabrication retracted in `docs/adr/012-security-model.md`).
 >   The **only** implemented control is path-traversal containment
 >   (`src/tools/safe_paths.resolve_within`). The canonical, code-grounded security
->   reference is **[`docs/security/THREAT_MODEL.md`](security/THREAT_MODEL.md)**;
+>   reference is **[`docs/security/threat-model.md`](security/THREAT_MODEL.md)**;
 >   §8.4 below is a **design aspiration, not a statement of what exists**.
 >
 > See `STATUS.md` and `CHANGELOG.md` for current, provenance-backed numbers.
@@ -2492,7 +2492,7 @@ See `docs/adr/` for complete ADR documentation.
 **System Context:**
 - README.md
 - docs/COMPARISON.md
-- docs/WORKFLOWS.md
+- docs/workflows.md
 - evaluation/HONEST_ASSESSMENT.md
 
 **Architecture:**
@@ -2506,14 +2506,14 @@ See `docs/adr/` for complete ADR documentation.
 - scripts/ (automation scripts)
 
 **Operations:**
-- docs/INSTALLATION.md
-- docs/QUICK_START.md
-- docs/CUSTOMIZATION.md
-- docs/MONITORING.md
+- docs/installation.md
+- docs/quick-start.md
+- docs/customization.md
+- docs/monitoring.md
 
 **Governance:**
 - CHANGELOG.md
-- docs/INDEX.md
+- docs/index.md
 - docs/project-management/
 
 ---

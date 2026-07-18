@@ -1,7 +1,7 @@
 # docs/ Tier-1 Remediation Plan
 
 **Goal:** Every document in `docs/` at the same Tier-1 institutional level as
-`docs/ARCHITECTURE.md` and `docs/architecture/ARCHITECTURE.md` (Grade A).
+`docs/ARCHITECTURE.md` and `docs/architecture/architecture.md` (Grade A).
 
 **Standard:** arc42 / ISO/IEC 42010 · Tier-1 Software Vendor bar.
 Each document must have:
@@ -17,10 +17,10 @@ Each document must have:
 
 **Already Grade A (no action):**
 - `docs/ARCHITECTURE.md` (Bob Shell KB Manager) — A
-- `docs/architecture/ARCHITECTURE.md` (Python token-optimizer) — A
+- `docs/architecture/architecture.md` (Python token-optimizer) — A
 
 **Already Grade A in its domain (no action):**
-- `docs/security/THREAT_MODEL.md` — A (narrow scope by design; exemplary)
+- `docs/security/threat-model.md` — A (narrow scope by design; exemplary)
 
 **Gates that must stay green after every sub-task:**
 - `scripts/check_status_consistency.py`
@@ -32,7 +32,7 @@ Each document must have:
 
 ---
 
-## Sub-Task 1 — Rewrite `docs/MONITORING.md` (B → A)
+## Sub-Task 1 — Rewrite `docs/monitoring.md` (B → A)
 
 **Status:** [ ] pending
 
@@ -55,7 +55,7 @@ not just *how* to use it.
 - Glossary of monitoring-specific terms
 
 **Todo List:**
-1. Read full `docs/MONITORING.md` (already done in research)
+1. Read full `docs/monitoring.md` (already done in research)
 2. Read `src/monitoring/` directory to understand all 4 components
 3. Read `src/monitoring/metrics.py`, `src/monitoring/logger.py`, `src/monitoring/health.py`, `src/monitoring/cost_tracker.py` for accurate citations
 4. Write context section: what the monitoring subsystem covers (logger, metrics, health, cost), what it does NOT cover (no APM, no distributed tracing, no alerting)
@@ -69,13 +69,13 @@ not just *how* to use it.
 12. Add glossary: Bobcoin, structured log event, health check, MetricsCollector, CostTracker
 
 **Relevant Context:**
-- Current file: `docs/MONITORING.md`
+- Current file: `docs/monitoring.md`
 - Source: `src/monitoring/` (logger.py, metrics.py, health.py, cost_tracker.py, cost_reporting.py)
-- Reference: `docs/architecture/ARCHITECTURE.md §5` (monitoring component description)
+- Reference: `docs/architecture/architecture.md §5` (monitoring component description)
 
 ---
 
-## Sub-Task 2 — Rewrite `docs/INSTALLATION.md` (C → A)
+## Sub-Task 2 — Rewrite `docs/installation.md` (C → A)
 
 **Status:** [ ] pending
 
@@ -110,13 +110,13 @@ pre/post states look like, what can go wrong at each step and why.
 11. Add glossary: Bob Shell config home, custom mode, knowledge-manager slug, pandoc
 
 **Relevant Context:**
-- Current file: `docs/INSTALLATION.md`
+- Current file: `docs/installation.md`
 - Source: `scripts/install.sh:1-48`, `scripts/init-project.sh:1-120`
 - Known bug: `init-project.sh` INDEX.md heredoc uses `$(date)` inside single quotes — does not expand
 
 ---
 
-## Sub-Task 3 — Rewrite `docs/QUICK_START.md` (C → A)
+## Sub-Task 3 — Rewrite `docs/quick-start.md` (C → A)
 
 **Status:** [ ] pending
 
@@ -149,13 +149,13 @@ provides verifiable success criteria at every stage.
 9. Add "Next steps" with correct links (no dead links)
 
 **Relevant Context:**
-- Current file: `docs/QUICK_START.md`
+- Current file: `docs/quick-start.md`
 - Source: `scripts/install.sh`, `scripts/init-project.sh`, `scripts/validate-kb.sh`
 - Stale link to remove: `PHASE3_IMPLEMENTATION_COMPLETE.md`
 
 ---
 
-## Sub-Task 4 — Rewrite `docs/USAGE.md` (C → A)
+## Sub-Task 4 — Rewrite `docs/usage.md` (C → A)
 
 **Status:** [ ] pending
 
@@ -180,7 +180,7 @@ key workflows.
 - Glossary of usage-specific terms
 
 **Todo List:**
-1. Read current `docs/USAGE.md` in full (already done in research)
+1. Read current `docs/usage.md` in full (already done in research)
 2. Write document-type decision tree flowchart (when concept vs guide vs reference vs research)
 3. Write "create document" sequence diagram (full 7-step mode workflow from `custom_modes.yaml:180-203`)
 4. Write "query KB" sequence diagram (2-path: memory recall first, then search_file_content)
@@ -192,13 +192,13 @@ key workflows.
 10. Add glossary: Bob mode, search_file_content, save_memory, INDEX.md, cross-reference, knowledge-manager workflow
 
 **Relevant Context:**
-- Current file: `docs/USAGE.md`
+- Current file: `docs/usage.md`
 - Mode instructions: `config/custom_modes.yaml:180-203` (the 7-step workflow)
 - Bob Shell built-ins: `save_memory`, `search_file_content`
 
 ---
 
-## Sub-Task 5 — Rewrite `docs/CUSTOMIZATION.md` (C → A)
+## Sub-Task 5 — Rewrite `docs/customization.md` (C → A)
 
 **Status:** [ ] pending
 
@@ -229,14 +229,14 @@ constraints exist, and what risks each customization introduces.
 8. Add risk register: naming convention drift, mode collision, template that breaks INDEX.md update, category that breaks validate-kb.sh
 
 **Relevant Context:**
-- Current file: `docs/CUSTOMIZATION.md`
+- Current file: `docs/customization.md`
 - Config: `config/custom_modes.yaml:158-211` (knowledge-manager mode entry)
 - Script assumptions: `scripts/validate-kb.sh:20-26` (hardcoded 4 category dirs)
 - Templates: `config/templates/`
 
 ---
 
-## Sub-Task 6 — Rewrite `docs/WORKFLOWS.md` (D → A)
+## Sub-Task 6 — Rewrite `docs/workflows.md` (D → A)
 
 **Status:** [ ] pending
 
@@ -258,7 +258,7 @@ when it goes wrong. With Mermaid flowcharts for each major workflow.
 - Risk register: workflow-level risks (incomplete research session, INDEX.md drift, search false-negatives)
 
 **Todo List:**
-1. Read current `docs/WORKFLOWS.md` in full (already done)
+1. Read current `docs/workflows.md` in full (already done)
 2. Define the 4 primary workflows: Morning Research, New Project Setup, KB Maintenance, Research Documentation
 3. Write "Morning Research Session" flowchart (start Bob → research → create doc → save memory → update index → commit)
 4. Write "New Project Onboarding" flowchart (init-project.sh → create architecture doc → create setup guide → create API reference → link all)
@@ -271,14 +271,14 @@ when it goes wrong. With Mermaid flowcharts for each major workflow.
 11. Add risk register: 4 workflow-level risks
 
 **Relevant Context:**
-- Current file: `docs/WORKFLOWS.md`
+- Current file: `docs/workflows.md`
 - Mode instructions: `config/custom_modes.yaml:180-203` (workflow steps)
 - Scripts used in workflows: `validate-kb.sh`, `export-kb.sh`
 - Examples: `examples/personal-wiki/`, `examples/research-project/`, `examples/software-project/`
 
 ---
 
-## Sub-Task 7 — Elevate `docs/MONITORING.md` context section to cover both systems (B → A)
+## Sub-Task 7 — Elevate `docs/monitoring.md` context section to cover both systems (B → A)
 
 **Status:** [ ] pending — depends on Sub-Task 1
 

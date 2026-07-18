@@ -32,11 +32,11 @@ next one begins.
 second, structural improvement last.
 
 ### Q2 — Location of `CONCURRENCY.md`
-**Decision:** `src/cache/CONCURRENCY.md` (co-located with the code it documents).
+**Decision:** `src/cache/concurrency.md` (co-located with the code it documents).
 Rationale: a contributor modifying `src/cache/` browses that directory in their
 editor. A file under `docs/` requires them to know to look there. The KB doc at
 `docs/knowledge-base/research/iterative-audit-lessons-2026-07.md` remains the
-narrative history; `src/cache/CONCURRENCY.md` is the operational reference.
+narrative history; `src/cache/concurrency.md` is the operational reference.
 
 ### Q3 — `CacheStatsSnapshot` dataclass: include or defer?
 **Decision: Include as Sub-Task 5.** Full rationale below.
@@ -222,7 +222,7 @@ query behind its flag.
 
 ---
 
-## Sub-Task 3 — Create `src/cache/CONCURRENCY.md`
+## Sub-Task 3 — Create `src/cache/concurrency.md`
 
 ### Intent
 
@@ -234,7 +234,7 @@ must live beside the code it documents.
 
 ### Expected Outcomes
 
-- `src/cache/CONCURRENCY.md` exists and is committed.
+- `src/cache/concurrency.md` exists and is committed.
 - The file contains: the lock inventory table, the lock-ordering rule, the snapshot
   pattern with a code example, and the complete 4-tier audit checklist verbatim from
   the KB doc.
@@ -243,7 +243,7 @@ must live beside the code it documents.
 
 ### Todo List
 
-1. Create `src/cache/CONCURRENCY.md` with the following sections in order:
+1. Create `src/cache/concurrency.md` with the following sections in order:
    - **Overview** — one paragraph stating this file is the in-tree concurrency
      reference for `src/cache/`; the KB doc is the narrative history.
    - **Lock Inventory** — a three-row table matching the one in the KB doc:
@@ -276,7 +276,7 @@ must live beside the code it documents.
   lines 192–220 (checklist) and lines 253–272 (lock-order and lock inventory)
 - **Source material:** `docs/knowledge-base/research/cache-race-fix-lessons-2026-07.md`
   lines 255–272 (lock ordering section)
-- **Destination:** `src/cache/CONCURRENCY.md` (does not yet exist; confirmed by
+- **Destination:** `src/cache/concurrency.md` (does not yet exist; confirmed by
   `ls src/cache/`)
 - **N-5 advisory comment** (the only in-code reference today) is at
   `src/cache/semantic_cache.py` lines 511–514 — the new doc supersedes it as
@@ -371,7 +371,7 @@ uv run mypy src/cache/
 - Zero new mypy errors (annotation-unchecked notes are acceptable)
 - `stats()["l3_hits"]` key present and correct (Sub-Task 1)
 - `contains()` with disabled flags returns correct result (Sub-Task 2)
-- `src/cache/CONCURRENCY.md` exists and renders correctly (Sub-Task 3)
+- `src/cache/concurrency.md` exists and renders correctly (Sub-Task 3)
 - Inline comment on `max_size` reads in `stats()` (Sub-Task 4)
 
 ---
@@ -518,7 +518,7 @@ uv run mypy src/cache/
 - Zero new mypy errors (annotation-unchecked notes are acceptable)
 - `stats()["l3_hits"]` key present and correct (Sub-Task 1)
 - `contains()` with disabled flags returns correct result (Sub-Task 2)
-- `src/cache/CONCURRENCY.md` exists and renders correctly (Sub-Task 3)
+- `src/cache/concurrency.md` exists and renders correctly (Sub-Task 3)
 - Inline comment on `max_size` reads in `stats()` (Sub-Task 4)
 - `CacheStatsSnapshot` dataclass exists in `src/cache/base.py` with all 26 typed
   fields; `stats()` returns `snapshot.to_dict()` (Sub-Task 5)

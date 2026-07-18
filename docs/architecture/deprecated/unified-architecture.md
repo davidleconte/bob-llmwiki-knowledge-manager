@@ -204,11 +204,11 @@ bob --chat-mode=knowledge-manager
 ### 2.6 Documentation
 
 - **README.md** - Project overview
-- **docs/QUICK_START.md** - 5-minute guide
-- **docs/INSTALLATION.md** - Detailed installation
-- **docs/USAGE.md** - Usage guide
-- **docs/CUSTOMIZATION.md** - Customization options
-- **docs/WORKFLOWS.md** - Common workflows
+- **docs/quick-start.md** - 5-minute guide
+- **docs/installation.md** - Detailed installation
+- **docs/usage.md** - Usage guide
+- **docs/customization.md** - Customization options
+- **docs/workflows.md** - Common workflows
 
 ---
 
@@ -388,7 +388,7 @@ python3 -m pytest tests/ --cov=src --cov-report=html
 ### 3.6 Documentation
 
 - **ACTUAL_SYSTEM_ARCHITECTURE.md** - Complete architecture
-- **docs/MONITORING.md** - Monitoring guide
+- **docs/monitoring.md** - Monitoring guide
 - **docs/api/README.md** - Auto-generated API reference
 - **docs/adr/** - Architecture Decision Records (12 ADRs)
 
@@ -562,18 +562,18 @@ python3 -m pytest tests/cache/ -v
 **New Users:**
 1. Start with [README.md](../../README.md) - Understand dual system
 2. Choose your path:
-   - **Documentation:** [docs/QUICK_START.md](../QUICK_START.md)
+   - **Documentation:** [docs/quick-start.md](../QUICK_START.md)
    - **LLM Optimization:** [docs/architecture/ACTUAL_SYSTEM_ARCHITECTURE.md](ACTUAL_SYSTEM_ARCHITECTURE.md)
 
 ### 6.2 Bob Shell Knowledge Manager Docs
 
 **Core Documentation:**
 - [README.md](../../README.md) - Project overview
-- [docs/QUICK_START.md](../QUICK_START.md) - 5-minute guide
-- [docs/INSTALLATION.md](../INSTALLATION.md) - Installation
-- [docs/USAGE.md](../USAGE.md) - Usage guide
-- [docs/CUSTOMIZATION.md](../CUSTOMIZATION.md) - Customization
-- [docs/WORKFLOWS.md](../WORKFLOWS.md) - Workflows
+- [docs/quick-start.md](../QUICK_START.md) - 5-minute guide
+- [docs/installation.md](../INSTALLATION.md) - Installation
+- [docs/usage.md](../USAGE.md) - Usage guide
+- [docs/customization.md](../CUSTOMIZATION.md) - Customization
+- [docs/workflows.md](../WORKFLOWS.md) - Workflows
 
 **Examples:**
 - [examples/personal-wiki/](../../examples/personal-wiki/) - Personal KB
@@ -584,7 +584,7 @@ python3 -m pytest tests/cache/ -v
 
 **Core Documentation:**
 - [ACTUAL_SYSTEM_ARCHITECTURE.md](ACTUAL_SYSTEM_ARCHITECTURE.md) - Complete architecture
-- [docs/MONITORING.md](../MONITORING.md) - Monitoring guide
+- [docs/monitoring.md](../MONITORING.md) - Monitoring guide
 - [docs/api/README.md](../api/README.md) - API reference
 
 **Architecture Decisions:**
@@ -734,7 +734,7 @@ logger.info("optimization_complete", savings=result["savings"])
 **Documentation:**
 - Architecture: This document
 - API Reference: [docs/api/README.md](../api/README.md)
-- Knowledge Base: [docs/knowledge-base/INDEX.md](../knowledge-base/INDEX.md)
+- Knowledge Base: [docs/knowledge-base/index.md](../knowledge-base/INDEX.md)
 
 **Issues:**
 - Track in project management system

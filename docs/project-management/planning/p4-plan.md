@@ -306,17 +306,17 @@ All new parameters default to current behaviour (`recency_weight=0.0`, `date_fil
   - Decision 3: length normalisation deferred (MiniLM sufficient at p@3=0.88; revisit if needed)
   - Validation results: p@3 before/after on golden set (values from Sub-Task 4 slow test)
 - `docs/adr/README.md` has the ADR-018 entry
-- `docs/architecture/ARCHITECTURE.md` reflects: (a) MiniLM dual-backend chain updated
+- `docs/architecture/architecture.md` reflects: (a) MiniLM dual-backend chain updated
   (mlx → sentence-transformers → hashing), (b) `NodeProps` table updated with 4 new fields,
   (c) query scoring section updated with recency and date-filter parameters
 - `CHANGELOG.md` `[Unreleased]` section has P4 entries in Added/Changed/Fixed
 - `STATUS.md` roadmap field updated with P4 note
-- `docs/knowledge-base/INDEX.md` updated with any new research/guide docs created this phase
+- `docs/knowledge-base/index.md` updated with any new research/guide docs created this phase
 
 **Todo List:**
 1. Write `docs/adr/018-p4-query-quality.md` (3 decisions + validation table; mirror ADR-017 structure)
 2. Add ADR-018 row to `docs/adr/README.md`
-3. Update `docs/architecture/ARCHITECTURE.md`:
+3. Update `docs/architecture/architecture.md`:
    - §5 (Embedding backends): extend MiniLM resolution chain description
    - §3b (Graph layer): update `NodeProps` field table to include 4 new fields
    - §4 (Query scoring): add recency_weight and date_filter to parameter table
@@ -328,12 +328,12 @@ All new parameters default to current behaviour (`recency_weight=0.0`, `date_fil
      when `mlx-embeddings` is not installed
    - Fixed: AF-3 `findall` → `finditer` in chunker; AF-5 `doc_count` docstring; AF-6 regression test
 5. Update `STATUS.md` roadmap field with P4 completion note and validated p@3 figure
-6. Update `docs/knowledge-base/INDEX.md` with new research entries if any were created
+6. Update `docs/knowledge-base/index.md` with new research entries if any were created
 
 **Relevant Context:**
 - `docs/adr/017-knowledge-graph-layer.md` — mirror this structure for ADR-018
 - `docs/adr/README.md` — append new row in the ADR table
-- `docs/architecture/ARCHITECTURE.md` — current architecture doc (updated in P3 doc session)
+- `docs/architecture/architecture.md` — current architecture doc (updated in P3 doc session)
 - `CHANGELOG.md` — `[Unreleased]` section
 - `STATUS.md:12` — roadmap field (single home; do not update the maturity table without a
   completed re-audit)

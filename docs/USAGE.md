@@ -7,7 +7,7 @@
 | **Standard** | arc42 / Tier-1 |
 | **Scope** | Operational reference for all interactions with the `knowledge-manager` mode in both **Bob Shell CLI** and **Bob IDE**: document creation, querying, updating, organizing, exporting, and validating the `docs/knowledge-base/` directory tree. |
 
-> **Bob IDE users:** see [docs/BOB-IDE-GUIDE.md](BOB-IDE-GUIDE.md) for the IDE-specific reference.
+> **Bob IDE users:** see [docs/bob-ide-guide.md](BOB-IDE-GUIDE.md) for the IDE-specific reference.
 > Key differences: activation via mode picker (not `--chat-mode=`); `save_memory` is **not available**
 > (file persistence only); shell group is `execute` (not `command`).
 
@@ -67,8 +67,8 @@ No install step required. The mode is registered in `.bob/custom_modes.yaml`.
 
 1. Open this workspace in Bob IDE.
 2. Click the **mode picker** in the bottom-left of the chat panel (shows the current mode name).
-3. Scroll to **📚 Knowledge Manager** and select it.
-4. Confirm the status bar shows `Mode: 📚 Knowledge Manager`.
+3. Scroll to **🧠 Mnemox Knowledge Builder** and select it.
+4. Confirm the status bar shows `Mode: 🧠 Mnemox Knowledge Builder`.
 
 Bob IDE differences vs Bob Shell CLI:
 
@@ -79,7 +79,7 @@ Bob IDE differences vs Bob Shell CLI:
 | Skill lazy-load | not supported | `use_skill("knowledge-manager")` |
 | Writes outside workspace | allowed | workspace-constrained |
 
-For the complete Bob IDE reference see [docs/BOB-IDE-GUIDE.md](BOB-IDE-GUIDE.md).
+For the complete Bob IDE reference see [docs/bob-ide-guide.md](BOB-IDE-GUIDE.md).
 
 ---
 
@@ -200,7 +200,7 @@ Bob Shell will:
 - Create `docs/knowledge-base/concepts/gossip-protocol.md`
 - Follow the [`config/templates/concept.md`](../config/templates/concept.md) template
 - Save key facts with `save_memory` *(Bob Shell CLI only)*
-- Append an entry to [`docs/knowledge-base/INDEX.md`](knowledge-base/INDEX.md)
+- Append an entry to [`docs/knowledge-base/index.md`](knowledge-base/INDEX.md)
 
 ---
 
@@ -499,13 +499,13 @@ Bob Shell will:
 - List all documents in the category
 - Check for missing cross-references
 - Add "Related Documents" sections where absent
-- Update [`docs/knowledge-base/INDEX.md`](knowledge-base/INDEX.md)
+- Update [`docs/knowledge-base/index.md`](knowledge-base/INDEX.md)
 
 ### 6.2 Architectural Context: What "Organize" Means
 
 Organizing the knowledge base has two concrete artifacts:
 
-**INDEX.md** is the canonical document registry at [`docs/knowledge-base/INDEX.md`](knowledge-base/INDEX.md). It has three structural parts:
+**INDEX.md** is the canonical document registry at [`docs/knowledge-base/index.md`](knowledge-base/INDEX.md). It has three structural parts:
 
 | Section | Purpose |
 |---|---|
@@ -656,7 +656,7 @@ The shell script [`scripts/validate-kb.sh`](../scripts/validate-kb.sh) performs 
 The script checks:
 
 1. That `docs/knowledge-base/` directory exists
-2. That `docs/knowledge-base/INDEX.md` exists
+2. That `docs/knowledge-base/index.md` exists
 3. That all four required subdirectories (`concepts/`, `guides/`, `references/`, `research/`) exist
 4. That every relative Markdown link in every `.md` file resolves to an existing file
 
@@ -675,7 +675,7 @@ git commit -m "Add concept: CAP theorem"
 git push
 
 # After a bulk organize session
-git add docs/knowledge-base/INDEX.md docs/knowledge-base/concepts/
+git add docs/knowledge-base/index.md docs/knowledge-base/concepts/
 git commit -m "Organize: add cross-references to consistency concepts"
 git push
 
@@ -812,7 +812,7 @@ The broken-link check is performed by the loop at [`scripts/validate-kb.sh:33-47
 | Check | Script Line | Pass Condition |
 |---|---|---|
 | KB directory exists | L7–10 | `docs/knowledge-base/` is a directory |
-| INDEX.md present | L13–16 | `docs/knowledge-base/INDEX.md` is a file |
+| INDEX.md present | L13–16 | `docs/knowledge-base/index.md` is a file |
 | `concepts/` exists | L20–26 | directory present |
 | `guides/` exists | L20–26 | directory present |
 | `references/` exists | L20–26 | directory present |
@@ -945,7 +945,7 @@ The following six scenarios define verifiable success criteria for each major op
 | **Bob mode** | A named configuration unit in [`config/custom_modes.yaml`](../config/custom_modes.yaml) that binds a system prompt, a tool set, and `customInstructions` to a Bob Shell `--chat-mode` flag. The `knowledge-manager` mode activates the 7-step document creation workflow and all KB-specific tool bindings. |
 | **`search_file_content`** | A Bob Shell built-in tool that performs a regex or substring scan across all files in a specified directory tree. In the knowledge-manager mode it is used during query resolution (Path 2, §4.1) to find documents whose facts were not saved to memory. |
 | **`save_memory`** | A Bob Shell CLI built-in tool that persists a key-value or structured fact into the session's in-context memory store. Facts saved with this tool are automatically recalled on subsequent turns. Used in Step 6 of the document creation workflow ([`config/custom_modes.yaml:195`](../config/custom_modes.yaml:195)) and after every update operation. **Not available in Bob IDE** — use `write_file` to `docs/knowledge-base/` instead. |
-| **INDEX.md** | The canonical document registry at [`docs/knowledge-base/INDEX.md`](knowledge-base/INDEX.md). Contains three sections: Quick Navigation (category links), Recent Additions (reverse-chronological), and All Documents (full enumeration by category). It is the single source of truth for what documents exist in the knowledge base and is updated in Step 7 of every document creation. |
+| **INDEX.md** | The canonical document registry at [`docs/knowledge-base/index.md`](knowledge-base/INDEX.md). Contains three sections: Quick Navigation (category links), Recent Additions (reverse-chronological), and All Documents (full enumeration by category). It is the single source of truth for what documents exist in the knowledge base and is updated in Step 7 of every document creation. |
 | **Cross-reference** | A bidirectional relative Markdown link between two documents in the knowledge base. Cross-references appear in each document's "Related Documents" section and are validated by [`scripts/validate-kb.sh`](../scripts/validate-kb.sh). The mode's core principles require bidirectionality ([`config/custom_modes.yaml:185`](../config/custom_modes.yaml:185)): if document A links to document B, document B should link back to document A. |
 | **knowledge-manager workflow** | The 7-step sequence defined at [`config/custom_modes.yaml:191-197`](../config/custom_modes.yaml:191): (1) determine category, (2) select template, (3) apply naming convention, (4) write content, (5) add cross-references, (6) save key facts to memory, (7) update INDEX.md. Every document creation and significant update follows this sequence. |
 

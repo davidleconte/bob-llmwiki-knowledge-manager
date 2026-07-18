@@ -316,8 +316,8 @@ Start by analyzing the codebase and suggesting 5 initial documents to create"
 
 - [Test Results Final](TEST_RESULTS_FINAL.md) - Complete test validation
 - [Honest Assessment](HONEST_ASSESSMENT.md) - Production readiness analysis
-- [Token Savings Test Plan](../docs/TOKEN_SAVINGS_TEST_PLAN.md) - Validation methodology
-- [Repository Analysis Workflow](../docs/REPOSITORY_ANALYSIS_WORKFLOW.md) - Analysis guide
+- [Token Savings Test Plan](../docs/token-savings-test-plan.md) - Validation methodology
+- [Repository Analysis Workflow](../docs/repository-analysis-workflow.md) - Analysis guide
 
 ---
 

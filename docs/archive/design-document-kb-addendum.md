@@ -201,7 +201,7 @@ echo "  bob --chat-mode=knowledge-manager"
 mkdir -p docs/knowledge-base/{concepts,guides,references,research}
 
 # 2. Create INDEX.md
-cat > docs/knowledge-base/INDEX.md << 'EOF'
+cat > docs/knowledge-base/index.md << 'EOF'
 # Knowledge Base Index
 
 ## Concepts

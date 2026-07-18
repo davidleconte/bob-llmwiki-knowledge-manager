@@ -14,7 +14,7 @@ path or ``../`` sequence escape the base and read arbitrary files
 and symlinks), and returns the result only if it stays inside the base —
 raising ``ValueError`` otherwise. This is the mitigation for the sole concrete
 Information-Disclosure finding in the STRIDE threat model; see
-``docs/security/THREAT_MODEL.md``.
+``docs/security/threat-model.md``.
 
 ## Functions
 

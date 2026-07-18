@@ -504,7 +504,7 @@ Review reports and validation documentation:
 
 **Location:** `docs/knowledge-base/`
 
-See [Knowledge Base Index](docs/knowledge-base/INDEX.md)
+See [Knowledge Base Index](docs/knowledge-base/index.md)
 
 ### 5. Configuration
 

@@ -63,7 +63,7 @@ These documents describe the **original planned architecture** from Week 18, whi
 
 5. **MONITORING.md** (873 lines) - Original monitoring design
    - Status: Implemented differently in Week 20
-   - Actual: See `src/monitoring/` and `docs/MONITORING.md`
+   - Actual: See `src/monitoring/` and `docs/monitoring.md`
 
 6. **OPTIMIZER.md** (698 lines) - Original optimizer design
    - Status: Partially implemented differently
@@ -131,7 +131,7 @@ This is the **single authoritative architecture document** covering:
 - 4 truncation strategies
 - Truncator — auto-selection
 
-**Monitoring System:** See `docs/MONITORING.md` and `src/monitoring/`
+**Monitoring System:** See `docs/monitoring.md` and `src/monitoring/`
 - Structured logging (JSON)
 - Metrics collection
 - Health checks

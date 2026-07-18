@@ -149,7 +149,7 @@ Transform the Week 19 implementation into a **production-ready system** through:
 **Deliverables**:
 - `src/monitoring/metrics.py` (new)
 - `src/monitoring/health.py` (new)
-- `docs/MONITORING.md` (new)
+- `docs/monitoring.md` (new)
 - Alert runbook
 
 ---
@@ -367,7 +367,7 @@ Transform the Week 19 implementation into a **production-ready system** through:
    - `src/security/rate_limiter.py`
 
 3. **Documentation** (6)
-   - `docs/MONITORING.md`
+   - `docs/monitoring.md`
    - `docs/SECURITY.md`
    - `docs/operations/DEPLOYMENT.md`
    - `docs/operations/TROUBLESHOOTING.md`

@@ -93,7 +93,7 @@ pandoc --version | head -1
 ## 3. Step 1: Install the mode (~2 min)
 
 > **Bob IDE users — no install needed.**
-> Open this workspace (`bob-llmwiki-knowledge-manager`) in Bob IDE. Click the **mode picker** in the bottom-left status bar, scroll to and select **📚 Knowledge Manager**. The mode is already registered in `.bob/custom_modes.yaml`. **Skip directly to [Step 3](#5-step-3-your-first-document-2-min).** See [docs/BOB-IDE-GUIDE.md](BOB-IDE-GUIDE.md) for full Bob IDE details.
+> Open this workspace (`bob-llmwiki-knowledge-manager`) in Bob IDE. Click the **mode picker** in the bottom-left status bar, scroll to and select **🧠 Mnemox Knowledge Builder**. The mode is already registered in `.bob/custom_modes.yaml`. **Skip directly to [Step 3](#5-step-3-your-first-document-2-min).** See [docs/bob-ide-guide.md](BOB-IDE-GUIDE.md) for full Bob IDE details.
 
 ---
 
@@ -189,7 +189,7 @@ Next steps:
 | 2 | `docs/knowledge-base/guides/` | Category directory for how-to guides |
 | 3 | `docs/knowledge-base/references/` | Category directory for API docs and specs |
 | 4 | `docs/knowledge-base/research/` | Category directory for research notes |
-| 5 | `docs/knowledge-base/INDEX.md` | Master index — auto-updated by the mode |
+| 5 | `docs/knowledge-base/index.md` | Master index — auto-updated by the mode |
 | 6 | `.bob/settings.json` | Auto-loads `INDEX.md` into Bob Shell's context |
 
 ### Expected directory tree
@@ -245,7 +245,7 @@ This step creates the **KB directory contract** — the fixed directory layout t
 
 ### Option A2 — Bob IDE mode picker
 
-1. **Select the mode** using the mode picker (bottom-left status bar → **📚 Knowledge Manager**).
+1. **Select the mode** using the mode picker (bottom-left status bar → **🧠 Mnemox Knowledge Builder**).
 
 2. **Activate the skill** at the start of your session:
    ```
@@ -272,7 +272,7 @@ cp ~/Projects/bob-llmwiki-knowledge-manager/config/templates/concept.md \
    docs/knowledge-base/concepts/microservices-architecture.md
 
 # Open the file and fill in the sections
-# Then update docs/knowledge-base/INDEX.md manually
+# Then update docs/knowledge-base/index.md manually
 ```
 
 ---
@@ -311,11 +311,11 @@ research
 
 **③ INDEX.md is present and non-empty**
 ```bash
-wc -l docs/knowledge-base/INDEX.md
+wc -l docs/knowledge-base/index.md
 ```
 Expected output: a line count greater than 0, e.g.:
 ```
-      71 docs/knowledge-base/INDEX.md
+      71 docs/knowledge-base/index.md
 ```
 
 ---
@@ -359,17 +359,17 @@ microservices-architecture.md
 
 ## 7. Troubleshooting
 
-### T0 — Bob IDE: 📚 Knowledge Manager not in mode picker
+### T0 — Bob IDE: 🧠 Mnemox Knowledge Builder not in mode picker
 
 | Field | Detail |
 |---|---|
-| **Symptom** | The mode picker does not show **📚 Knowledge Manager** |
+| **Symptom** | The mode picker does not show **🧠 Mnemox Knowledge Builder** |
 | **Cause** | Bob IDE has not picked up `.bob/custom_modes.yaml`, or the workspace was opened before the file was written |
 | **Fix 1** | Reload the Bob IDE window: **Cmd+Shift+P → Developer: Reload Window** |
 | **Fix 2** | Make a trivial edit to [`.bob/custom_modes.yaml`](../.bob/custom_modes.yaml) (add and remove a space), then save — Bob IDE hot-reloads on file change |
 | **Fix 3** | Confirm the file exists: `ls .bob/custom_modes.yaml` and contains the `knowledge-manager` slug: `grep knowledge-manager .bob/custom_modes.yaml` |
 
-See [docs/BOB-IDE-GUIDE.md — Troubleshooting](BOB-IDE-GUIDE.md#10-troubleshooting) for additional Bob IDE issues.
+See [docs/bob-ide-guide.md — Troubleshooting](BOB-IDE-GUIDE.md#10-troubleshooting) for additional Bob IDE issues.
 
 ---
 
@@ -427,9 +427,9 @@ See [docs/BOB-IDE-GUIDE.md — Troubleshooting](BOB-IDE-GUIDE.md#10-troubleshoot
 
 | Goal | Resource |
 |---|---|
-| Understand all available prompts and workflows | [docs/USAGE.md](USAGE.md) |
-| See end-to-end scenario walkthroughs | [docs/WORKFLOWS.md](WORKFLOWS.md) |
-| Customise templates, categories, or mode behaviour | [docs/CUSTOMIZATION.md](CUSTOMIZATION.md) |
+| Understand all available prompts and workflows | [docs/usage.md](USAGE.md) |
+| See end-to-end scenario walkthroughs | [docs/workflows.md](WORKFLOWS.md) |
+| Customise templates, categories, or mode behaviour | [docs/customization.md](CUSTOMIZATION.md) |
 | Browse worked KB examples | [`examples/`](../examples/) directory |
 
 ---
@@ -452,7 +452,7 @@ The fixed four-category directory layout under `docs/knowledge-base/` (`concepts
 ---
 
 **INDEX.md**  
-The master index file at `docs/knowledge-base/INDEX.md`. It is automatically loaded into the Bob Shell context window (via `.bob/settings.json`) and is updated by the agent at the end of every document-creation workflow (Step 7 of 7). It serves as the agent's primary navigation map for cross-referencing.
+The master index file at `docs/knowledge-base/index.md`. It is automatically loaded into the Bob Shell context window (via `.bob/settings.json`) and is updated by the agent at the end of every document-creation workflow (Step 7 of 7). It serves as the agent's primary navigation map for cross-referencing.
 
 ---
 

@@ -55,7 +55,7 @@ Original component specifications (5,534 lines total) have been moved to:
 4. **Knowledge Graph:** [ARCHITECTURE.md §5](../ARCHITECTURE.md#5-components) — `src/graph/`
 5. **Optimizer Layer:** [ARCHITECTURE.md §5](../ARCHITECTURE.md#5-components) — `src/optimizer/`
 6. **Truncation Layer:** [ARCHITECTURE.md §5](../ARCHITECTURE.md#5-components) — `src/truncation/`
-7. **Monitoring:** [docs/MONITORING.md](../../MONITORING.md)
+7. **Monitoring:** [docs/monitoring.md](../../MONITORING.md)
 8. **Delegation Pipeline:** [ARCHITECTURE.md §2](../ARCHITECTURE.md#2-component-overview) — `src/delegation/`
 
 ### Source Code (current test counts — see `pytest tests/ -v` for live counts)

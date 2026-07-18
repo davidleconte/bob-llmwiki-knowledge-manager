@@ -170,7 +170,7 @@ documentation — no code changes required.
   states: "This `MultiLevelCache` is available for KB/query use-cases. `optimize()`
   uses a separate `ExactCache` instance (`self.optimizer.cache`) and is unaffected
   by `CacheConfig.l2_*` settings — see ARCHITECTURE.md §5 (L2-scoping)."
-- `docs/architecture/ARCHITECTURE.md §4` config table adds a "Scope" footnote to
+- `docs/architecture/architecture.md §4` config table adds a "Scope" footnote to
   the `l2_similarity_threshold` and `l2_max_size` rows: "KB/query path only; does
   not affect `optimize()`."
 - `generate_api_docs.py --check` continues to pass (docstring change is in-scope
@@ -181,13 +181,13 @@ documentation — no code changes required.
 1. Read `src/facade.py` — find the `cache` attribute / property and its current
    docstring.
 2. Add the one-sentence disclosure to the `cache` docstring.
-3. Read `docs/architecture/ARCHITECTURE.md:126-137` — the §4 config table.
+3. Read `docs/architecture/architecture.md:126-137` — the §4 config table.
 4. Add a "KB/query only" footnote to the `l2_*` rows.
 5. Run: `python3 scripts/generate_api_docs.py --check && uv run pytest tests/ -q`.
 
 **Relevant Context:**
 - `src/facade.py` — `TokenOptimizer.cache` attribute
-- `docs/architecture/ARCHITECTURE.md:126-154` — §4 config table + §5 component notes
+- `docs/architecture/architecture.md:126-154` — §4 config table + §5 component notes
 - `docs/adr/002-caching-strategy.md` — L2 exclusion rationale (cross-reference only)
 
 **Status:** [x] done
@@ -414,10 +414,10 @@ published dependency surface.
 ### Current Grade: A → Target: A+
 
 ### Verified Closed (do not re-open)
-- **F-GAP (no authoritative architecture doc) CLOSED:** `docs/architecture/ARCHITECTURE.md`
+- **F-GAP (no authoritative architecture doc) CLOSED:** `docs/architecture/architecture.md`
   is the single authoritative architecture doc; both deprecated predecessors carry
   on-file banners.
-- **F-GAP (no Diátaxis index) CLOSED:** `docs/INDEX.md` is organized by Diátaxis
+- **F-GAP (no Diátaxis index) CLOSED:** `docs/index.md` is organized by Diátaxis
   categories (Tutorials, How-To, Reference, Explanation).
 - **F-GAP (API docs not drift-checked) CLOSED:** `generate_api_docs.py --check` runs
   in CI; 41 files in sync.
@@ -527,7 +527,7 @@ the canonical status and installation docs.
 - 12-artifact community-health set present and non-stub (gate-slip verified each
   file's deletion fails CI).
 - ADR-012 fabricated security stack retracted with banner + superseded by
-  `docs/security/THREAT_MODEL.md`.
+  `docs/security/threat-model.md`.
 - STRIDE analysis covers all 6 categories with defensible N/A calls for local CLI.
 
 ### Remaining Gap
@@ -548,7 +548,7 @@ filesystem write access. The threat model claims to be exhaustive; naming this
 accepted residual completes that claim without code changes.
 
 **Expected Outcomes:**
-- `docs/security/THREAT_MODEL.md` residual register contains a "TOCTOU:
+- `docs/security/threat-model.md` residual register contains a "TOCTOU:
   resolve-then-open" entry with:
   - Severity: Negligible
   - Condition: Attacker has filesystem write access on the same machine
@@ -560,12 +560,12 @@ accepted residual completes that claim without code changes.
 - All gates pass.
 
 **Todo List:**
-1. Read `docs/security/THREAT_MODEL.md` to locate the residual register section.
+1. Read `docs/security/threat-model.md` to locate the residual register section.
 2. Add the TOCTOU entry following the existing residual format.
 3. Run: `python3 scripts/check_community_health.py && uv run pytest tests/ -q`.
 
 **Relevant Context:**
-- `docs/security/THREAT_MODEL.md` — STRIDE analysis and residual register
+- `docs/security/threat-model.md` — STRIDE analysis and residual register
 - `src/tools/safe_paths.py` — `resolve_within()` implementation
 
 **Status:** [x] done
@@ -600,7 +600,7 @@ The review is complete and all dimensions reach A/A+ when:
 - [ ] `check_status_consistency.py` passes (including new test-count guard added in F2)
 - [ ] `THREAT_MODEL.md` residual register is complete (TOCTOU entry added in G1)
 - [ ] `AGENTS.md` floor value consistent with `check_coverage_by_package.py` (F1)
-- [ ] `docs/architecture/ARCHITECTURE.md §4` config table clarifies L2 scope (B1)
+- [ ] `docs/architecture/architecture.md §4` config table clarifies L2 scope (B1)
 - [ ] `docs/adr/016-truncation-no-config.md` exists and is indexed in `docs/adr/README.md` (B2)
 - [ ] Adversarial spot-check: revert C1/C5 fixes → regression tests go red ✓ (already confirmed, preserve)
 - [ ] Adversarial spot-check: probe `resolve_within` with path-traversal → all rejected ✓ (already confirmed, preserve)

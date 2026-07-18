@@ -415,7 +415,7 @@ queries from ADR-014.
   - Recommended `semantic_threshold` and `graph_weight` defaults
   - Memory consumption: graph JSON file size, in-memory dict size
 - ADR-017 updated with validation results if defaults change
-- `docs/knowledge-base/INDEX.md` updated
+- `docs/knowledge-base/index.md` updated
 
 **Relevant Context**
 
@@ -507,7 +507,7 @@ The following assertions must all be true before this feature is considered comp
 | `src/cli.py` | Add `graph-build`, `graph-query`, `graph-health` subcommands |
 | `src/graph/__init__.py` | Export `KnowledgeGraph`, `KnowledgeGraphBuilder`, `GraphStore`, `GraphRanker` |
 | `.gitignore` | Add `.bob/kb-graph.json` |
-| `docs/knowledge-base/INDEX.md` | Add validation research doc |
+| `docs/knowledge-base/index.md` | Add validation research doc |
 | `docs/adr/README.md` | Add ADR-017 row |
 
 ---

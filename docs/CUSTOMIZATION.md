@@ -11,7 +11,7 @@
 
 > **Scope note — Bob Shell CLI:** This document covers Bob Shell CLI customization (`config/custom_modes.yaml` → `~/.bob/custom_modes.yaml`).
 > **Bob IDE users:** group names differ (`execute`/`skill` vs `command`/`browser`), `save_memory` is not available,
-> and workspace modes live in `.bob/custom_modes.yaml`. See [docs/BOB-IDE-GUIDE.md](BOB-IDE-GUIDE.md).
+> and workspace modes live in `.bob/custom_modes.yaml`. See [docs/bob-ide-guide.md](BOB-IDE-GUIDE.md).
 
 ---
 
@@ -71,7 +71,7 @@ done
 | `docs/knowledge-base/guides/` must exist | `validate-kb.sh` exits with code 1 |
 | `docs/knowledge-base/references/` must exist | `validate-kb.sh` exits with code 1 |
 | `docs/knowledge-base/research/` must exist | `validate-kb.sh` exits with code 1 |
-| `docs/knowledge-base/INDEX.md` must exist | `validate-kb.sh` exits with code 1 (line 13–16) |
+| `docs/knowledge-base/index.md` must exist | `validate-kb.sh` exits with code 1 (line 13–16) |
 
 Renaming or removing any of these directories causes CI-level failures wherever `validate-kb.sh` is invoked. Additionally, the `customInstructions` in the mode YAML (see §3) reference these exact paths by name — removing them would cause Bob to write documents outside the expected structure.
 
@@ -137,7 +137,7 @@ The following is the complete `knowledge-manager` entry from [`config/custom_mod
     #   alias that references it by name.
     # • Allowed characters: lowercase letters, digits, hyphens.
 
-    name: 📚 Knowledge Manager
+    name: 🧠 Mnemox Knowledge Builder
     # name ──────────────────────────────────────────────────────
     # Human-readable display name shown in the Bob Shell mode
     # picker UI. The leading emoji is cosmetic and optional.
@@ -153,7 +153,7 @@ The following is the complete `knowledge-manager` entry from [`config/custom_mod
       - docs/knowledge-base/guides/ - How-to guides and tutorials
       - docs/knowledge-base/references/ - API docs and specifications
       - docs/knowledge-base/research/ - Research notes and findings
-      - docs/knowledge-base/INDEX.md - Master index of all content
+      - docs/knowledge-base/index.md - Master index of all content
     # roleDefinition ────────────────────────────────────────────
     # System-prompt fragment injected at session start, before any
     # user message. Tells Bob WHO it is in this mode.
@@ -252,7 +252,7 @@ Create a file at `.bob/custom_modes.yaml` in your project root. Bob Shell will r
 ### 4.2 Concrete example: renaming the mode and extending instructions
 
 Suppose you want to:
-1. Rename the mode display name from `📚 Knowledge Manager` to `📚 ACME Wiki Manager`.
+1. Rename the mode display name from `🧠 Mnemox Knowledge Builder` to `📚 ACME Wiki Manager`.
 2. Add a project-specific instruction: all documents must include an ACME ticket reference in the footer.
 
 Create `.bob/custom_modes.yaml`:
@@ -273,7 +273,7 @@ customModes:
       - docs/knowledge-base/guides/ - How-to guides and tutorials
       - docs/knowledge-base/references/ - API docs and specifications
       - docs/knowledge-base/research/ - Research notes and findings
-      - docs/knowledge-base/INDEX.md - Master index of all content
+      - docs/knowledge-base/index.md - Master index of all content
 
     whenToUse: >-
       Use this mode when you need to manage the ACME project wiki.
@@ -621,7 +621,7 @@ The following scenarios are **verifiable outcomes** — each can be confirmed wi
 
 **Scenario.** A project-level `.bob/custom_modes.yaml` defines `slug: knowledge-manager` with `name: 📚 ACME Wiki Manager`.
 
-**Expected outcome.** When Bob Shell is started in the project directory, the mode picker displays `📚 ACME Wiki Manager` instead of `📚 Knowledge Manager`.
+**Expected outcome.** When Bob Shell is started in the project directory, the mode picker displays `📚 ACME Wiki Manager` instead of `🧠 Mnemox Knowledge Builder`.
 
 **Verification.**
 ```bash

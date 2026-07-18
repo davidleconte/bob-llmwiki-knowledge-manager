@@ -106,8 +106,8 @@ Bob Shell Knowledge Manager
 - Implementation (what users see vs how it works)
 
 **Documents:**
-- docs/WORKFLOWS.md
-- docs/USAGE.md
+- docs/workflows.md
+- docs/usage.md
 - examples/ (user scenarios)
 
 ### 1.4 Success Criteria
@@ -123,7 +123,7 @@ Bob Shell Knowledge Manager
 - Current status (that's in project management)
 
 **Documents:**
-- docs/TOKEN_SAVINGS_TEST_PLAN.md
+- docs/token-savings-test-plan.md
 - evaluation/TEST_RESULTS_FINAL.md
 
 ---
@@ -298,8 +298,8 @@ Bob Shell Knowledge Manager
 - Code (deployment vs implementation)
 
 **Documents:**
-- docs/INSTALLATION.md
-- docs/QUICK_START.md
+- docs/installation.md
+- docs/quick-start.md
 - scripts/install.sh
 - requirements.txt
 
@@ -317,7 +317,7 @@ Bob Shell Knowledge Manager
 - Monitoring (configuration vs observation)
 
 **Documents:**
-- docs/CUSTOMIZATION.md
+- docs/customization.md
 - config/custom_modes.yaml
 - config/settings.json
 
@@ -335,7 +335,7 @@ Bob Shell Knowledge Manager
 - Security (monitoring vs protection)
 
 **Documents:**
-- docs/MONITORING.md
+- docs/monitoring.md
 - src/monitoring/ (implementation)
 - docs/adr/011-monitoring-observability.md
 
@@ -412,7 +412,7 @@ Bob Shell Knowledge Manager
 - All other categories (describes vs is)
 
 **Documents:**
-- docs/INDEX.md (documentation index)
+- docs/index.md (documentation index)
 - docs/knowledge-base/ (knowledge base)
 - config/templates/ (document templates)
 
@@ -522,8 +522,8 @@ Bob Shell Knowledge Manager
 ```
 README.md
 docs/COMPARISON.md
-docs/WORKFLOWS.md
-docs/USAGE.md
+docs/workflows.md
+docs/usage.md
 evaluation/HONEST_ASSESSMENT.md
 evaluation/LIVE_EXAMPLE_HCD_ANALYSIS.md
 examples/
@@ -552,10 +552,10 @@ src/integration/
 
 ### Operations (How - Run)
 ```
-docs/INSTALLATION.md
-docs/QUICK_START.md
-docs/CUSTOMIZATION.md
-docs/MONITORING.md
+docs/installation.md
+docs/quick-start.md
+docs/customization.md
+docs/monitoring.md
 config/
 scripts/install.sh
 scripts/init-project.sh
@@ -566,10 +566,10 @@ requirements.txt
 ```
 CHANGELOG.md
 AGENTS.md
-docs/INDEX.md
+docs/index.md
 docs/knowledge-base/
 docs/project-management/
-docs/TOKEN_SAVINGS_TEST_PLAN.md
+docs/token-savings-test-plan.md
 evaluation/TEST_RESULTS_FINAL.md
 tests/ (213 tests)
 ```

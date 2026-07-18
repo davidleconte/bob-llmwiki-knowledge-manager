@@ -516,5 +516,5 @@ costs = optimizer.cost_report()      # dict with Bobcoin spend/savings
 ---
 
 *Authoritative monitoring and observability documentation for the Python Token Optimization System.*  
-*System architecture: see [`docs/architecture/ARCHITECTURE.md`](architecture/ARCHITECTURE.md).*  
+*System architecture: see [`docs/architecture/architecture.md`](architecture/ARCHITECTURE.md).*  
 *Maintained by: Architecture Team · Last reviewed: 2026-07-14*

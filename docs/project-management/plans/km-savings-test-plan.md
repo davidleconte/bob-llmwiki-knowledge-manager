@@ -223,14 +223,14 @@ the exact anti-pattern that produced the retracted 68.96% figure.
 
 **Intent:** Ensure the new tests run in the standard pytest pass, update the coverage
 floor check, add the test file to `CODEOWNERS`, and register the guide cross-reference
-in `docs/knowledge-base/INDEX.md`.
+in `docs/knowledge-base/index.md`.
 
 **Expected Outcomes:**
 - `uv run pytest tests/validation/test_km_savings.py -v` exits 0 with all tests passing.
 - `uv run pytest tests/ --ignore=tests/load --ignore=tests/performance -q` exits 0
   (new tests don't break the existing suite).
 - `scripts/check_coverage_by_package.py` reports delegation ≥ 70% and validation ≥ 80%.
-- `docs/knowledge-base/INDEX.md` references the new guide under **Guides** with a
+- `docs/knowledge-base/index.md` references the new guide under **Guides** with a
   one-line description.
 - `.github/CODEOWNERS` has an entry for `tests/validation/test_km_savings.py`.
 

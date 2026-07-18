@@ -43,7 +43,7 @@ This is the **master architecture reference** (v3.0, 2026-07-14) that explains:
 
 > **mypy note (post G-2 gap closure, 2026-07-17):** `src/delegation/` and `src/tools/` are now fully included in the mypy scope — the previous `exclude` directive has been removed. `src/` type-checks clean (0 errors; only `[annotation-unchecked]` advisory notes for untyped function bodies remain, which are acceptable and not counted as errors).
 
-3. **[docs/security/THREAT_MODEL.md](../security/THREAT_MODEL.md)** — STRIDE threat model
+3. **[docs/security/threat-model.md](../security/THREAT_MODEL.md)** — STRIDE threat model
    - Trust boundaries and data flows
    - Mitigations with path:line citations
    - Residual risks and non-risks
@@ -189,7 +189,7 @@ See [deprecated/README.md](deprecated/README.md) for details.
 **Status:** Integrated — analysis pipeline (84% coverage, 70% floor; ADR-019)
 
 **CLI:** `bob-optimize analyze <target> [--kb-path] [--output-dir] [--workers] [--depth] [--no-compress]`
-**Documentation:** [src/delegation/EXPERIMENTAL.md](../../src/delegation/EXPERIMENTAL.md) · [ADR-019](../adr/019-delegation-pipeline-activation.md)
+**Documentation:** [src/delegation/experimental.md](../../src/delegation/experimental.md) · [ADR-019](../adr/019-delegation-pipeline-activation.md)
 
 ---
 
@@ -199,7 +199,7 @@ See [deprecated/README.md](deprecated/README.md) for details.
 
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** — Master reference (authoritative)
 - **[docs/adr/](../adr/)** — Architecture Decision Records (ADR-001–019)
-- **[docs/security/THREAT_MODEL.md](../security/THREAT_MODEL.md)** — STRIDE threat model
+- **[docs/security/threat-model.md](../security/THREAT_MODEL.md)** — STRIDE threat model
 
 ### Implementation
 
@@ -215,9 +215,9 @@ See [deprecated/README.md](deprecated/README.md) for details.
 ### User Documentation
 
 - **[README.md](../../README.md)** — Project overview
-- **[docs/QUICK_START.md](../QUICK_START.md)** — 5-minute guide
-- **[docs/USAGE.md](../USAGE.md)** — Usage guide
-- **[docs/MONITORING.md](../MONITORING.md)** — Monitoring guide
+- **[docs/quick-start.md](../QUICK_START.md)** — 5-minute guide
+- **[docs/usage.md](../USAGE.md)** — Usage guide
+- **[docs/monitoring.md](../MONITORING.md)** — Monitoring guide
 
 ---
 
@@ -276,7 +276,7 @@ See [deprecated/README.md](deprecated/README.md) for details.
 1. **Architecture Questions:** See [ARCHITECTURE.md](ARCHITECTURE.md)
 2. **Implementation Questions:** Check source code in `src/` or tests in `tests/`
 3. **Design Decisions:** See [docs/adr/](../adr/)
-4. **Security:** See [docs/security/THREAT_MODEL.md](../security/THREAT_MODEL.md)
+4. **Security:** See [docs/security/threat-model.md](../security/THREAT_MODEL.md)
 5. **Status / Grade:** See [STATUS.md](../../STATUS.md)
 
 ### Contributing

@@ -1,4 +1,4 @@
-# Bob IDE Guide — Knowledge Manager Mode
+# Bob IDE Guide — 🧠 Mnemox Knowledge Builder Mode
 
 **Version:** Bob IDE 1.121.0+bob2.0.1  
 **Last verified:** 2026-07-16  
@@ -6,9 +6,9 @@
 
 > **Cross-references:**  
 > — New to this project? Start with [README.md](../README.md).  
-> — 5-minute onboarding: [docs/QUICK_START.md](QUICK_START.md).  
-> — Full installation reference: [docs/INSTALLATION.md](INSTALLATION.md).  
-> — This guide covers Bob IDE only. For the terminal binary, see [docs/INSTALLATION.md](INSTALLATION.md) §1.
+> — 5-minute onboarding: [docs/quick-start.md](QUICK_START.md).  
+> — Full installation reference: [docs/installation.md](INSTALLATION.md).  
+> — This guide covers Bob IDE only. For the terminal binary, see [docs/installation.md](INSTALLATION.md) §1.
 
 ---
 
@@ -36,7 +36,7 @@ Bob IDE is the VS Code / Cursor extension version of Bob Shell. It runs modes de
 | Dimension | Bob Shell CLI | Bob IDE |
 |---|---|---|
 | Installation | `scripts/install.sh` → `~/.bob/custom_modes.yaml` | Open workspace — zero steps |
-| Mode activation | `bob --chat-mode=knowledge-manager` | Mode picker → 📚 Knowledge Manager |
+| Mode activation | `bob --chat-mode=knowledge-manager` | Mode picker → 🧠 Mnemox Knowledge Builder |
 | Shell group name | `command` | `execute` |
 | Web group name | `browser` | not supported |
 | Skill lazy-load | not supported | `skill` group + `use_skill()` |
@@ -60,7 +60,7 @@ machine-verified during the session of 2026-07-16.
 | `.bob/custom_modes.yaml` | Must be present in the workspace root (committed to this repo) |
 | `.bob/skills/knowledge-manager/SKILL.md` | Must be present for lazy-load skill support |
 
-No network access, Python, or Node.js is required to run the Knowledge Manager mode.
+No network access, Python, or Node.js is required to run the Mnemox Knowledge Builder mode.
 
 ---
 
@@ -92,7 +92,7 @@ ls .bob/skills/knowledge-manager/SKILL.md
 Both commands should return the file path without error.
 
 > **Bob Shell CLI users:** If you are using the terminal binary, run `scripts/install.sh`
-> instead. See [docs/INSTALLATION.md](INSTALLATION.md) for the CLI path.
+> instead. See [docs/installation.md](INSTALLATION.md) for the CLI path.
 
 ---
 
@@ -103,14 +103,14 @@ Both commands should return the file path without error.
 The mode picker is in the **bottom-left of the chat panel** status bar. It shows the
 currently active mode name (e.g. `Mode: Agent` by default).
 
-### Selecting Knowledge Manager
+### Selecting Mnemox Knowledge Builder
 
 1. Click the mode name in the bottom-left status bar.
-2. A mode list opens. Scroll to **📚 Knowledge Manager**.
+2. A mode list opens. Scroll to **🧠 Mnemox Knowledge Builder**.
 3. Click it. The status bar immediately updates to:
 
    ```
-   Mode: 📚 Knowledge Manager
+   Mode: 🧠 Mnemox Knowledge Builder
    ```
 
 No restart or reload is required. The change takes effect for the next message you send.
@@ -130,7 +130,7 @@ The response should acknowledge the Knowledge Manager role and mention the
 
 ## 5. Tool groups
 
-The Knowledge Manager mode in Bob IDE is configured with the following tool groups
+The Mnemox Knowledge Builder mode in Bob IDE is configured with the following tool groups
 (defined in `.bob/custom_modes.yaml`):
 
 | Group | What it enables | Notes |
@@ -251,7 +251,7 @@ What mode are you in? Describe your role.
 ```
 
 **Expected output:** The agent describes the Knowledge Manager role and confirms it will
-write to `docs/knowledge-base/`. The status bar shows `Mode: 📚 Knowledge Manager`.
+write to `docs/knowledge-base/`. The status bar shows `Mode: 🧠 Mnemox Knowledge Builder`.
 
 ---
 
@@ -310,7 +310,7 @@ panel:
 - `techzone`
 - `atlassian`
 
-These errors are **pre-existing and unrelated to the Knowledge Manager mode**. They do
+These errors are **pre-existing and unrelated to the Mnemox Knowledge Builder mode**. They do
 not affect mode operation, file reading/writing, shell execution, or skill activation.
 You can safely ignore them.
 
@@ -344,7 +344,7 @@ not a configuration issue.
 
 ### Mode not appearing in the picker
 
-**Symptom:** After opening the workspace, `📚 Knowledge Manager` does not appear in
+**Symptom:** After opening the workspace, `🧠 Mnemox Knowledge Builder` does not appear in
 the mode list.
 
 **Resolution:**
@@ -364,7 +364,7 @@ the mode list.
 **Symptom:** The status bar shows a different mode name (e.g. `Mode: Agent`).
 
 **Resolution:** Click the mode name in the bottom-left status bar and select
-`📚 Knowledge Manager` from the list. The switch is immediate.
+`🧠 Mnemox Knowledge Builder` from the list. The switch is immediate.
 
 ---
 

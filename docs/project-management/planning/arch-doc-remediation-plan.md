@@ -49,7 +49,7 @@
 **Relevant Context:**
 - File: `docs/architecture/README.md`
 - Audit findings: `architecture-audit-mece-2026-07-14.md` Dimension 1 and Dimension 7
-- Authoritative doc: `docs/architecture/ARCHITECTURE.md` (v3.0, 2026-07-14)
+- Authoritative doc: `docs/architecture/architecture.md` (v3.0, 2026-07-14)
 - Grade source: `STATUS.md` line 11
 
 ---
@@ -132,7 +132,7 @@
 - All facts are verifiable against `pyproject.toml` and source code (no invented constraints)
 
 **Todo List:**
-1. Read `docs/architecture/ARCHITECTURE.md` to find the current last section (§8) and exact EOF
+1. Read `docs/architecture/architecture.md` to find the current last section (§8) and exact EOF
 2. Read `pyproject.toml` to verify Python floor, dependency names, and optional deps
 3. Read `src/facade.py` to confirm sync-only, no async
 4. Read `.github/workflows/ci.yml` to confirm which OS and Python versions are tested
@@ -140,7 +140,7 @@
 6. Insert the section before EOF in `ARCHITECTURE.md`
 
 **Relevant Context:**
-- File: `docs/architecture/ARCHITECTURE.md`
+- File: `docs/architecture/architecture.md`
 - arc42 §6 requirement: deployment view
 - Audit findings: `architecture-audit-mece-2026-07-14.md` Dimension 2 — "Deployment view absent"
 - Data sources: `pyproject.toml`, `.github/workflows/ci.yml`, `src/facade.py`
@@ -159,7 +159,7 @@
 - All definitions are grounded in actual code (cite source file where the term originates)
 
 **Todo List:**
-1. Read `docs/architecture/ARCHITECTURE.md` to confirm §9 was added (sub-task 4) and find exact insertion point
+1. Read `docs/architecture/architecture.md` to confirm §9 was added (sub-task 4) and find exact insertion point
 2. Collect term definitions from source:
    - Bobcoin: `src/pricing.py` — what it is, the formula
    - tiktoken_active: `src/optimizer/token_counter.py` — what it means when false
@@ -173,7 +173,7 @@
 4. Append to `ARCHITECTURE.md` after §9
 
 **Relevant Context:**
-- File: `docs/architecture/ARCHITECTURE.md`
+- File: `docs/architecture/architecture.md`
 - arc42 §10 requirement: glossary
 - Audit findings: `architecture-audit-mece-2026-07-14.md` Dimension 2 — "Glossary absent"
 - Term sources: `src/pricing.py`, `src/optimizer/token_counter.py`, `src/validation/manifest.py`, `src/cache/`, `src/config/schema.py`

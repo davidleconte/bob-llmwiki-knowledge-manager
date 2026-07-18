@@ -237,7 +237,7 @@ Not ready for:
 
 ## Files Generated
 
-1. **docs/TOKEN_SAVINGS_TEST_PLAN.md** - Comprehensive test plan
+1. **docs/token-savings-test-plan.md** - Comprehensive test plan
 2. **evaluation/scripts/generate_synthetic_data.py** - Data generator
 3. **evaluation/scripts/run_token_validation.py** - Validation runner
 4. **evaluation/HONEST_ASSESSMENT.md** - Complete honest analysis

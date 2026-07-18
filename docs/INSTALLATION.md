@@ -41,7 +41,7 @@ Running [`scripts/init-project.sh`](../scripts/init-project.sh) scaffolds a know
 
 | Artefact written | Condition |
 |---|---|
-| `docs/knowledge-base/INDEX.md` | Always (overwrites) |
+| `docs/knowledge-base/index.md` | Always (overwrites) |
 | `docs/knowledge-base/concepts/` | Always |
 | `docs/knowledge-base/guides/` | Always |
 | `docs/knowledge-base/references/` | Always |
@@ -200,7 +200,7 @@ sequenceDiagram
 
     init.sh->>FS: mkdir -p docs/knowledge-base/{concepts,guides,references,research}  [L18]
 
-    init.sh->>FS: write docs/knowledge-base/INDEX.md (heredoc INDEXEOF)  [L22–L72]
+    init.sh->>FS: write docs/knowledge-base/index.md (heredoc INDEXEOF)  [L22–L72]
     Note over FS: ⚠️ Heredoc uses single-quoted delimiter 'INDEXEOF'<br/>$(date +%Y-%m-%d) is written literally — see §8
 
     init.sh->>FS: test -d .bob  [L75]
@@ -211,7 +211,7 @@ sequenceDiagram
     init.sh->>FS: test -f .bob/settings.json  [L81]
     alt .bob/settings.json does NOT exist
         init.sh->>FS: write .bob/settings.json (heredoc SETTINGSEOF)  [L83–L89]
-        Note over FS: context.fileName = ["CONTEXT.md","docs/knowledge-base/INDEX.md"]
+        Note over FS: context.fileName = ["CONTEXT.md","docs/knowledge-base/index.md"]
     else already exists  [L91]
         Note over init.sh: print "already exists (not overwriting)"
     end
@@ -235,7 +235,7 @@ sequenceDiagram
 | `docs/knowledge-base/guides/` | **Yes** | Empty directory ([L18](../scripts/init-project.sh)) |
 | `docs/knowledge-base/references/` | **Yes** | Empty directory ([L18](../scripts/init-project.sh)) |
 | `docs/knowledge-base/research/` | **Yes** | Empty directory ([L18](../scripts/init-project.sh)) |
-| `docs/knowledge-base/INDEX.md` | **Yes (overwrites)** | See [§8](#8-known-bug--indexmd-date-not-expanding) for date bug |
+| `docs/knowledge-base/index.md` | **Yes (overwrites)** | See [§8](#8-known-bug--indexmd-date-not-expanding) for date bug |
 | `.bob/settings.json` | Only if absent ([L81](../scripts/init-project.sh)) | Sets `context.fileName` to load INDEX.md automatically |
 | `.gitignore` (appended) | Only if file exists and entry absent ([L95–L96](../scripts/init-project.sh)) | Adds `.DS_Store` exclusion |
 
@@ -276,7 +276,7 @@ Bob Shell should start without an "unknown mode" error.
 ls -d docs/knowledge-base/{concepts,guides,references,research}
 
 # INDEX.md
-ls -la docs/knowledge-base/INDEX.md
+ls -la docs/knowledge-base/index.md
 
 # Per-project Bob context
 cat .bob/settings.json
@@ -287,7 +287,7 @@ Expected `.bob/settings.json` content (written by [`init-project.sh` L83–L89](
 ```json
 {
   "context": {
-    "fileName": ["CONTEXT.md", "docs/knowledge-base/INDEX.md"]
+    "fileName": ["CONTEXT.md", "docs/knowledge-base/index.md"]
   }
 }
 ```
@@ -296,9 +296,9 @@ Expected `.bob/settings.json` content (written by [`init-project.sh` L83–L89](
 
 If you are using **Bob IDE**, the CLI verification commands above do not apply. Verify the Bob IDE setup with these checks:
 
-**① Mode picker shows 📚 Knowledge Manager**
+**① Mode picker shows 🧠 Mnemox Knowledge Builder**
 
-Open this workspace in Bob IDE. Click the **mode picker** in the bottom-left status bar. Scroll to and confirm that **📚 Knowledge Manager** is listed. Select it.
+Open this workspace in Bob IDE. Click the **mode picker** in the bottom-left status bar. Scroll to and confirm that **🧠 Mnemox Knowledge Builder** is listed. Select it.
 
 **② Skill activation succeeds**
 
@@ -320,7 +320,7 @@ Expected output: `KB shell access OK`
 
 Send this prompt:
 ```
-Read docs/knowledge-base/INDEX.md and confirm it exists
+Read docs/knowledge-base/index.md and confirm it exists
 ```
 Expected: the agent reads and summarises the file without error.
 
@@ -347,7 +347,7 @@ The table below covers every `exit 1` and every printed warning in both scripts.
 | F-5 | `install.sh` | `Permission denied` (from `cp`) | The script file itself is not executable. | `chmod +x scripts/install.sh && ./scripts/install.sh` |
 | F-6 | `init-project.sh` | `⚠️  Warning: This doesn't look like a project directory` + prompt ([L8–L9](../scripts/init-project.sh)) | No `.git`, `package.json`, or `pyproject.toml` found in the current directory. | If you intend to initialise a KB in a non-project directory, answer `y`. Otherwise `cd` to the correct project root first. |
 | F-7 | `init-project.sh` | *(exit 1 with no additional message, after prompt)* | User answered `N` (or Enter) at the "not a project directory" prompt ([L11–L13](../scripts/init-project.sh)). | Expected behaviour. Navigate to the correct project directory and re-run. |
-| F-8 | `init-project.sh` | `ℹ️  .bob/settings.json already exists (not overwriting)` ([L91](../scripts/init-project.sh)) | `.bob/settings.json` already exists in the target project. | **Non-fatal, informational.** The existing file is preserved. Ensure `docs/knowledge-base/INDEX.md` is listed in your `context.fileName` array if you want Bob Shell to auto-load it. |
+| F-8 | `init-project.sh` | `ℹ️  .bob/settings.json already exists (not overwriting)` ([L91](../scripts/init-project.sh)) | `.bob/settings.json` already exists in the target project. | **Non-fatal, informational.** The existing file is preserved. Ensure `docs/knowledge-base/index.md` is listed in your `context.fileName` array if you want Bob Shell to auto-load it. |
 
 ---
 
@@ -355,10 +355,10 @@ The table below covers every `exit 1` and every printed warning in both scripts.
 
 ### Description
 
-[`init-project.sh` line 22](../scripts/init-project.sh) writes `docs/knowledge-base/INDEX.md` using a heredoc with a **single-quoted** delimiter:
+[`init-project.sh` line 22](../scripts/init-project.sh) writes `docs/knowledge-base/index.md` using a heredoc with a **single-quoted** delimiter:
 
 ```bash
-cat > docs/knowledge-base/INDEX.md << 'INDEXEOF'
+cat > docs/knowledge-base/index.md << 'INDEXEOF'
 ...
 Last Updated: $(date +%Y-%m-%d)
 ...
@@ -370,7 +370,7 @@ In Bash, single-quoting the heredoc delimiter (`'INDEXEOF'`) **suppresses all pa
 ### Observable effect
 
 ```bash
-grep "Last Updated" docs/knowledge-base/INDEX.md
+grep "Last Updated" docs/knowledge-base/index.md
 # Output:
 # Last Updated: $(date +%Y-%m-%d)
 ```
@@ -381,15 +381,15 @@ After running `init-project.sh`, manually replace the placeholder with today's d
 
 ```bash
 TODAY=$(date +%Y-%m-%d)
-sed -i.bak "s/\$(date +%Y-%m-%d)/$TODAY/" docs/knowledge-base/INDEX.md
-rm docs/knowledge-base/INDEX.md.bak   # macOS sed creates a backup
+sed -i.bak "s/\$(date +%Y-%m-%d)/$TODAY/" docs/knowledge-base/index.md
+rm docs/knowledge-base/index.md.bak   # macOS sed creates a backup
 ```
 
 Or edit the file directly:
 
 ```bash
 # Replace the literal string with today's date
-sed -i '' "s/\$(date +%Y-%m-%d)/$(date +%Y-%m-%d)/" docs/knowledge-base/INDEX.md
+sed -i '' "s/\$(date +%Y-%m-%d)/$(date +%Y-%m-%d)/" docs/knowledge-base/index.md
 ```
 
 ### Root cause
@@ -497,7 +497,7 @@ These are verifiable success criteria. Each maps to a specific observable state 
 
 ## 14. Bob IDE Installation
 
-> **Cross-reference:** For a 5-minute walkthrough, see [docs/QUICK_START.md](QUICK_START.md). For full Bob IDE reference documentation, see [docs/BOB-IDE-GUIDE.md](BOB-IDE-GUIDE.md).
+> **Cross-reference:** For a 5-minute walkthrough, see [docs/quick-start.md](QUICK_START.md). For full Bob IDE reference documentation, see [docs/bob-ide-guide.md](BOB-IDE-GUIDE.md).
 
 ### 14.1 Overview
 
@@ -514,7 +514,7 @@ Bob IDE picks up `.bob/custom_modes.yaml` automatically when the workspace is op
 
 1. Open the `bob-llmwiki-knowledge-manager` workspace in Bob IDE (VS Code or Cursor with the Bob IDE extension installed).
 2. Click the **mode picker** in the bottom-left status bar.
-3. Scroll to and select **📚 Knowledge Manager**.
+3. Scroll to and select **🧠 Mnemox Knowledge Builder**.
 
 The mode is now active. The agent is constrained to the `execute`, `skill`, `read`, and `edit[\.md$]` tool groups defined in `.bob/custom_modes.yaml`.
 
@@ -542,7 +542,7 @@ After activation, confirm the setup with the checks in [§6.4](#64-bob-ide-verif
 
 | Symptom | Fix |
 |---|---|
-| **📚 Knowledge Manager not in mode picker** | Reload the window (**Cmd+Shift+P → Developer: Reload Window**), or make a trivial edit to `.bob/custom_modes.yaml` and save (Bob IDE hot-reloads on file change) |
+| **🧠 Mnemox Knowledge Builder not in mode picker** | Reload the window (**Cmd+Shift+P → Developer: Reload Window**), or make a trivial edit to `.bob/custom_modes.yaml` and save (Bob IDE hot-reloads on file change) |
 | **`use_skill` returns an error** | Confirm `.bob/skills/knowledge-manager/SKILL.md` exists: `ls .bob/skills/knowledge-manager/SKILL.md` |
-| **Agent cannot run shell commands** | Confirm the active mode is 📚 Knowledge Manager, not the default Agent mode. Only knowledge-manager mode has the `execute` group wired to this workspace |
+| **Agent cannot run shell commands** | Confirm the active mode is 🧠 Mnemox Knowledge Builder, not the default Agent mode. Only knowledge-manager mode has the `execute` group wired to this workspace |
 | **Agent cannot write markdown files** | The `edit[\.md$]` fileRegex restricts edits to `.md` files. This is intentional — use the knowledge-manager mode for all KB writes |
