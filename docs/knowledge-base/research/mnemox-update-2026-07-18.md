@@ -1,12 +1,3 @@
----
-title: "Mnemox Update — 2026-07-18"
-category: research
-tags: [research]
-created: 2026-07-18
-updated: 2026-07-18
-status: active
----
-
 # Mnemox Update — 2026-07-18
 
 ## Objective
@@ -15,13 +6,15 @@ This note captures what changed since the last run and provides a scaffold
 for lessons learned — synthesised by Bob in the same session.
 
 ## Background
-- Last mnemox run: 2026-07-18T17:27:13Z
+- Last mnemox run: 2026-07-18T17:28:07Z
 - KB location: `docs/knowledge-base`
 
 ## Git Changes Since Last Run
 
 ```
-8c1bff3 fix: grep -qF -- sentinel in mnemox-lessons.sh (macOS BSD grep compat)
+82fe4aa refactor: kebab-case all .md filenames under docs/ and evaluation/
+4496d60 feat: auto-add frontmatter via mnemox
+2b40318 mnemox: update KB 2026-07-18
 ```
 
 ## KB State
@@ -36,7 +29,23 @@ for lessons learned — synthesised by Bob in the same session.
 
 ## New Analysis Reports Filed
 
+- `docs/knowledge-base/research/code-metrics-2026-07-12.md`
+- `docs/knowledge-base/research/code-metrics-2026-07-13.md`
+- `docs/knowledge-base/research/code-metrics-2026-07-18.md`
+- `docs/knowledge-base/research/doc-coverage-2026-07-12.md`
+- `docs/knowledge-base/research/doc-coverage-2026-07-13.md`
+- `docs/knowledge-base/research/git-analysis-2026-07-12.md`
+- `docs/knowledge-base/research/git-analysis-2026-07-13.md`
 - `docs/knowledge-base/research/mnemox-update-2026-07-18.md`
+- `docs/knowledge-base/research/performance-benchmarks.md`
+- `docs/knowledge-base/research/repo-scan-2026-07-12.md`
+- `docs/knowledge-base/research/repo-scan-2026-07-13.md`
+- `docs/knowledge-base/research/repo-scan-2026-07-18.md`
+- `docs/knowledge-base/research/repository-improvement-plan.md`
+- `docs/knowledge-base/research/security-scan-2026-07-12.md`
+- `docs/knowledge-base/research/security-scan-2026-07-13.md`
+- `docs/knowledge-base/research/test-coverage-2026-07-12.md`
+- `docs/knowledge-base/research/test-coverage-2026-07-13.md`
 
 ## Findings
 
