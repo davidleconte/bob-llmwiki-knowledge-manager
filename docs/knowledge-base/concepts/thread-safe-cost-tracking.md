@@ -1,3 +1,12 @@
+---
+title: "Thread-Safe Cost Tracking"
+category: concept
+tags: [cost-tracking, thread-safety, bobcoins, compact-summary]
+created: 2026-07-18
+updated: 2026-07-18
+status: active
+---
+
 # Thread-Safe Cost Tracking
 
 ## Overview

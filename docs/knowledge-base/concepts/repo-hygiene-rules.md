@@ -1,3 +1,12 @@
+---
+title: "Repo Hygiene Rules"
+category: concept
+tags: [git, hygiene, security, secrets, compact-summary]
+created: 2026-07-18
+updated: 2026-07-18
+status: active
+---
+
 # Repo Hygiene Rules
 
 ## Overview

@@ -1,3 +1,12 @@
+---
+title: "Dependency Analysis"
+category: concept
+tags: [dependencies, security, python, compact-summary]
+created: 2026-07-18
+updated: 2026-07-18
+status: active
+---
+
 # Dependency Analysis Report
 
 **Generated:** 2026-07-18 18:09:23  

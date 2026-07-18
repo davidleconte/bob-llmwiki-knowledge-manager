@@ -1,3 +1,12 @@
+---
+title: "Cache Thread-Safety Patterns"
+category: concept
+tags: [cache, thread-safety, concurrency, compact-summary]
+created: 2026-07-18
+updated: 2026-07-18
+status: active
+---
+
 # Cache Thread-Safety Patterns
 
 ## Overview

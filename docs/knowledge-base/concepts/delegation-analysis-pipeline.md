@@ -1,3 +1,12 @@
+---
+title: "Delegation Analysis Pipeline"
+category: concept
+tags: [delegation, pipeline, agents, compact-summary]
+created: 2026-07-18
+updated: 2026-07-18
+status: active
+---
+
 # Delegation Analysis Pipeline
 
 ## Overview

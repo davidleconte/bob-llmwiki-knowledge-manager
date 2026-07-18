@@ -1,3 +1,12 @@
+---
+title: "Token Optimization"
+category: concept
+tags: [token-optimization, cache, compression, compact-summary]
+created: 2026-07-18
+updated: 2026-07-18
+status: active
+---
+
 # Token Optimization
 
 ## Overview

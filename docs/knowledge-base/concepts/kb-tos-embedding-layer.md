@@ -4,7 +4,7 @@ date: 2026-07-14
 type: concept
 status: proposed
 adversarial_audit: 2026-07-16
-tags: [architecture, embedding, kb-manager, token-optimizer, p2, persistent-index, integration]
+tags: [architecture, embedding, kb-manager, token-optimizer, p2, persistent-index, integration, compact-summary]
 related:
   - ../research/kb-tos-integration-feasibility-2026-07-14.md
   - ../guides/kb-tos-integration-roadmap.md

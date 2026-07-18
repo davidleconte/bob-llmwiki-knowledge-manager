@@ -1,3 +1,12 @@
+---
+title: "Knowledge Graph Layer"
+category: concept
+tags: [knowledge-graph, pagerank, embeddings, compact-summary]
+created: 2026-07-18
+updated: 2026-07-18
+status: active
+---
+
 # Knowledge Graph Layer (P3)
 
 ## Overview

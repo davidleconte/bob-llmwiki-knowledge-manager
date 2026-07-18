@@ -1,3 +1,12 @@
+---
+title: "Multi-Level Caching Architecture Patterns"
+category: concept
+tags: [cache, architecture-patterns, compact-summary]
+created: 2026-07-18
+updated: 2026-07-18
+status: active
+---
+
 # Multi-Level Caching Architecture Patterns
 
 ## Overview

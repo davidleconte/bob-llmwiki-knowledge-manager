@@ -1,3 +1,12 @@
+---
+title: "KB Document Types"
+category: concept
+tags: [knowledge-base, document-types, compact-summary]
+created: 2026-07-18
+updated: 2026-07-18
+status: active
+---
+
 # KB Document Types
 
 ## Overview

@@ -1,3 +1,12 @@
+---
+title: "File Naming Conventions"
+category: concept
+tags: [naming, kebab-case, conventions, compact-summary]
+created: 2026-07-18
+updated: 2026-07-18
+status: active
+---
+
 # File Naming Conventions
 
 ## Overview
