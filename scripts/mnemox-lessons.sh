@@ -124,7 +124,7 @@ if [[ -f "$INDEX_FILE" ]]; then
     INDEX_ENTRY="- $TODAY: [Mnemox Update — $TODAY]($NOTE_RELATIVE) - Research — automated KB update: git log, doc counts, lessons learned scaffold"
 
     # Guard: skip insert if entry for today already present (prevents duplicates on re-run)
-    if grep -qF "$INDEX_ENTRY" "$INDEX_FILE"; then
+    if grep -qF -- "$INDEX_ENTRY" "$INDEX_FILE"; then
         echo -e "${GREEN}✅ index.md already up to date${NC}"
     else
         # Insert after the "## Recent Additions" line using Python for safe UTF-8 handling
