@@ -12,8 +12,13 @@ Last Updated: 2026-07-18
 
 ## Recent Additions
 - 2026-07-18: [Mnemox Update — 2026-07-18](./research/mnemox-update-2026-07-18.md) - Research — automated KB update: git log, doc counts, lessons learned scaffold
-- 2026-07-18: [Mnemox Update — 2026-07-18](./research/mnemox-update-2026-07-18.md) - Research — automated KB update: git log, doc counts, lessons learned scaffold
-- 2026-07-18: [Mnemox Update — 2026-07-18](./research/mnemox-update-2026-07-18.md) - Research — automated KB update: git log, doc counts, lessons learned scaffold
+- 2026-07-18: [File Naming Conventions](./concepts/file-naming-conventions.md) - Concept ⭐ NEW — kebab-case rule, exclusion zones, `index.md` blast radius, emoji SSoT, drift detection
+- 2026-07-18: [Repo Hygiene Rules](./concepts/repo-hygiene-rules.md) - Concept ⭐ NEW — 5 hygiene classes (H-1–H-5), pre-push verification gate, `.gitignore` leading-`/` rule
+- 2026-07-18: [Cache Thread-Safety Patterns](./concepts/cache-thread-safety-patterns.md) - Concept ⭐ NEW — 4-tier audit, lock map, GIL limits, snapshot pattern, cross-class accessor pattern
+- 2026-07-18: [KB Document Types](./concepts/kb-document-types.md) - Concept ⭐ NEW — compact summary vs comprehensive document, re-derivation saving applicability, compact-summary tag
+- 2026-07-18: [Iterative Audit Methodology](./concepts/iterative-audit-methodology.md) - Concept ⭐ NEW — T1–T4 audit tiers, alternative-path anti-pattern, stats() canary, regression test discipline
+- 2026-07-18: [Thread-Safe Cost Tracking](./concepts/thread-safe-cost-tracking.md) - Concept ⭐ NEW — opt-in design, RLock pattern, three confidence levels, Bobcoin pricing constant
+- 2026-07-18: [Mnemox Update — 2026-07-18](./research/mnemox-update-2026-07-18.md) - Research — kebab rename lessons, emoji SSoT, index.md sweep, test brittleness
 - 2026-07-18: [Quality Gate Status — 2026-07-18](./research/quality-gate-status-2026-07-18.md) - Research ⭐ NEW — Status-only audit snapshot: 1112 tests / 0 failures, 89.82% global coverage, all 5 per-package floors met, ruff + mypy clean; script-output hygiene warning; merge checklist
 - 2026-07-18: [Repo Hygiene — Lessons Learned](./research/repo-hygiene-lessons-2026-07.md) - Research — 5 hygiene classes (unrelated dirs, root plan files, machine-specific paths, another user's paths, exposed API key); gitignore leading-`/` rule; hygiene audit protocol; portability verification commands
 - 2026-07-18: [Cache Thread-Safety Audit — Round 5 Lessons Learned](./research/cache-race-fix-round5-2026-07.md) - Research — 3 new bugs fixed (l3_hits missing from stats, contains() flag-gating, CacheStatsSnapshot); structural enforcement via frozen dataclass; new counter checklist; 1109→1112 tests
@@ -75,8 +80,14 @@ Last Updated: 2026-07-18
 ## All Documents
 
 ### Concepts
-- [Knowledge Graph Layer](./concepts/knowledge-graph-layer.md) - P3 property graph over KB documents: 4 modules (graph · builder · ranker · store), NodeProps model, explicit + semantic + broken edge types, orphan/hub/broken-link detection, PageRank re-ranking, benefits table ⭐ NEW
-- [Delegation Analysis Pipeline](./concepts/delegation-analysis-pipeline.md) - 6 parallel analysis agents (Security · Performance · Quality · Architecture · Documentation · Research), thin connector pattern, KB-aware execution order, token-compressed output, `bob-optimize analyze` CLI ⭐ NEW
+- [File Naming Conventions](./concepts/file-naming-conventions.md) - Kebab-case rule for all `.md` files, exclusion zones, `index.md` blast radius, emoji single source of truth, drift detection command ⭐ NEW
+- [Repo Hygiene Rules](./concepts/repo-hygiene-rules.md) - 5 hygiene failure classes (H-1–H-5): unrelated dirs, root plan files, machine-specific paths, cross-user paths, committed secrets; pre-push gate ⭐ NEW
+- [Cache Thread-Safety Patterns](./concepts/cache-thread-safety-patterns.md) - 4-tier audit (structural, snapshot, cross-class, alternative paths), lock map for `src/cache/`, GIL limits, snapshot-before-compute pattern ⭐ NEW
+- [KB Document Types](./concepts/kb-document-types.md) - Compact summary vs comprehensive document; re-derivation saving applies only to compact summaries; `compact-summary` tag; stale-pair detection ⭐ NEW
+- [Iterative Audit Methodology](./concepts/iterative-audit-methodology.md) - T1–T4 audit tiers, `stats()` as canary, alternative-path anti-pattern, regression test discipline, KB compounding within a branch ⭐ NEW
+- [Thread-Safe Cost Tracking](./concepts/thread-safe-cost-tracking.md) - Opt-in design, `RLock` pattern, tracking/reporting separation, three confidence levels, Bobcoin pricing constant ⭐ NEW
+- [Knowledge Graph Layer](./concepts/knowledge-graph-layer.md) - P3 property graph over KB documents: 4 modules (graph · builder · ranker · store), NodeProps model, explicit + semantic + broken edge types, orphan/hub/broken-link detection, PageRank re-ranking, benefits table
+- [Delegation Analysis Pipeline](./concepts/delegation-analysis-pipeline.md) - 6 parallel analysis agents (Security · Performance · Quality · Architecture · Documentation · Research), thin connector pattern, KB-aware execution order, token-compressed output, `bob-optimize analyze` CLI
 - [Multi-Level Caching Architecture Patterns](./concepts/multi-level-caching-architecture-patterns.md) - Comprehensive guide to cache hierarchy patterns: L1/L2/L3 organization, eviction policies, distributed caching, with examples from CPU caches to CDN to application caches
 - [KB-TOS Shared Embedding Layer](./concepts/kb-tos-embedding-layer.md) - P2 shared infrastructure (`src/embeddings/`): `PersistentEmbeddingIndex`, `FileBackedVectorStore`, `KBIndexer`, persistent disk-backed semantic search for KB Manager and Token Optimizer
 - [Multi-Level Caching](./concepts/multi-level-caching.md) - Hierarchical caching strategy combining L1 (exact match) and L2 (semantic similarity) caches with automatic promotion
