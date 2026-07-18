@@ -356,6 +356,8 @@ Both rounds used the same discipline:
 
 ## Related Documents
 
+- [Cache Thread-Safety Audit — Round 5 Lessons Learned](./cache-race-fix-round5-2026-07.md)
+- [Iterative Audit Methodology — Lessons Learned](./iterative-audit-lessons-2026-07.md)
 - [Multi-Level Caching](../concepts/multi-level-caching.md)
 - [Multi-Level Caching Architecture Patterns](../concepts/multi-level-caching-architecture-patterns.md)
 - [Phase 2 Thread Safety Fixes Complete](./phase2-thread-safety-fixes-complete.md)

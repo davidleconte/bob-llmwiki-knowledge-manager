@@ -275,6 +275,8 @@ Artifact hygiene
 ## Related Documents
 
 - [Cache Thread-Safety Audit — Rounds 1–4 Lessons Learned](./cache-race-fix-lessons-2026-07.md)
+- [Cache Thread-Safety Audit — Round 5 Lessons Learned](./cache-race-fix-round5-2026-07.md)
+- [Repo Hygiene — Lessons Learned](./repo-hygiene-lessons-2026-07.md)
 - [Phase 2 Thread Safety Fixes Complete](./phase2-thread-safety-fixes-complete.md)
 - [Phase 2 Concurrency Test Results](./phase2-concurrency-test-results.md)
 - [KB Leveraging Across Mode Switches — Lessons Learned](./kb-mode-switch-lessons-2026-07.md)

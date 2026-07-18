@@ -11,6 +11,8 @@ Last Updated: 2026-07-18
 - [Research](./research/) - Research notes and findings
 
 ## Recent Additions
+- 2026-07-18: [Repo Hygiene — Lessons Learned](./research/repo-hygiene-lessons-2026-07.md) - Research ⭐ NEW — 5 hygiene classes (unrelated dirs, root plan files, machine-specific paths, another user's paths, exposed API key); gitignore leading-`/` rule; hygiene audit protocol; portability verification commands
+- 2026-07-18: [Cache Thread-Safety Audit — Round 5 Lessons Learned](./research/cache-race-fix-round5-2026-07.md) - Research ⭐ NEW — 3 new bugs fixed (l3_hits missing from stats, contains() flag-gating, CacheStatsSnapshot); structural enforcement via frozen dataclass; new counter checklist; 1109→1112 tests
 - 2026-07-18: [Iterative Audit Methodology — Lessons Learned](./research/iterative-audit-lessons-2026-07.md) - Research ⭐ NEW — 6 findings on how to audit concurrency code across sessions; 4-tier audit checklist (T1 structural, T2 snapshot, T3 cross-class, T4 alternative paths); race taxonomy table; KB-first compounding; plan-file hygiene
 - 2026-07-18: [Cache Thread-Safety Audit — Rounds 1–4 Lessons Learned](./research/cache-race-fix-lessons-2026-07.md) - Research — 14 races total (R-1–R-6, N-1–N-4, O-1–O-2, S-1–S-2); cross-class threshold read; unique_entries stale snapshot; 1109 tests passing
 - 2026-07-18: [KB Leveraging Across Mode Switches — Lessons Learned](./research/kb-mode-switch-lessons-2026-07.md) - Research — session analysis: what was leveraged vs missed, 5 findings, AGENTS.md gap root cause, 19-pair corpus anti-pattern, two distinct KB doc roles, 5 recommendations
@@ -111,6 +113,8 @@ Last Updated: 2026-07-18
 - [Cache API Reference](./references/cache-api.md) - Complete API documentation for all cache classes, methods, and usage examples
 
 ### Research
+- [Repo Hygiene — Lessons Learned](./research/repo-hygiene-lessons-2026-07.md) - H-1–H-5 issue taxonomy; gitignore `/`-anchoring rule; hygiene audit protocol (5 shell commands); `.gitignore` design table; verification gate ⭐ NEW
+- [Cache Thread-Safety Audit — Round 5 Lessons Learned](./research/cache-race-fix-round5-2026-07.md) - Round 5 findings: l3_hits missing (5A), contains() flag bug (5B), CONCURRENCY.md (5C), max_size comment (5D), CacheStatsSnapshot structural enforcement (5E); new counter checklist; 1112 tests ⭐ NEW
 - [Iterative Audit Methodology — Lessons Learned](./research/iterative-audit-lessons-2026-07.md) - 4-tier audit checklist; 6 process findings; race taxonomy; KB compounding pattern; plan-file hygiene rule; `stats()` as concurrency canary ⭐ NEW
 - [Cache Thread-Safety Audit — Rounds 1–4 Lessons Learned](./research/cache-race-fix-lessons-2026-07.md) - 14 races total (R-1–R-6, N-1–N-4, O-1–O-2, S-1–S-2); GIL misconception; lock-order rule; snapshot-before-compute; cross-class lock read; alternative-path stats bypass; 1109 tests
 - [KB Leveraging Across Mode Switches — Lessons Learned](./research/kb-mode-switch-lessons-2026-07.md) - Session analysis: KB retrieval vs guidance vs compounding, 5 findings (broken AGENTS.md pointer, cost-tracking miss, mode-reset gap, 19-pair anti-pattern, two KB doc roles), 5 actionable recommendations
