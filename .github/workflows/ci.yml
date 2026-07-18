@@ -99,6 +99,41 @@ jobs:
         # (SECURITY.md, CONTRIBUTING, CODE_OF_CONDUCT, GOVERNANCE, SUPPORT,
         # CODEOWNERS, THREAT_MODEL, issue/PR templates) is missing or a stub.
         run: python scripts/check_community_health.py
+      - name: Doc href-casing lint (Linux CI ground truth)
+        # Fails if any active .md file contains a Markdown href using the
+        # pre-rename uppercase filename variants that silently resolve on macOS
+        # HFS+ but break on this Linux runner.  Matches only href syntax
+        # (](...)) to avoid false-positives from prose, code blocks, or repo
+        # scan reports that discuss the old names.
+        # Exclusions: project-management plans, deprecated/, archive/, adr/
+        # (historic prose), and knowledge-base/research/ (mnemox lesson notes
+        # that discuss the renames as prose, not as live hrefs).
+        # Pattern rationale (mnemox lessons 2026-07-18 Finding 1):
+        #   ](QUICK_START.md)   → on-disk name is quick-start.md
+        #   ](SLA.md)           → on-disk name is sla.md
+        #   ](architecture.md)  → on-disk name is ARCHITECTURE.md
+        run: |
+          bad=$(grep -rn \
+            --include="*.md" \
+            -e "](QUICK_START\.md)" \
+            -e "](SLA\.md)" \
+            -e "](architecture\.md)" \
+            README.md STATUS.md CHANGELOG.md docs/ \
+            --exclude-dir=".git" \
+            --exclude-dir="project-management" \
+            --exclude-dir="planning" \
+            --exclude-dir="plans" \
+            --exclude-dir="deprecated" \
+            --exclude-dir="archive" \
+            --exclude-dir="adr" \
+            --exclude-dir="research" \
+            2>/dev/null || true)
+          if [ -n "$bad" ]; then
+            echo "❌ Href casing violations found (break on Linux, silent on macOS):"
+            echo "$bad"
+            exit 1
+          fi
+          echo "✅ No href casing violations."
       - name: Install bandit (SAST)
         run: pip install "bandit>=1.7"
       - name: Bandit security scan (src/, medium+ severity)

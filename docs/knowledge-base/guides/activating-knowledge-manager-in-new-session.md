@@ -8,7 +8,7 @@ tags: [usage, activation, session, CONTEXT.md, start-kb.sh, workflow]
 related:
   - ../../USAGE.md
   - ../../INSTALLATION.md
-  - ../../QUICK_START.md
+  - ../../quick-start.md
 created: 2026-07-14
 updated: 2026-07-14
 
@@ -180,7 +180,7 @@ Bob will:
 
 - [USAGE.md §0 — Starting a Session](../../USAGE.md#0-starting-a-session) — full session activation reference with Mermaid flowchart
 - [INSTALLATION.md](../../INSTALLATION.md) — installing the mode globally
-- [QUICK_START.md](../../QUICK_START.md) — 5-minute onboarding from scratch
+- [quick-start.md](../../quick-start.md) — 5-minute onboarding from scratch
 - [WORKFLOWS.md §2 — Morning Research Session](../../WORKFLOWS.md) — daily workflow including session start
 
 ---

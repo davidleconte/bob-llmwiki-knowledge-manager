@@ -61,7 +61,7 @@ REQUIRED: tuple[Artifact, ...] = (
     Artifact("GOVERNANCE.md", 300, "decision model"),
     Artifact("SUPPORT.md", 200, "where to get help"),
     Artifact("LICENSE", 200, "MIT license text"),
-    Artifact("docs/security/THREAT_MODEL.md", 800, "STRIDE threat model"),
+    Artifact("docs/security/threat-model.md", 800, "STRIDE threat model"),
     Artifact(".github/CODEOWNERS", 40, "review ownership"),
     Artifact(".github/PULL_REQUEST_TEMPLATE.md", 200, "PR checklist"),
     Artifact(".github/ISSUE_TEMPLATE/bug_report.md", 150, "bug template"),

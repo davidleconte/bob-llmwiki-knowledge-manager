@@ -25,6 +25,8 @@ Every box should be checked before requesting review (CI enforces most of them):
       `python scripts/generate_api_docs.py` and committed `docs/api/`
 - [ ] No fabricated metrics — any savings/coverage/perf figure cites a real
       artifact (manifest, test, or `STATUS.md`)
+- [ ] If test count or coverage % changed: **`STATUS.md` Terminology guardrail
+      updated** in this same PR (old → new values in commit message)
 - [ ] No edits to frozen audit-trail files (dated snapshots, superseded docs)
 - [ ] Change verified end-to-end (ran the affected flow), not just compiled
 

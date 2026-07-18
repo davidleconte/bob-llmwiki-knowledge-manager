@@ -5,7 +5,7 @@ status: reference
 category: guide
 related:
   - ../knowledge-base/guides/setup-token-optimization.md
-  - ../QUICK_START.md
+  - ../quick-start.md
   - ../USAGE.md
 ---
 
