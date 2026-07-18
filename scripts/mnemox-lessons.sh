@@ -123,8 +123,12 @@ if [[ -f "$INDEX_FILE" ]]; then
     NOTE_RELATIVE="./research/mnemox-update-${TODAY}.md"
     INDEX_ENTRY="- $TODAY: [Mnemox Update — $TODAY]($NOTE_RELATIVE) - Research — automated KB update: git log, doc counts, lessons learned scaffold"
 
-    # Insert after the "## Recent Additions" line using Python for safe UTF-8 handling
-    python3 - "$INDEX_FILE" "$INDEX_ENTRY" << 'PYEOF'
+    # Guard: skip insert if entry for today already present (prevents duplicates on re-run)
+    if grep -qF "$INDEX_ENTRY" "$INDEX_FILE"; then
+        echo -e "${GREEN}✅ index.md already up to date${NC}"
+    else
+        # Insert after the "## Recent Additions" line using Python for safe UTF-8 handling
+        python3 - "$INDEX_FILE" "$INDEX_ENTRY" << 'PYEOF'
 import sys
 path, entry = sys.argv[1], sys.argv[2]
 with open(path, 'r', encoding='utf-8') as f:
@@ -140,10 +144,11 @@ with open(path, 'w', encoding='utf-8') as f:
     f.writelines(out)
 PYEOF
 
-    if [[ $? -eq 0 ]]; then
-        echo -e "${GREEN}✅ index.md updated${NC}"
-    else
-        echo -e "${YELLOW}⚠️  Could not update index.md — add entry manually${NC}"
+        if [[ $? -eq 0 ]]; then
+            echo -e "${GREEN}✅ index.md updated${NC}"
+        else
+            echo -e "${YELLOW}⚠️  Could not update index.md — add entry manually${NC}"
+        fi
     fi
 fi
 

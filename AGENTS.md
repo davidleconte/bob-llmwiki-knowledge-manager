@@ -8,7 +8,7 @@ This project maintains a pre-digested knowledge base at `docs/knowledge-base/`.
 **Before reading any raw source file, check the KB index first.**
 
 ```
-docs/knowledge-base/INDEX.md    ← master index of all digested knowledge
+docs/knowledge-base/index.md    ← master index of all digested knowledge
 docs/knowledge-base/concepts/   ← architecture, caching, optimization, graph
 docs/knowledge-base/guides/     ← setup, workflows, savings measurement
 docs/knowledge-base/references/ ← API docs, estimation methodology
@@ -17,7 +17,7 @@ docs/knowledge-base/research/   ← audit findings, validation results, benchmar
 
 **Mode-switch protocol:** When you switch modes mid-session (knowledge-manager →
 plan, plan → agent, etc.) your context resets. On the first task in the new mode,
-check `docs/knowledge-base/INDEX.md` for a KB doc covering the topic before
+check `docs/knowledge-base/index.md` for a KB doc covering the topic before
 reading raw source. A KB hit replaces a full source read and saves ~51% of tokens
 on well-formed pairs (measured; see README §10).
 
@@ -32,12 +32,18 @@ uv run bob-optimize graph-build --kb-path docs/knowledge-base --with-semantic
 
 | You need to… | Read this KB doc first |
 |---|---|
-| Understand the architecture | `docs/knowledge-base/concepts/token-optimization.md` + `docs/architecture/ARCHITECTURE.md` |
+| Understand the architecture | `docs/knowledge-base/concepts/token-optimization.md` + `docs/architecture/architecture.md` |
 | Work on the cache | `docs/knowledge-base/concepts/multi-level-caching.md` |
+| Audit cache thread-safety | `docs/knowledge-base/concepts/cache-thread-safety-patterns.md` |
 | Work on the graph layer | `docs/knowledge-base/concepts/knowledge-graph-layer.md` |
 | Work on delegation/pipeline | `docs/knowledge-base/concepts/delegation-analysis-pipeline.md` |
 | Check test coverage / floors | `docs/knowledge-base/research/coverage-measurement-2026-07-13.md` |
 | Understand savings claims | `docs/knowledge-base/research/bobcoin-savings-analysis-2026-07-14.md` |
+| Understand KB document types | `docs/knowledge-base/concepts/kb-document-types.md` |
+| Rename or move files | `docs/knowledge-base/concepts/file-naming-conventions.md` |
+| Run a repo hygiene check | `docs/knowledge-base/concepts/repo-hygiene-rules.md` |
+| Audit concurrency code | `docs/knowledge-base/concepts/iterative-audit-methodology.md` |
+| Work on cost tracking | `docs/knowledge-base/concepts/thread-safe-cost-tracking.md` |
 | Set up or install | `docs/knowledge-base/guides/setup-token-optimization.md` |
 | Understand project status | `STATUS.md` (single authoritative source) |
 
@@ -92,7 +98,7 @@ A parallel sub-agent framework for repository analysis. **This is a separate sys
 - Task queue with priority scheduling
 - Result aggregation and reporting
 
-**Note:** See `src/delegation/EXPERIMENTAL.md` and `docs/knowledge-base/research/delegation-integration-analysis-2026-07-13.md` for details.
+**Note:** See `src/delegation/experimental.md` and `docs/knowledge-base/research/delegation-integration-analysis-2026-07-13.md` for details.
 
 ---
 
@@ -153,7 +159,7 @@ lazy-load skill). Open this workspace in Bob IDE — the mode is immediately ava
 ##### Activate the Mode
 
 1. Click the **mode picker** in the bottom-left status bar (or use the command palette).
-2. Scroll to and select **📚 Knowledge Manager**.
+2. Scroll to and select **🧠 Mnemox Knowledge Builder**.
 
 ##### Load the Skill
 
@@ -360,28 +366,28 @@ metrics.record_optimization(1000, 800, 10.0)
 ### Bob Shell Knowledge Manager Documentation
 
 - **[README.md](README.md)** - Project overview and quick start
-- **[docs/QUICK_START.md](docs/QUICK_START.md)** - 5-minute getting started guide
-- **[docs/INSTALLATION.md](docs/INSTALLATION.md)** - Detailed installation
-- **[docs/USAGE.md](docs/USAGE.md)** - Usage guide with examples
-- **[docs/CUSTOMIZATION.md](docs/CUSTOMIZATION.md)** - Customization options
-- **[docs/WORKFLOWS.md](docs/WORKFLOWS.md)** - Common workflows
+- **[docs/quick-start.md](docs/quick-start.md)** - 5-minute getting started guide
+- **[docs/installation.md](docs/installation.md)** - Detailed installation
+- **[docs/usage.md](docs/usage.md)** - Usage guide with examples
+- **[docs/customization.md](docs/customization.md)** - Customization options
+- **[docs/workflows.md](docs/workflows.md)** - Common workflows
 - **[docs/archive/COMPARISON.md](docs/archive/COMPARISON.md)** — Comparison with LLM-Wiki (archived)
 
 ### Token Optimization System Documentation
 
-- **[docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md)** — Authoritative architecture (v3.0: facade, cache, KB subsystems, delegation, validation)
-- **[docs/kb-manager/ARCHITECTURE.md](docs/kb-manager/ARCHITECTURE.md)** — KB Manager architecture (arc42 v2.1)
-- **[docs/MONITORING.md](docs/MONITORING.md)** — Monitoring and observability
-- **[docs/SLA.md](docs/SLA.md)** — SLA v1.0: latency, throughput, quality, concurrency targets
+- **[docs/architecture/architecture.md](docs/architecture/architecture.md)** — Authoritative architecture (v3.0: facade, cache, KB subsystems, delegation, validation)
+- **[docs/kb-manager/architecture.md](docs/kb-manager/architecture.md)** — KB Manager architecture (arc42 v2.1)
+- **[docs/monitoring.md](docs/monitoring.md)** — Monitoring and observability
+- **[docs/sla.md](docs/sla.md)** — SLA v1.0: latency, throughput, quality, concurrency targets
 - **[docs/api/README.md](docs/api/README.md)** — Auto-generated API reference
 - **[docs/adr/](docs/adr/)** — Architecture Decision Records (ADR-001–019; ADR-012 superseded)
-- **[docs/knowledge-base/INDEX.md](docs/knowledge-base/INDEX.md)** — KB master index (pre-digested knowledge; check here before reading raw source)
-- **[docs/INDEX.md](docs/INDEX.md)** — TOS documentation index
+- **[docs/knowledge-base/index.md](docs/knowledge-base/index.md)** — KB master index (pre-digested knowledge; check here before reading raw source)
+- **[docs/index.md](docs/index.md)** — TOS documentation index
 
 ### Important Notes
 
-1. **Deprecated Docs:** Files in `docs/architecture/deprecated/` describe an earlier or planned system — use `docs/architecture/ARCHITECTURE.md` for the current system.
-2. **Current Architecture:** `docs/architecture/ARCHITECTURE.md` for TOS; `docs/kb-manager/ARCHITECTURE.md` for KB Manager. The old `ACTUAL_SYSTEM_ARCHITECTURE.md` no longer exists.
+1. **Deprecated Docs:** Files in `docs/architecture/deprecated/` describe an earlier or planned system — use `docs/architecture/architecture.md` for the current system.
+2. **Current Architecture:** `docs/architecture/architecture.md` for TOS; `docs/kb-manager/architecture.md` for KB Manager. The old `ACTUAL_SYSTEM_ARCHITECTURE.md` no longer exists.
 3. **Dual Nature:** This repository contains both the simple KB framework AND the Python optimization system.
 4. **Optional Dependencies:** psutil is optional for Token Optimization System; gracefully degrades without it.
 
@@ -438,11 +444,11 @@ metrics.record_optimization(1000, 800, 10.0)
 
 **Authoritative status: [`STATUS.md`](STATUS.md)** — single source of truth. Do not derive status from this file.
 
-Summary (2026-07-18): grade **A+ (4.30/4.30)**, 1088+ tests passing, ≥80% global coverage, all per-package floors met, SLA defined, load tests present. See `STATUS.md` for the full scorecard.
+Summary (2026-07-18): grade **A+ (4.30/4.30)**, 1 112 tests passing, ≥80% global coverage (89.82%), all per-package floors met, SLA defined, load tests present. See `STATUS.md` for the full scorecard.
 
 ### Bob Shell Knowledge Manager
-- **Status:** Functional. KB at `docs/knowledge-base/` (60+ documents).
-- **Entry point for any mode:** `docs/knowledge-base/INDEX.md`
+- **Status:** Functional. KB at `docs/knowledge-base/` (90+ documents).
+- **Entry point for any mode:** `docs/knowledge-base/index.md`
 
 ### Token Optimization System
 - **Implementation:** `TokenOptimizer` facade → cache → optimizer → truncation; `bob-optimize` CLI
@@ -452,7 +458,7 @@ Summary (2026-07-18): grade **A+ (4.30/4.30)**, 1088+ tests passing, ≥80% glob
 ### Delegation Module
 - **Status:** Functional and integrated (`bob-optimize analyze`); layering-clean
 - **Coverage:** 84% measured (floor 70%)
-- **Note:** See `src/delegation/EXPERIMENTAL.md`
+- **Note:** See `src/delegation/experimental.md`
 
 ---
 
@@ -461,9 +467,9 @@ Summary (2026-07-18): grade **A+ (4.30/4.30)**, 1088+ tests passing, ≥80% glob
 When working on this codebase:
 
 ### For any task (all modes)
-1. **KB first** — check `docs/knowledge-base/INDEX.md` before reading raw source
+1. **KB first** — check `docs/knowledge-base/index.md` before reading raw source
 2. **Status from STATUS.md** — not from this file; it may be stale
-3. **Architecture from docs/architecture/ARCHITECTURE.md** (TOS) or `docs/kb-manager/ARCHITECTURE.md` (KB Manager) — `ACTUAL_SYSTEM_ARCHITECTURE.md` no longer exists
+3. **Architecture from docs/architecture/architecture.md** (TOS) or `docs/kb-manager/architecture.md` (KB Manager) — `ACTUAL_SYSTEM_ARCHITECTURE.md` no longer exists
 
 ### For Bob Shell Knowledge Manager
 1. **Understand the simplicity** — templates and scripts, not complex code
@@ -472,17 +478,17 @@ When working on this codebase:
 
 ### For Token Optimization System
 1. **Read KB concept first** — `docs/knowledge-base/concepts/token-optimization.md`
-2. **Then architecture** — `docs/architecture/ARCHITECTURE.md`
+2. **Then architecture** — `docs/architecture/architecture.md`
 3. **Test always** — TDD; run `uv run pytest tests/ --ignore=tests/load --ignore=tests/performance`
 4. **Monitor everything** — add logging and metrics for new features
 5. **Document APIs** — comprehensive docstrings; they auto-generate docs
-6. **Performance matters** — profile and optimize; meet SLA targets in `docs/SLA.md`
+6. **Performance matters** — profile and optimize; meet SLA targets in `docs/sla.md`
 7. **Graceful degradation** — handle missing dependencies
 
 ---
 
 ## Contact & Support
 
-- **KB index:** `docs/knowledge-base/INDEX.md` — pre-digested knowledge, check first
-- **TOS documentation index:** `docs/INDEX.md`
+- **KB index:** `docs/knowledge-base/index.md` — pre-digested knowledge, check first
+- **TOS documentation index:** `docs/index.md`
 - **Architecture Questions:** ADRs in `docs/adr/`

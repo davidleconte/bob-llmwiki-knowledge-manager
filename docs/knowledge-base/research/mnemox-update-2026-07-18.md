@@ -6,14 +6,13 @@ This note captures what changed since the last run and provides a scaffold
 for lessons learned — synthesised by Bob in the same session.
 
 ## Background
-- Last mnemox run: 2026-07-18T17:06:29Z
+- Last mnemox run: 2026-07-18T17:15:35Z
 - KB location: `docs/knowledge-base`
 
 ## Git Changes Since Last Run
 
 ```
-2b55241 kb: graduate 6 research findings into concept documents
-1ccda1c mnemox: synthesise lessons 2026-07-18 — kebab rename, emoji fix, index.md sweep
+a27d520 mnemox: update KB 2026-07-18
 ```
 
 ## KB State
