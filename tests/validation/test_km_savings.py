@@ -132,6 +132,7 @@ satisfy SLA targets.
 # Sub-task 1: Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def raw_source_doc() -> Document:
     """~500-word technical markdown — the 'codebase' a KB doc summarises."""
@@ -158,6 +159,7 @@ def config() -> ConfigSchema:
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _measure_compression(
     raw_doc: Document,
@@ -259,18 +261,14 @@ def assert_compliant_claim(claim: Dict[str, Any]) -> None:
         or not all(isinstance(v, (int, float)) for v in cr)
         or cr[0] > cr[1]
     ):
-        errors.append(
-            "'confidence_range' must be a [lo, hi] pair of numbers with lo <= hi"
-        )
+        errors.append("'confidence_range' must be a [lo, hi] pair of numbers with lo <= hi")
 
     boundary = claim.get("applicability_boundary")
     if not isinstance(boundary, str) or not boundary.strip():
         errors.append("'applicability_boundary' must be a non-empty string")
 
     if errors:
-        raise AssertionError(
-            "Non-compliant savings claim — " + "; ".join(errors)
-        )
+        raise AssertionError("Non-compliant savings claim — " + "; ".join(errors))
 
 
 def check_for_verbatim_duplication(
@@ -308,6 +306,7 @@ def check_for_verbatim_duplication(
 # ===========================================================================
 # Sub-task 2 — Context compression ratio
 # ===========================================================================
+
 
 class TestContextCompressionRatio:
     """Guide §3: direct token-diff between raw source and KB summary."""
@@ -366,6 +365,7 @@ class TestContextCompressionRatio:
 # Sub-task 3 — Re-derivation avoidance (shadow comparison)
 # ===========================================================================
 
+
 class TestReDerivationAvoidance:
     """Guide §2: raw session vs KB-primary session via measure_optimizer."""
 
@@ -419,8 +419,12 @@ class TestReDerivationAvoidance:
     ) -> None:
         result = self._run_shadow(raw_source_doc, kb_summary_doc, config)
         required = (
-            "raw_tokens", "kb_tokens", "savings_pct",
-            "n_queries", "mechanism", "applicability_boundary",
+            "raw_tokens",
+            "kb_tokens",
+            "savings_pct",
+            "n_queries",
+            "mechanism",
+            "applicability_boundary",
         )
         for field in required:
             assert field in result, f"Missing required field: {field!r}"
@@ -435,14 +439,14 @@ class TestReDerivationAvoidance:
         # Verbatim KB ≈ same size as raw source; optimizer may compress both
         # by the same small amount, so savings_pct ~ 0.
         assert result["savings_pct"] < 5.0, (
-            f"Verbatim KB doc should yield <5% shadow savings; "
-            f"got {result['savings_pct']:.2f}%"
+            f"Verbatim KB doc should yield <5% shadow savings; got {result['savings_pct']:.2f}%"
         )
 
 
 # ===========================================================================
 # Sub-task 4 — Amortised ROI formula
 # ===========================================================================
+
 
 class TestAmortisedROI:
     """Guide §4: accounting identity using real token counts from fixtures."""
@@ -461,9 +465,7 @@ class TestAmortisedROI:
         kb_bc = tokens_to_bobcoins(kb_result["total_original_tokens"])
         return raw_bc - kb_bc
 
-    def test_roi_positive_after_breakeven(
-        self, real_savings_per_query_bc: float
-    ) -> None:
+    def test_roi_positive_after_breakeven(self, real_savings_per_query_bc: float) -> None:
         # Use a query count well above the expected breakeven (40 queries is
         # the guide's example; with real savings_per_query this still holds).
         creation_bc = 0.80
@@ -481,13 +483,10 @@ class TestAmortisedROI:
             "Check that the KB summary is genuinely smaller than the raw source."
         )
         assert result["roi_multiplier"] > 1.0, (
-            f"ROI multiplier should exceed 1× at 40 queries; "
-            f"got {result['roi_multiplier']:.4f}×"
+            f"ROI multiplier should exceed 1× at 40 queries; got {result['roi_multiplier']:.4f}×"
         )
 
-    def test_roi_negative_before_breakeven(
-        self, real_savings_per_query_bc: float
-    ) -> None:
+    def test_roi_negative_before_breakeven(self, real_savings_per_query_bc: float) -> None:
         # Single query: can't recover KB creation cost in one use.
         result = _amortised_roi(
             queries=1,
@@ -513,9 +512,7 @@ class TestAmortisedROI:
         with pytest.raises(ValueError, match="savings_per_query_bc must be > 0"):
             breakeven_queries(0.80, 0.30, 0.0)
 
-    def test_roi_result_has_expected_keys(
-        self, real_savings_per_query_bc: float
-    ) -> None:
+    def test_roi_result_has_expected_keys(self, real_savings_per_query_bc: float) -> None:
         result = _amortised_roi(
             queries=10,
             savings_per_query_bc=real_savings_per_query_bc,
@@ -523,14 +520,15 @@ class TestAmortisedROI:
             maintenance_bc=0.10,
         )
         for key in (
-            "gross_savings_bc", "total_cost_bc", "net_savings_bc",
-            "roi_multiplier", "breakeven_queries",
+            "gross_savings_bc",
+            "total_cost_bc",
+            "net_savings_bc",
+            "roi_multiplier",
+            "breakeven_queries",
         ):
             assert key in result, f"Missing key in ROI result: {key!r}"
 
-    def test_gross_equals_queries_times_per_query(
-        self, real_savings_per_query_bc: float
-    ) -> None:
+    def test_gross_equals_queries_times_per_query(self, real_savings_per_query_bc: float) -> None:
         n = 15
         result = _amortised_roi(
             queries=n,
@@ -547,6 +545,7 @@ class TestAmortisedROI:
 # ===========================================================================
 # Sub-task 5 — Reporting integrity guard
 # ===========================================================================
+
 
 class TestReportingIntegrityGuard:
     """Guide §5: four required fields + additive-fallacy rejection."""
@@ -635,6 +634,7 @@ class TestReportingIntegrityGuard:
 # Sub-task 6 — Null guard for verbatim KB docs
 # ===========================================================================
 
+
 class TestVerbatimKBNullGuard:
     """A KB doc that duplicates its source verbatim must be flagged, not counted."""
 
@@ -643,8 +643,7 @@ class TestVerbatimKBNullGuard:
     ) -> None:
         result = check_for_verbatim_duplication(raw_source_doc, verbatim_kb_doc, config)
         assert result["flagged"] is True, (
-            f"Verbatim KB doc must be flagged; "
-            f"got savings_pct={result['savings_pct']:.2f}%"
+            f"Verbatim KB doc must be flagged; got savings_pct={result['savings_pct']:.2f}%"
         )
 
     def test_genuine_kb_is_not_flagged(
@@ -652,8 +651,7 @@ class TestVerbatimKBNullGuard:
     ) -> None:
         result = check_for_verbatim_duplication(raw_source_doc, kb_summary_doc, config)
         assert result["flagged"] is False, (
-            f"Genuine KB summary must NOT be flagged; "
-            f"got savings_pct={result['savings_pct']:.2f}%"
+            f"Genuine KB summary must NOT be flagged; got savings_pct={result['savings_pct']:.2f}%"
         )
 
     def test_null_flag_reason_is_informative(

@@ -478,8 +478,6 @@ class TestMultiLevelCacheConcurrency:
             sys.setswitchinterval(old_interval)
 
 
-
-
 class TestRaceConditions:
     """Tests for detecting race conditions."""
 

@@ -223,24 +223,38 @@ class TestMultiLevelCache:
         """
         cache = MultiLevelCache()
         cache.set("key1", "response1")
-        cache.get("key1")   # L1 hit
-        cache.get("miss")   # miss
+        cache.get("key1")  # L1 hit
+        cache.get("miss")  # miss
 
         s = cache.stats()
 
         expected_keys = {
             # overall
-            "total_requests", "total_hits", "total_misses", "hit_rate",
-            "avg_lookup_time_ms", "version",
+            "total_requests",
+            "total_hits",
+            "total_misses",
+            "hit_rate",
+            "avg_lookup_time_ms",
+            "version",
             # L1
-            "l1_hits", "l1_hit_rate", "l1_size", "l1_max_size", "l1_utilization",
+            "l1_hits",
+            "l1_hit_rate",
+            "l1_size",
+            "l1_max_size",
+            "l1_utilization",
             # L2
-            "l2_hits", "l2_hit_rate", "l2_size", "l2_max_size", "l2_utilization",
-            "l2_similarity_threshold", "l2_avg_similarity",
+            "l2_hits",
+            "l2_hit_rate",
+            "l2_size",
+            "l2_max_size",
+            "l2_utilization",
+            "l2_similarity_threshold",
+            "l2_avg_similarity",
             # L3
             "l3_hits",
             # configuration
-            "promote_l2_hits", "unique_entries",
+            "promote_l2_hits",
+            "unique_entries",
         }
         missing = expected_keys - s.keys()
         assert not missing, f"stats() is missing keys: {sorted(missing)}"
@@ -256,8 +270,6 @@ class TestMultiLevelCache:
         assert isinstance(s["promote_l2_hits"], bool), "promote_l2_hits must be bool"
         assert isinstance(s["version"], str), "version must be str"
         assert isinstance(s["unique_entries"], int), "unique_entries must be int"
-
-
 
     def test_get_with_level(self):
         """Test getting response with cache level info."""
@@ -289,7 +301,6 @@ class TestMultiLevelCache:
         assert cache.contains("key1") is True
         assert cache.contains("nonexistent") is False
 
-
     def test_contains_respects_disabled_flags(self):
         """contains() must honour l1_enabled/l2_enabled — disabled levels must not
         be queried even when they contain matching data (B fix).
@@ -314,7 +325,6 @@ class TestMultiLevelCache:
         assert cache_none.contains("key") is False, (
             "contains() must return False when both levels are disabled"
         )
-
 
     def test_update_similarity_threshold(self):
         """Test updating L2 similarity threshold."""
@@ -508,8 +518,6 @@ class TestMultiLevelCache:
         assert stats["total_hits"] == 3
         assert stats["total_misses"] == 1
 
-
-
     def test_get_with_level_respects_disabled_flags(self):
         """get_with_level() must honour l1_enabled/l2_enabled — disabled levels must
         not be queried even when they contain matching data (M-1 regression)."""
@@ -647,8 +655,6 @@ class TestMultiLevelCache:
             assert not errors, f"stats() size/utilization inconsistency: {errors[:3]}"
         finally:
             sys.setswitchinterval(old_interval)
-
-
 
 
 class TestMultiLevelCacheTTL:
@@ -792,7 +798,6 @@ class TestMultiLevelCacheL3:
         assert cache.l2_hits == 0
         assert cache.misses == 0
 
-
     def test_stats_includes_l3_hits(self, tmp_path):
         """stats() must include 'l3_hits' key and count L3 queries in 'total_hits' (A fix).
 
@@ -831,17 +836,15 @@ class TestMultiLevelCacheL3:
 
         # After a mix: 3 L3 hits + 1 L1 hit (via set/get) + 1 miss.
         cache.set("key", "value")
-        cache.get("key")   # L1 hit
+        cache.get("key")  # L1 hit
         cache.get("nope")  # miss
 
         s = cache.stats()
         assert s["l3_hits"] == 3
         assert s["l1_hits"] == 1
-        assert s["total_hits"] == 4       # 3 L3 + 1 L1
+        assert s["total_hits"] == 4  # 3 L3 + 1 L1
         assert s["total_misses"] == 1
         assert s["total_requests"] == s["total_hits"] + s["total_misses"]
-
-
 
 
 class TestMultiLevelCachePromoteFlagRace:
@@ -945,8 +948,7 @@ class TestGetWithLevelStatsAccounting:
             cache_b.get_with_level(f"k{i}")
 
         assert cache_a.hit_rate() == cache_b.hit_rate(), (
-            f"hit_rate mismatch: get()={cache_a.hit_rate()} "
-            f"get_with_level()={cache_b.hit_rate()}"
+            f"hit_rate mismatch: get()={cache_a.hit_rate()} get_with_level()={cache_b.hit_rate()}"
         )
         assert cache_a.l1_hits == cache_b.l1_hits
 
