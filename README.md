@@ -191,7 +191,7 @@ source ~/.bashrc              # or ~/.zshrc
 
 | Flag | What runs | When to use |
 |------|-----------|-------------|
-| `mnemox` / `mnemox --full` | 7-phase analysis + lessons + graph + commit | New source files, schema changes, architectural decisions |
+| `mnemox` / `mnemox --full` | **7-phase analysis** (scan · deps · metrics · security · test coverage · git history · docs coverage) + lessons + graph + commit | New source files, schema changes, architectural decisions introduced this session |
 | `mnemox --quick` | lessons + graph + commit only | Code housekeeping, doc edits, daily refresh — finishes in seconds |
 
 <details>
