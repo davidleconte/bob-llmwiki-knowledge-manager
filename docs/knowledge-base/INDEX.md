@@ -81,6 +81,9 @@ Last Updated: 2026-07-18
 
 ## All Documents
 
+### 🏛️ Architectural Overviews
+- [Full Technical Design Retro-Engineering — 2026-07](./research/full-technical-design-retro-2026-07.md) - Complete business/functional/use-case-driven architecture: UC-1–UC-6, all component specs, embedding+graph value stack, economic model, quality gates, open gaps — load this first for any architectural question ⭐ NEW
+
 ### Recently Filed (not yet in Recent Additions)
 - [Adversarial Review Pattern](./concepts/adversarial-review-pattern.md) - Two-pass hostile + friendly review technique; pre-emption rule; label separation; fabrication ceiling ⭐ NEW
 
