@@ -174,30 +174,35 @@ if [[ "$SKIP_ANALYSIS" == false ]]; then
     fi
     echo ""
 else
-    echo -e "${YELLOW}ℹ️  Step 1/5 · Skipping repo analysis (--quick mode)${NC}"
+    echo -e "${YELLOW}ℹ️  Step 1/6 · Skipping repo analysis (--quick mode)${NC}"
 fi
 
 # Step 2: add frontmatter to any KB docs that lack it (idempotent)
 echo ""
-echo -e "${CYAN}Step 2/5 · Ensuring frontmatter on all KB docs...${NC}"
+echo -e "${CYAN}Step 2/6 · Ensuring frontmatter on all KB docs...${NC}"
 bash "$MNEMOX_HOME/scripts/add-frontmatter.sh" docs/knowledge-base
 
-# Step 3: capture lessons learned
+# Step 3: sync SKILL.md template blocks from config/templates/ (idempotent)
 echo ""
-echo -e "${CYAN}Step 3/5 · Capturing lessons learned...${NC}"
+echo -e "${CYAN}Step 3/6 · Syncing SKILL.md template blocks...${NC}"
+bash "$MNEMOX_HOME/scripts/sync-skill-templates.sh" --km-home "$MNEMOX_HOME"
+
+# Step 4: capture lessons learned
+echo ""
+echo -e "${CYAN}Step 4/6 · Capturing lessons learned...${NC}"
 LESSONS_OUTPUT=$(bash "$MNEMOX_HOME/scripts/mnemox-lessons.sh" 2>&1)
 echo "$LESSONS_OUTPUT"
 # Parse the MNEMOX_LESSONS_NOTE path from output
 LESSONS_NOTE=$(echo "$LESSONS_OUTPUT" | grep '^MNEMOX_LESSONS_NOTE=' | tail -1 | cut -d'=' -f2-)
 
-# Step 4: validate
+# Step 5: validate
 echo ""
-echo -e "${CYAN}Step 4/5 · Validating knowledge base structure...${NC}"
+echo -e "${CYAN}Step 5/6 · Validating knowledge base structure...${NC}"
 bash "$MNEMOX_HOME/scripts/validate-kb.sh"
 
-# Step 5: rebuild knowledge graph (graceful — never blocks)
+# Step 6: rebuild knowledge graph (graceful — never blocks)
 echo ""
-echo -e "${CYAN}Step 5/5 · Rebuilding knowledge graph...${NC}"
+echo -e "${CYAN}Step 6/6 · Rebuilding knowledge graph...${NC}"
 if command -v uv &>/dev/null; then
     uv run bob-optimize graph-build --kb-path docs/knowledge-base --with-semantic
     GRAPH_EXIT=$?
