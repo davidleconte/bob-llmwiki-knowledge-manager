@@ -354,14 +354,18 @@ class ExactCache(CacheInterface):
     def stats(self) -> Dict[str, Any]:
         """Get cache statistics.
 
+        Snapshot ``size`` once so that ``"size"`` and ``"utilization"`` are
+        consistent even if a concurrent eviction runs between the two calls.
+
         Returns:
             Dictionary with cache statistics
         """
+        n = self.size()
         return {
             **self._stats.to_dict(),
-            "size": self.size(),
+            "size": n,
             "max_size": self.max_size,
-            "utilization": (self.size() / self.max_size) * 100,
+            "utilization": (n / self.max_size) * 100,
             "version": self.VERSION,
         }
 
@@ -446,36 +450,28 @@ class ExactCache(CacheInterface):
     def migrate(self, from_version: str, to_version: str) -> int:
         """Migrate entries from one version to another.
 
-        Creates new versioned entries for all entries matching from_version.
-        Original entries are preserved.
+        .. note::
+            **Always returns 0.**  ExactCache stores prompts as irreversible
+            SHA-256 hashes.  Without the original key string it is impossible to
+            reconstruct a new versioned entry, so migration between version
+            namespaces is not supported.  The log event ``cache_migration_skipped``
+            (with ``reason="irreversible_hash"``) is emitted so callers can
+            distinguish "nothing to migrate" from "migration not supported".
 
         Args:
-            from_version: Source version
-            to_version: Target version
+            from_version: Source version (ignored — keys are not reversible)
+            to_version: Target version (ignored — keys are not reversible)
 
         Returns:
-            Number of entries migrated
+            Always 0.
         """
-        migrated = 0
-        entries_to_migrate = []
-
-        # Collect entries to migrate
-        for hashed_key, entry in self.cache.items():
-            if entry.metadata.get("version") == from_version:
-                entries_to_migrate.append((hashed_key, entry))
-
-        # Migrate entries
-        for hashed_key, entry in entries_to_migrate:
-            # Extract original key from metadata if available
-            # For now, we can't reverse the hash, so we skip migration
-            # This is a limitation of the hash-based approach
-            pass
-
         self._logger.info(
-            "cache_migration", from_version=from_version, to_version=to_version, migrated=migrated
+            "cache_migration_skipped",
+            reason="irreversible_hash",
+            from_version=from_version,
+            to_version=to_version,
         )
-
-        return migrated
+        return 0
 
     @_synchronized
     def cleanup_version(self, version: str) -> int:

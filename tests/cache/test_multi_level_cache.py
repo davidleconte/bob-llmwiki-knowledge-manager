@@ -438,6 +438,148 @@ class TestMultiLevelCache:
         assert stats["total_misses"] == 1
 
 
+
+    def test_get_with_level_respects_disabled_flags(self):
+        """get_with_level() must honour l1_enabled/l2_enabled — disabled levels must
+        not be queried even when they contain matching data (M-1 regression)."""
+        # L1 disabled: key is written only to L2 (set() respects the flag).
+        cache_no_l1 = MultiLevelCache(l1_enabled=False)
+        cache_no_l1.set("key", "value")
+        # get_with_level() must not surface a result from the disabled L1 level.
+        # (set() only wrote to L2, so L2 might return it — but L1 is the point.)
+        result_via_get = cache_no_l1.get_with_level("key")
+        # If L2 returns it, level must be "L2" not "L1".
+        if result_via_get is not None:
+            _, level = result_via_get
+            assert level == "L2", "Disabled L1 must not be reported as the hit level"
+        # Verify L1 was not queried by checking it is empty.
+        assert cache_no_l1.l1_cache.size() == 0
+
+        # L2 disabled: key is written only to L1.
+        cache_no_l2 = MultiLevelCache(l2_enabled=False)
+        cache_no_l2.set("key", "value")
+        result_via_get = cache_no_l2.get_with_level("key")
+        assert result_via_get is not None
+        _, level = result_via_get
+        assert level == "L1"
+        # L2 must not have received the value or been queried.
+        assert cache_no_l2.l2_cache.size() == 0
+
+    def test_promotion_flag_consistent_in_stats_snapshot(self):
+        """enable/disable_promotion() must hold _stats_lock and stats() must snapshot
+        promote_l2_hits inside the same lock block as the counters, so the returned
+        dict is internally consistent under concurrent flag flips (N-3 regression).
+        ``sys`` state is restored in ``finally``.
+        """
+        import sys
+        import threading
+        from concurrent.futures import ThreadPoolExecutor
+
+        old_interval = sys.getswitchinterval()
+        sys.setswitchinterval(1e-7)
+        try:
+            cache = MultiLevelCache()
+            for i in range(50):
+                cache.set(f"key_{i}", f"val_{i}")
+
+            errors: list[str] = []
+            stop = threading.Event()
+
+            def flipper() -> None:
+                while not stop.is_set():
+                    cache.enable_promotion()
+                    cache.disable_promotion()
+
+            def stat_reader() -> None:
+                try:
+                    for _ in range(500):
+                        s = cache.stats()
+                        flag = s["promote_l2_hits"]
+                        assert isinstance(flag, bool), (
+                            f"promote_l2_hits must be bool, got {type(flag)}: {flag}"
+                        )
+                except Exception as exc:  # noqa: BLE001
+                    errors.append(repr(exc))
+
+            with ThreadPoolExecutor(max_workers=8) as executor:
+                flippers = [executor.submit(flipper) for _ in range(3)]
+                readers = [executor.submit(stat_reader) for _ in range(4)]
+                for f in readers:
+                    f.result()
+                stop.set()
+                for f in flippers:
+                    f.result()
+
+            assert not errors, f"promotion-flag race in stats(): {errors[:3]}"
+        finally:
+            sys.setswitchinterval(old_interval)
+
+    def test_stats_l1_size_and_utilization_are_consistent(self):
+        """stats() must compute l1_size and l1_utilization from the same snapshot
+        so they are internally consistent (N-4: double size() call race).
+        Uses concurrent evictors to make the race window reachable.
+        ``sys`` state is restored in ``finally``.
+        """
+        import sys
+        from concurrent.futures import ThreadPoolExecutor
+
+        old_interval = sys.getswitchinterval()
+        sys.setswitchinterval(1e-7)
+        try:
+            cache = MultiLevelCache(l1_max_size=50, l2_max_size=50)
+            for i in range(50):
+                cache.set(f"key_{i}", f"val_{i}")
+
+            errors: list[str] = []
+            import threading
+
+            stop = threading.Event()
+
+            def evictor(tid: int) -> None:
+                i = 0
+                while not stop.is_set():
+                    cache.set(f"evict_{tid}_{i}", f"v{i}")
+                    i += 1
+
+            def checker() -> None:
+                try:
+                    for _ in range(500):
+                        s = cache.stats()
+                        l1_size = s["l1_size"]
+                        l1_max = s["l1_max_size"]
+                        l1_util = s["l1_utilization"]
+                        expected = (l1_size / l1_max) * 100
+                        assert abs(l1_util - expected) < 1e-9, (
+                            f"l1_size={l1_size} / l1_max={l1_max} → "
+                            f"expected utilization {expected} but got {l1_util}"
+                        )
+                        l2_size = s["l2_size"]
+                        l2_max = s["l2_max_size"]
+                        l2_util = s["l2_utilization"]
+                        expected2 = (l2_size / l2_max) * 100
+                        assert abs(l2_util - expected2) < 1e-9, (
+                            f"l2_size={l2_size} / l2_max={l2_max} → "
+                            f"expected utilization {expected2} but got {l2_util}"
+                        )
+                except Exception as exc:  # noqa: BLE001
+                    errors.append(repr(exc))
+
+            with ThreadPoolExecutor(max_workers=8) as executor:
+                evictors = [executor.submit(evictor, t) for t in range(4)]
+                checkers = [executor.submit(checker) for _ in range(4)]
+                for f in checkers:
+                    f.result()
+                stop.set()
+                for f in evictors:
+                    f.result()
+
+            assert not errors, f"stats() size/utilization inconsistency: {errors[:3]}"
+        finally:
+            sys.setswitchinterval(old_interval)
+
+
+
+
 class TestMultiLevelCacheTTL:
     """MultiLevelCache must thread TTL config into its sub-caches (C-6)."""
 
@@ -553,3 +695,29 @@ class TestMultiLevelCacheL3:
         assert cache.l3_hits == 0
         # Index still intact after clear
         assert idx.doc_count == 1
+
+    def test_reset_stats_clears_l3_hits(self, tmp_path):
+        """reset_stats() must zero l3_hits alongside l1_hits/l2_hits/misses (L-1 regression).
+
+        Previously reset_stats() omitted l3_hits, causing a cumulative counter
+        across checkpoints when an L3 index was wired.
+        """
+        from src.cache.embeddings import EmbeddingGenerator
+        from src.embeddings.index import PersistentEmbeddingIndex
+
+        embedder = EmbeddingGenerator()
+        idx = PersistentEmbeddingIndex(embedder, tmp_path / "l3-index")
+        idx.index_document("guides/g.md", "# Guide\n\nguide content")
+        idx.flush()
+
+        cache = MultiLevelCache(l3_index=idx)
+        cache.query_l3("guide content")
+        assert cache.l3_hits == 1
+
+        cache.reset_stats()
+
+        assert cache.l3_hits == 0, "reset_stats() must zero l3_hits"
+        assert cache.l1_hits == 0
+        assert cache.l2_hits == 0
+        assert cache.misses == 0
+

@@ -427,3 +427,118 @@ class TestExactCacheTTL:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+
+
+class TestExactCacheMigrate:
+    """ExactCache.migrate() always returns 0 — SHA-256 keys are not reversible (M-2)."""
+
+    def test_migrate_always_returns_zero(self):
+        """ExactCache stores keys as irreversible SHA-256 hashes, so it is
+        impossible to reconstruct the original key string for re-insertion under
+        a new version prefix.  migrate() must return 0 and log
+        'cache_migration_skipped' rather than silently returning 0 as if nothing
+        matched the version filter.
+        """
+        cache = ExactCache(max_size=100)
+        for i in range(10):
+            cache.set(f"key_{i}", f"val_{i}", version="v1")
+
+        result = cache.migrate("v1", "v2")
+
+        assert result == 0
+        # Cache contents are unchanged — no new v2 entries written.
+        assert cache.size() == 10
+
+    def test_migrate_returns_zero_on_empty_cache(self):
+        """migrate() on an empty cache also returns 0 cleanly."""
+        cache = ExactCache(max_size=100)
+        assert cache.migrate("v1", "v2") == 0
+
+    def test_migrate_returns_zero_when_version_not_present(self):
+        """migrate() returns 0 when no entries match from_version."""
+        cache = ExactCache(max_size=100)
+        cache.set("key", "val", version="v3")
+        assert cache.migrate("v1", "v2") == 0
+
+
+class TestExactCacheStatsConsistency:
+    """stats() must return a consistent size/utilization pair (N-4).
+
+    Before the fix, stats() called self.size() twice — once for "size" and once
+    for "utilization".  A concurrent eviction between the two calls could yield
+    a snapshot where utilization does not match size:
+        utilization != size * 100 / max_size
+    The fix snapshots `n = self.size()` once and reuses it for both fields.
+    """
+
+    def test_stats_size_and_utilization_are_consistent_no_concurrency(self):
+        """Baseline: single-threaded — size and utilization always agree."""
+        cache = ExactCache(max_size=50)
+        for i in range(30):
+            cache.set(f"key_{i}", f"val_{i}")
+
+        s = cache.stats()
+        expected_utilization = s["size"] * 100 / s["max_size"]
+        assert s["utilization"] == expected_utilization, (
+            f"utilization {s['utilization']} does not match "
+            f"size {s['size']} / max_size {s['max_size']}"
+        )
+
+    def test_stats_size_and_utilization_consistent_under_concurrent_eviction(self):
+        """Race-detector: concurrent evictors must not cause size/utilization mismatch.
+
+        With the old double self.size() call an evictor running between the two
+        reads could produce a snapshot where
+            utilization != size * 100 / max_size.
+        The fix snapshots n = self.size() once so both fields are always derived
+        from the same measurement.
+        """
+        import sys
+        import threading
+        from concurrent.futures import ThreadPoolExecutor
+
+        old_interval = sys.getswitchinterval()
+        sys.setswitchinterval(1e-7)
+        try:
+            max_size = 20
+            cache = ExactCache(max_size=max_size)
+            for i in range(max_size):
+                cache.set(f"key_{i}", f"val_{i}")
+
+            errors: list[str] = []
+            stop = threading.Event()
+            counter = [0]
+
+            def evictor() -> None:
+                """Continuously add and clear entries to provoke evictions."""
+                i = max_size
+                while not stop.is_set():
+                    cache.set(f"extra_{i}", f"val_{i}")
+                    i += 1
+
+            def stat_checker() -> None:
+                try:
+                    for _ in range(1_000):
+                        s = cache.stats()
+                        expected = s["size"] * 100 / s["max_size"]
+                        assert s["utilization"] == expected, (
+                            f"Inconsistent snapshot: size={s['size']}, "
+                            f"utilization={s['utilization']}, expected={expected}"
+                        )
+                        counter[0] += 1
+                except Exception as exc:  # noqa: BLE001
+                    errors.append(repr(exc))
+
+            with ThreadPoolExecutor(max_workers=10) as executor:
+                evictors = [executor.submit(evictor) for _ in range(4)]
+                checkers = [executor.submit(stat_checker) for _ in range(4)]
+                for f in checkers:
+                    f.result()
+                stop.set()
+                for f in evictors:
+                    f.result()
+
+            assert not errors, f"stats() inconsistency detected: {errors[:3]}"
+            assert counter[0] >= 3_000, f"Too few stat checks ran: {counter[0]}"
+        finally:
+            sys.setswitchinterval(old_interval)

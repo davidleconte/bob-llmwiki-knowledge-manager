@@ -508,6 +508,9 @@ class SemanticCache(CacheInterface):
                 "utilization": (size / self.max_size) * 100,
                 "similarity_threshold": self.similarity_threshold,
                 "avg_similarity_score": avg_similarity,
+                # Lock-order note: self._lock is held here while calling
+                # embedding_generator.cache_size().  embedding_generator must
+                # NOT acquire self._lock internally to avoid a deadlock.
                 "embedding_cache_size": self.embedding_generator.cache_size(),
                 "version": self.VERSION,
             }
@@ -626,10 +629,15 @@ class SemanticCache(CacheInterface):
         if not 0 <= new_threshold <= 1:
             raise ValueError("threshold must be between 0 and 1")
 
-        self.similarity_threshold = new_threshold
+        with self._lock:
+            self.similarity_threshold = new_threshold
 
     def get_entry(self, key: str, version: Optional[str] = None) -> Optional[CacheEntry]:
         """Get full cache entry.
+
+        Thread-safe: Uses lock to protect shared state. The entries dict can be
+        mutated by a concurrent set(), _evict_lru(), or clear() — acquiring
+        self._lock here prevents a read of a partially-removed entry.
 
         Args:
             key: The cache key
@@ -638,23 +646,35 @@ class SemanticCache(CacheInterface):
         Returns:
             CacheEntry if found, None otherwise
         """
-        versioned_key = self._make_versioned_key(key, version)
-        return self.entries.get(versioned_key)
+        with self._lock:
+            versioned_key = self._make_versioned_key(key, version)
+            return self.entries.get(versioned_key)
 
     def average_similarity_score(self) -> float:
         """Get average similarity score for cache hits.
 
+        Thread-safe: Takes a snapshot of ``_similarity_scores`` under
+        ``self._lock`` so that a concurrent ``reset_stats()`` cannot clear the
+        list between the ``if not`` guard and the ``sum()`` call.
+
         Returns:
             Average similarity score (0-1)
         """
-        if not self._similarity_scores:
+        with self._lock:
+            scores = list(self._similarity_scores)
+        if not scores:
             return 0.0
-        return sum(self._similarity_scores) / len(self._similarity_scores)
+        return sum(scores) / len(scores)
 
     def migrate(self, from_version: str, to_version: str) -> int:
         """Migrate entries from one version to another.
 
-        Thread-safe: Uses lock to protect shared state.
+        Thread-safe: Holds ``self._lock`` (a re-entrant ``RLock``) for the full
+        duration — both the collection phase and all ``set()`` calls — so the
+        migration is atomic with respect to concurrent writers.  ``set()`` also
+        acquires ``self._lock``, which is safe because ``RLock`` allows
+        re-entrant acquisition from the same thread.
+
         Creates new versioned entries for all entries matching from_version.
         Original entries are preserved.
 
@@ -669,17 +689,17 @@ class SemanticCache(CacheInterface):
             migrated = 0
             entries_to_migrate = []
 
-            # Collect entries to migrate
+            # Collect entries to migrate.
             for versioned_key, entry in self.entries.items():
                 if self._extract_version(versioned_key) == from_version:
                     base_key = self._extract_base_key(versioned_key)
                     entries_to_migrate.append((base_key, entry))
 
-        # Migrate entries (set() has its own lock)
-        for base_key, entry in entries_to_migrate:
-            # Create new versioned entry
-            self.set(base_key, entry.response, to_version, entry.metadata.copy())
-            migrated += 1
+            # Write new versioned entries inside the same lock so concurrent
+            # writes to to_version cannot interleave with our set() calls.
+            for base_key, entry in entries_to_migrate:
+                self.set(base_key, entry.response, to_version, entry.metadata.copy())
+                migrated += 1
 
         self._logger.info(
             "cache_migration", from_version=from_version, to_version=to_version, migrated=migrated
@@ -724,6 +744,13 @@ class SemanticCache(CacheInterface):
             return removed
 
     def reset_stats(self) -> None:
-        """Reset statistics counters."""
-        self._stats.reset()
-        self._similarity_scores.clear()
+        """Reset statistics counters.
+
+        Thread-safe: Both ``_stats.reset()`` and ``_similarity_scores.clear()``
+        are performed atomically under ``self._lock`` so that a concurrent
+        ``average_similarity_score()`` or ``stats()`` call cannot observe a
+        half-reset state.
+        """
+        with self._lock:
+            self._stats.reset()
+            self._similarity_scores.clear()

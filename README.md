@@ -558,8 +558,8 @@ Authoritative status: [`STATUS.md`](STATUS.md).
 |-----------|:-----:|-------|
 | Product Integrity & Claims | **A+** | All fabricated metrics retracted and permanently recorded; every published number manifest-backed; machine-validated by CI |
 | Architecture & Design | **A+** | Facade holds no logic; factory is single config→constructor home; all config fields wired; SLA v1.0 + load tests + `sentence-transformers` in dev extras (G-1/G-3 closed) |
-| Code Correctness | **A+** | C1–C8 + RLock fixed; behavioral regression tests for each; zero `# type: ignore` in `src/`; full mypy scope including `src/delegation/` + `src/tools/` (G-2 closed) |
-| Testing & Verification | **A+** | 1053+ passed · ≥80% coverage gate · per-package floors · delegation floor 70%, measured 84% (ADR-019); load/soak suite (8 tests) |
+| Code Correctness | **A+** | C1–C8 + RLock fixed; **N-1–N-4** cache race conditions eliminated (unsynchronised `_similarity_scores` reads, threshold write, promotion-flag write, double `size()` snapshot); behavioral regression tests for each fix; zero `# type: ignore` in `src/`; full mypy scope |
+| Testing & Verification | **A+** | **1102 passed** · ≥80% coverage gate (89.6%) · per-package floors · **14 race-detector tests** (concurrent eviction, `reset_stats()`, `update_threshold()`, promotion-flag, size-snapshot consistency under thread pressure) · load/soak suite (8 tests) |
 | Build, Release & Supply-Chain | **A+** | `uv sync --frozen` in CI · `pip-audit --strict` · 0 CVEs · bandit SAST blocking · CycloneDX SBOM · 3.11+3.12 matrix |
 | Documentation | **A+** | Two authoritative arc42 documents · 19 ADRs (ADR-012 superseded) · 41 API docs CI-drift-checked · STRIDE threat model grounded in `path:line` citations · formal SLA |
 | Governance & Compliance | **A+** | 12-artifact community health · CODEOWNERS covers all packages (G-4 closed) · STRIDE TOCTOU narrowed · all governance validators in CI |

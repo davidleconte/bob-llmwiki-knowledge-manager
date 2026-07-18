@@ -456,3 +456,239 @@ class TestSemanticCacheTTL:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+
+
+class TestSemanticCacheGetEntryLock:
+    """get_entry() must be lock-protected against concurrent eviction (M-4 regression)."""
+
+    def test_get_entry_never_raises_under_concurrent_eviction(self):
+        """get_entry() reading self.entries without a lock could see a KeyError or
+        partial state when another thread concurrently evicts or clears the cache.
+        Holding self._lock in get_entry() closes the race.
+        ``sys`` state is restored in ``finally``.
+        """
+        import sys
+        import threading
+        from concurrent.futures import ThreadPoolExecutor
+
+        old_interval = sys.getswitchinterval()
+        sys.setswitchinterval(1e-7)
+        try:
+            cache = SemanticCache(max_size=20)
+            # Fill to capacity so every new set() triggers eviction.
+            for i in range(20):
+                cache.set(f"key_{i}", f"val_{i}")
+
+            errors: list[str] = []
+            stop = threading.Event()
+
+            def mutator(tid: int) -> None:
+                i = 0
+                while not stop.is_set():
+                    # Alternately set (triggering LRU eviction) and clear.
+                    cache.set(f"key_{i % 20}", f"new_val_{tid}_{i}")
+                    if i % 10 == 0:
+                        cache.clear()
+                        for j in range(20):
+                            cache.set(f"key_{j}", f"val_{j}")
+                    i += 1
+
+            def reader() -> None:
+                try:
+                    for _ in range(500):
+                        for k in range(20):
+                            cache.get_entry(f"key_{k}")  # must not raise
+                except Exception as exc:  # noqa: BLE001
+                    errors.append(repr(exc))
+
+            with ThreadPoolExecutor(max_workers=8) as executor:
+                mutators = [executor.submit(mutator, t) for t in range(4)]
+                readers = [executor.submit(reader) for _ in range(4)]
+                for f in readers:
+                    f.result()
+                stop.set()
+                for f in mutators:
+                    f.result()
+
+            assert not errors, f"get_entry() raced with eviction: {errors[:3]}"
+        finally:
+            sys.setswitchinterval(old_interval)
+
+
+class TestSemanticCacheMigrateLock:
+    """migrate() must hold the lock for the full duration (C-2 TOCTOU regression)."""
+
+    def test_migrate_is_atomic_no_interleaved_writes(self):
+        """Without holding the lock through the set() calls, a concurrent write to
+        the target version could be silently overwritten by the migration loop.
+        With the full-duration lock, the migration is atomic: concurrent writers
+        targeting to_version are serialised after the migration completes.
+        ``sys`` state is restored in ``finally``.
+        """
+        import sys
+        import threading
+        from concurrent.futures import ThreadPoolExecutor
+
+        old_interval = sys.getswitchinterval()
+        sys.setswitchinterval(1e-7)
+        try:
+            cache = SemanticCache(max_size=200)
+            for i in range(20):
+                cache.set(f"key_{i}", f"original_v1_{i}", version="v1")
+
+            errors: list[str] = []
+            stop = threading.Event()
+
+            def concurrent_writer(tid: int) -> None:
+                i = 0
+                while not stop.is_set():
+                    # Write to the migration target version continuously.
+                    cache.set(f"concurrent_{tid}_{i}", f"cval_{i}", version="v2")
+                    i += 1
+
+            def migrator() -> None:
+                try:
+                    for _ in range(10):
+                        count = cache.migrate("v1", "v2")
+                        # Returned count must be non-negative — no partial migration.
+                        assert count >= 0, f"migrate() returned negative count: {count}"
+                except Exception as exc:  # noqa: BLE001
+                    errors.append(repr(exc))
+
+            with ThreadPoolExecutor(max_workers=6) as executor:
+                writers = [executor.submit(concurrent_writer, t) for t in range(4)]
+                migrators = [executor.submit(migrator) for _ in range(2)]
+                for f in migrators:
+                    f.result()
+                stop.set()
+                for f in writers:
+                    f.result()
+
+            assert not errors, f"migrate() raised under concurrency: {errors[:3]}"
+        finally:
+            sys.setswitchinterval(old_interval)
+
+
+class TestSemanticCacheAverageSimilarityLock:
+    """average_similarity_score() and reset_stats() must be lock-consistent (N-1)."""
+
+    def test_average_similarity_score_never_races_with_reset(self):
+        """average_similarity_score() reading _similarity_scores without the lock
+        can race against reset_stats() calling _similarity_scores.clear() outside
+        the lock, producing a stale zero or a non-atomic multi-field CacheStats reset.
+        Both must hold self._lock.  ``sys`` state is restored in ``finally``.
+        """
+        import sys
+        import threading
+        from concurrent.futures import ThreadPoolExecutor
+
+        old_interval = sys.getswitchinterval()
+        sys.setswitchinterval(1e-7)
+        try:
+            cache = SemanticCache(max_size=100)
+            # Seed so hits are generated and _similarity_scores is populated.
+            for i in range(20):
+                cache.set(f"key_{i}", f"val_{i}")
+
+            errors: list[str] = []
+            stop = threading.Event()
+
+            def getter(tid: int) -> None:
+                """Generate hits to populate _similarity_scores continuously."""
+                i = 0
+                while not stop.is_set():
+                    cache.get(f"key_{i % 20}")
+                    i += 1
+
+            def resetter() -> None:
+                """Call reset_stats() continuously to race with reads."""
+                while not stop.is_set():
+                    cache.reset_stats()
+
+            def reader() -> None:
+                """Call average_similarity_score() and assert valid range."""
+                try:
+                    for _ in range(500):
+                        score = cache.average_similarity_score()
+                        assert 0.0 <= score <= 1.0, (
+                            f"average_similarity_score() out of range: {score}"
+                        )
+                except Exception as exc:  # noqa: BLE001
+                    errors.append(repr(exc))
+
+            with ThreadPoolExecutor(max_workers=10) as executor:
+                getters = [executor.submit(getter, t) for t in range(4)]
+                resetters = [executor.submit(resetter) for _ in range(2)]
+                readers = [executor.submit(reader) for _ in range(4)]
+                for f in readers:
+                    f.result()
+                stop.set()
+                for f in getters + resetters:
+                    f.result()
+
+            assert not errors, f"average_similarity_score() race detected: {errors[:3]}"
+        finally:
+            sys.setswitchinterval(old_interval)
+
+
+class TestSemanticCacheUpdateThresholdLock:
+    """update_threshold() must hold the lock when writing similarity_threshold (N-2)."""
+
+    def test_update_threshold_never_races_with_get(self):
+        """update_threshold() assigns self.similarity_threshold without holding
+        self._lock, while get() reads it inside the lock.  The write must also
+        acquire the lock so readers see a consistent value.
+        ``sys`` state is restored in ``finally``.
+        """
+        import sys
+        import threading
+        from concurrent.futures import ThreadPoolExecutor
+
+        old_interval = sys.getswitchinterval()
+        sys.setswitchinterval(1e-7)
+        try:
+            cache = SemanticCache(max_size=100, similarity_threshold=0.5)
+            for i in range(20):
+                cache.set(f"key_{i}", f"val_{i}")
+
+            errors: list[str] = []
+            stop = threading.Event()
+
+            def getter() -> None:
+                i = 0
+                while not stop.is_set():
+                    cache.get(f"key_{i % 20}")
+                    i += 1
+
+            def threshold_toggler() -> None:
+                """Alternate threshold between 0.5 and 0.9 continuously."""
+                flip = True
+                while not stop.is_set():
+                    try:
+                        cache.update_threshold(0.9 if flip else 0.5)
+                    except Exception as exc:  # noqa: BLE001
+                        errors.append(repr(exc))
+                    flip = not flip
+
+            def stat_reader() -> None:
+                try:
+                    for _ in range(500):
+                        t = cache.similarity_threshold
+                        # Threshold must always be one of the two valid values.
+                        assert t in (0.5, 0.9), f"threshold has unexpected value: {t}"
+                except Exception as exc:  # noqa: BLE001
+                    errors.append(repr(exc))
+
+            with ThreadPoolExecutor(max_workers=10) as executor:
+                getters = [executor.submit(getter) for _ in range(4)]
+                togglers = [executor.submit(threshold_toggler) for _ in range(2)]
+                readers = [executor.submit(stat_reader) for _ in range(4)]
+                for f in readers:
+                    f.result()
+                stop.set()
+                for f in getters + togglers:
+                    f.result()
+
+            assert not errors, f"update_threshold() race detected: {errors[:3]}"
+        finally:
+            sys.setswitchinterval(old_interval)

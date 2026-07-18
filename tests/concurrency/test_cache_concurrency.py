@@ -415,6 +415,70 @@ class TestMultiLevelCacheConcurrency:
         finally:
             sys.setswitchinterval(old_interval)
 
+    def test_stats_counters_never_race_with_concurrent_gets(self):
+        """hit_rate()/l1_hit_rate()/l2_hit_rate()/stats() must return valid values
+        and never raise while concurrent get() calls mutate l1_hits/l2_hits/misses.
+
+        Regression for the unsynchronised plain-int counters on MultiLevelCache:
+        the read-modify-write triple in hit_rate() is not atomic with respect to
+        concurrent increments, and clear()/reset_stats() could zero counters between
+        a sub-cache clear and the stat read.  _stats_lock serialises all paths.
+        ``sys`` state is restored in ``finally``.
+        """
+        old_interval = sys.getswitchinterval()
+        sys.setswitchinterval(1e-7)
+        try:
+            cache = MultiLevelCache(l1_max_size=500, l2_max_size=500)
+            # Pre-populate so get() produces L1 hits, not only misses.
+            for i in range(50):
+                cache.set(f"key_{i}", f"val_{i}")
+
+            errors: List[str] = []
+            stop = threading.Event()
+
+            def getter(tid: int) -> None:
+                i = 0
+                while not stop.is_set():
+                    cache.get(f"key_{i % 100}")  # hits and misses
+                    i += 1
+
+            def resetter() -> None:
+                while not stop.is_set():
+                    cache.reset_stats()
+
+            def stat_reader() -> None:
+                try:
+                    for _ in range(500):
+                        hr = cache.hit_rate()
+                        l1r = cache.l1_hit_rate()
+                        l2r = cache.l2_hit_rate()
+                        s = cache.stats()
+                        # Values must be valid percentages and totals must be consistent.
+                        assert 0.0 <= hr <= 100.0, f"hit_rate out of range: {hr}"
+                        assert 0.0 <= l1r <= 100.0, f"l1_hit_rate out of range: {l1r}"
+                        assert 0.0 <= l2r <= 100.0, f"l2_hit_rate out of range: {l2r}"
+                        assert s["total_hits"] >= 0
+                        assert s["total_misses"] >= 0
+                except Exception as exc:  # noqa: BLE001
+                    errors.append(repr(exc))
+
+            with ThreadPoolExecutor(max_workers=12) as executor:
+                getters = [executor.submit(getter, t) for t in range(4)]
+                resetters = [executor.submit(resetter) for _ in range(2)]
+                readers = [executor.submit(stat_reader) for _ in range(4)]
+                # Let readers finish their fixed iteration count first.
+                for f in readers:
+                    f.result()
+                stop.set()
+                for f in getters + resetters:
+                    f.result()
+
+            assert not errors, f"stats counter race detected: {errors[:3]}"
+        finally:
+            sys.setswitchinterval(old_interval)
+
+
+
 
 class TestRaceConditions:
     """Tests for detecting race conditions."""

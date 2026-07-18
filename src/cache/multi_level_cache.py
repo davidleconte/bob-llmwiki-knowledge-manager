@@ -22,6 +22,7 @@ Target metrics:
   figures were never validated and are retired.
 """
 
+import threading
 import time
 from collections import deque
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
@@ -112,7 +113,10 @@ class MultiLevelCache(CacheInterface):
         self._logger = get_logger("cache.multi_level")
         self._metrics = get_metrics_collector()
 
-        # Statistics
+        # Statistics — all mutations and reads are serialised by _stats_lock so
+        # that hit_rate() / stats() snapshots are consistent under concurrent get()
+        # calls and clear() / reset_stats() resets are atomic.
+        self._stats_lock = threading.RLock()
         self.l1_hits = 0
         self.l2_hits = 0
         self.misses = 0
@@ -148,9 +152,10 @@ class MultiLevelCache(CacheInterface):
         # Try L1 first (fast exact match), unless L1 is disabled by config.
         result = self.l1_cache.get(key, version) if self.l1_enabled else None
         if result is not None:
-            self.l1_hits += 1
             latency_ms = (time.time() - start_time) * 1000
-            self._lookup_times.append(time.time() - start_time)
+            with self._stats_lock:
+                self.l1_hits += 1
+                self._lookup_times.append(time.time() - start_time)
 
             self._logger.debug(
                 "multi_level_hit",
@@ -163,8 +168,10 @@ class MultiLevelCache(CacheInterface):
         # Try L2 (semantic similarity), unless L2 is disabled by config.
         result = self.l2_cache.get(key, version) if self.l2_enabled else None
         if result is not None:
-            self.l2_hits += 1
             latency_ms = (time.time() - start_time) * 1000
+            with self._stats_lock:
+                self.l2_hits += 1
+                self._lookup_times.append(time.time() - start_time)
 
             # Promote to L1 for future fast access (only if L1 is enabled).
             if self.promote_l2_hits and self.l1_enabled:
@@ -183,8 +190,6 @@ class MultiLevelCache(CacheInterface):
                     version=version or self.VERSION,
                 )
 
-            self._lookup_times.append(time.time() - start_time)
-
             self._logger.debug(
                 "multi_level_hit",
                 cache_level="L2",
@@ -195,9 +200,10 @@ class MultiLevelCache(CacheInterface):
             return result
 
         # Cache miss (L3 is a separate namespace — use query_l3() for doc search)
-        self.misses += 1
         latency_ms = (time.time() - start_time) * 1000
-        self._lookup_times.append(time.time() - start_time)
+        with self._stats_lock:
+            self.misses += 1
+            self._lookup_times.append(time.time() - start_time)
 
         self._logger.debug(
             "multi_level_miss", version=version or self.VERSION, latency_ms=latency_ms
@@ -230,7 +236,8 @@ class MultiLevelCache(CacheInterface):
         if not results:
             return None
         doc_id, score = results[0]
-        self.l3_hits += 1
+        with self._stats_lock:
+            self.l3_hits += 1
         self._logger.debug(
             "multi_level_hit",
             cache_level="L3",
@@ -263,11 +270,12 @@ class MultiLevelCache(CacheInterface):
         """Clear L1 and L2 caches (L3 index is NOT cleared — disk-backed)."""
         self.l1_cache.clear()
         self.l2_cache.clear()
-        self.l1_hits = 0
-        self.l2_hits = 0
-        self.l3_hits = 0
-        self.misses = 0
-        self._lookup_times.clear()
+        with self._stats_lock:
+            self.l1_hits = 0
+            self.l2_hits = 0
+            self.l3_hits = 0
+            self.misses = 0
+            self._lookup_times.clear()
 
     def size(self) -> int:
         """Get total number of unique entries across both caches.
@@ -296,10 +304,12 @@ class MultiLevelCache(CacheInterface):
         Returns:
             Hit rate as percentage (0-100)
         """
-        total = self.l1_hits + self.l2_hits + self.misses
+        with self._stats_lock:
+            l1, l2, m = self.l1_hits, self.l2_hits, self.misses
+        total = l1 + l2 + m
         if total == 0:
             return 0.0
-        return ((self.l1_hits + self.l2_hits) / total) * 100
+        return ((l1 + l2) / total) * 100
 
     def l1_hit_rate(self) -> float:
         """Calculate L1 cache hit rate.
@@ -307,10 +317,12 @@ class MultiLevelCache(CacheInterface):
         Returns:
             L1 hit rate as percentage (0-100)
         """
-        total = self.l1_hits + self.l2_hits + self.misses
+        with self._stats_lock:
+            l1, l2, m = self.l1_hits, self.l2_hits, self.misses
+        total = l1 + l2 + m
         if total == 0:
             return 0.0
-        return (self.l1_hits / total) * 100
+        return (l1 / total) * 100
 
     def l2_hit_rate(self) -> float:
         """Calculate L2 cache hit rate.
@@ -318,10 +330,12 @@ class MultiLevelCache(CacheInterface):
         Returns:
             L2 hit rate as percentage (0-100)
         """
-        total = self.l1_hits + self.l2_hits + self.misses
+        with self._stats_lock:
+            l1, l2, m = self.l1_hits, self.l2_hits, self.misses
+        total = l1 + l2 + m
         if total == 0:
             return 0.0
-        return (self.l2_hits / total) * 100
+        return (l2 / total) * 100
 
     def stats(self) -> Dict[str, Any]:
         """Get comprehensive cache statistics.
@@ -329,35 +343,46 @@ class MultiLevelCache(CacheInterface):
         Returns:
             Dictionary with cache statistics
         """
-        total_requests = self.l1_hits + self.l2_hits + self.misses
-        avg_lookup_time = (
-            sum(self._lookup_times) / len(self._lookup_times) if self._lookup_times else 0.0
-        )
+        with self._stats_lock:
+            l1_hits = self.l1_hits
+            l2_hits = self.l2_hits
+            misses = self.misses
+            promote_l2_hits = self.promote_l2_hits
+        total_requests = l1_hits + l2_hits + misses
+        hit_rate = ((l1_hits + l2_hits) / total_requests * 100) if total_requests else 0.0
+        l1_hit_rate = (l1_hits / total_requests * 100) if total_requests else 0.0
+        l2_hit_rate = (l2_hits / total_requests * 100) if total_requests else 0.0
+
+        # Snapshot sizes once so "l1_size" and "l1_utilization" (and the L2
+        # equivalents) are consistent within a single stats() call even if
+        # concurrent evictions run between the two reads.
+        l1_size = self.l1_cache.size()
+        l2_size = self.l2_cache.size()
 
         return {
             # Overall stats
             "total_requests": total_requests,
-            "total_hits": self.l1_hits + self.l2_hits,
-            "total_misses": self.misses,
-            "hit_rate": self.hit_rate(),
-            "avg_lookup_time_ms": avg_lookup_time * 1000,
+            "total_hits": l1_hits + l2_hits,
+            "total_misses": misses,
+            "hit_rate": hit_rate,
+            "avg_lookup_time_ms": self.average_lookup_time_ms(),
             "version": self.VERSION,
             # L1 stats
-            "l1_hits": self.l1_hits,
-            "l1_hit_rate": self.l1_hit_rate(),
-            "l1_size": self.l1_cache.size(),
+            "l1_hits": l1_hits,
+            "l1_hit_rate": l1_hit_rate,
+            "l1_size": l1_size,
             "l1_max_size": self.l1_cache.max_size,
-            "l1_utilization": (self.l1_cache.size() / self.l1_cache.max_size) * 100,
+            "l1_utilization": (l1_size / self.l1_cache.max_size) * 100,
             # L2 stats
-            "l2_hits": self.l2_hits,
-            "l2_hit_rate": self.l2_hit_rate(),
-            "l2_size": self.l2_cache.size(),
+            "l2_hits": l2_hits,
+            "l2_hit_rate": l2_hit_rate,
+            "l2_size": l2_size,
             "l2_max_size": self.l2_cache.max_size,
-            "l2_utilization": (self.l2_cache.size() / self.l2_cache.max_size) * 100,
+            "l2_utilization": (l2_size / self.l2_cache.max_size) * 100,
             "l2_similarity_threshold": self.l2_cache.similarity_threshold,
             "l2_avg_similarity": self.l2_cache.average_similarity_score(),
             # Configuration
-            "promote_l2_hits": self.promote_l2_hits,
+            "promote_l2_hits": promote_l2_hits,
             "unique_entries": self.size(),
         }
 
@@ -387,14 +412,19 @@ class MultiLevelCache(CacheInterface):
 
     def enable_promotion(self) -> None:
         """Enable L2 to L1 promotion."""
-        self.promote_l2_hits = True
+        with self._stats_lock:
+            self.promote_l2_hits = True
 
     def disable_promotion(self) -> None:
         """Disable L2 to L1 promotion."""
-        self.promote_l2_hits = False
+        with self._stats_lock:
+            self.promote_l2_hits = False
 
     def get_with_level(self, key: str, version: Optional[str] = None) -> Optional[Tuple[str, str]]:
         """Get cached response with cache level information.
+
+        Respects :attr:`l1_enabled` and :attr:`l2_enabled` flags — disabled
+        levels are skipped, consistent with the behaviour of :meth:`get`.
 
         Args:
             key: The cache key (prompt)
@@ -403,15 +433,17 @@ class MultiLevelCache(CacheInterface):
         Returns:
             Tuple of (response, level) where level is 'L1' or 'L2', or None
         """
-        # Try L1
-        result = self.l1_cache.get(key, version)
-        if result is not None:
-            return (result, "L1")
+        # Try L1 (skip if disabled by config)
+        if self.l1_enabled:
+            result = self.l1_cache.get(key, version)
+            if result is not None:
+                return (result, "L1")
 
-        # Try L2
-        result = self.l2_cache.get(key, version)
-        if result is not None:
-            return (result, "L2")
+        # Try L2 (skip if disabled by config)
+        if self.l2_enabled:
+            result = self.l2_cache.get(key, version)
+            if result is not None:
+                return (result, "L2")
 
         return None
 
@@ -433,19 +465,29 @@ class MultiLevelCache(CacheInterface):
         Returns:
             Average lookup time in ms
         """
-        if not self._lookup_times:
+        with self._stats_lock:
+            times = list(self._lookup_times)
+        if not times:
             return 0.0
-        return (sum(self._lookup_times) / len(self._lookup_times)) * 1000
+        return (sum(times) / len(times)) * 1000
 
     def migrate(self, from_version: str, to_version: str) -> int:
         """Migrate entries from one version to another in both caches.
+
+        .. note::
+            L1 always contributes 0 migrated entries because
+            :class:`~src.cache.exact_cache.ExactCache` stores keys as
+            irreversible SHA-256 hashes and cannot reconstruct the original
+            key string required for re-insertion under a new version prefix.
+            Only L2 (:class:`~src.cache.semantic_cache.SemanticCache`) performs
+            actual migration.
 
         Args:
             from_version: Source version
             to_version: Target version
 
         Returns:
-            Total number of entries migrated across both caches
+            Total number of entries migrated across both caches (L1 always 0)
         """
         l1_migrated = self.l1_cache.migrate(from_version, to_version)
         l2_migrated = self.l2_cache.migrate(from_version, to_version)
@@ -489,9 +531,11 @@ class MultiLevelCache(CacheInterface):
 
     def reset_stats(self) -> None:
         """Reset statistics counters."""
-        self.l1_hits = 0
-        self.l2_hits = 0
-        self.misses = 0
-        self._lookup_times.clear()
+        with self._stats_lock:
+            self.l1_hits = 0
+            self.l2_hits = 0
+            self.l3_hits = 0
+            self.misses = 0
+            self._lookup_times.clear()
         self.l1_cache.reset_stats()
         self.l2_cache.reset_stats()

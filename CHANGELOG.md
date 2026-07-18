@@ -218,6 +218,74 @@ retracted and replaced with manifest-backed measurements. See [`STATUS.md`](STAT
 ### Fixed
 - Correctness bugs C1–C7 (Phase 1), including the L2 semantic-cache colliding-key
   wrong-content bug (C-5) and an RLock re-entrancy deadlock; single pricing home.
+- **C-1 — `MultiLevelCache` stats counters unsynchronised** (`src/cache/multi_level_cache.py`):
+  added `_stats_lock = threading.RLock()` and serialised all four counter mutations
+  (`l1_hits`, `l2_hits`, `misses`, `l3_hits`) in `get()`, `query_l3()`, `clear()`,
+  and `reset_stats()`, and all counter reads in `hit_rate()`, `l1_hit_rate()`,
+  `l2_hit_rate()`, and `stats()`. Regression test
+  `test_stats_counters_never_race_with_concurrent_gets` in `TestMultiLevelCacheConcurrency`.
+- **M-3 / ST-2 — `_lookup_times` deque non-atomic iteration** (`src/cache/multi_level_cache.py`):
+  `stats()` and `average_lookup_time_ms()` now snapshot the deque into a local list
+  under `_stats_lock` before calling `sum()`/`len()`, eliminating the
+  check-then-act race that could raise `ZeroDivisionError` under concurrent
+  `reset_stats()`. Deque appends in `get()` also moved inside `_stats_lock`.
+- **C-2 — `SemanticCache.migrate()` TOCTOU** (`src/cache/semantic_cache.py`):
+  the `with self._lock:` block now covers both the collection phase and the `set()`
+  loop, making migration atomic with respect to concurrent writers. Safe because
+  `self._lock` is a reentrant `RLock`. Regression test
+  `test_migrate_is_atomic_no_interleaved_writes` in `TestSemanticCacheMigrateLock`.
+- **M-4 — `SemanticCache.get_entry()` missing lock** (`src/cache/semantic_cache.py`):
+  added `with self._lock:` around the `self.entries.get()` call. Called from
+  `MultiLevelCache.get()` on the L2→L1 promotion path while concurrent eviction
+  could mutate `entries`. Regression test
+  `test_get_entry_never_raises_under_concurrent_eviction` in `TestSemanticCacheGetEntryLock`.
+- **M-2 — `ExactCache.migrate()` silent no-op made visible** (`src/cache/exact_cache.py`):
+  the dead iteration loop (which could never migrate anything because SHA-256 keys
+  are irreversible) was replaced with an explicit early return. The log event is now
+  `cache_migration_skipped` with `reason="irreversible_hash"` so callers can
+  distinguish "nothing matched" from "migration not supported".
+  `MultiLevelCache.migrate()` docstring updated to document that L1 always
+  contributes 0. Regression tests in `TestExactCacheMigrate`.
+- **L-1 — `MultiLevelCache.reset_stats()` missing `l3_hits` reset**
+  (`src/cache/multi_level_cache.py`): `reset_stats()` now zeroes all four counters
+  (`l1_hits`, `l2_hits`, `l3_hits`, `misses`) inside `_stats_lock`, consistent
+  with `clear()`. Regression test `test_reset_stats_clears_l3_hits` in `TestMultiLevelCacheL3`.
+- **M-1 — `MultiLevelCache.get_with_level()` ignoring `l1_enabled`/`l2_enabled`**
+  (`src/cache/multi_level_cache.py`): the method now guards each sub-cache call
+  behind the same `if self.l1_enabled` / `if self.l2_enabled` flags used by
+  `get()`. Regression test `test_get_with_level_respects_disabled_flags` in
+  `TestMultiLevelCache`.
+- **N-1 — `SemanticCache.average_similarity_score()` / `reset_stats()` race**
+  (`src/cache/semantic_cache.py`): `average_similarity_score()` now snapshots
+  `_similarity_scores` under `self._lock` so a concurrent `reset_stats()` cannot
+  clear the list between the emptiness guard and `sum()`. `reset_stats()` now
+  performs both `_stats.reset()` and `_similarity_scores.clear()` atomically
+  inside `with self._lock:`. Regression test
+  `TestSemanticCacheAverageSimilarityLock::test_average_similarity_score_never_races_with_reset`.
+- **N-2 — `SemanticCache.update_threshold()` unsynchronised write**
+  (`src/cache/semantic_cache.py`): `update_threshold()` now acquires `self._lock`
+  before assigning `self.similarity_threshold`, making the write consistent with
+  the guarded reads in `get()` and `stats()`. Regression test
+  `TestSemanticCacheUpdateThresholdLock::test_update_threshold_never_races_with_get`.
+- **N-3 — `MultiLevelCache.enable_promotion()` / `disable_promotion()` unsynchronised writes**
+  (`src/cache/multi_level_cache.py`): both methods now acquire `self._stats_lock`
+  before writing `promote_l2_hits`. `stats()` snapshots the flag inside the same
+  `with self._stats_lock:` block as the hit/miss counters so the returned
+  `"promote_l2_hits"` value is consistent with the counters in the same snapshot.
+  Regression test
+  `TestMultiLevelCache::test_promotion_flag_consistent_in_stats_snapshot`.
+- **N-4 — `stats()` double `size()` calls producing inconsistent snapshots**
+  (`src/cache/exact_cache.py`, `src/cache/multi_level_cache.py`):
+  `ExactCache.stats()` now snapshots `n = self.size()` once and reuses it for
+  both `"size"` and `"utilization"`, eliminating the window where a concurrent
+  eviction could make the two fields disagree. `MultiLevelCache.stats()` applies
+  the same pattern via `l1_size` and `l2_size` locals. Regression tests
+  `TestExactCacheStatsConsistency` and
+  `TestMultiLevelCache::test_stats_l1_size_and_utilization_are_consistent`.
+- **N-5 — advisory lock-order comment in `SemanticCache.stats()`**
+  (`src/cache/semantic_cache.py`): added a 3-line comment above the
+  `embedding_generator.cache_size()` call documenting that `self._lock` is held
+  at that point and that `embedding_generator` must not re-acquire it.
 
 ### Security
 - **STRIDE threat model** (Phase 7): [`docs/security/THREAT_MODEL.md`](docs/security/THREAT_MODEL.md)
