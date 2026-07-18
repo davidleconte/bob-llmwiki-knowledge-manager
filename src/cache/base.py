@@ -4,6 +4,7 @@ This module defines the abstract base class for all cache implementations,
 providing a common interface and version support for cache evolution.
 """
 
+import dataclasses
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -131,6 +132,84 @@ class CacheStats:
             "total_requests": self.hits + self.misses,
             "hit_rate": self.hit_rate(),
         }
+
+
+@dataclass(frozen=True)
+class CacheStatsSnapshot:
+    """Immutable point-in-time snapshot of ``MultiLevelCache.stats()``.
+
+    All fields are populated at construction time inside a single lock block
+    in ``MultiLevelCache.stats()``.  The frozen dataclass makes the assembly
+    contract structural: mypy catches a missing field at the construction call
+    site, so the snapshot-discipline failures found in Rounds 1–4 cannot
+    recur silently.
+
+    **Do not mutate field values after construction** — ``frozen=True``
+    enforces this at runtime.
+
+    See ``src/cache/CONCURRENCY.md`` for the snapshot pattern and the rule
+    that every new counter added to ``MultiLevelCache`` must be added here
+    in the same commit.
+
+    Attributes:
+        total_requests: Total get() + query_l3() calls (hits + misses).
+        total_hits: Total L1 + L2 + L3 hits.
+        total_misses: Total cache misses.
+        hit_rate: Overall hit rate (0–100 %).
+        avg_lookup_time_ms: Rolling average lookup latency in milliseconds.
+        version: Cache version string.
+        l1_hits: L1 (exact) cache hit count.
+        l1_hit_rate: L1 hit rate (0–100 %).
+        l1_size: Current number of entries in L1.
+        l1_max_size: Maximum capacity of L1 (construction-time constant).
+        l1_utilization: l1_size / l1_max_size * 100.
+        l2_hits: L2 (semantic) cache hit count.
+        l2_hit_rate: L2 hit rate (0–100 %).
+        l2_size: Current number of entries in L2.
+        l2_max_size: Maximum capacity of L2 (construction-time constant).
+        l2_utilization: l2_size / l2_max_size * 100.
+        l2_similarity_threshold: Active cosine-similarity threshold for L2.
+        l2_avg_similarity: Rolling average similarity score for L2 hits.
+        l3_hits: L3 (persistent index) hit count (0 when no L3 is wired).
+        promote_l2_hits: Whether L2→L1 promotion is currently enabled.
+        unique_entries: Deduplicated key count across L1 ∪ L2.
+    """
+
+    # ---- overall ----
+    total_requests: int
+    total_hits: int
+    total_misses: int
+    hit_rate: float
+    avg_lookup_time_ms: float
+    version: str
+    # ---- L1 ----
+    l1_hits: int
+    l1_hit_rate: float
+    l1_size: int
+    l1_max_size: int
+    l1_utilization: float
+    # ---- L2 ----
+    l2_hits: int
+    l2_hit_rate: float
+    l2_size: int
+    l2_max_size: int
+    l2_utilization: float
+    l2_similarity_threshold: float
+    l2_avg_similarity: float
+    # ---- L3 ----
+    l3_hits: int
+    # ---- configuration ----
+    promote_l2_hits: bool
+    unique_entries: int
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Return a plain ``dict`` with the same shape as the pre-dataclass
+        ``MultiLevelCache.stats()`` return value.
+
+        All existing callers (30+ sites across 10 files) continue to receive
+        a ``dict`` and require no changes.
+        """
+        return dataclasses.asdict(self)
 
 
 class CacheInterface(ABC):

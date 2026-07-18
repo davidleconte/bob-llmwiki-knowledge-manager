@@ -151,6 +151,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   re-ranking at any tested weight). Validated defaults: `semantic_threshold=0.30`,
   `graph_weight=0.0`. See ADR-017.
 
+### Fixed (Round 4 — S-1, S-2, S-3, S-4)
+- **S-1 — `MultiLevelCache.stats()` read `self.l2_cache.similarity_threshold` without
+  `SemanticCache._lock`.** Added `SemanticCache.get_threshold()` — a lock-guarded
+  read that mirrors `average_similarity_score()` — and updated `stats()` to call
+  it (`src/cache/semantic_cache.py`, `src/cache/multi_level_cache.py`).
+
+- **S-2 — `stats()` called `self.size()` after releasing `_stats_lock`**, producing a
+  `unique_entries` value at a different moment-in-time than `l1_size` / `l2_size`.
+  Inlined the key-union computation alongside the already-snapshotted
+  `snapshot_keys()` calls so all four size-related fields are taken at the same
+  point in time (`src/cache/multi_level_cache.py`).
+
+- **S-3/S-4 — Deleted stale root-level plan files and `README2.md`:**
+  `cache-race-fixes-plan.md`, `cache-race-fixes-round2-plan.md`, `README2.md`.
+  `README.md` is the sole authoritative README; the plan documents are superseded
+  by CHANGELOG.md entries and KB research notes.
+
+- **Regression tests:** `TestStatsThresholdAndUniqueEntries` (3 tests — threshold
+  round-trip, unique_entries bound, concurrent threshold-flip race detector).
+  Tests: 1106 → 1109 passed.
+
+### Fixed (Round 3 — O-1, O-2)
+- **O-1 — `promote_l2_hits` read in `get()` outside `_stats_lock`.**
+  After the L2 hit counter was incremented under `_stats_lock`, the `promote_l2_hits`
+  flag was read outside the lock on the next line — a concurrent `disable_promotion()`
+  / `enable_promotion()` could therefore race between the counter increment and the
+  promotion decision. Fixed by snapshotting `do_promote = self.promote_l2_hits`
+  inside the same `with self._stats_lock` block that increments `l2_hits`.
+  The log message `promoted=` also uses the local snapshot (`do_promote`) rather
+  than re-reading the live field (`src/cache/multi_level_cache.py`).
+
+- **O-2 — `get_with_level()` bypassed all stats accounting and L2→L1 promotion.**
+  The method re-implemented the two-level lookup without calling `get()`, so
+  `l1_hits` / `l2_hits` / `misses` and `_lookup_times` were never updated for
+  calls made via this path — `hit_rate()`, `average_lookup_time_ms()`, and
+  `stats()` all silently under-reported. L2→L1 promotion was also skipped.
+  Fixed by delegating to `self.get()` and inferring the hit level from the
+  counter delta under `_stats_lock` (`src/cache/multi_level_cache.py`).
+
+- **Regression tests:** `TestMultiLevelCachePromoteFlagRace` (1 test — concurrent
+  flag-flip + getter, verifies no exceptions, checks counter consistency) and
+  `TestGetWithLevelStatsAccounting` (3 tests — l1_hits, misses, hit_rate parity
+  with `get()`). Tests: 1102 → 1106 passed.
+
 ### Changed
 - **`EmbeddingGenerator(backend="minilm")` fallback chain**: now resolves via
   `mlx-embeddings` first (Apple Silicon, ~2–4 ms), then `sentence-transformers`

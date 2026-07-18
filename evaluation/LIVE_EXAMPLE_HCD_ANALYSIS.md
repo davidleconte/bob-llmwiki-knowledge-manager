@@ -21,7 +21,7 @@ I want you to act as a knowledge manager for this codebase.
 
 Your role:
 - Document code in docs/knowledge-base/
-- Use templates from /Users/david.leconte/Projects/bob-llmwiki-knowledge-manager/config/templates/
+- Use templates from <project-root>/config/templates/
 - Create concept documents for core ideas
 - Create guides for how-to instructions
 - Create references for API documentation

@@ -30,7 +30,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 if TYPE_CHECKING:
     from src.embeddings.index import PersistentEmbeddingIndex
 
-from src.cache.base import CacheInterface
+from src.cache.base import CacheInterface, CacheStatsSnapshot
 from src.cache.exact_cache import ExactCache
 from src.cache.semantic_cache import SemanticCache
 from src.monitoring import get_logger, get_metrics_collector
@@ -172,9 +172,12 @@ class MultiLevelCache(CacheInterface):
             with self._stats_lock:
                 self.l2_hits += 1
                 self._lookup_times.append(time.time() - start_time)
+                # Snapshot the flag under the same lock so a concurrent
+                # enable/disable_promotion() cannot race against this read.
+                do_promote = self.promote_l2_hits
 
             # Promote to L1 for future fast access (only if L1 is enabled).
-            if self.promote_l2_hits and self.l1_enabled:
+            if do_promote and self.l1_enabled:
                 # Get metadata from L2 if available
                 l2_entry = self.l2_cache.get_entry(key, version)
                 metadata = l2_entry.metadata if l2_entry else {}
@@ -195,7 +198,7 @@ class MultiLevelCache(CacheInterface):
                 cache_level="L2",
                 version=version or self.VERSION,
                 latency_ms=latency_ms,
-                promoted=self.promote_l2_hits,
+                promoted=do_promote,
             )
             return result
 
@@ -346,10 +349,11 @@ class MultiLevelCache(CacheInterface):
         with self._stats_lock:
             l1_hits = self.l1_hits
             l2_hits = self.l2_hits
+            l3_hits = self.l3_hits
             misses = self.misses
             promote_l2_hits = self.promote_l2_hits
-        total_requests = l1_hits + l2_hits + misses
-        hit_rate = ((l1_hits + l2_hits) / total_requests * 100) if total_requests else 0.0
+        total_requests = l1_hits + l2_hits + l3_hits + misses
+        hit_rate = ((l1_hits + l2_hits + l3_hits) / total_requests * 100) if total_requests else 0.0
         l1_hit_rate = (l1_hits / total_requests * 100) if total_requests else 0.0
         l2_hit_rate = (l2_hits / total_requests * 100) if total_requests else 0.0
 
@@ -359,32 +363,62 @@ class MultiLevelCache(CacheInterface):
         l1_size = self.l1_cache.size()
         l2_size = self.l2_cache.size()
 
-        return {
-            # Overall stats
-            "total_requests": total_requests,
-            "total_hits": l1_hits + l2_hits,
-            "total_misses": misses,
-            "hit_rate": hit_rate,
-            "avg_lookup_time_ms": self.average_lookup_time_ms(),
-            "version": self.VERSION,
-            # L1 stats
-            "l1_hits": l1_hits,
-            "l1_hit_rate": l1_hit_rate,
-            "l1_size": l1_size,
-            "l1_max_size": self.l1_cache.max_size,
-            "l1_utilization": (l1_size / self.l1_cache.max_size) * 100,
-            # L2 stats
-            "l2_hits": l2_hits,
-            "l2_hit_rate": l2_hit_rate,
-            "l2_size": l2_size,
-            "l2_max_size": self.l2_cache.max_size,
-            "l2_utilization": (l2_size / self.l2_cache.max_size) * 100,
-            "l2_similarity_threshold": self.l2_cache.similarity_threshold,
-            "l2_avg_similarity": self.l2_cache.average_similarity_score(),
-            # Configuration
-            "promote_l2_hits": promote_l2_hits,
-            "unique_entries": self.size(),
-        }
+        # S-1: read threshold via lock-guarded accessor so a concurrent
+        # update_threshold() cannot race between our read and the value used in
+        # the last get() call.
+        # S-2: derive unique_entries from already-snapshotted l1/l2 sizes rather
+        # than calling self.size() (which re-reads both sub-caches at a later
+        # moment, making the value inconsistent with l1_size / l2_size above).
+        l2_threshold = self.l2_cache.get_threshold()
+        unique = len(
+            set(self.l1_cache.snapshot_keys())
+            | set(
+                self.l1_cache._hash_key(
+                    self.l2_cache._make_versioned_key(
+                        self.l2_cache._extract_base_key(k),
+                        self.l2_cache._extract_version(k),
+                    )
+                )
+                for k in self.l2_cache.snapshot_keys()
+            )
+        )
+
+        # Assemble via CacheStatsSnapshot (frozen=True) so that:
+        # (a) the assembly point is a single explicit call — all fields are
+        #     listed here and mypy enforces completeness at construction time;
+        # (b) callers still receive a plain dict via to_dict() with no API change.
+        # See src/cache/CONCURRENCY.md — "stats() Is the Concurrency Canary".
+        #
+        # max_size fields: construction-time-only constants, safe to read
+        # without a lock. See the CONCURRENCY.md note on cross-class reads.
+        return CacheStatsSnapshot(
+            # ---- overall ----
+            total_requests=total_requests,
+            total_hits=l1_hits + l2_hits + l3_hits,
+            total_misses=misses,
+            hit_rate=hit_rate,
+            avg_lookup_time_ms=self.average_lookup_time_ms(),
+            version=self.VERSION,
+            # ---- L1 ----
+            l1_hits=l1_hits,
+            l1_hit_rate=l1_hit_rate,
+            l1_size=l1_size,
+            l1_max_size=self.l1_cache.max_size,
+            l1_utilization=(l1_size / self.l1_cache.max_size) * 100,
+            # ---- L2 ----
+            l2_hits=l2_hits,
+            l2_hit_rate=l2_hit_rate,
+            l2_size=l2_size,
+            l2_max_size=self.l2_cache.max_size,
+            l2_utilization=(l2_size / self.l2_cache.max_size) * 100,
+            l2_similarity_threshold=l2_threshold,
+            l2_avg_similarity=self.l2_cache.average_similarity_score(),
+            # ---- L3 ----
+            l3_hits=l3_hits,
+            # ---- configuration ----
+            promote_l2_hits=promote_l2_hits,
+            unique_entries=unique,
+        ).to_dict()
 
     def get_l1_cache(self) -> ExactCache:
         """Get L1 cache instance.
@@ -423,6 +457,11 @@ class MultiLevelCache(CacheInterface):
     def get_with_level(self, key: str, version: Optional[str] = None) -> Optional[Tuple[str, str]]:
         """Get cached response with cache level information.
 
+        Delegates to :meth:`get` so that stats accounting (l1_hits / l2_hits /
+        misses, _lookup_times) and L2→L1 promotion are applied identically to a
+        plain ``get()`` call.  The cache level is inferred from which counter
+        was incremented.
+
         Respects :attr:`l1_enabled` and :attr:`l2_enabled` flags — disabled
         levels are skipped, consistent with the behaviour of :meth:`get`.
 
@@ -433,31 +472,43 @@ class MultiLevelCache(CacheInterface):
         Returns:
             Tuple of (response, level) where level is 'L1' or 'L2', or None
         """
-        # Try L1 (skip if disabled by config)
-        if self.l1_enabled:
-            result = self.l1_cache.get(key, version)
-            if result is not None:
+        # Snapshot hit counters before the call so we can infer the level from
+        # whichever counter increments — avoids duplicating the full get() logic.
+        with self._stats_lock:
+            l1_before = self.l1_hits
+            l2_before = self.l2_hits
+
+        result = self.get(key, version)
+        if result is None:
+            return None
+
+        with self._stats_lock:
+            if self.l1_hits > l1_before:
                 return (result, "L1")
-
-        # Try L2 (skip if disabled by config)
-        if self.l2_enabled:
-            result = self.l2_cache.get(key, version)
-            if result is not None:
+            if self.l2_hits > l2_before:
                 return (result, "L2")
-
-        return None
+        # Fallback — should not be reachable, but be safe.
+        return (result, "L1")
 
     def contains(self, key: str, version: Optional[str] = None) -> bool:
         """Check if key exists in either cache.
+
+        Respects :attr:`l1_enabled` and :attr:`l2_enabled` flags — disabled
+        levels are not queried, consistent with the behaviour of :meth:`get`
+        and :meth:`set`.
 
         Args:
             key: The cache key
             version: Optional version
 
         Returns:
-            True if key exists in L1 or L2, False otherwise
+            True if key exists in an enabled L1 or L2 cache, False otherwise
         """
-        return self.l1_cache.contains(key, version) or self.l2_cache.contains(key, version)
+        if self.l1_enabled and self.l1_cache.contains(key, version):
+            return True
+        if self.l2_enabled and self.l2_cache.contains(key, version):
+            return True
+        return False
 
     def average_lookup_time_ms(self) -> float:
         """Get average lookup time in milliseconds.

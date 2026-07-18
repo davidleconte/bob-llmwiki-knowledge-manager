@@ -215,6 +215,50 @@ class TestMultiLevelCache:
         assert stats["total_hits"] == 1
         assert stats["total_misses"] == 1
 
+    def test_stats_returns_all_expected_keys(self):
+        """stats() must return all 21 expected keys with correct types (E fix).
+
+        Acts as a regression guard: dropping or renaming a key, or omitting a
+        field from CacheStatsSnapshot, will cause this test to fail immediately.
+        """
+        cache = MultiLevelCache()
+        cache.set("key1", "response1")
+        cache.get("key1")   # L1 hit
+        cache.get("miss")   # miss
+
+        s = cache.stats()
+
+        expected_keys = {
+            # overall
+            "total_requests", "total_hits", "total_misses", "hit_rate",
+            "avg_lookup_time_ms", "version",
+            # L1
+            "l1_hits", "l1_hit_rate", "l1_size", "l1_max_size", "l1_utilization",
+            # L2
+            "l2_hits", "l2_hit_rate", "l2_size", "l2_max_size", "l2_utilization",
+            "l2_similarity_threshold", "l2_avg_similarity",
+            # L3
+            "l3_hits",
+            # configuration
+            "promote_l2_hits", "unique_entries",
+        }
+        missing = expected_keys - s.keys()
+        assert not missing, f"stats() is missing keys: {sorted(missing)}"
+
+        # Type assertions for selected fields — catches type regressions from
+        # CacheStatsSnapshot field annotation changes.
+        assert isinstance(s["total_requests"], int), "total_requests must be int"
+        assert isinstance(s["total_hits"], int), "total_hits must be int"
+        assert isinstance(s["total_misses"], int), "total_misses must be int"
+        assert isinstance(s["hit_rate"], float), "hit_rate must be float"
+        assert isinstance(s["l1_hits"], int), "l1_hits must be int"
+        assert isinstance(s["l3_hits"], int), "l3_hits must be int"
+        assert isinstance(s["promote_l2_hits"], bool), "promote_l2_hits must be bool"
+        assert isinstance(s["version"], str), "version must be str"
+        assert isinstance(s["unique_entries"], int), "unique_entries must be int"
+
+
+
     def test_get_with_level(self):
         """Test getting response with cache level info."""
         cache = MultiLevelCache()
@@ -244,6 +288,33 @@ class TestMultiLevelCache:
 
         assert cache.contains("key1") is True
         assert cache.contains("nonexistent") is False
+
+
+    def test_contains_respects_disabled_flags(self):
+        """contains() must honour l1_enabled/l2_enabled — disabled levels must not
+        be queried even when they contain matching data (B fix).
+
+        Mirrors test_get_with_level_respects_disabled_flags pattern.
+        """
+        # L1 disabled: set() writes only to L2; contains() must find it via L2.
+        cache_no_l1 = MultiLevelCache(l1_enabled=False)
+        cache_no_l1.set("key", "value")
+        assert cache_no_l1.l1_cache.size() == 0, "set() must skip disabled L1"
+        assert cache_no_l1.contains("key") is True, "contains() must find key in L2"
+
+        # L2 disabled: set() writes only to L1; contains() must find it via L1.
+        cache_no_l2 = MultiLevelCache(l2_enabled=False)
+        cache_no_l2.set("key", "value")
+        assert cache_no_l2.l2_cache.size() == 0, "set() must skip disabled L2"
+        assert cache_no_l2.contains("key") is True, "contains() must find key in L1"
+
+        # Both disabled: set() writes nothing; contains() must return False.
+        cache_none = MultiLevelCache(l1_enabled=False, l2_enabled=False)
+        cache_none.set("key", "value")
+        assert cache_none.contains("key") is False, (
+            "contains() must return False when both levels are disabled"
+        )
+
 
     def test_update_similarity_threshold(self):
         """Test updating L2 similarity threshold."""
@@ -721,3 +792,238 @@ class TestMultiLevelCacheL3:
         assert cache.l2_hits == 0
         assert cache.misses == 0
 
+
+    def test_stats_includes_l3_hits(self, tmp_path):
+        """stats() must include 'l3_hits' key and count L3 queries in 'total_hits' (A fix).
+
+        Verifies:
+        - stats()["l3_hits"] == cache.l3_hits after N query_l3() calls.
+        - stats()["total_hits"] counts L3 hits (not just L1+L2).
+        - The key is present even when l3_hits == 0 (no L3 wired).
+        - total_requests == total_hits + total_misses at all times.
+        """
+        from src.cache.embeddings import EmbeddingGenerator
+        from src.embeddings.index import PersistentEmbeddingIndex
+
+        embedder = EmbeddingGenerator()
+        idx = PersistentEmbeddingIndex(embedder, tmp_path / "l3-index")
+        idx.index_document("concepts/caching.md", "# Caching\n\nMulti-level cache L1 L2 L3.")
+        idx.flush()
+
+        cache = MultiLevelCache(l3_index=idx)
+
+        # Before any queries — key must be present with value 0.
+        s = cache.stats()
+        assert "l3_hits" in s, "stats() must always include 'l3_hits' key"
+        assert s["l3_hits"] == 0
+
+        # Perform 3 L3 queries (no L1/L2 activity).
+        for _ in range(3):
+            cache.query_l3("multi level cache")
+        assert cache.l3_hits == 3
+
+        s = cache.stats()
+        assert s["l3_hits"] == 3, "stats()['l3_hits'] must equal cache.l3_hits"
+        assert s["total_hits"] == 3, "total_hits must include L3 hits"
+        assert s["total_requests"] == s["total_hits"] + s["total_misses"], (
+            "total_requests must equal total_hits + total_misses"
+        )
+
+        # After a mix: 3 L3 hits + 1 L1 hit (via set/get) + 1 miss.
+        cache.set("key", "value")
+        cache.get("key")   # L1 hit
+        cache.get("nope")  # miss
+
+        s = cache.stats()
+        assert s["l3_hits"] == 3
+        assert s["l1_hits"] == 1
+        assert s["total_hits"] == 4       # 3 L3 + 1 L1
+        assert s["total_misses"] == 1
+        assert s["total_requests"] == s["total_hits"] + s["total_misses"]
+
+
+
+
+class TestMultiLevelCachePromoteFlagRace:
+    """Regression tests for promote_l2_hits flag race in get() (O-1)."""
+
+    def test_promote_flag_snapshotted_under_lock_in_get(self):
+        """get() must snapshot promote_l2_hits under _stats_lock so a concurrent
+        disable_promotion() cannot race between the flag read and the l1_cache.set()
+        call (O-1 regression).  The test verifies no exceptions are raised and
+        that hit counters remain consistent under concurrent flag flips.
+        ``sys`` state is restored in ``finally``.
+        """
+        import sys
+        import threading
+        from concurrent.futures import ThreadPoolExecutor
+
+        old_interval = sys.getswitchinterval()
+        sys.setswitchinterval(1e-7)
+        try:
+            cache = MultiLevelCache(similarity_threshold=0.01)  # low threshold → L2 hits
+            # Pre-load into L2 only (bypass L1 by setting directly on the L2 sub-cache).
+            for i in range(20):
+                cache.l2_cache.set(f"key_{i}", f"val_{i}")
+
+            errors: list[str] = []
+            stop = threading.Event()
+
+            def flipper() -> None:
+                while not stop.is_set():
+                    cache.enable_promotion()
+                    cache.disable_promotion()
+
+            def getter() -> None:
+                try:
+                    for i in range(20):
+                        cache.get(f"key_{i}")
+                except Exception as exc:  # noqa: BLE001
+                    errors.append(repr(exc))
+
+            with ThreadPoolExecutor(max_workers=8) as executor:
+                flippers = [executor.submit(flipper) for _ in range(3)]
+                getters = [executor.submit(getter) for _ in range(4)]
+                for f in getters:
+                    f.result()
+                stop.set()
+                for f in flippers:
+                    f.result()
+
+            assert not errors, f"promote_l2_hits race in get(): {errors[:3]}"
+            # Stats must be consistent (no counter overflow / underflow)
+            s = cache.stats()
+            total = s["l1_hits"] + s["l2_hits"] + s["total_misses"]
+            assert total == s["total_requests"], "stats() total_requests inconsistent"
+        finally:
+            sys.setswitchinterval(old_interval)
+
+
+class TestGetWithLevelStatsAccounting:
+    """Regression tests for get_with_level() stats accounting (O-2)."""
+
+    def test_get_with_level_increments_l1_hits(self):
+        """get_with_level() on an L1 hit must increment l1_hits, not leave it at 0."""
+        cache = MultiLevelCache()
+        cache.set("key", "value")
+        # Warm L1 (set() writes to both levels; first get will be L1).
+        cache.reset_stats()
+
+        result = cache.get_with_level("key")
+        assert result is not None
+        response, level = result
+        assert response == "value"
+        assert level == "L1"
+        assert cache.l1_hits == 1, "get_with_level() must increment l1_hits"
+        assert cache.l2_hits == 0
+        assert cache.misses == 0
+
+    def test_get_with_level_increments_misses(self):
+        """get_with_level() on a miss must increment misses, not leave them at 0."""
+        cache = MultiLevelCache()
+        cache.reset_stats()
+
+        result = cache.get_with_level("nonexistent_key")
+        assert result is None
+        assert cache.misses == 1, "get_with_level() must increment misses"
+        assert cache.l1_hits == 0
+        assert cache.l2_hits == 0
+
+    def test_get_with_level_hit_rate_consistent_with_get(self):
+        """hit_rate() after get_with_level() hits must equal hit_rate() after
+        the same number of get() hits — the two call paths must be equivalent."""
+        cache_a = MultiLevelCache()
+        cache_b = MultiLevelCache()
+        for i in range(5):
+            cache_a.set(f"k{i}", f"v{i}")
+            cache_b.set(f"k{i}", f"v{i}")
+        cache_a.reset_stats()
+        cache_b.reset_stats()
+
+        for i in range(5):
+            cache_a.get(f"k{i}")
+            cache_b.get_with_level(f"k{i}")
+
+        assert cache_a.hit_rate() == cache_b.hit_rate(), (
+            f"hit_rate mismatch: get()={cache_a.hit_rate()} "
+            f"get_with_level()={cache_b.hit_rate()}"
+        )
+        assert cache_a.l1_hits == cache_b.l1_hits
+
+
+class TestStatsThresholdAndUniqueEntries:
+    """Regression tests for S-1 (threshold cross-class race) and S-2 (unique_entries
+    double-read) in MultiLevelCache.stats()."""
+
+    def test_stats_l2_similarity_threshold_via_lock(self):
+        """stats()['l2_similarity_threshold'] must reflect the value as of the
+        stats() call, read under SemanticCache._lock via get_threshold() (S-1).
+        After update_threshold() the new value must appear in the next stats() call.
+        """
+        cache = MultiLevelCache(similarity_threshold=0.85)
+        assert cache.stats()["l2_similarity_threshold"] == 0.85
+
+        cache.update_similarity_threshold(0.70)
+        assert cache.stats()["l2_similarity_threshold"] == 0.70
+
+    def test_stats_unique_entries_consistent_with_sizes(self):
+        """stats()['unique_entries'] must be <= l1_size + l2_size (it is the
+        deduplicated union), and it must reflect entries that were added (S-2).
+        Calling self.size() after releasing _stats_lock previously produced a
+        snapshot at a different moment than l1_size / l2_size.
+        """
+        cache = MultiLevelCache()
+        for i in range(10):
+            cache.set(f"key_{i}", f"val_{i}")
+
+        s = cache.stats()
+        assert s["unique_entries"] >= 1
+        # unique_entries is the deduplicated union — always <= l1+l2 raw sum
+        assert s["unique_entries"] <= s["l1_size"] + s["l2_size"]
+
+    def test_stats_l2_similarity_threshold_race(self):
+        """Concurrent update_threshold() must not cause stats() to observe a
+        torn float for l2_similarity_threshold (S-1 race-detector check).
+        ``sys`` state is restored in ``finally``.
+        """
+        import sys
+        import threading
+        from concurrent.futures import ThreadPoolExecutor
+
+        old_interval = sys.getswitchinterval()
+        sys.setswitchinterval(1e-7)
+        try:
+            cache = MultiLevelCache(similarity_threshold=0.85)
+            errors: list[str] = []
+            stop = threading.Event()
+
+            def threshold_flipper() -> None:
+                thresholds = [0.70, 0.80, 0.90, 0.85]
+                idx = 0
+                while not stop.is_set():
+                    cache.update_similarity_threshold(thresholds[idx % len(thresholds)])
+                    idx += 1
+
+            def stats_reader() -> None:
+                try:
+                    for _ in range(500):
+                        s = cache.stats()
+                        t = s["l2_similarity_threshold"]
+                        assert isinstance(t, float) and 0.0 <= t <= 1.0, (
+                            f"l2_similarity_threshold out of range or wrong type: {t!r}"
+                        )
+                except Exception as exc:  # noqa: BLE001
+                    errors.append(repr(exc))
+
+            with ThreadPoolExecutor(max_workers=6) as executor:
+                flippers = [executor.submit(threshold_flipper) for _ in range(2)]
+                readers = [executor.submit(stats_reader) for _ in range(3)]
+                for r in readers:
+                    r.result()
+                stop.set()
+                for f in flippers:
+                    f.result()
+
+            assert not errors, f"threshold race in stats(): {errors[:3]}"
+        finally:
+            sys.setswitchinterval(old_interval)

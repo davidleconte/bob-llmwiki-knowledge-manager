@@ -56,8 +56,8 @@ You are continuing a comprehensive architecture documentation project for an HCD
 ## Files Have Been Moved
 
 All documentation has been consolidated from:
-- **OLD:** `/Users/david.leconte/Documents/Work/Labs/hcd-at-its-core/docs/knowledge-base/`
-- **NEW:** `/Users/david.leconte/Projects/bob-llmwiki-knowledge-manager/`
+- **OLD:** `<project-root>/docs/knowledge-base/`
+- **NEW:** `<project-root>/`
 
 ## Next Phase: Week 18 Days 6-7 - Final Review & Validation
 
@@ -132,7 +132,7 @@ This is an **HCD (Hyper Converged Database)** system with:
 
 ## Git Repository
 
-- **Location:** `/Users/david.leconte/Projects/bob-llmwiki-knowledge-manager/`
+- **Location:** `<project-root>/`
 - **Branch:** master
 - **Last Commit:** Week 18 Days 3-4 Complete - All 7 Component Specifications
 - **Status:** Clean, all changes committed
@@ -162,7 +162,7 @@ This is an **HCD (Hyper Converged Database)** system with:
 
 ## Important Notes
 
-- All documentation is in `/Users/david.leconte/Projects/bob-llmwiki-knowledge-manager/`
+- All documentation is in `<project-root>/`
 - Files follow naming convention: `ARCHITECTURE_*.md`, `ADR-*.md`, `DOCUMENTATION_PLAN.md`
 - All metrics are production-validated from real system
 - All code examples are Python 3.11+
@@ -185,7 +185,7 @@ The project will be complete when:
 
 ```bash
 # Navigate to project
-cd /Users/david.leconte/Projects/bob-llmwiki-knowledge-manager
+cd <project-root>
 
 # Check git status
 git status

@@ -58,3 +58,13 @@ docs/knowledge-base/.DS_Store
 evaluation/reports/
 .bob/kb-index/
 .bob/kb-graph.json
+
+# Bob IDE Labs and Recipes — unrelated to this project's topic
+LABs/
+Recipes/
+
+# Root-level plan/scratch files — transient session artefacts (see docs/project-management/plans/)
+/gap-fix-plan.md
+/km-savings-test-plan.md
+/minilm-docs-plan.md
+/cache-remediation-plan.md

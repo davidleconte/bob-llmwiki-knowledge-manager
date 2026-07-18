@@ -620,6 +620,19 @@ class SemanticCache(CacheInterface):
         result = self.get_with_similarity(key, version)
         return result is not None
 
+    def get_threshold(self) -> float:
+        """Return the current similarity threshold under ``self._lock``.
+
+        Thread-safe read for callers (e.g. ``MultiLevelCache.stats()``) that
+        need a consistent snapshot of the threshold without holding their own
+        lock.  Mirrors the pattern of :meth:`average_similarity_score`.
+
+        Returns:
+            Current similarity threshold (0-1).
+        """
+        with self._lock:
+            return self.similarity_threshold
+
     def update_threshold(self, new_threshold: float) -> None:
         """Update similarity threshold.
 

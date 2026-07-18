@@ -168,7 +168,7 @@ Selected repositories for Phase 6 real-world validation using Bob Shell as LLM A
 ```bash
 # Full analysis of current project
 python3 evaluation/scripts/run_bob_shell_validation.py \
-    --repo /Users/david.leconte/Projects/bob-llmwiki-knowledge-manager \
+    --repo <project-root> \
     --name "bob-llmwiki-knowledge-manager" \
     --budget 25.0 \
     --max-files 50 \

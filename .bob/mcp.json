@@ -36,12 +36,12 @@
     },
     "external-llm": {
       "disabled": true,
-      "command": "/Users/coredump/Desktop/EXEC2/.venv/bin/python",
+      "command": "python",
       "args": [
-        "/Users/coredump/Desktop/EXEC2/external-llm-mcp-server-bob/external_llm_mcp_server.py"
+        "external_llm_mcp_server.py"
       ],
       "env": {
-        "OPENAI_API_KEY": "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",
+        "OPENAI_API_KEY": "YOUR-OPENAI-API-KEY-HERE",
         "OPENAI_MODEL": "gpt-5.5",
         "OPENAI_BASE_URL": "https://api.openai.com/v1",
         "EXTERNAL_LLM_MAX_TOKENS": "4096",
