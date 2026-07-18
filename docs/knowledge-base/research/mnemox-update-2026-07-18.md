@@ -33,19 +33,69 @@ for lessons learned — synthesised by Bob in the same session.
 
 ## Findings
 
-<!-- MNEMOX_SYNTHESISE: Bob — review the git changes and new analysis reports
-above and write 3–5 concrete, specific lessons learned directly into this
-section now. Replace this comment with the synthesised content.
-Focus on: what changed in the codebase, what patterns emerged, what should
-be remembered for the next session. Then update index.md with this note's entry. -->
+### 1. Lint checks belong in the tool that already runs at the gate
+
+The root-file hygiene check was added directly to `scripts/validate-kb.sh`
+(Step 5 of every `mnemox` run) rather than a separate script. This is correct:
+one gate, one call, one output block. The pattern generalises — any new static
+check on repo structure belongs in `validate-kb.sh`, not as a standalone linter
+that can be forgotten.
+
+### 2. Allowlists must cover GitHub Community Health Files from the start
+
+The initial allowlist (`README.md AGENTS.md STATUS.md CHANGELOG.md INTEGRATIONS.md`)
+was immediately expanded to include `CODE_OF_CONDUCT.md CONTRIBUTING.md
+GOVERNANCE.md SECURITY.md SUPPORT.md` because those 5 files are required at the
+root by GitHub's community health framework. Any repo-hygiene allowlist must
+account for the full set of GitHub-surfaced conventional root files, not just the
+project's own conventions.
+
+### 3. Documentation of operational flags closes the "how do I use this?" gap
+
+The `--quick` / `--full` decision table in `README.md §5` converts an implicit
+convention (known only to the author) into an explicit, scannable contract visible
+to any new user or judge. The pattern: whenever a tool has multiple operating
+modes, the README should show the decision rule as a table, not bury it in
+`--help` output or skill docs.
+
+### 4. "Portability concern" resolved without code change
+
+The lessons note from the previous run flagged `shasum -a 256` vs `sha256sum`
+portability. Investigation confirmed the SHA256 is computed entirely via Python
+`hashlib` — no shell command involved. The fix was a one-line comment confirming
+the design. Lesson: before writing a portability shim, verify whether the concern
+is even applicable to the actual implementation.
+
+### 5. Three `mnemox --quick` runs in one session produce clean, additive output
+
+Each quick run rewrites the same dated note (`mnemox-update-2026-07-18.md`)
+rather than creating duplicate files. The frontmatter step correctly adds
+missing headers to the rewritten note. The graph rebuild is idempotent (same
+node/edge counts on identical KB state). The git commit fires only when there
+is a diff — the "nothing to commit" case is handled gracefully (warns, continues).
+The session demonstrated that `--quick` is safe to run repeatedly without
+accumulating noise.
 
 ## Conclusions
 
 ### Recommendations
-<!-- Bob: add 1–3 actionable next steps based on the findings above -->
+
+1. **Gate pattern is established** — add all future repo-structure checks
+   (e.g., orphaned KB docs not in INDEX.md, missing frontmatter fields) as
+   new sections in `validate-kb.sh`, following the existing `🏠`, `🔗`, `📊`
+   section pattern.
+2. **Expand the decision-table pattern to `mnemox --full`** — README §5 now
+   shows the two speeds; consider adding a "what the 7-phase analysis checks"
+   one-liner so users know what they gain from `--full` vs `--quick`.
+3. **Allowlist maintenance is a low-frequency, high-value task** — review the
+   root-file allowlist whenever adding a new top-level conventional file; it
+   takes 30 seconds and prevents false-positive lint noise.
 
 ### Next Steps
-<!-- Bob: add specific tasks for the next session -->
+
+- [ ] Add orphan check to `validate-kb.sh`: warn on KB docs not referenced in `index.md`
+- [ ] Add `--full` one-liner summary to README §5 (what the 7-phase analysis produces)
+- [ ] Consider adding frontmatter completeness check to `validate-kb.sh` (required fields: title, category, tags, created, updated, status)
 
 ## Related Documents
 - [Knowledge Base Index](../index.md)
