@@ -61,6 +61,15 @@ mkdir -p "$RESEARCH_DIR"
 
 # ── Write dated research note ────────────────────────────────────────────────
 cat > "$NOTE_FILE" << NOTEEOF
+---
+title: "Mnemox Update — $TODAY"
+category: research
+tags: [mnemox, lessons-learned]
+created: $TODAY
+updated: $TODAY
+status: active
+---
+
 # Mnemox Update — $TODAY
 
 ## Objective
