@@ -61,7 +61,7 @@ def test_knowledge_manager_mode_structure(mode_config):
     assert "customInstructions" in km_mode, "Mode should have customInstructions"
 
     assert km_mode["slug"] == "knowledge-manager", "Slug should be knowledge-manager"
-    assert "📚" in km_mode["name"], "Name should include emoji"
+    assert "🧠" in km_mode["name"], "Name should include emoji"
 
 
 @pytest.mark.unit

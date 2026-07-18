@@ -1,52 +1,53 @@
-# Bob Shell Knowledge Manager
+# Mnemox
 
-### Make your codebase's knowledge *compound* — instead of paying to rediscover it every session.
+### *Give IBM Bob a memory. Make your knowledge compound.*
 
-A native **IBM Bob Shell** implementation of Andrej Karpathy's **LLM-Wiki** pattern, engineered for **Bobcoin economy**.
+> **Mnemox** — from *Mnemosyne* (Μνημοσύνη), the Greek Titaness of memory.
+> In Greek mythology, Mnemosyne was not merely the goddess of remembrance —
+> she was the *mother of the nine Muses*, the source from which all knowledge,
+> art, and discovery flow. Before you can create, you must remember. Before you
+> can go deeper, you must not re-pay for what you already know. Mnemosyne held
+> the river of memory (*Lethe*'s opposite) in Hades — the water that let souls
+> *retain* what they had learned rather than forget it at the threshold.
+>
+> **Mnemox is that river, built into IBM Bob.** It is the persistent memory layer
+> IBM Bob was missing — the layer that lets every session start from everything
+> the team already learned, so the budget previously consumed by forgetting is
+> freed for the work that actually matters: going deeper, thinking broader,
+> attempting the problems that were previously too expensive to try.
+>
+> *Mnemox your workspace. The impossible gets closer with every session.*
+
+A native **IBM Bob** implementation of Andrej Karpathy's **LLM-Wiki** pattern, engineered for **Bobcoin economy**. Built by **Team BobjectifLune** as their 2026 IBMer watsonx Challenge submission. Works in **Bob IDE** and **Bob Shell CLI**.
+
+> 💡 **What is a Bobcoin?** IBM Bob runs on a token-based budget called **Bobcoins** — the internal unit that measures how much AI computation each session consumes. Every question you ask, every file Bob reads, every answer it generates costs Bobcoins. The budget is finite and shared. Spending it on re-derivation — re-reading files Bob already processed, re-reasoning about decisions it already made — is waste. Mnemox eliminates that waste structurally, so your Bobcoin budget goes to work that actually moves things forward.
 
 `MIT licensed` · `Native Bob modes` · `No MCP servers` · `No plugins` · `Pattern: LLM-Wiki (Karpathy)` · `Bob Shell CLI` · `Bob IDE`
 
-> **What this is.** Every Bob session re-reads and re-reasons about the same codebase — and pays
-> Bobcoins to do it, again and again. The fix isn't a shorter prompt; it's a **memory**. This project turns
-> Bob into a disciplined maintainer of a living, markdown knowledge base: knowledge is written down once
-> and *retrieved* thereafter, so the bill falls because the work stops repeating. It ships as **two native
-> Bob modes** — no plugin, no MCP server, nothing external in the loop.
+> **What this is.** The most powerful thing you can do with Bob is give it a research scope that
+> compounds. Not just one codebase — a living, growing body of knowledge that spans architectures,
+> decisions, experiment findings, and accumulated expertise. Mnemox builds that memory: knowledge
+> is written down once and *retrieved* thereafter, so the cost of re-derivation drops toward zero —
+> and the budget it frees up becomes available for depth, breadth, and agentic ambition. It ships as
+> **two native Bob modes** — no plugin, no MCP server, nothing external in the loop.
 
 ---
 
-## ℹ️ This repository contains two independently-operable systems
-
-| System | Technology | Status |
-|--------|-----------|--------|
-| **Bob Shell Knowledge Manager** | Bash scripts, YAML, Markdown | Stable v1.0 |
-| **Token Optimization System** (`src/`) | Python 3.11+, tiktoken, scikit-learn | Beta — Not Production Ready |
-
-Each system works without the other. Three **opt-in** integration points connect them (all fallback-safe — if the Python system is absent, the KB Manager is unaffected): the KB query engine can use the TOS embedding scorer; the `knowledge-manager` mode can compress retrieved context via `bob-optimize`; and a persistent embedding index bridges KB document search with TOS cache infrastructure. See [`INTEGRATIONS.md`](INTEGRATIONS.md).
-
-Architecture: [KB Manager — `docs/kb-manager/ARCHITECTURE.md`](docs/kb-manager/ARCHITECTURE.md) · [Python system — `docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md).
-
-### Supported targets
-
-| Target | Activation | Install step | Skill lazy-load | `save_memory` | **Best for** | **Key trade-off** |
-|--------|-----------|--------------|-----------------|---------------|------------|-----------------|
-| **Bob Shell CLI** | `bob --chat-mode=knowledge-manager` | `scripts/install.sh` | not supported | ✅ available | Daily CLI users; full `save_memory` | One-time install + `~/.zshrc` alias |
-| **Bob IDE** | Mode picker → 📚 Knowledge Manager | none — zero steps | ✅ auto-loaded | ❌ file persistence only | IDE users; zero install | No cross-session `save_memory` facts |
-
-> **Bob IDE users:** see [`docs/BOB-IDE-GUIDE.md`](docs/BOB-IDE-GUIDE.md) for the full IDE workflow.
-
----
-
-## 1. The problem: you're paying to relearn what Bob already knew
+## 1. The problem: re-derivation is consuming the budget that should go to depth
 
 IBM's own guidance is blunt about where a session's budget goes. Every turn burns **input**, **output**,
 and **reasoning** tokens — and the two you can't see are the expensive ones.
 
 Teams respond by trimming the visible line: disabling tools, pasting less, shortening prompts. That helps —
 until it hits a floor. Because the largest recurring cost isn't the prompt. **It's re-derivation.** Session
-after session, Bob re-reads your architecture, re-infers the same relationships, and re-explains the same
-concepts — because nothing it learned last time survived the end of the thread.
+after session, Bob re-reads the same architecture, re-infers the same relationships, and re-explains the
+same concepts — because nothing it learned last time survived the end of the thread.
 
-> The cheapest session is the one that never has to think a thought twice.
+The consequence is invisible but compounding: every Bobcoin spent re-deriving what the team already knows is a Bobcoin not available for going deeper, exploring a new research direction, or deploying a broader agentic scope. The budget shrinks — not because Bob is doing more, but because it keeps relearning the same things.
+The question teams eventually cannot ask is not *"can Bob do this?"* — it's *"can we afford to let Bob try?"*
+
+> The cheapest session is the one that never has to think a thought twice. But the real prize is what
+> you can do with the budget you recover.
 
 ## 2. The pattern: Karpathy's LLM-Wiki
 
@@ -66,21 +67,86 @@ His load-bearing insight: *"the tedious part of maintaining a knowledge base is 
 thinking — it's the bookkeeping."* LLMs are extraordinary bookkeepers. Point one at your repo, and the
 knowledge base maintains itself.
 
-## 3. This implementation: native to Bob Shell
+## 3. This implementation: native to Bob — IDE and CLI
 
-Bob Shell Knowledge Manager is that pattern, built entirely on Bob's **native** capabilities:
+Bob Knowledge Manager is that pattern, built entirely on Bob's **native** capabilities. It works identically in **Bob IDE** and **Bob Shell CLI** — same modes, same KB structure, same compounding benefit.
 
-- **📚 `knowledge-manager` mode** — structured KB maintainer: concepts / guides / references / research,
-  consistent templates, bidirectional cross-references, `save_memory` *(Bob Shell CLI only — Bob IDE uses
-  file persistence)*, self-updating `INDEX.md`.
-- **🔍 `repo-analyzer` mode** — 7-phase repository audit that runs analysis *scripts* and files digested
-  findings into the KB, instead of dragging raw source through the context window.
-- **The schema layer** — your `AGENTS.md` plus the mode definition *are* Karpathy's third layer: stable
-  rules that make Bob both disciplined and cacheable.
+### 3a. How it works — the three components
+
+- **🧠 `knowledge-manager` mode** — structured KB maintainer: concepts / guides / references / research, consistent templates, bidirectional cross-references, self-updating `index.md`. Every document filed becomes a permanent asset, retrieved on demand by any future session.
+- **🔍 `repo-analyzer` mode** — 7-phase repository audit that runs analysis scripts and files digested findings into the KB, instead of dragging raw source through the context window.
+- **The schema layer** — your `AGENTS.md` plus the mode definition *are* Karpathy's third layer: stable rules that make Bob disciplined, consistent, and cacheable across every session.
+
+> **Works with the full Bob ecosystem.** The Knowledge Manager is a native Bob mode — it composes naturally with every mode, skill, rule, and MCP server in the [Bob Marketplace](https://marketplace.bob.ibm.com). Use it alongside `ibm-watsonx-data`, `ibm-docling`, `carbon-mcp`, or `techzone` as examples — but it pairs equally with any current or future Bob capability. The KB becomes the persistent memory layer that runs underneath your entire Bob toolkit, not just one workflow.
 
 <p align="center">
   <img src="docs/assets/kb-compounding-loop.svg" alt="The compounding-knowledge loop: Bob reads your repository once, files digested knowledge into a version-controlled knowledge base, and every later session retrieves from that knowledge base instead of re-deriving from the repo." width="760">
 </p>
+
+### 3b. Two activation paths — choose yours
+
+| | **Bob IDE** *(recommended for teams)* | **Bob Shell CLI** |
+|---|---|---|
+| **Activate** | Mode picker → 🧠 Mnemox Knowledge Builder | `bob --chat-mode=knowledge-manager` *(slug — same mode)* |
+| **First-time setup** | `scripts/init-project.sh` once per project (30 seconds) | `scripts/install.sh` once |
+| **Persistence model** | **Git-backed markdown** — shared, versioned, visible to the whole team. Knowledge auto-loads at every session start via `.bob/settings.json`. | **`save_memory`** + markdown files — in-session fact injection, ideal for solo CLI use. |
+| **Skill lazy-load** | ✅ `use_skill("knowledge-manager")` | not supported |
+| **Best for** | Teams, shared knowledge, any workspace | Solo power users, terminal-native workflows |
+
+> **Bob IDE is the recommended path for team use.** Knowledge persists as Git-committed Markdown — every team member reads and builds on the same growing KB. There is no private fact store: everything is shared, auditable, and compounds across the whole team.
+>
+> **Bob Shell CLI** adds `save_memory` on top of the same KB — an in-session fact store that injects recalled facts into each turn automatically. Fast and seamless for solo work; facts are private to the session owner.
+>
+> Both paths produce the same KB artefacts and the same compounding benefit. Choose based on your workflow, not on capability.
+
+## 3c. Who this is for
+
+The pattern works wherever accumulated knowledge has value — across roles, domains, and disciplines.
+
+| Role | The problem | What the KB makes possible |
+|---|---|---|
+| **Product Specialist / Tiger Team** | Client scenarios re-answered from scratch each engagement; expertise lives in Slack and individual sessions | A living KB of patterns, decisions, and findings — every new engagement starts from the team's full accumulated expertise, not zero |
+| **Software team (SDLC)** | Sprint knowledge decays between sessions; design rationale and architectural decisions are re-derived on every onboarding | Architecture decisions, design rationale, and test findings compound across sprints — new members get a KB tour, not an archaeology project |
+| **Researcher** | Experiment context, negative results, and methodology notes don't survive session boundaries | A persistent research KB where each experiment builds on the last; literature, hypotheses, and findings are cross-referenced, not re-derived |
+| **Agentic team lead** | Real-time multi-agent deployments on complex business scopes are Bobcoin-prohibitive when every agent pays the full re-derivation cost | Pre-loaded KB context reduces per-agent input cost, making it economically rational to deploy deeper agent teams on broader research scopes |
+
+> **The economic thesis:** Bobcoin economy is not just about spending less — it is about *spending on
+> what matters*. When re-derivation cost approaches zero, the budget previously consumed by repetition
+> becomes available for depth, breadth, and agentic ambition. The KB is not a cost-cutting tool.
+> It is a lever that moves the frontier of what is affordable.
+>
+> **The compounding advantage scales with your Bob stack.** Every mode, skill, rule, and MCP server you add to your Bob workspace produces knowledge worth keeping. The KB Manager captures it — so the more powerful your Bob setup, the more value compounds.
+
+---
+
+## ℹ️ This repository contains two independently-operable systems
+
+| System | Technology | Status |
+|--------|-----------|--------|
+| **Bob Knowledge Manager** | Bash scripts, YAML, Markdown | Stable v1.0 |
+| **Token Optimization System** (`src/`) | Python 3.11+, tiktoken, scikit-learn | Beta — Not Production Ready |
+
+Each system works without the other. Three **opt-in** integration points connect them (all fallback-safe — if the Python system is absent, the KB Manager is unaffected): the KB query engine can use the TOS embedding scorer; the `knowledge-manager` mode can compress retrieved context via `bob-optimize`; and a persistent embedding index bridges KB document search with TOS cache infrastructure. See [`INTEGRATIONS.md`](INTEGRATIONS.md).
+
+Architecture: [KB Manager — `docs/kb-manager/architecture.md`](docs/kb-manager/architecture.md) · [Python system — `docs/architecture/architecture.md`](docs/architecture/architecture.md).
+
+### Supported targets
+
+| Target | Activation | Install step | Skill lazy-load | **Persistence model** | **Best for** |
+|--------|-----------|--------------|-----------------|----------------------|------------|
+| **Bob Shell CLI** | `bob --chat-mode=knowledge-manager` | `scripts/install.sh` | not supported | `save_memory` (in-session, single-user) + markdown files | CLI power users; solo workflows |
+| **Bob IDE (this repo)** | Mode picker → 🧠 Mnemox Knowledge Builder | none — zero steps | ✅ `use_skill("knowledge-manager")` — lazy, explicit | Git-backed markdown — shared, versioned, team-visible | Teams; any workspace; recommended |
+| **Bob IDE (other project)** | Mode picker → 🧠 Mnemox Knowledge Builder | `scripts/init-project.sh` — once per project | ✅ `use_skill("knowledge-manager")` — lazy, explicit | Git-backed markdown — shared, versioned, team-visible | Teams; any workspace; recommended |
+
+> **Two persistence models — both are complete, neither is a fallback:**
+>
+> **Bob Shell CLI** uses `save_memory` — an in-session fact store that injects recalled facts into each turn automatically. Fast and seamless for solo use; facts are private to the session owner and not visible to teammates.
+>
+> **Bob IDE** uses Git-backed markdown — knowledge is written to `docs/knowledge-base/`, committed to the repository, and auto-loaded at the start of every session via `.bob/settings.json`. Every team member reads and builds on the same growing KB. This is the recommended model for team use: knowledge is shared, auditable, and compounds across the entire team, not just one person's sessions.
+>
+> See [`docs/bob-ide-guide.md`](docs/bob-ide-guide.md) for the full Bob IDE workflow.
+
+---
 
 ## 4. Why it saves Bobcoins: structure, not a benchmark
 
@@ -91,61 +157,65 @@ The savings are **structural** — each IBM token-economy principle has a concre
 | **Catalog tax** | Every MCP server re-sends its full tool catalog every turn | Native Bob mode — **no plugin, no MCP** |
 | **Payload tax** | A 2,000-line file attached when 20 lines matter | `repo-analyzer` runs scripts that **summarise**; the KB stores digested reports you *cite*, not raw source |
 | **Compression trap** | Stripping meaning can backfire and *raise* effective cost | Templates **preserve** meaning — rationale, real names, cross-refs |
-| **Short threads** | Turn 15 re-pays 14 turns of stale history | Knowledge persists in KB files + `save_memory` *(Bob Shell CLI)* / file persistence *(Bob IDE)*; a fresh thread **retrieves** |
+| **Short threads** | Turn 15 re-pays 14 turns of stale history | Knowledge persists in Git-backed KB files (both targets); `save_memory` additionally injects facts per-turn *(Bob Shell CLI)*; a fresh thread always **retrieves** |
 | **Let caching work** | Reworded prefixes miss the cache | Fixed mode definition + `AGENTS.md` + KB layout = a **cacheable prefix** |
-| **Trim output** | Verbose narration is paid on every reply | Bounded artifacts: templates, `INDEX.md`, reports — not essays |
+| **Trim output** | Verbose narration is paid on every reply | Bounded artifacts: templates, `index.md`, reports — not essays |
 
-## 5. Get started in 5 minutes (one-time setup)
+## 5. Get started — `mnemox your workspace`
 
-No custom mode required. Point three scripts at your project, then let any Bob mode do the thinking.
+> **One word. That is the entire command.**
+>
+> Type `mnemox your workspace` (or just `mnemox`) in any **🧠 Mnemox Knowledge Builder** session —
+> Bob IDE or Bob Shell CLI — and Mnemox does the right thing automatically:
+>
+> - **Fresh workspace** (no KB yet) → scaffolds `docs/knowledge-base/`, runs the 7-phase analysis
+>   suite, validates structure. Your workspace is Mnemoxed.
+> - **Already Mnemoxed** → refreshes the 7-phase analysis, captures lessons learned from `git log`
+>   and KB diff into a dated research note, rebuilds the knowledge graph, and auto-commits
+>   `docs/knowledge-base/` to git. Bob synthesises the lessons learned **in the same session**,
+>   immediately after the script completes.
+>
+> The `mnemox` command is installed as a shell function by `scripts/install.sh` (Bob Shell CLI) and
+> is wired as a trigger phrase in the mode skill (Bob IDE). Set `MNEMOX_HOME` to the path of this
+> repo to use it from any project.
+
+**Install once (Bob Shell CLI):**
+
+```bash
+cd ~/Projects/bob-llmwiki-knowledge-manager
+./scripts/install.sh          # writes ~/.bob/mnemox.sh, adds shell function
+source ~/.bashrc              # or ~/.zshrc
+```
+
+**Already Mnemoxed?** Re-run `mnemox` at any time to refresh dated KB snapshots,
+rebuild the knowledge graph, and auto-commit — all in one step.
+
+<details>
+<summary><strong>What happens under the hood (three scripts, ~5 minutes)</strong></summary>
+
+```bash
+# What mnemox calls internally:
+scripts/init-project.sh        # (init path only) scaffold docs/knowledge-base/
+scripts/run-full-analysis.sh   # 7-phase analysis → dated research snapshots
+scripts/validate-kb.sh         # (init path only) structure check
+scripts/mnemox-lessons.sh      # (update path only) lessons-learned note
+uv run bob-optimize graph-build --kb-path docs/knowledge-base --with-semantic
+git add docs/knowledge-base/ && git commit -m "mnemox: update KB $(date +%Y-%m-%d)"
+```
+
+> **What `run-full-analysis.sh` produces:** 7 Bash scripts run against your repo and file 7 dated
+> Markdown snapshots into `docs/knowledge-base/research/` (scan, dependencies, metrics, security,
+> test coverage, git history, docs coverage). Bob reads these ~200-line digested reports instead of
+> raw source — that is why the KB session immediately produces grounded suggestions.
+> Re-run at any time to refresh dated snapshots without overwriting prior KB work.
+> Full details: [`docs/knowledge-base/guides/complete-repository-analysis.md`](docs/knowledge-base/guides/complete-repository-analysis.md).
 
 > **Full-stack setup (recommended):** Run `./scripts/setup.sh` once from the repo
 > root. It installs the Token Optimization System, builds the KB embedding index,
 > and prints an integration health report (`bob-optimize kb-status`). The KB Manager
 > works without it — setup.sh only activates the optional Python integrations.
 
-```bash
-# 0 · Set once, to wherever you cloned this repo
-KM_HOME=~/Projects/bob-llmwiki-knowledge-manager
-
-# 1 · Scaffold the knowledge base in your project
-cd ~/your-project
-"$KM_HOME/scripts/init-project.sh"
-
-# 2 · Full automated analysis, filed into docs/knowledge-base/
-"$KM_HOME/scripts/run-full-analysis.sh"
-
-# 3 · Validate KB structure
-"$KM_HOME/scripts/validate-kb.sh"
-```
-
-> **What `run-full-analysis.sh` produces:** 7 Bash scripts run against your repo and file 7 dated
-> Markdown snapshots into `docs/knowledge-base/research/` (scan, dependencies, metrics, security,
-> test coverage, git history, docs coverage). Bob reads these ~200-line digested reports instead of
-> raw source — that is why the KB session immediately produces grounded suggestions. Start the KB
-> session *after* this step. Re-run it any time to refresh dated snapshots without overwriting prior
-> KB work. Full details: [`docs/knowledge-base/guides/complete-repository-analysis.md`](docs/knowledge-base/guides/complete-repository-analysis.md).
-
-Then, in any Bob mode (Ask, Code, …):
-
-```text
-I want you to act as a knowledge manager for this codebase.
-
-Your role:
-- Document code in docs/knowledge-base/
-- Use templates from <KM_HOME>/config/templates/
-- Create concept documents for core ideas, guides for how-to instructions,
-  references for API documentation, research notes for investigations
-- Maintain INDEX.md with all documents and add bidirectional cross-references
-
-Start by analyzing the codebase and suggesting 5 initial documents to create.
-```
-
-The scripts have already filed 7 dated research snapshots into `docs/knowledge-base/research/`, so Bob
-proposes documents **grounded in evidence it didn't have to re-read from raw source**.
-
-> *Optional:* the `knowledge-manager` mode packages this as a one-liner (`./scripts/install.sh`) for Bob Shell CLI,
-> or is available immediately via the mode picker in Bob IDE. Not required.
+</details>
 
 ## 6. Starting a new session (daily use)
 
@@ -157,10 +227,10 @@ No installation or CLI required. The Knowledge Manager mode is bundled in `.bob/
 
 1. Open the workspace in Bob IDE (VS Code / Cursor with the Bob extension).
 2. Click the mode picker in the bottom-left status bar (shows the current mode name).
-3. Scroll to **📚 Knowledge Manager** and select it.
+3. Scroll to **🧠 Mnemox Knowledge Builder** and select it.
 4. Bob IDE loads `.bob/skills/knowledge-manager/SKILL.md` automatically via the `skill` group.
 
-> **Full reference:** [`docs/BOB-IDE-GUIDE.md`](docs/BOB-IDE-GUIDE.md)
+> **Full reference:** [`docs/bob-ide-guide.md`](docs/bob-ide-guide.md)
 
 ### Path A — Wrapper script (Bob Shell CLI, recommended)
 
@@ -192,12 +262,12 @@ If the mode is not installed globally, paste this at the start of any Bob mode:
 
 ```text
 You are acting as the knowledge manager for this project.
-KB location: docs/knowledge-base/  (INDEX.md is loaded in context)
+KB location: docs/knowledge-base/  (index.md is loaded in context)
 Resume: summarise what exists in the KB, what was most recently documented,
 and suggest what to work on next.
 Workflow: follow the 7-step process (determine category → select template →
 apply naming convention → write content → add cross-references → save to
-memory → update INDEX.md).
+memory → update index.md).
 ```
 
 ### Standard resume prompt (first message of every session)
@@ -208,15 +278,15 @@ Once activated, open with:
 What did we document most recently? Summarise the KB and suggest what to work on next.
 ```
 
-Bob will scan `INDEX.md` (auto-loaded via `.bob/settings.json`), recall any `save_memory` facts from prior sessions *(Bob Shell CLI only — Bob IDE uses file persistence in `docs/knowledge-base/`)*, and propose the next logical documents or updates.
+Bob will scan `index.md` (auto-loaded via `.bob/settings.json`), recall any `save_memory` facts from prior sessions *(Bob Shell CLI only — Bob IDE uses file persistence in `docs/knowledge-base/`)*, and propose the next logical documents or updates.
 
-> **Full reference:** [`docs/USAGE.md §0`](docs/USAGE.md#0-starting-a-session) · [`docs/knowledge-base/guides/activating-knowledge-manager-in-new-session.md`](docs/knowledge-base/guides/activating-knowledge-manager-in-new-session.md)
+> **Full reference:** [`docs/usage.md §0`](docs/usage.md#0-starting-a-session) · [`docs/knowledge-base/guides/activating-knowledge-manager-in-new-session.md`](docs/knowledge-base/guides/activating-knowledge-manager-in-new-session.md)
 
 ### Mode switching and the KB
 
 Switching mode mid-session (e.g. `/mode agent` to write code) does **not** delete or hide KB files — they
 remain on disk exactly as written. What stops is the **maintenance discipline**: templates, bidirectional
-cross-references, and `INDEX.md` updates are enforced by the `knowledge-manager` mode's instructions, not
+cross-references, and `index.md` updates are enforced by the `knowledge-manager` mode's instructions, not
 by the file system.
 
 **Recommended pattern:** work in `agent` or `plan` mode for code changes, then `/mode knowledge-manager`
@@ -233,7 +303,7 @@ remain available when you switch back.
   - Bob Shell CLI config: `config/custom_modes.yaml` → installed to `~/.bob/custom_modes.yaml`
   - Bob IDE config: `.bob/custom_modes.yaml` (workspace-level, zero install)
 - 4 document templates — concept · guide · reference · research
-- Knowledge-base structure with self-maintained `INDEX.md` and `save_memory` integration *(Bob Shell CLI; Bob IDE uses file persistence)*
+- Knowledge-base structure with self-maintained `index.md` and `save_memory` integration *(Bob Shell CLI; Bob IDE uses file persistence)*
 - Bob IDE lazy-load skill: `.bob/skills/knowledge-manager/SKILL.md` — full templates + cross-reference protocol
 - Core scripts — `install`, `init-project`, `validate-kb`, `export-kb` (Markdown / Obsidian / HTML / PDF)
 - Analysis suite — scan, dependencies, metrics, security, test-coverage, git-history, docs, consolidated report
@@ -559,7 +629,7 @@ Authoritative status: [`STATUS.md`](STATUS.md).
 | Product Integrity & Claims | **A+** | All fabricated metrics retracted and permanently recorded; every published number manifest-backed; machine-validated by CI |
 | Architecture & Design | **A+** | Facade holds no logic; factory is single config→constructor home; all config fields wired; SLA v1.0 + load tests + `sentence-transformers` in dev extras (G-1/G-3 closed) |
 | Code Correctness | **A+** | C1–C8 + RLock fixed; **N-1–N-4** cache race conditions eliminated (unsynchronised `_similarity_scores` reads, threshold write, promotion-flag write, double `size()` snapshot); behavioral regression tests for each fix; zero `# type: ignore` in `src/`; full mypy scope |
-| Testing & Verification | **A+** | **1102 passed** · ≥80% coverage gate (89.6%) · per-package floors · **14 race-detector tests** (concurrent eviction, `reset_stats()`, `update_threshold()`, promotion-flag, size-snapshot consistency under thread pressure) · load/soak suite (8 tests) |
+| Testing & Verification | **A+** | **1 112 passed** · ≥80% coverage gate (89.82%) · per-package floors · **14+ race-detector tests** (concurrent eviction, `reset_stats()`, `update_threshold()`, promotion-flag, size-snapshot consistency under thread pressure) · load/soak suite (8 tests) |
 | Build, Release & Supply-Chain | **A+** | `uv sync --frozen` in CI · `pip-audit --strict` · 0 CVEs · bandit SAST blocking · CycloneDX SBOM · 3.11+3.12 matrix |
 | Documentation | **A+** | Two authoritative arc42 documents · 19 ADRs (ADR-012 superseded) · 41 API docs CI-drift-checked · STRIDE threat model grounded in `path:line` citations · formal SLA |
 | Governance & Compliance | **A+** | 12-artifact community health · CODEOWNERS covers all packages (G-4 closed) · STRIDE TOCTOU narrowed · all governance validators in CI |
@@ -597,7 +667,7 @@ except two optional first-use downloads:
   configuration or on CI.**
 
 - **Report a vulnerability:** [`SECURITY.md`](SECURITY.md) — GitHub Private Vulnerability Reporting.
-- **Threat model:** [`docs/security/THREAT_MODEL.md`](docs/security/THREAT_MODEL.md) — STRIDE analysis;
+- **Threat model:** [`docs/security/threat-model.md`](docs/security/threat-model.md) — STRIDE analysis;
   supersedes retracted ADR-012.
 - **In CI:** bandit SAST (medium+, blocking) · CycloneDX SBOM · `pip-audit` (blocking, 0 CVEs) ·
   Dependabot · path-traversal containment in `src/tools/` verified end-to-end.
@@ -605,15 +675,15 @@ except two optional first-use downloads:
 ## 13. Documentation
 
 - **[docs/README.md](docs/README.md)** — Diátaxis navigation hub (tutorials, how-to, reference, explanation)
-- **[docs/BOB-IDE-GUIDE.md](docs/BOB-IDE-GUIDE.md)** — Bob IDE complete reference (activation, tool groups, skill, validation, troubleshooting)
-- **[docs/QUICK_START.md](docs/QUICK_START.md)** — 5-minute getting started — Bob Shell CLI and Bob IDE (arc42 Tier-1)
-- **[docs/INSTALLATION.md](docs/INSTALLATION.md)** — detailed installation — Bob Shell CLI and Bob IDE (arc42 Tier-1)
-- **[docs/USAGE.md](docs/USAGE.md)** — usage guide with workflow diagrams (arc42 Tier-1)
-- **[docs/kb-manager/ARCHITECTURE.md](docs/kb-manager/ARCHITECTURE.md)** — KB Manager architecture (arc42 v2.1, 13 sections, 8+ diagrams)
-- **[docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md)** — Python token-optimizer architecture (arc42 v3.0, 11 sections, 5 diagrams)
-- **[docs/MONITORING.md](docs/MONITORING.md)** — monitoring & observability (arc42 Tier-1)
-- **[docs/SLA.md](docs/SLA.md)** — SLA v1.0: latency, throughput, quality, concurrency targets
-- **[docs/security/THREAT_MODEL.md](docs/security/THREAT_MODEL.md)** — STRIDE threat model
+- **[docs/bob-ide-guide.md](docs/bob-ide-guide.md)** — Bob IDE complete reference (activation, tool groups, skill, validation, troubleshooting)
+- **[docs/quick-start.md](docs/quick-start.md)** — 5-minute getting started — Bob Shell CLI and Bob IDE (arc42 Tier-1)
+- **[docs/installation.md](docs/installation.md)** — detailed installation — Bob Shell CLI and Bob IDE (arc42 Tier-1)
+- **[docs/usage.md](docs/usage.md)** — usage guide with workflow diagrams (arc42 Tier-1)
+- **[docs/kb-manager/architecture.md](docs/kb-manager/architecture.md)** — KB Manager architecture (arc42 v2.1, 13 sections, 8+ diagrams)
+- **[docs/architecture/architecture.md](docs/architecture/architecture.md)** — Python token-optimizer architecture (arc42 v3.0, 11 sections, 5 diagrams)
+- **[docs/monitoring.md](docs/monitoring.md)** — monitoring & observability (arc42 Tier-1)
+- **[docs/sla.md](docs/sla.md)** — SLA v1.0: latency, throughput, quality, concurrency targets
+- **[docs/security/threat-model.md](docs/security/threat-model.md)** — STRIDE threat model
 - **[docs/adr/](docs/adr/)** — 19 Architecture Decision Records (ADR-012 superseded)
 - **[STATUS.md](STATUS.md)** — canonical maturity status (single source of truth)
 

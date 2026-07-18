@@ -85,7 +85,7 @@ def test_validate_script_checks_structure(scripts_dir):
     script_path = scripts_dir / "validate-kb.sh"
     content = script_path.read_text()
 
-    assert "INDEX.md" in content, "Validate script should check for INDEX.md"
+    assert "index.md" in content, "Validate script should check for index.md"
     assert "concepts" in content, "Validate script should check concepts directory"
 
 
@@ -176,9 +176,9 @@ def test_examples_have_kb_structure(project_root):
             subdir_path = kb_path / subdir
             assert subdir_path.exists(), f"Example {example} should have {subdir} directory"
 
-        # Check for INDEX.md
-        index_path = kb_path / "INDEX.md"
-        assert index_path.exists(), f"Example {example} should have INDEX.md"
+        # Check for index.md
+        index_path = kb_path / "index.md"
+        assert index_path.exists(), f"Example {example} should have index.md"
 
 
 @pytest.mark.unit
@@ -187,24 +187,24 @@ def test_documentation_files_exist(project_root):
     docs_dir = project_root / "docs"
     # Live Diátaxis-spine and reference docs at docs/ root.
     required_docs = [
-        "INSTALLATION.md",
-        "USAGE.md",
-        "CUSTOMIZATION.md",
-        "WORKFLOWS.md",
+        "installation.md",
+        "usage.md",
+        "customization.md",
+        "workflows.md",
     ]
     for doc in required_docs:
         doc_path = docs_dir / doc
         assert doc_path.exists(), f"Documentation {doc} should exist"
 
-    # ARCHITECTURE.md was moved to docs/kb-manager/ in Sub-Task 7 to avoid
+    # architecture.md was moved to docs/kb-manager/ in Sub-Task 7 to avoid
     # the dual-architecture-doc confusion identified in the gap-fix audit.
-    assert (docs_dir / "kb-manager" / "ARCHITECTURE.md").exists(), (
-        "ARCHITECTURE.md should exist under docs/kb-manager/"
+    assert (docs_dir / "kb-manager" / "architecture.md").exists(), (
+        "architecture.md should exist under docs/kb-manager/"
     )
 
-    # COMPARISON.md was moved to docs/archive/ when the docs/ root was curated.
-    assert (docs_dir / "archive" / "COMPARISON.md").exists(), (
-        "COMPARISON.md should exist under docs/archive/"
+    # comparison.md was moved to docs/archive/ when the docs/ root was curated.
+    assert (docs_dir / "archive" / "comparison.md").exists(), (
+        "comparison.md should exist under docs/archive/"
     )
 
 
