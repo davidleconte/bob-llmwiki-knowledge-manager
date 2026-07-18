@@ -897,7 +897,7 @@ The system is suitable for:
 **Documentation:**
 - `STATUS.md` - Canonical status
 - `docs/architecture/UNIFIED_ARCHITECTURE.md` - Current architecture
-- `docs/knowledge-base/INDEX.md` - KB master index
+- `docs/knowledge-base/index.md` - KB master index
 
 **Source Code:**
 - `src/facade.py` - TokenOptimizer facade

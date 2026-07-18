@@ -24,7 +24,7 @@ exists in this environment). The MiniLM run is authoritative.
 
 > **Embedding backend correction:** The initial validation run used
 > `EmbeddingGenerator(backend="hashing")` — the default fallback. The
-> architecture doc (`docs/architecture/ARCHITECTURE.md §5`) documents a
+> architecture doc (`docs/architecture/architecture.md §5`) documents a
 > `"minilm"` backend using `sentence-transformers/all-MiniLM-L6-v2` via Apple
 > MLX (`mlx-embeddings` optional dep). While `mlx-embeddings` is not installed
 > in the current Python 3.11 environment, `sentence-transformers==4.0.2` **is**
@@ -297,4 +297,4 @@ results via Apple Neural Engine at ~2–4 ms/call.
 - [`docs/adr/017-knowledge-graph-layer.md`](../../../docs/adr/017-knowledge-graph-layer.md)
 - [`research/kb-query-ab-validation-2026-07.md`](./kb-query-ab-validation-2026-07.md)
 - [`research/adversarial-audit-embeddings-chunker-2026-07-17.md`](./adversarial-audit-embeddings-chunker-2026-07-17.md)
-- [`docs/architecture/ARCHITECTURE.md`](../../../docs/architecture/ARCHITECTURE.md) — §5 Embedding backends
+- [`docs/architecture/architecture.md`](../../../docs/architecture/architecture.md) — §5 Embedding backends

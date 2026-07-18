@@ -84,7 +84,7 @@ Adopt unified status: "Beta (7/10) - Not Production Ready"
 - [ ] README.md (add disclaimer)
 - [ ] evaluation/README.md (mark as synthetic)
 - [ ] evaluation/scripts/run_token_validation.py (add warnings)
-- [ ] docs/TOKEN_SAVINGS_TEST_PLAN.md (mark as unexecuted)
+- [ ] docs/token-savings-test-plan.md (mark as unexecuted)
 
 ### Task 1.3: Fix Architecture Documentation
 
@@ -113,7 +113,7 @@ Adopt unified status: "Beta (7/10) - Not Production Ready"
 
 **Files to Update:**
 - [ ] README.md (update architecture link)
-- [ ] docs/INDEX.md (update references)
+- [ ] docs/index.md (update references)
 
 ### Task 1.4: Consolidate Test Count Claims
 

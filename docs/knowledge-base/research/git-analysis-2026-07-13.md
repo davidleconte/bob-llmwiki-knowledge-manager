@@ -89,7 +89,7 @@
 | evaluation/results/comparison.png | 2 | 🟢 Low |
 | evaluation/EXECUTION_GUIDE.md | 2 | 🟢 Low |
 | evaluation/data/test_001.json | 2 | 🟢 Low |
-| docs/QUICK_START.md | 2 | 🟢 Low |
+| docs/quick-start.md | 2 | 🟢 Low |
 | docs/project-management/PROJECT_STATUS.md | 2 | 🟢 Low |
 | docs/architecture/README.md | 2 | 🟢 Low |
 | docs/architecture/MASTER.md | 2 | 🟢 Low |
@@ -124,7 +124,7 @@
 | README.md | 917 |
 | WEEK18_FINAL_VALIDATION_REPORT.md | 913 |
 | INDEX.md | 884 |
-| docs/WORKFLOW_AUTOMATION_PLAN.md | 873 |
+| docs/workflow-automation-plan.md | 873 |
 | docs/architecture/components/MONITORING.md | 873 |
 | docs/project-management/reviews/ARCHITECTURE_AUDIT_REPORT.md | 867 |
 | docs/architecture/components/INTEGRATION.md | 858 |
@@ -151,7 +151,7 @@
 | evaluation/results/comparison.png | 2 |
 | evaluation/EXECUTION_GUIDE.md | 2 |
 | evaluation/data/test_001.json | 2 |
-| docs/QUICK_START.md | 2 |
+| docs/quick-start.md | 2 |
 | docs/project-management/PROJECT_STATUS.md | 2 |
 | docs/architecture/README.md | 2 |
 | docs/architecture/MASTER.md | 2 |

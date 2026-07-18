@@ -81,8 +81,8 @@ scripts/generate_api_docs.py:65: error: Item "str" of "list[Any] | str | None" h
 
 #### Documentation Files
 
-- `docs/WORKFLOWS.md`
-- `docs/REPOSITORY_ANALYSIS_WORKFLOW.md`
+- `docs/workflows.md`
+- `docs/repository-analysis-workflow.md`
 - `docs/adr/003-tfidf-scoring.md`
 - `docs/adr/006-cache-strategy.md`
 - `docs/adr/011-monitoring-observability.md`
@@ -98,8 +98,8 @@ scripts/generate_api_docs.py:65: error: Item "str" of "list[Any] | str | None" h
 - `docs/adr/010-testing-strategy.md`
 - `docs/ARCHITECTURE.md`
 - `docs/COMPARISON.md`
-- `docs/CUSTOMIZATION.md`
-- `docs/USAGE.md`
+- `docs/customization.md`
+- `docs/usage.md`
 - `docs/project-management/PROJECT_STATUS.md`
 
 ---

@@ -132,7 +132,7 @@ The 84.4% headline figure is load-bearing on **excluding `src/tools/`** from the
 
 **A0 — `check_savings_claims.py` gives false CI coverage**
 
-The gate operates on a hardcoded 5-file allowlist (`STATUS.md`, `README.md`, `AGENTS.md`, `docs/INDEX.md`, `REPOSITORY_ANALYSIS_WORKFLOW.md` + 2 code files). It correctly blocks violations *within that scope* (gate-slip confirmed), but cannot see the BOOK series, design doc, ADRs, or guides where A1's fabrication hides. CI green ≠ clean tree.
+The gate operates on a hardcoded 5-file allowlist (`STATUS.md`, `README.md`, `AGENTS.md`, `docs/index.md`, `REPOSITORY_ANALYSIS_WORKFLOW.md` + 2 code files). It correctly blocks violations *within that scope* (gate-slip confirmed), but cannot see the BOOK series, design doc, ADRs, or guides where A1's fabrication hides. CI green ≠ clean tree.
 
 ---
 
@@ -160,7 +160,7 @@ The gate operates on a hardcoded 5-file allowlist (`STATUS.md`, `README.md`, `AG
 
 **G-THR — `THREAT_MODEL.md` over-claims delegation containment**
 
-`docs/security/THREAT_MODEL.md:104-115` states delegation uniformly routes untrusted paths through `resolve_within`. In reality, `src/delegation/agents/documentation_agent.py:50-55` does a raw `Path(target).rglob()` outside any containment. Delegation is orphaned/demo-only (limiting exposure), but the model's exhaustiveness claim is false.
+`docs/security/threat-model.md:104-115` states delegation uniformly routes untrusted paths through `resolve_within`. In reality, `src/delegation/agents/documentation_agent.py:50-55` does a raw `Path(target).rglob()` outside any containment. Delegation is orphaned/demo-only (limiting exposure), but the model's exhaustiveness claim is false.
 
 ---
 
@@ -248,7 +248,7 @@ In order of consequence:
 ### Priority 5 — Tighten governance (Low, ~1 hour)
 
 1. Correct `INSTALLATION.md` broken clone URL
-2. In `docs/security/THREAT_MODEL.md` — either add a scope exclusion for the delegation subsystem or route `documentation_agent.py:50-55` through `resolve_within`
+2. In `docs/security/threat-model.md` — either add a scope exclusion for the delegation subsystem or route `documentation_agent.py:50-55` through `resolve_within`
 3. Make `pip-audit` a blocking CI step (change `continue-on-error: true` → remove it, once the 0-CVE state is confirmed stable)
 4. Make CI install from `uv.lock` rather than floating `>=` floors: replace `pip install -e ".[dev,monitoring]"` with `uv pip install --system --locked -e ".[dev,monitoring]"` in `ci.yml`
 

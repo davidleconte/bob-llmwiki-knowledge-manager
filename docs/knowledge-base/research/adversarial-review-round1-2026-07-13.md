@@ -602,7 +602,7 @@ def optimize(self, prompt: str, ...) -> Dict[str, Any]:
 
 ### 8.2 Not Integrated (HIGH)
 
-**File:** `src/delegation/EXPERIMENTAL.md`
+**File:** `src/delegation/experimental.md`
 
 **Issue:** Module exists but not integrated with core system.
 
@@ -616,7 +616,7 @@ def optimize(self, prompt: str, ...) -> Dict[str, Any]:
 
 ### 8.3 Misleading Documentation (MEDIUM)
 
-**File:** `src/delegation/EXPERIMENTAL.md`
+**File:** `src/delegation/experimental.md`
 
 **Issue:** Documentation suggests future integration but no plan.
 

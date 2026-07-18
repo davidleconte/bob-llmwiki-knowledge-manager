@@ -18,7 +18,7 @@ related:
 > The 28% orphaned-code and 0% agent-coverage figures cited below were correct as of
 > 2026-07-13; both are now remediated (84% coverage, 70% floor). See:
 > - [ADR-019: Delegation Pipeline Activation](../../adr/019-delegation-pipeline-activation.md)
-> - [src/delegation/EXPERIMENTAL.md](../../../../src/delegation/EXPERIMENTAL.md)
+> - [src/delegation/experimental.md](../../../../src/delegation/experimental.md)
 
 **Date:** 2026-07-13
 **Status:** ~~Research Complete — Decision: Keep as Separate System~~ **Superseded — see ADR-019**

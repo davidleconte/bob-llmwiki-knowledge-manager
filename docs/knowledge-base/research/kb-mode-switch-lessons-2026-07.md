@@ -76,8 +76,8 @@ in absolute terms, but the pattern matters at scale.
 file deleted in a prior session. Any mode following this instruction would get a
 file-not-found, fall back to raw source, and pay full codebase read cost.
 
-**Fix applied:** Replaced with correct pointers to `docs/architecture/ARCHITECTURE.md`
-(TOS) and `docs/kb-manager/ARCHITECTURE.md` (KB Manager).
+**Fix applied:** Replaced with correct pointers to `docs/architecture/architecture.md`
+(TOS) and `docs/kb-manager/architecture.md` (KB Manager).
 
 ---
 

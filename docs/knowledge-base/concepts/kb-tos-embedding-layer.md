@@ -277,7 +277,7 @@ Before implementing P2, the following must be documented in ADRs:
 - **Token optimization concept:** [`token-optimization.md`](token-optimization.md)
 - **Existing embedding infrastructure:** `src/cache/embeddings.py`
 - **Existing KB query tool:** `src/tools/kb_query.py`
-- **Current cache architecture:** `docs/architecture/ARCHITECTURE.md §5`
+- **Current cache architecture:** `docs/architecture/architecture.md §5`
 
 ---
 

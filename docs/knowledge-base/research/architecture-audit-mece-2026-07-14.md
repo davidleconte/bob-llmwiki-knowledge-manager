@@ -11,8 +11,8 @@ audit_standard: >
 auditor: Bob (Plan/Agent) — firsthand read of every file; no inferred content
 scope: >
   docs/architecture/ (all 13 files) · docs/adr/ (12 ADRs + README) ·
-  docs/security/THREAT_MODEL.md · src/facade.py · src/factory.py ·
-  src/__init__.py · src/config/schema.py · src/delegation/EXPERIMENTAL.md
+  docs/security/threat-model.md · src/facade.py · src/factory.py ·
+  src/__init__.py · src/config/schema.py · src/delegation/experimental.md
 do_not_edit: Point-in-time snapshot. Corrections in a new document.
 related:
   - audit-2026-07-14-post-remediation.md
@@ -49,7 +49,7 @@ There are **four competing documents** that claim or imply architectural authori
 
 | File | Self-description | Actual status |
 |------|-----------------|---------------|
-| `docs/architecture/ARCHITECTURE.md` | "Single authoritative architecture document… supersedes ACTUAL and UNIFIED" | ✅ **Authoritative** (v3.0, 2026-07-14, post-Phase-4) |
+| `docs/architecture/architecture.md` | "Single authoritative architecture document… supersedes ACTUAL and UNIFIED" | ✅ **Authoritative** (v3.0, 2026-07-14, post-Phase-4) |
 | `docs/architecture/ACTUAL_SYSTEM_ARCHITECTURE.md` | "Complete technical design" (from `token-optimization.md:290`) | ⚠️ Deprecated but not clearly marked with a banner in its header |
 | `docs/architecture/UNIFIED_ARCHITECTURE.md` | "Master reference" per `docs/architecture/README.md:12-13` | ⚠️ Superseded but `docs/architecture/README.md` still points here as primary |
 | `docs/architecture/README.md` | Navigation hub — says "Start Here: UNIFIED_ARCHITECTURE.md" | ❌ **Contradicts** `ARCHITECTURE.md:7-9`; points new developers to the wrong doc |
@@ -60,7 +60,7 @@ There are **four competing documents** that claim or imply architectural authori
 
 **Specific evidence:**
 - `docs/architecture/README.md:12` → `[UNIFIED_ARCHITECTURE.md](UNIFIED_ARCHITECTURE.md)` labelled "START HERE"
-- `docs/architecture/ARCHITECTURE.md:7-9` → explicitly supersedes UNIFIED and ACTUAL
+- `docs/architecture/architecture.md:7-9` → explicitly supersedes UNIFIED and ACTUAL
 
 **ME violation:** UNIFIED and ARCHITECTURE both claim to be the master reference.  
 **CE gap:** Navigation hub is not updated.
@@ -173,7 +173,7 @@ There are **four competing documents** that claim or imply architectural authori
 
 **Finding:** This is **the strongest dimension** in the corpus.
 
-`docs/security/THREAT_MODEL.md` meets or exceeds Tier-1 standard on every criterion:
+`docs/security/threat-model.md` meets or exceeds Tier-1 standard on every criterion:
 
 | Criterion | Met? | Evidence |
 |-----------|:----:|---------|
@@ -229,8 +229,8 @@ There are **four competing documents** that claim or imply architectural authori
 |-------------|--------------------|----|---------|
 | `docs/architecture/README.md` | README → "Start Here: UNIFIED_ARCHITECTURE.md" → wrong doc | 1 wrong click | ❌ Hub points to superseded doc |
 | `docs/README.md` (Diátaxis hub) | README → "Architecture" → `architecture/ARCHITECTURE.md` | 2 correct clicks | ✅ |
-| Root `README.md` | README → `docs/architecture/ARCHITECTURE.md` | 1 correct click | ✅ |
-| `docs/INDEX.md` | Index → links not updated post-archive move | stale | ⚠️ |
+| Root `README.md` | README → `docs/architecture/architecture.md` | 1 correct click | ✅ |
+| `docs/index.md` | Index → links not updated post-archive move | stale | ⚠️ |
 
 **`docs/architecture/README.md` problems (precise):**
 - Line 12: `[UNIFIED_ARCHITECTURE.md]` as "START HERE" — wrong
@@ -355,9 +355,9 @@ For each, append a one-paragraph "Implementation note (2026-07-14)" clarifying:
 
 ## What Is Already Excellent (Credit Due)
 
-1. **`docs/architecture/ARCHITECTURE.md`** — the authoritative document is genuinely excellent: Mermaid diagrams are accurate (verified against source), config table matches `schema.py` exactly, cross-cutting invariants section is complete and enforced in CI. This meets the Tier-1 bar for the document itself.
+1. **`docs/architecture/architecture.md`** — the authoritative document is genuinely excellent: Mermaid diagrams are accurate (verified against source), config table matches `schema.py` exactly, cross-cutting invariants section is complete and enforced in CI. This meets the Tier-1 bar for the document itself.
 
-2. **`docs/security/THREAT_MODEL.md`** — STRIDE analysis grounded in actual code with `path:line` citations. N/A calls explicitly justified. Residual risks and non-risks both documented. Maintenance triggers listed. Exemplary.
+2. **`docs/security/threat-model.md`** — STRIDE analysis grounded in actual code with `path:line` citations. N/A calls explicitly justified. Residual risks and non-risks both documented. Maintenance triggers listed. Exemplary.
 
 3. **ADR-012 retraction handling** — fabricated security claims correctly retracted with a banner, kept as audit trail, replaced by the real threat model. Textbook ADR governance.
 
@@ -378,8 +378,8 @@ All 6 prioritised remediation items were implemented on 2026-07-14. Gates remain
 | P1 | Fixed navigation hub — 7 stale/wrong claims corrected | `docs/architecture/README.md` (full rewrite) |
 | P2 | Archived 4 deprecated docs | `ACTUAL_SYSTEM_ARCHITECTURE.md`, `UNIFIED_ARCHITECTURE.md`, `DOCUMENTATION_PLAN.md`, `QUALITY_ATTRIBUTES.md` → `docs/architecture/deprecated/`; `deprecated/README.md` updated |
 | P3 | Wrote missing ADR-013 | `docs/adr/013-facade-factory-pattern.md` (new); `docs/adr/README.md` index updated |
-| P4 | Added deployment view §9 | `docs/architecture/ARCHITECTURE.md` (§9 appended) |
-| P5 | Added glossary §10 | `docs/architecture/ARCHITECTURE.md` (§10 appended, 11 terms) |
+| P4 | Added deployment view §9 | `docs/architecture/architecture.md` (§9 appended) |
+| P5 | Added glossary §10 | `docs/architecture/architecture.md` (§10 appended, 11 terms) |
 | P6 | Added implementation-status notes to ADR-002–005 | `docs/adr/002-caching-strategy.md`, `003-tfidf-scoring.md`, `004-semantic-similarity.md`, `005-batch-processing.md` |
 
 ### Revised score estimate
@@ -423,7 +423,7 @@ The post-remediation note (above) says:
 > "Dimension 4 is held at B+ because `ARCHITECTURE.md:74` still incorrectly states
 > `src/tools/` is 'excluded from coverage gates'."
 
-**That claim is now false.** `docs/architecture/ARCHITECTURE.md:73-74` currently reads:
+**That claim is now false.** `docs/architecture/architecture.md:73-74` currently reads:
 > "Included in the coverage and type gates with a per-package floor of 85% (`scripts/check_coverage_by_package.py`)."
 
 The exclusion claim was corrected in the same session as the P1–P6 remediations above.

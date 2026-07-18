@@ -79,7 +79,7 @@ priority: P0-critical
 
 4. ✅ **Documented Delegation Module**
    - Created delegation-integration-analysis-2026-07-13.md
-   - Created src/delegation/EXPERIMENTAL.md
+   - Created src/delegation/experimental.md
    - Clarified it's separate from core system (0% coverage)
 
 ### Files Created
@@ -87,7 +87,7 @@ priority: P0-critical
 - tests/conftest.py
 - docs/knowledge-base/research/coverage-measurement-2026-07-13.md
 - docs/knowledge-base/research/delegation-integration-analysis-2026-07-13.md
-- src/delegation/EXPERIMENTAL.md
+- src/delegation/experimental.md
 
 ### Files Modified
 - tests/monitoring/test_metrics.py (skipped 6 hanging tests)

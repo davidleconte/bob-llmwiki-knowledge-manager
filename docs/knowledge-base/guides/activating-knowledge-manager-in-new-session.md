@@ -132,7 +132,7 @@ Bob will:
 ```json
 {
   "context": {
-    "fileName": ["CONTEXT.md", "docs/knowledge-base/INDEX.md"]
+    "fileName": ["CONTEXT.md", "docs/knowledge-base/index.md"]
   }
 }
 ```

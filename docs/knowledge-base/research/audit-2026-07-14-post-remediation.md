@@ -36,7 +36,7 @@ Every change made in the remediation session was independently verified.
 | Change | Evidence | Result |
 |--------|----------|--------|
 | `yourusername` → `davidleconte` in 5 doc files | `grep -r yourusername --include=*.md . --exclude-dir=.claude` exits 1 (no matches outside frozen research) | ✅ Confirmed |
-| `docs/knowledge-base/INDEX.md` — README3.md link removed | Link absent from current file | ✅ Confirmed |
+| `docs/knowledge-base/index.md` — README3.md link removed | Link absent from current file | ✅ Confirmed |
 | `STATUS.md` grade table: D− → B+/A− | `STATUS.md:11` reads `≈ B+/A‑ (3.46/4.3)` | ✅ Confirmed |
 | `STATUS.md` roadmap: Phase 8 = NO-GO filed | `STATUS.md:12` references `audit-2026-07-14-signoff.md` and `remediation-plan.md` | ✅ Confirmed |
 | `dual-system-use-case-example.md` — WITHDRAWN banner | Line 13: `WITHDRAWN AS VALIDATED RESULTS` — triggers `has_banner()` gate | ✅ Confirmed |
@@ -112,7 +112,7 @@ All regression tests for C1–C7 were verified present in prior audits (revert-t
 
 **Status:** ⚠️ Pending  
 **Location:** `/README2.md`, `/README3.md`  
-**Evidence:** Files exist; `README2.md` is a "dual-system" framing variant; `README3.md` is a near-copy of `README.md`. Neither is referenced from any live index (the `docs/knowledge-base/INDEX.md` link was removed). `README.md` is the declared authoritative file.  
+**Evidence:** Files exist; `README2.md` is a "dual-system" framing variant; `README3.md` is a near-copy of `README.md`. Neither is referenced from any live index (the `docs/knowledge-base/index.md` link was removed). `README.md` is the declared authoritative file.  
 **Fix:** `rm README2.md README3.md` — no code change needed; no tests affected.
 
 ### 4.2 Low — C8 singleton races confirmed still present

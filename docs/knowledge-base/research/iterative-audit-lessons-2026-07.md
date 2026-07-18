@@ -241,7 +241,7 @@ Artifact hygiene
 1. **Run all four audit tiers after every concurrency fix** — T1 is fast (grep);
    T2–T4 each take 10–15 minutes. Do not stop after T1 goes green.
 
-2. **Add the audit checklist to `src/cache/CONCURRENCY.md`** (open `next step` from
+2. **Add the audit checklist to `src/cache/concurrency.md`** (open `next step` from
    prior document) — a standing reference that any future contributor can follow.
 
 3. **Write a KB doc at the end of every fix session** — even a short one. The
@@ -257,7 +257,7 @@ Artifact hygiene
 
 ### Next Steps
 
-- [ ] Create `src/cache/CONCURRENCY.md` with the lock-order rule, snapshot pattern,
+- [ ] Create `src/cache/concurrency.md` with the lock-order rule, snapshot pattern,
       and the 4-tier audit checklist
 - [ ] Add `tests/concurrency/` to the CI fast-path (currently skipped in coverage run)
 - [ ] Consider a `CacheStatsSnapshot` dataclass so `stats()` returns a frozen object

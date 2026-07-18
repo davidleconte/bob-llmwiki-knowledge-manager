@@ -277,7 +277,7 @@ The **"one home per value" validators** (status, savings, generic) are **innovat
 **Current State:**
 
 ✅ **Strengths:**
-- **Single architecture document** (`docs/architecture/ARCHITECTURE.md`) - authoritative
+- **Single architecture document** (`docs/architecture/architecture.md`) - authoritative
 - **Diátaxis structure** implemented Phase 6:
   - Tutorials (getting started)
   - How-to guides (task-oriented)
@@ -329,7 +329,7 @@ However, the **presence of deprecated docs** (even if marked) creates confusion.
 - **SUPPORT.md** with support channels
 - **.github/CODEOWNERS** for code ownership
 - **Issue/PR templates**
-- **STRIDE threat model** (`docs/security/THREAT_MODEL.md`)
+- **STRIDE threat model** (`docs/security/threat-model.md`)
 - **Community health gate** in CI
 
 ⚠️ **Gaps:**

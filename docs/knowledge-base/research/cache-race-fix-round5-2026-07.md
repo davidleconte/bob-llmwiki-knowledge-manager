@@ -123,7 +123,7 @@ before `MultiLevelCache._stats_lock`) existed only in the KB at
 `docs/knowledge-base/research/iterative-audit-lessons-2026-07.md`. No contributor
 modifying `src/cache/` would find them without knowing to check the KB.
 
-**Fix:** Created `src/cache/CONCURRENCY.md` co-located with the code, containing:
+**Fix:** Created `src/cache/concurrency.md` co-located with the code, containing:
 - Lock inventory table (3 classes, 3 mechanisms)
 - Lock-ordering rule with the one live call path that creates it
 - Snapshot pattern with before/after code examples
@@ -290,7 +290,7 @@ survives until the next audit.
 
 - [`src/cache/multi_level_cache.py`](../../../src/cache/multi_level_cache.py) — A, B, D fixes
 - [`src/cache/base.py`](../../../src/cache/base.py) — E: `CacheStatsSnapshot` definition
-- [`src/cache/CONCURRENCY.md`](../../../src/cache/CONCURRENCY.md) — C: in-tree reference
+- [`src/cache/concurrency.md`](../../../src/cache/concurrency.md) — C: in-tree reference
 - [`tests/cache/test_multi_level_cache.py`](../../../tests/cache/test_multi_level_cache.py) — new regression tests
 - [`docs/project-management/plans/cache-remediation-plan.md`](../../project-management/plans/cache-remediation-plan.md) — full sub-task spec
 

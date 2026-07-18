@@ -68,9 +68,9 @@ evaluation/data/synthetic/repositories/scenario_1_small/src/auth/module_0.py: no
 #### Documentation Files
 
 - `docs/DESIGN_DOCUMENT_KB_ADDENDUM.md`
-- `docs/WORKFLOWS.md`
+- `docs/workflows.md`
 - `docs/BOOK_CHAPTER_04.md`
-- `docs/REPOSITORY_ANALYSIS_WORKFLOW.md`
+- `docs/repository-analysis-workflow.md`
 - `docs/adr/003-tfidf-scoring.md`
 - `docs/adr/006-cache-strategy.md`
 - `docs/adr/011-monitoring-observability.md`
