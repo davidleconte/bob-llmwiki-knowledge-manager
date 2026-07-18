@@ -13,6 +13,7 @@ Last Updated: 2026-07-18
 ## Recent Additions
 - 2026-07-18: [Mnemox Update — 2026-07-18](./research/mnemox-update-2026-07-18.md) - Research — automated KB update: git log, doc counts, lessons learned scaffold
 - 2026-07-18: [Mnemox Update — 2026-07-18](./research/mnemox-update-2026-07-18.md) - Research — automated KB update: git log, doc counts, lessons learned scaffold
+- 2026-07-18: [Mnemox Update — 2026-07-18](./research/mnemox-update-2026-07-18.md) - Research — automated KB update: git log, doc counts, lessons learned scaffold
 - 2026-07-18: [Quality Gate Status — 2026-07-18](./research/quality-gate-status-2026-07-18.md) - Research ⭐ NEW — Status-only audit snapshot: 1112 tests / 0 failures, 89.82% global coverage, all 5 per-package floors met, ruff + mypy clean; script-output hygiene warning; merge checklist
 - 2026-07-18: [Repo Hygiene — Lessons Learned](./research/repo-hygiene-lessons-2026-07.md) - Research — 5 hygiene classes (unrelated dirs, root plan files, machine-specific paths, another user's paths, exposed API key); gitignore leading-`/` rule; hygiene audit protocol; portability verification commands
 - 2026-07-18: [Cache Thread-Safety Audit — Round 5 Lessons Learned](./research/cache-race-fix-round5-2026-07.md) - Research — 3 new bugs fixed (l3_hits missing from stats, contains() flag-gating, CacheStatsSnapshot); structural enforcement via frozen dataclass; new counter checklist; 1109→1112 tests
