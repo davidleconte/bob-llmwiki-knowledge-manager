@@ -1,5 +1,6 @@
 ---
 title: "Dual System Use Case: Enterprise AI Assistant Platform"
+category: guide
 date: 2026-07-14
 type: guide
 status: complete
@@ -8,6 +9,9 @@ related:
   - using-both-systems-together.md
   - ../research/bobcoin-savings-analysis-2026-07-14.md
   - token-optimizer-quick-install.md
+created: 2026-07-14
+updated: 2026-07-14
+
 ---
 
 > ⚠️ **ILLUSTRATIVE PROJECTIONS — WITHDRAWN AS VALIDATED RESULTS.** All Bobcoin figures and savings percentages in this document (e.g. 28%, 90.3%, 88.6%) are illustrative projections for a fictional scenario, not measured outcomes. They are not backed by a reproducible manifest and must not be cited as real results. The only measured optimizer compression figure is **~20%** (provenance: `evaluation/results/validation-2026-07-14/manifest.json`; see `STATUS.md`).

@@ -1,5 +1,6 @@
 ---
 title: "Knowledge Graph Layer — Live Validation — July 2026"
+category: research
 date: 2026-07-17
 type: research
 status: complete
@@ -12,6 +13,9 @@ related:
   - ../concepts/knowledge-graph-layer.md
   - ../guides/kb-tos-integration-roadmap.md
   - ../guides/knowledge-graph-usage-guide.md
+created: 2026-07-17
+updated: 2026-07-17
+
 ---
 
 # Knowledge Graph Layer — Live Validation — July 2026

@@ -1,5 +1,6 @@
 ---
 title: "Token Optimizer Quick Install Guide"
+category: guide
 date: 2026-07-14
 type: guide
 status: complete
@@ -8,6 +9,9 @@ related:
   - setup-token-optimization.md
   - ../concepts/token-optimization.md
   - ../references/cache-api.md
+created: 2026-07-14
+updated: 2026-07-14
+
 ---
 
 # Token Optimizer Quick Install Guide

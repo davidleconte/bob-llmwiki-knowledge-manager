@@ -81,7 +81,7 @@ echo "📋 Checking frontmatter completeness..."
 fm_missing=0
 REQUIRED_FM_FIELDS="title category tags created updated status"
 while IFS= read -r f; do
-    content=$(head -20 "$f")
+    content=$(head -30 "$f")
     for field in $REQUIRED_FM_FIELDS; do
         if ! echo "$content" | grep -q "^${field}:"; then
             echo "⚠️  Missing '${field}:' in frontmatter: ${f#$KB_DIR/}"

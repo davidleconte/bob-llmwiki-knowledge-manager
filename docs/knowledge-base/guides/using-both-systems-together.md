@@ -1,5 +1,6 @@
 ---
 title: "Using Token Optimizer and Knowledge Manager Together"
+category: guide
 date: 2026-07-14
 type: guide
 status: complete
@@ -9,6 +10,9 @@ related:
   - setup-token-optimization.md
   - ../research/bobcoin-savings-analysis-2026-07-14.md
   - ../concepts/token-optimization.md
+created: 2026-07-14
+updated: 2026-07-14
+
 ---
 
 > ⚠️ **ILLUSTRATIVE PROJECTIONS — WITHDRAWN AS VALIDATED RESULTS.** All savings percentages in this document (e.g. 40-80%, 60-75%, 20-50%) are workload-dependent estimates, not measured outcomes backed by a reproducible manifest and must not be cited as real results. The only measured optimizer compression figure is **~20%** (provenance: `evaluation/results/validation-2026-07-14/manifest.json`; see `STATUS.md`). Structural KB savings are not independently measured.

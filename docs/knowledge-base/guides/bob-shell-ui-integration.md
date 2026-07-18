@@ -1,6 +1,7 @@
 ---
 title: Bob Shell UI Integration for Cost Tracking
 category: guide
+status: active
 tags: [bob-shell, ui, cost-tracking, integration]
 created: 2026-07-13
 updated: 2026-07-13

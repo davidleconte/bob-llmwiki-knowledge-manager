@@ -1,5 +1,8 @@
 ---
 title: "KB-TOS Shared Embedding Layer"
+category: concept
+created: 2026-07-14
+updated: 2026-07-14
 date: 2026-07-14
 type: concept
 status: proposed

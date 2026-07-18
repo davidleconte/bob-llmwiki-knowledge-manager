@@ -1,11 +1,15 @@
 ---
 title: "Phase 2: Vocabulary Drift Monitoring Implementation"
+category: research
 date: 2026-07-13
 status: complete
 tags: [phase2, monitoring, vocabulary-drift, semantic-cache]
 related:
   - phase2-completion-summary.md
   - phase2-health-checks-complete.md
+created: 2026-07-13
+updated: 2026-07-13
+
 ---
 
 # Phase 2: Vocabulary Drift Monitoring Implementation

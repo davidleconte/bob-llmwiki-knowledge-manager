@@ -1,5 +1,6 @@
 ---
 title: "Delegation Module Integration Analysis"
+category: research
 date: 2026-07-13
 type: research
 status: superseded
@@ -8,6 +9,9 @@ related:
   - codebase-analysis-2026-07-14.md
   - audit-2026-07-13-institutional.md
   - external-audit-2026-07-12.md
+created: 2026-07-13
+updated: 2026-07-13
+
 ---
 
 # Delegation Module Integration Analysis

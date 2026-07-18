@@ -1,5 +1,6 @@
 ---
 title: "Code Coverage Measurement Results"
+category: research
 date: 2026-07-13
 type: research
 status: complete
@@ -9,6 +10,9 @@ related:
   - audit-2026-07-13-institutional.md
   - codebase-analysis-2026-07-14.md
   - ../guides/audit-remediation-action-plan.md
+created: 2026-07-13
+updated: 2026-07-13
+
 ---
 
 # Code Coverage Measurement Results

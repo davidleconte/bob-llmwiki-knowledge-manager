@@ -1,5 +1,6 @@
 ---
 title: "Activating the Knowledge Manager in a New Session"
+category: guide
 date: 2026-07-14
 type: guide
 status: complete
@@ -8,6 +9,9 @@ related:
   - ../../USAGE.md
   - ../../INSTALLATION.md
   - ../../QUICK_START.md
+created: 2026-07-14
+updated: 2026-07-14
+
 ---
 
 # Activating the Knowledge Manager in a New Session

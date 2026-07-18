@@ -1,6 +1,7 @@
 ---
 title: Phase 8 — Independent Adversarial Re-Audit & Sign-Off (2026-07-14)
 category: research
+status: active
 tags: [audit, sign-off, phase-8, adversarial, mece, scorecard, production-readiness, go-no-go]
 created: 2026-07-14
 updated: 2026-07-14

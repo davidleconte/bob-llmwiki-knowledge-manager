@@ -1,6 +1,7 @@
 ---
 title: Cost Tracking System - Lessons Learned
 category: research
+status: active
 tags: [lessons-learned, cost-tracking, implementation, best-practices]
 created: 2026-07-13
 updated: 2026-07-13

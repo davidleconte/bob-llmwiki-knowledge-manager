@@ -1,5 +1,6 @@
 ---
 title: "Phase 3 Validation User Guide"
+category: guide
 date: 2026-07-13
 status: active
 tags: [phase3, validation, guide, measurement, best-practices]
@@ -7,6 +8,9 @@ related:
   - ../research/phase3-real-world-validation-plan.md
   - ../research/phase3-day1-2-validation-framework.md
   - ../research/phase3-day3-4-parallel-work.md
+created: 2026-07-13
+updated: 2026-07-13
+
 ---
 
 # Phase 3 Validation User Guide

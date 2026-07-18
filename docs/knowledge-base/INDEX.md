@@ -81,6 +81,9 @@ Last Updated: 2026-07-18
 
 ## All Documents
 
+### Recently Filed (not yet in Recent Additions)
+- [Adversarial Review Pattern](./concepts/adversarial-review-pattern.md) - Two-pass hostile + friendly review technique; pre-emption rule; label separation; fabrication ceiling ⭐ NEW
+
 ### Concepts
 - [File Naming Conventions](./concepts/file-naming-conventions.md) - Kebab-case rule for all `.md` files, exclusion zones, `index.md` blast radius, emoji single source of truth, drift detection command ⭐ NEW
 - [Repo Hygiene Rules](./concepts/repo-hygiene-rules.md) - 5 hygiene failure classes (H-1–H-5): unrelated dirs, root plan files, machine-specific paths, cross-user paths, committed secrets; pre-push gate ⭐ NEW
@@ -126,6 +129,8 @@ Last Updated: 2026-07-18
 - [Setting Up Token Optimization System](./guides/setup-token-optimization.md) - Complete installation and configuration guide for the Token Optimization System
 
 ### References
+- [Mnemox CLI Reference](./references/mnemox-cli-reference.md) - All flags, modes, env vars, auto-detection logic, exit codes, examples ⭐ NEW
+- [bob-optimize CLI Reference](./references/bob-optimize-cli-reference.md) - All 13 subcommands with options, defaults, and examples ⭐ NEW
 - [KB Savings Estimation Methodology](./references/kb-savings-estimation-methodology.md) - Robust methodology for estimating token savings from knowledge base usage with confidence levels
 - [Cache API Reference](./references/cache-api.md) - Complete API documentation for all cache classes, methods, and usage examples
 
@@ -159,6 +164,34 @@ Last Updated: 2026-07-18
 - [External Audit 2026-07-12](./research/external-audit-2026-07-12.md) - Independent external audit identifying critical findings, fabricated metrics, and documentation drift with recommended remediation
 - [Cost Tracking Lessons Learned](./research/cost-tracking-lessons-learned.md) - Key lessons learned from implementing the comprehensive Bobcoin cost tracking system with KB savings estimation
 - [Performance Benchmarks](./research/performance-benchmarks.md) - Comprehensive performance analysis including latency, throughput, memory usage, and token savings measurements
+- [Architecture Audit MECE Framework 2026-07-14](./research/architecture-audit-mece-2026-07-14.md) - MECE framework audit of architecture documentation
+- [Phase 8 Audit Sign-off 2026-07-14](./research/audit-2026-07-14-signoff.md) - Final sign-off audit after Phase 8 remediation
+
+### Analysis Snapshots
+> Dated snapshots generated automatically by `scripts/run-full-analysis.sh`. Each file represents one analysis run; the most recent supersedes earlier ones. Listed here for completeness — use the latest dated file for current state.
+
+**Repository Scans**
+- [Repo Scan 2026-07-18](./research/repo-scan-2026-07-18.md) · [2026-07-13](./research/repo-scan-2026-07-13.md) · [2026-07-12](./research/repo-scan-2026-07-12.md)
+
+**Code Metrics**
+- [Code Metrics 2026-07-18](./research/code-metrics-2026-07-18.md) · [2026-07-13](./research/code-metrics-2026-07-13.md) · [2026-07-12](./research/code-metrics-2026-07-12.md)
+
+**Security Scans**
+- [Security Scan 2026-07-13](./research/security-scan-2026-07-13.md) · [2026-07-12](./research/security-scan-2026-07-12.md)
+
+**Test Coverage**
+- [Test Coverage 2026-07-13](./research/test-coverage-2026-07-13.md) · [2026-07-12](./research/test-coverage-2026-07-12.md)
+
+**Documentation Coverage**
+- [Doc Coverage 2026-07-13](./research/doc-coverage-2026-07-13.md) · [2026-07-12](./research/doc-coverage-2026-07-12.md)
+
+**Git Analysis**
+- [Git Analysis 2026-07-13](./research/git-analysis-2026-07-13.md) · [2026-07-12](./research/git-analysis-2026-07-12.md)
+
+### Guides (orphan resolution)
+- [Activating the Knowledge Manager in a New Session](./guides/activating-knowledge-manager-in-new-session.md) - Workflow for starting a KB session from scratch; CONTEXT.md; start-kb.sh
+- [Complete Repository Analysis](./guides/complete-repository-analysis.md) - Full 7-phase analysis guide; what each script produces; how to interpret results
+- [P0 Critical Fixes Implementation Guide](./guides/p0-critical-fixes-implementation.md) - Implementation guide for P0 critical fixes
 
 ---
 

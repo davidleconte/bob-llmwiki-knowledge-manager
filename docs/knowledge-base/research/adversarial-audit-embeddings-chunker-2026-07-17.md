@@ -1,5 +1,6 @@
 ---
 title: "Adversarial Audit — src/embeddings/ chunker integration (2026-07-17)"
+category: research
 date: 2026-07-17
 type: research
 status: complete
@@ -12,6 +13,9 @@ related:
   - ../../../src/embeddings/index.py
   - ../../../src/embeddings/chunker.py
   - ../../../src/embeddings/indexer.py
+created: 2026-07-17
+updated: 2026-07-17
+
 ---
 
 # Adversarial Audit — `src/embeddings/` Chunker Integration (2026-07-17)

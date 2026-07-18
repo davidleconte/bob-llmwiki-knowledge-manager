@@ -4,6 +4,7 @@ category: reference
 tags: [cost-tracking, knowledge-base, methodology, estimation]
 created: 2026-07-13
 updated: 2026-07-13
+status: active
 ---
 
 # Knowledge Base Savings Estimation Methodology

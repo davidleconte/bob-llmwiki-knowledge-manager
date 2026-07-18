@@ -1,5 +1,6 @@
 ---
 title: "Senior Expert Institutional Audit - LLM-Wiki & Token Optimization"
+category: research
 date: 2026-07-14
 type: research
 status: complete
@@ -10,6 +11,9 @@ related:
   - audit-2026-07-13-institutional.md
   - codebase-analysis-2026-07-14.md
   - external-audit-2026-07-12.md
+created: 2026-07-14
+updated: 2026-07-14
+
 ---
 
 # Senior Expert Institutional Audit

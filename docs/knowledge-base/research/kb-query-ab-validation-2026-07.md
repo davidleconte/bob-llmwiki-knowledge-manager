@@ -1,5 +1,6 @@
 ---
 title: "KB Query Scorer A/B Validation — July 2026"
+category: research
 date: 2026-07-16
 type: research
 status: complete
@@ -8,6 +9,9 @@ related:
   - ../guides/kb-tos-integration-roadmap.md
   - ../concepts/kb-tos-embedding-layer.md
   - ../../../docs/adr/014-kb-query-embedding-scorer.md
+created: 2026-07-16
+updated: 2026-07-16
+
 ---
 
 # KB Query Scorer A/B Validation — July 2026

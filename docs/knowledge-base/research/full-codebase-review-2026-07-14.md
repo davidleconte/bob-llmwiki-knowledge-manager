@@ -1,5 +1,6 @@
 ---
 title: "Full Codebase & Documentation Review"
+category: research
 date: 2026-07-14
 type: research
 status: complete
@@ -20,6 +21,9 @@ related:
   - senior-expert-institutional-audit-2026-07-14.md
   - audit-2026-07-13-institutional.md
   - external-audit-2026-07-12.md
+created: 2026-07-14
+updated: 2026-07-14
+
 ---
 
 # Full Codebase & Documentation Review

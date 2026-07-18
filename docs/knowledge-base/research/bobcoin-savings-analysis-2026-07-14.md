@@ -1,5 +1,6 @@
 ---
 title: "Bobcoin Savings Analysis - Two Sub-Projects"
+category: research
 date: 2026-07-14
 type: research
 status: complete
@@ -10,6 +11,9 @@ related:
   - ../references/kb-savings-estimation-methodology.md
   - ../guides/km-bobcoin-savings-measurement-guide.md
   - kb-mode-switch-lessons-2026-07.md
+created: 2026-07-14
+updated: 2026-07-14
+
 ---
 
 # Bobcoin Savings Analysis

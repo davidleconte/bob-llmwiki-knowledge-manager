@@ -1,6 +1,7 @@
 ---
 title: Institutional Codebase & Documentation Audit (2026-07-13)
 category: research
+status: active
 tags: [audit, institutional, mece, scorecard, production-readiness, supply-chain, claims-integrity]
 created: 2026-07-13
 updated: 2026-07-13

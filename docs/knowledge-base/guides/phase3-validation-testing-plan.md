@@ -1,11 +1,15 @@
 ---
 title: "Phase 3 Validation Testing Plan"
+category: guide
 date: 2026-07-13
 status: active
 tags: [phase3, testing, validation, pytest, quality-assurance]
 related:
   - ../research/phase3-day3-4-parallel-work.md
   - ./phase3-validation-user-guide.md
+created: 2026-07-13
+updated: 2026-07-13
+
 ---
 
 # Phase 3 Validation Testing Plan

@@ -1,5 +1,6 @@
 ---
 title: "KB Manager ↔ Token Optimization System: Integration Feasibility Study"
+category: research
 date: 2026-07-14
 type: research
 status: complete
@@ -11,6 +12,9 @@ related:
   - delegation-integration-analysis-2026-07-13.md
   - ../guides/using-both-systems-together.md
   - ../guides/dual-system-use-case-example.md
+created: 2026-07-14
+updated: 2026-07-14
+
 ---
 
 > ⚠️ **Adversarial audit applied 2026-07-16.** Three claims in the original draft were

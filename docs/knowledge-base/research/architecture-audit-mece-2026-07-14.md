@@ -1,5 +1,7 @@
 ---
 title: "Architecture Documentation Audit — MECE / Tier-1 Software Vendor Standard"
+category: research
+tags: [architecture, audit, mece]
 date: 2026-07-14
 type: research
 status: complete
@@ -17,6 +19,9 @@ do_not_edit: Point-in-time snapshot. Corrections in a new document.
 related:
   - audit-2026-07-14-post-remediation.md
   - ../../architecture/ARCHITECTURE.md
+created: 2026-07-14
+updated: 2026-07-14
+
 ---
 
 # Architecture Documentation Audit

@@ -1,5 +1,6 @@
 ---
 title: "KB Manager ↔ TOS Integration Roadmap: P0 / P1 / P2 + TOS Stability Gate"
+category: guide
 date: 2026-07-14
 type: guide
 status: active
@@ -10,6 +11,9 @@ related:
   - ../concepts/kb-tos-embedding-layer.md
   - token-optimizer-quick-install.md
   - setup-token-optimization.md
+created: 2026-07-14
+updated: 2026-07-14
+
 ---
 
 # KB Manager ↔ TOS Integration Roadmap
