@@ -497,7 +497,7 @@ These are verifiable success criteria. Each maps to a specific observable state 
 
 ## 14. Bob IDE Installation
 
-> **Cross-reference:** For a 5-minute walkthrough, see [docs/quick-start.md](QUICK_START.md). For full Bob IDE reference documentation, see [docs/bob-ide-guide.md](BOB-IDE-GUIDE.md).
+> **Cross-reference:** For a 5-minute walkthrough, see [docs/quick-start.md](quick-start.md). For full Bob IDE reference documentation, see [docs/BOB-IDE-GUIDE.md](BOB-IDE-GUIDE.md).
 
 ### 14.1 Overview
 

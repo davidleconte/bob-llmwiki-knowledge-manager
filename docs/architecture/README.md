@@ -215,9 +215,9 @@ See [deprecated/README.md](deprecated/README.md) for details.
 ### User Documentation
 
 - **[README.md](../../README.md)** — Project overview
-- **[docs/quick-start.md](../QUICK_START.md)** — 5-minute guide
-- **[docs/usage.md](../USAGE.md)** — Usage guide
-- **[docs/monitoring.md](../MONITORING.md)** — Monitoring guide
+- **[docs/quick-start.md](../quick-start.md)** — 5-minute guide
+- **[docs/USAGE.md](../USAGE.md)** — Usage guide
+- **[docs/MONITORING.md](../MONITORING.md)** — Monitoring guide
 
 ---
 

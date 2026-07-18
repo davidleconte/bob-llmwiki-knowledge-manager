@@ -35,7 +35,7 @@
 
 **Location:** `docs/`
 
-- **[Quick Start Guide](QUICK_START.md)** — 5-minute getting started guide
+- **[Quick Start Guide](quick-start.md)** — 5-minute getting started guide
 - **[Installation Guide](INSTALLATION.md)** — Detailed installation instructions
 - **[Usage Guide](USAGE.md)** — Comprehensive usage examples
 - **[Customization Guide](CUSTOMIZATION.md)** — Customization options
@@ -51,7 +51,7 @@
 - **[Validation Report (Phase 5, measured)](../evaluation/results/validation-2026-07-14/report.json)** — manifest-backed run (`report.json` + `manifest.json`); the earlier `validation_report.json` (68.96%) is retracted/fabricated
 
 **Key Findings:**
-- ✅ 1053+ tests passing — see [STATUS.md](../STATUS.md) for the current live snapshot; gate is `pyproject.toml`
+- ✅ 1112 tests passing — see [STATUS.md](../STATUS.md) for the current live snapshot; gate is `pyproject.toml`
 - ✅ Token savings **measured**: ~20% mean optimizer compression (95% CI [19%, 21%], N=183) — manifest-backed at `evaluation/results/validation-2026-07-14/`; the earlier 68.96% is retracted
 - ✅ A+ (4.30/4.30) — all 4 structural gaps closed (SLA v1.0, sentence-transformers, full mypy scope, CODEOWNERS)
 - ✅ Delegation pipeline wired: `bob-optimize analyze` (ADR-019)
@@ -163,13 +163,13 @@ Auto-generated API documentation from source code (see [full API reference](api/
 ### 7. User Guides
 
 - **[Installation](INSTALLATION.md)** — Setup and installation
-- **[Quick Start](QUICK_START.md)** — Getting started guide
+- **[Quick Start](quick-start.md)** — Getting started guide
 - **[Usage](USAGE.md)** — Detailed usage instructions
 - **[Workflows](WORKFLOWS.md)** — Common workflows
 - **[Repository Analysis Workflow](REPOSITORY_ANALYSIS_WORKFLOW.md)** — Token-efficient repository audit workflow
 - **[Customization](CUSTOMIZATION.md)** — Configuration and customization
 - **[Bob IDE Guide](BOB-IDE-GUIDE.md)** — Bob IDE mode picker, skill activation, persistence
-- **[SLA](SLA.md)** — Latency/throughput targets and measurement methodology
+- **[SLA](sla.md)** — Latency/throughput targets and measurement methodology
 - **[Comparison](archive/COMPARISON.md)** — Comparison with alternatives (archived)
 
 ### 8. Configuration
@@ -268,7 +268,7 @@ See [API Reference](api/README.md) for details.
 ## Navigation by Role
 
 ### Developers
-1. Start with [Quick Start](QUICK_START.md) (Bob Shell KB) or the [optimize-a-prompt tutorial](tutorials/optimize-a-prompt.md) (Python TOS)
+1. Start with [Quick Start](quick-start.md) (Bob Shell KB) or the [optimize-a-prompt tutorial](tutorials/optimize-a-prompt.md) (Python TOS)
 2. Review [API Reference](api/README.md)
 3. Check the [Architecture](architecture/ARCHITECTURE.md)
 4. See [Usage Guide](USAGE.md) for examples
@@ -277,13 +277,13 @@ See [API Reference](api/README.md) for details.
 1. Review [Monitoring Guide](MONITORING.md)
 2. Check [Installation](INSTALLATION.md)
 3. See [Health Checking](api/monitoring/health.md)
-4. Review [SLA](SLA.md) for latency/throughput targets
+4. Review [SLA](sla.md) for latency/throughput targets
 
 ### Architects
 1. Read the [Architecture](architecture/ARCHITECTURE.md)
 2. Review [ADRs](adr/README.md)
 3. See [STRIDE Threat Model](security/THREAT_MODEL.md)
-4. Check the [SLA](SLA.md) for quality scenarios
+4. Check the [SLA](sla.md) for quality scenarios
 
 ### Contributors
 1. Read [CONTRIBUTING.md](../CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md)
@@ -330,7 +330,7 @@ print(result["compression_ratio"])     # e.g. 0.80 → 20% smaller
 bob-optimize analyze src/ --kb-path docs/knowledge-base --output-dir /tmp/analysis
 ```
 
-See [Quick Start](QUICK_START.md) for the Bob Shell KB Manager onboarding.
+See [Quick Start](quick-start.md) for the Bob Shell KB Manager onboarding.
 
 ---
 

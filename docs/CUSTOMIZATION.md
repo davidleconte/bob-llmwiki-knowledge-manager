@@ -11,7 +11,7 @@
 
 > **Scope note — Bob Shell CLI:** This document covers Bob Shell CLI customization (`config/custom_modes.yaml` → `~/.bob/custom_modes.yaml`).
 > **Bob IDE users:** group names differ (`execute`/`skill` vs `command`/`browser`), `save_memory` is not available,
-> and workspace modes live in `.bob/custom_modes.yaml`. See [docs/bob-ide-guide.md](BOB-IDE-GUIDE.md).
+> and workspace modes live in `.bob/custom_modes.yaml`. See [BOB-IDE-GUIDE.md](BOB-IDE-GUIDE.md).
 
 ---
 

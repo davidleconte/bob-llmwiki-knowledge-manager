@@ -8,7 +8,7 @@
 | **Scope** | End-to-end operational workflows for the Bob Shell LLM Wiki Knowledge Manager — covering document creation, project onboarding, KB maintenance, and research documentation. Each workflow is grounded in the system's actual mode configuration ([`config/custom_modes.yaml`](../config/custom_modes.yaml)) and supporting scripts ([`scripts/validate-kb.sh`](../scripts/validate-kb.sh), [`scripts/export-kb.sh`](../scripts/export-kb.sh)). |
 
 > **Scope note — Bob Shell CLI:** These workflows are written for Bob Shell CLI (`bob --chat-mode=knowledge-manager`).
-> **Bob IDE users:** activate via the mode picker (🧠 Mnemox Knowledge Builder) and see [docs/bob-ide-guide.md](BOB-IDE-GUIDE.md).
+> **Bob IDE users:** activate via the mode picker (🧠 Mnemox Knowledge Builder) and see [BOB-IDE-GUIDE.md](BOB-IDE-GUIDE.md).
 > Key difference: `save_memory` is **not available** in Bob IDE — all persistence is via `write_file` to `docs/knowledge-base/`.
 
 ---

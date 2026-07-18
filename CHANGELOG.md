@@ -112,9 +112,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Gap-fix: KB Manager architecture doc consolidation** (Sub-Task 7):
   - `docs/ARCHITECTURE.md` (KB Manager arc42 document) renamed to
-    `docs/kb-manager/architecture.md` to eliminate the dual-architecture-doc
+    `docs/kb-manager/ARCHITECTURE.md` to eliminate the dual-architecture-doc
     navigation confusion identified in the gap audit.
-  - Cross-references in `README.md`, `docs/architecture/architecture.md`,
+  - Cross-references in `README.md`, `docs/architecture/ARCHITECTURE.md`,
     `docs/README.md`, and `AGENTS.md` updated.
   - `tests/test_workflows.py::test_documentation_files_exist` updated to
     assert the new path.

@@ -93,7 +93,7 @@ pandoc --version | head -1
 ## 3. Step 1: Install the mode (~2 min)
 
 > **Bob IDE users — no install needed.**
-> Open this workspace (`bob-llmwiki-knowledge-manager`) in Bob IDE. Click the **mode picker** in the bottom-left status bar, scroll to and select **🧠 Mnemox Knowledge Builder**. The mode is already registered in `.bob/custom_modes.yaml`. **Skip directly to [Step 3](#5-step-3-your-first-document-2-min).** See [docs/bob-ide-guide.md](BOB-IDE-GUIDE.md) for full Bob IDE details.
+> Open this workspace (`bob-llmwiki-knowledge-manager`) in Bob IDE. Click the **mode picker** in the bottom-left status bar, scroll to and select **🧠 Mnemox Knowledge Builder**. The mode is already registered in `.bob/custom_modes.yaml`. **Skip directly to [Step 3](#5-step-3-your-first-document-2-min).** See [BOB-IDE-GUIDE.md](BOB-IDE-GUIDE.md) for full Bob IDE details.
 
 ---
 
@@ -369,7 +369,7 @@ microservices-architecture.md
 | **Fix 2** | Make a trivial edit to [`.bob/custom_modes.yaml`](../.bob/custom_modes.yaml) (add and remove a space), then save — Bob IDE hot-reloads on file change |
 | **Fix 3** | Confirm the file exists: `ls .bob/custom_modes.yaml` and contains the `knowledge-manager` slug: `grep knowledge-manager .bob/custom_modes.yaml` |
 
-See [docs/bob-ide-guide.md — Troubleshooting](BOB-IDE-GUIDE.md#10-troubleshooting) for additional Bob IDE issues.
+See [BOB-IDE-GUIDE.md — Troubleshooting](BOB-IDE-GUIDE.md#10-troubleshooting) for additional Bob IDE issues.
 
 ---
 
@@ -427,9 +427,9 @@ See [docs/bob-ide-guide.md — Troubleshooting](BOB-IDE-GUIDE.md#10-troubleshoot
 
 | Goal | Resource |
 |---|---|
-| Understand all available prompts and workflows | [docs/usage.md](USAGE.md) |
-| See end-to-end scenario walkthroughs | [docs/workflows.md](WORKFLOWS.md) |
-| Customise templates, categories, or mode behaviour | [docs/customization.md](CUSTOMIZATION.md) |
+| Understand all available prompts and workflows | [docs/USAGE.md](USAGE.md) |
+| See end-to-end scenario walkthroughs | [docs/WORKFLOWS.md](WORKFLOWS.md) |
+| Customise templates, categories, or mode behaviour | [docs/CUSTOMIZATION.md](CUSTOMIZATION.md) |
 | Browse worked KB examples | [`examples/`](../examples/) directory |
 
 ---

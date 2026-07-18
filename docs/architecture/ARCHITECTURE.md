@@ -12,7 +12,7 @@ records live in [`../adr/`](../adr/); the generated API reference in
 
 > The repository also ships a separate Bash product, the **Bob Shell Knowledge
 > Manager** (~500 lines), whose architecture is documented in
-> [`docs/kb-manager/architecture.md`](../kb-manager/ARCHITECTURE.md). The two share
+> [`docs/kb-manager/ARCHITECTURE.md`](../kb-manager/ARCHITECTURE.md). The two share
 > a repo but are not one system. This document is about the Python
 > token-optimization system (`src/`).
 
@@ -384,7 +384,7 @@ Verifiable acceptance criteria for the system's cross-cutting quality attributes
 - Knowledge graph design: [`../adr/017-knowledge-graph-layer.md`](../adr/017-knowledge-graph-layer.md) (ADR-017).
 - Delegation pipeline design: [`../adr/019-delegation-pipeline-activation.md`](../adr/019-delegation-pipeline-activation.md) (ADR-019).
 - Graph live validation results: [`../knowledge-base/research/graph-validation-2026-07-17.md`](../knowledge-base/research/graph-validation-2026-07-17.md).
-- SLA: [`../SLA.md`](../SLA.md) — latency/throughput targets, measurement methodology.
+- SLA: [`../sla.md`](../sla.md) — latency/throughput targets, measurement methodology.
 
 ---
 

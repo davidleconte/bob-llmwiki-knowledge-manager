@@ -6,9 +6,9 @@
 
 > **Cross-references:**  
 > — New to this project? Start with [README.md](../README.md).  
-> — 5-minute onboarding: [docs/quick-start.md](QUICK_START.md).  
-> — Full installation reference: [docs/installation.md](INSTALLATION.md).  
-> — This guide covers Bob IDE only. For the terminal binary, see [docs/installation.md](INSTALLATION.md) §1.
+> — 5-minute onboarding: [docs/quick-start.md](quick-start.md).
+> — Full installation reference: [docs/INSTALLATION.md](INSTALLATION.md).
+> — This guide covers Bob IDE only. For the terminal binary, see [docs/INSTALLATION.md](INSTALLATION.md) §1.
 
 ---
 
@@ -92,7 +92,7 @@ ls .bob/skills/knowledge-manager/SKILL.md
 Both commands should return the file path without error.
 
 > **Bob Shell CLI users:** If you are using the terminal binary, run `scripts/install.sh`
-> instead. See [docs/installation.md](INSTALLATION.md) for the CLI path.
+> instead. See [docs/INSTALLATION.md](INSTALLATION.md) for the CLI path.
 
 ---
 
@@ -420,4 +420,4 @@ The agent follows the directory structure documented in [§7 Persistence](#7-per
 
 ---
 
-*See also: [README.md](../README.md) · [QUICK_START.md](QUICK_START.md) · [INSTALLATION.md](INSTALLATION.md)*
+*See also: [README.md](../README.md) · [quick-start.md](quick-start.md) · [INSTALLATION.md](INSTALLATION.md)*

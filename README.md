@@ -128,7 +128,7 @@ The pattern works wherever accumulated knowledge has value — across roles, dom
 
 Each system works without the other. Three **opt-in** integration points connect them (all fallback-safe — if the Python system is absent, the KB Manager is unaffected): the KB query engine can use the TOS embedding scorer; the `knowledge-manager` mode can compress retrieved context via `bob-optimize`; and a persistent embedding index bridges KB document search with TOS cache infrastructure. See [`INTEGRATIONS.md`](INTEGRATIONS.md).
 
-Architecture: [KB Manager — `docs/kb-manager/architecture.md`](docs/kb-manager/architecture.md) · [Python system — `docs/architecture/architecture.md`](docs/architecture/architecture.md).
+Architecture: [KB Manager — `docs/kb-manager/ARCHITECTURE.md`](docs/kb-manager/ARCHITECTURE.md) · [Python system — `docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md).
 
 ### Supported targets
 
@@ -144,7 +144,7 @@ Architecture: [KB Manager — `docs/kb-manager/architecture.md`](docs/kb-manager
 >
 > **Bob IDE** uses Git-backed markdown — knowledge is written to `docs/knowledge-base/`, committed to the repository, and auto-loaded at the start of every session via `.bob/settings.json`. Every team member reads and builds on the same growing KB. This is the recommended model for team use: knowledge is shared, auditable, and compounds across the entire team, not just one person's sessions.
 >
-> See [`docs/bob-ide-guide.md`](docs/bob-ide-guide.md) for the full Bob IDE workflow.
+> See [`docs/BOB-IDE-GUIDE.md`](docs/BOB-IDE-GUIDE.md) for the full Bob IDE workflow.
 
 ---
 
@@ -234,7 +234,7 @@ No installation or CLI required. The Knowledge Manager mode is bundled in `.bob/
 3. Scroll to **🧠 Mnemox Knowledge Builder** and select it.
 4. Bob IDE loads `.bob/skills/knowledge-manager/SKILL.md` automatically via the `skill` group.
 
-> **Full reference:** [`docs/bob-ide-guide.md`](docs/bob-ide-guide.md)
+> **Full reference:** [`docs/BOB-IDE-GUIDE.md`](docs/BOB-IDE-GUIDE.md)
 
 ### Path A — Wrapper script (Bob Shell CLI, recommended)
 
@@ -284,7 +284,7 @@ What did we document most recently? Summarise the KB and suggest what to work on
 
 Bob will scan `index.md` (auto-loaded via `.bob/settings.json`), recall any `save_memory` facts from prior sessions *(Bob Shell CLI only — Bob IDE uses file persistence in `docs/knowledge-base/`)*, and propose the next logical documents or updates.
 
-> **Full reference:** [`docs/usage.md §0`](docs/usage.md#0-starting-a-session) · [`docs/knowledge-base/guides/activating-knowledge-manager-in-new-session.md`](docs/knowledge-base/guides/activating-knowledge-manager-in-new-session.md)
+> **Full reference:** [`docs/USAGE.md §0`](docs/USAGE.md#0-starting-a-session) · [`docs/knowledge-base/guides/activating-knowledge-manager-in-new-session.md`](docs/knowledge-base/guides/activating-knowledge-manager-in-new-session.md)
 
 ### Mode switching and the KB
 
@@ -679,13 +679,13 @@ except two optional first-use downloads:
 ## 13. Documentation
 
 - **[docs/README.md](docs/README.md)** — Diátaxis navigation hub (tutorials, how-to, reference, explanation)
-- **[docs/bob-ide-guide.md](docs/bob-ide-guide.md)** — Bob IDE complete reference (activation, tool groups, skill, validation, troubleshooting)
+- **[docs/BOB-IDE-GUIDE.md](docs/BOB-IDE-GUIDE.md)** — Bob IDE complete reference (activation, tool groups, skill, validation, troubleshooting)
 - **[docs/quick-start.md](docs/quick-start.md)** — 5-minute getting started — Bob Shell CLI and Bob IDE (arc42 Tier-1)
-- **[docs/installation.md](docs/installation.md)** — detailed installation — Bob Shell CLI and Bob IDE (arc42 Tier-1)
-- **[docs/usage.md](docs/usage.md)** — usage guide with workflow diagrams (arc42 Tier-1)
-- **[docs/kb-manager/architecture.md](docs/kb-manager/architecture.md)** — KB Manager architecture (arc42 v2.1, 13 sections, 8+ diagrams)
-- **[docs/architecture/architecture.md](docs/architecture/architecture.md)** — Python token-optimizer architecture (arc42 v3.0, 11 sections, 5 diagrams)
-- **[docs/monitoring.md](docs/monitoring.md)** — monitoring & observability (arc42 Tier-1)
+- **[docs/INSTALLATION.md](docs/INSTALLATION.md)** — detailed installation — Bob Shell CLI and Bob IDE (arc42 Tier-1)
+- **[docs/USAGE.md](docs/USAGE.md)** — usage guide with workflow diagrams (arc42 Tier-1)
+- **[docs/kb-manager/ARCHITECTURE.md](docs/kb-manager/ARCHITECTURE.md)** — KB Manager architecture (arc42 v2.1, 13 sections, 8+ diagrams)
+- **[docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md)** — Python token-optimizer architecture (arc42 v3.0, 11 sections, 5 diagrams)
+- **[docs/MONITORING.md](docs/MONITORING.md)** — monitoring & observability (arc42 Tier-1)
 - **[docs/sla.md](docs/sla.md)** — SLA v1.0: latency, throughput, quality, concurrency targets
 - **[docs/security/threat-model.md](docs/security/threat-model.md)** — STRIDE threat model
 - **[docs/adr/](docs/adr/)** — 19 Architecture Decision Records (ADR-012 superseded)

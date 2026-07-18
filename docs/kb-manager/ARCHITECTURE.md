@@ -7,7 +7,7 @@
 implementation: `.bob/skills/knowledge-manager/SKILL.md` and `.bob/custom_modes.yaml`
 (workspace entry, `execute`/`skill` groups, verified on Bob IDE 1.121.0+bob2.0.1).
 Not to be confused with the Python token-optimization system (`src/`), which is documented in
-[`docs/architecture/architecture.md`](../architecture/ARCHITECTURE.md).
+[`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md).
 
 ---
 
@@ -625,5 +625,5 @@ A stale `INDEX.md` degrades query quality.
 ---
 
 *Authoritative architecture document for the Bob Shell Knowledge Manager component.*  
-*Python token-optimization system: see [`docs/architecture/architecture.md`](architecture/ARCHITECTURE.md).*  
+*Python token-optimization system: see [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md).*
 *Maintained by: Architecture Team · Last reviewed: 2026-07-14*

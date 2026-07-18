@@ -7,7 +7,7 @@
 | **Standard** | arc42 / Tier-1 |
 | **Scope** | Operational reference for all interactions with the `knowledge-manager` mode in both **Bob Shell CLI** and **Bob IDE**: document creation, querying, updating, organizing, exporting, and validating the `docs/knowledge-base/` directory tree. |
 
-> **Bob IDE users:** see [docs/bob-ide-guide.md](BOB-IDE-GUIDE.md) for the IDE-specific reference.
+> **Bob IDE users:** see [BOB-IDE-GUIDE.md](BOB-IDE-GUIDE.md) for the IDE-specific reference.
 > Key differences: activation via mode picker (not `--chat-mode=`); `save_memory` is **not available**
 > (file persistence only); shell group is `execute` (not `command`).
 
@@ -79,7 +79,7 @@ Bob IDE differences vs Bob Shell CLI:
 | Skill lazy-load | not supported | `use_skill("knowledge-manager")` |
 | Writes outside workspace | allowed | workspace-constrained |
 
-For the complete Bob IDE reference see [docs/bob-ide-guide.md](BOB-IDE-GUIDE.md).
+For the complete Bob IDE reference see [BOB-IDE-GUIDE.md](BOB-IDE-GUIDE.md).
 
 ---
 
