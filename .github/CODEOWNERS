@@ -14,3 +14,6 @@
 
 # Experimental delegation module — separate problem domain, layering-clean.
 /src/delegation/        @davidleconte
+
+# KM savings measurement tests — validation harness for re-derivation savings.
+/tests/validation/test_km_savings.py @davidleconte

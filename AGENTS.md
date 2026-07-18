@@ -2,6 +2,47 @@
 
 This file provides guidance to agents when working with code in this repository.
 
+## KB-First Protocol (read this before touching any source file)
+
+This project maintains a pre-digested knowledge base at `docs/knowledge-base/`.
+**Before reading any raw source file, check the KB index first.**
+
+```
+docs/knowledge-base/INDEX.md    ← master index of all digested knowledge
+docs/knowledge-base/concepts/   ← architecture, caching, optimization, graph
+docs/knowledge-base/guides/     ← setup, workflows, savings measurement
+docs/knowledge-base/references/ ← API docs, estimation methodology
+docs/knowledge-base/research/   ← audit findings, validation results, benchmarks
+```
+
+**Mode-switch protocol:** When you switch modes mid-session (knowledge-manager →
+plan, plan → agent, etc.) your context resets. On the first task in the new mode,
+check `docs/knowledge-base/INDEX.md` for a KB doc covering the topic before
+reading raw source. A KB hit replaces a full source read and saves ~51% of tokens
+on well-formed pairs (measured; see README §10).
+
+**After every KB write (any mode):** rebuild the knowledge graph so the new
+document is immediately queryable:
+
+```bash
+uv run bob-optimize graph-build --kb-path docs/knowledge-base --with-semantic
+```
+
+**Quick KB map by task type:**
+
+| You need to… | Read this KB doc first |
+|---|---|
+| Understand the architecture | `docs/knowledge-base/concepts/token-optimization.md` + `docs/architecture/ARCHITECTURE.md` |
+| Work on the cache | `docs/knowledge-base/concepts/multi-level-caching.md` |
+| Work on the graph layer | `docs/knowledge-base/concepts/knowledge-graph-layer.md` |
+| Work on delegation/pipeline | `docs/knowledge-base/concepts/delegation-analysis-pipeline.md` |
+| Check test coverage / floors | `docs/knowledge-base/research/coverage-measurement-2026-07-13.md` |
+| Understand savings claims | `docs/knowledge-base/research/bobcoin-savings-analysis-2026-07-14.md` |
+| Set up or install | `docs/knowledge-base/guides/setup-token-optimization.md` |
+| Understand project status | `STATUS.md` (single authoritative source) |
+
+---
+
 ## Project Overview
 
 This repository contains **TWO DISTINCT SYSTEMS**:
@@ -329,16 +370,18 @@ metrics.record_optimization(1000, 800, 10.0)
 ### Token Optimization System Documentation
 
 - **[docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md)** — Authoritative architecture (v3.0: facade, cache, KB subsystems, delegation, validation)
+- **[docs/kb-manager/ARCHITECTURE.md](docs/kb-manager/ARCHITECTURE.md)** — KB Manager architecture (arc42 v2.1)
 - **[docs/MONITORING.md](docs/MONITORING.md)** — Monitoring and observability
 - **[docs/SLA.md](docs/SLA.md)** — SLA v1.0: latency, throughput, quality, concurrency targets
 - **[docs/api/README.md](docs/api/README.md)** — Auto-generated API reference
 - **[docs/adr/](docs/adr/)** — Architecture Decision Records (ADR-001–019; ADR-012 superseded)
-- **[docs/INDEX.md](docs/INDEX.md)** — Complete documentation index
+- **[docs/knowledge-base/INDEX.md](docs/knowledge-base/INDEX.md)** — KB master index (pre-digested knowledge; check here before reading raw source)
+- **[docs/INDEX.md](docs/INDEX.md)** — TOS documentation index
 
 ### Important Notes
 
 1. **Deprecated Docs:** Files in `docs/architecture/deprecated/` describe an earlier or planned system — use `docs/architecture/ARCHITECTURE.md` for the current system.
-2. **Current Architecture:** Always refer to `docs/architecture/ARCHITECTURE.md` for the Token Optimization System implementation.
+2. **Current Architecture:** `docs/architecture/ARCHITECTURE.md` for TOS; `docs/kb-manager/ARCHITECTURE.md` for KB Manager. The old `ACTUAL_SYSTEM_ARCHITECTURE.md` no longer exists.
 3. **Dual Nature:** This repository contains both the simple KB framework AND the Python optimization system.
 4. **Optional Dependencies:** psutil is optional for Token Optimization System; gracefully degrades without it.
 
@@ -393,28 +436,23 @@ metrics.record_optimization(1000, 800, 10.0)
 
 ## Project Status
 
-⚠️ **Overall Status: Beta (7/10) — Not Production Ready**
+**Authoritative status: [`STATUS.md`](STATUS.md)** — single source of truth. Do not derive status from this file.
 
-See: `docs/knowledge-base/research/external-audit-2026-07-12.md` for complete audit findings and `docs/knowledge-base/guides/audit-remediation-action-plan.md` for remediation plan.
+Summary (2026-07-18): grade **A+ (4.30/4.30)**, 1088+ tests passing, ≥80% global coverage, all per-package floors met, SLA defined, load tests present. See `STATUS.md` for the full scorecard.
 
 ### Bob Shell Knowledge Manager
-- **Status:** Functional, needs validation
-- **Tests:** 45 tests passing
-- **Version:** 1.0
-- **Note:** Original project, well-documented
+- **Status:** Functional. KB at `docs/knowledge-base/` (60+ documents).
+- **Entry point for any mode:** `docs/knowledge-base/INDEX.md`
 
 ### Token Optimization System
-- **Implementation:** Cache/optimizer/truncation/monitoring composed behind a unified `TokenOptimizer` facade + `bob-optimize` CLI (`python -m src`); config is wired to the runtime (Phase 4, done)
-- **Tests / Coverage:** see [`STATUS.md`](STATUS.md) (gate >=80%, enforced by `pyproject.toml`)
-- **Maturity:** Beta — Not Production Ready (see [`STATUS.md`](STATUS.md), authoritative; grade A+ vs institutional bar 2026-07-17)
-- **Known Issues:** Phases 0–8 done + all 4 A+ structural gaps closed. The savings headline is measured (~20% optimizer compression, N=183; see `evaluation/results/validation-2026-07-14/`)
-- **Next:** Production readiness — load testing, SLA definition, Windows CI
+- **Implementation:** `TokenOptimizer` facade → cache → optimizer → truncation; `bob-optimize` CLI
+- **Tests / Coverage:** see [`STATUS.md`](STATUS.md)
+- **Savings (measured):** ~20% optimizer compression (N=183, manifest-backed); ~51% re-derivation saving on well-formed KB pairs (N=10, `tests/validation/test_km_savings.py`)
 
 ### Delegation Module
-- **Status:** Functional and integrated (`bob-optimize analyze`); layering-clean (shared utils in `src/tools/`)
-- **Coverage:** 84% measured (floor 70%; `scripts/check_coverage_by_package.py` is the single home for the floor)
-- **Purpose:** Parallel repository analysis (separate problem domain from token optimizer)
-- **Note:** See `src/delegation/EXPERIMENTAL.md` for details
+- **Status:** Functional and integrated (`bob-optimize analyze`); layering-clean
+- **Coverage:** 84% measured (floor 70%)
+- **Note:** See `src/delegation/EXPERIMENTAL.md`
 
 ---
 
@@ -422,25 +460,29 @@ See: `docs/knowledge-base/research/external-audit-2026-07-12.md` for complete au
 
 When working on this codebase:
 
-### For Bob Shell Knowledge Manager:
-1. **Understand the simplicity** - It's just templates and scripts, not complex code
-2. **Test with Bob Shell** - Always test mode changes with actual Bob Shell
-3. **Follow conventions** - Use established naming and structure patterns
-4. **Document examples** - Add examples for new features
+### For any task (all modes)
+1. **KB first** — check `docs/knowledge-base/INDEX.md` before reading raw source
+2. **Status from STATUS.md** — not from this file; it may be stale
+3. **Architecture from docs/architecture/ARCHITECTURE.md** (TOS) or `docs/kb-manager/ARCHITECTURE.md` (KB Manager) — `ACTUAL_SYSTEM_ARCHITECTURE.md` no longer exists
 
-### For Token Optimization System:
-1. **Read architecture first** - Check `ACTUAL_SYSTEM_ARCHITECTURE.md`
-2. **Test always** - Write tests before implementation (TDD)
-3. **Monitor everything** - Add logging and metrics for new features
-4. **Document APIs** - Use comprehensive docstrings; they auto-generate docs
-5. **Follow patterns** - Use existing design patterns (Strategy, Factory, etc.)
-6. **Performance matters** - Profile and optimize; meet latency targets
-7. **Graceful degradation** - Handle missing dependencies
+### For Bob Shell Knowledge Manager
+1. **Understand the simplicity** — templates and scripts, not complex code
+2. **Test with Bob Shell** — always test mode changes with actual Bob Shell
+3. **Follow conventions** — use established naming and structure patterns
+
+### For Token Optimization System
+1. **Read KB concept first** — `docs/knowledge-base/concepts/token-optimization.md`
+2. **Then architecture** — `docs/architecture/ARCHITECTURE.md`
+3. **Test always** — TDD; run `uv run pytest tests/ --ignore=tests/load --ignore=tests/performance`
+4. **Monitor everything** — add logging and metrics for new features
+5. **Document APIs** — comprehensive docstrings; they auto-generate docs
+6. **Performance matters** — profile and optimize; meet SLA targets in `docs/SLA.md`
+7. **Graceful degradation** — handle missing dependencies
 
 ---
 
 ## Contact & Support
 
-- **Documentation:** See `docs/INDEX.md` for complete documentation index
-- **Issues:** Track in project management system
-- **Architecture Questions:** Refer to ADRs in `docs/adr/`
+- **KB index:** `docs/knowledge-base/INDEX.md` — pre-digested knowledge, check first
+- **TOS documentation index:** `docs/INDEX.md`
+- **Architecture Questions:** ADRs in `docs/adr/`

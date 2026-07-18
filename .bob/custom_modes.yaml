@@ -21287,6 +21287,8 @@ customModes:
       4. Fill all standard template sections
       5. Add bidirectional cross-references to related docs
       6. Update docs/knowledge-base/INDEX.md
+      7. Rebuild the knowledge graph:
+           uv run bob-optimize graph-build --kb-path docs/knowledge-base --with-semantic
 
       ### Naming Conventions
       - Concepts:    concept-name.md

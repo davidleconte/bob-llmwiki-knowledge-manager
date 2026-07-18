@@ -35,6 +35,7 @@
       ]
     },
     "external-llm": {
+      "disabled": true,
       "command": "/Users/coredump/Desktop/EXEC2/.venv/bin/python",
       "args": [
         "/Users/coredump/Desktop/EXEC2/external-llm-mcp-server-bob/external_llm_mcp_server.py"
@@ -84,6 +85,7 @@
       ]
     },
     "carbon-mcp": {
+      "disabled": true,
       "type": "streamable-http",
       "url": "https://mcp.carbondesignsystem.com/mcp",
       "headers": {
@@ -92,6 +94,7 @@
       }
     },
     "mq-mcp-server-bob": {
+      "disabled": true,
       "command": "uv",
       "args": [
         "run",
@@ -139,6 +142,7 @@
       "alwaysAllow": []
     },
     "swift-info": {
+      "disabled": true,
       "command": "uv",
       "args": [
         "run",
@@ -170,7 +174,7 @@
       "headers": {
         "TechZone-Token": "YOUR-TECHZONE-API-KEY-HERE"
       },
-      "disabled": false,
+      "disabled": true,
       "alwaysAllow": [
         "documentation-mcp-techzone-search-content-docs",
         "request-mcp-techzone-get-request",

@@ -495,16 +495,55 @@ blocked — the `${compressed:-$KB_CONTEXT}` fallback ensures silence on failure
 
 ## 10. Token savings — measured, manifest-backed
 
-The optimizer savings below are **measured** over a real corpus and carry a reproducibility manifest.
+The three savings mechanisms in this repository are measured and reported **separately**.
+Blending them into a single headline would reproduce the fabricated 68.96% figure that was
+retracted after the Phase 5 audit.
+
+### Token Optimization System (Python library)
+
 Reproduce with `python -m src.validation`; CI re-runs it on every push.
 
-- **Optimizer compression:** ~20% mean savings (95% CI ≈ [19%, 21%], N=183 real in-repo docs, token-weighted ~23%) — manifest: [`evaluation/results/validation-2026-07-14/manifest.json`](evaluation/results/validation-2026-07-14/manifest.json). Near-lossless (whitespace + redundant-phrase removal).
-- **Cache recompute-avoidance:** workload-dependent — a cache hit avoids full recompute. The harness
-  discloses the workload's repeat rate separately; it is not blended into the compression figure.
-- **Truncation:** lossy budget-fit — deletes content to hit a token target with no fidelity guarantee.
-  Reported separately, excluded from the savings headline.
-- **Null test:** on shuffled input the optimizer's reduction collapses to near zero — confirming the
-  headline is genuine compression, not a measurement artifact.
+- **Optimizer compression:** ~20% mean (95% CI ≈ [19%, 21%], N=183 real in-repo docs,
+  token-weighted ~23%) — manifest:
+  [`evaluation/results/validation-2026-07-14/manifest.json`](evaluation/results/validation-2026-07-14/manifest.json).
+  Near-lossless (whitespace + redundant-phrase removal).
+- **Cache recompute-avoidance:** workload-dependent — a cache hit avoids full recompute.
+  The harness discloses the workload's repeat rate; not blended into the compression figure.
+- **Truncation:** lossy budget-fit — deletes content to hit a token target with no fidelity
+  guarantee. Reported separately, excluded from the savings headline.
+- **Null test:** on shuffled input the optimizer's reduction collapses to near zero —
+  confirming the headline is genuine compression, not a measurement artifact.
+
+### Knowledge Manager (Bob Shell mode)
+
+Re-derivation saving: KB doc replaces full source read. Measured via shadow comparison
+(`measure_optimizer`, cache=off, tiktoken/gpt-4) on 19 real source→KB file pairs from
+this repo. Test suite: [`tests/validation/test_km_savings.py`](tests/validation/test_km_savings.py).
+
+| Corpus | N pairs | Mean savings | 95% CI | What it means |
+|--------|--------:|-------------:|-------:|---------------|
+| All 19 pairs | 19 | 2% | [−32%, +30%] | No reliable claim — mixed pairing quality |
+| Well-formed KB summaries | 10 | **51%** | **[38%, 64%]** | KB doc is genuinely more compact than its source |
+| Mismatched pairs (KB ≥ source) | 9 | −52% | — | KB doc is a guide/report, not a summary — overhead, not saving |
+
+**What "well-formed KB summary" means:** the KB document is a compact distillation of a
+larger source file. 10 of 19 pairs in this repo meet that bar. The other 9 are legitimate
+KB artefacts (guides, research reports, plans) that serve a different purpose and produce
+no re-derivation saving.
+
+**ROI on well-formed pairs:** mean 2.22 BC saved per query; breakeven in 1 query against a
+0.80 BC creation + 0.30 BC maintenance cost; 80× return at 40 queries.
+
+**Applicability boundary:** recurring architecture/configuration queries on a stable
+codebase where the KB doc fully answers the query. Does not apply to first-time
+exploratory tasks, debugging sessions, or queries that still require reading the raw source.
+
+**These figures are not additive** with the TOS optimizer's ~20% compression — the two
+mechanisms operate at different levels of the stack and have different applicability
+conditions.
+
+> To measure your own workload: see
+> [`docs/knowledge-base/guides/km-bobcoin-savings-measurement-guide.md`](docs/knowledge-base/guides/km-bobcoin-savings-measurement-guide.md).
 
 
 ## 11. Maturity and current status

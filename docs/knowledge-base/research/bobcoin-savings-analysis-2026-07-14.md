@@ -8,6 +8,8 @@ related:
   - senior-expert-institutional-audit-2026-07-14.md
   - readme-critical-analysis-2026-07-14.md
   - ../references/kb-savings-estimation-methodology.md
+  - ../guides/km-bobcoin-savings-measurement-guide.md
+  - kb-mode-switch-lessons-2026-07.md
 ---
 
 # Bobcoin Savings Analysis

@@ -257,6 +257,21 @@ After creating or updating any document, add or refresh its entry in
 
 ---
 
+## Knowledge Graph Rebuild (mandatory after every KB write)
+
+After updating INDEX.md, always rebuild the knowledge graph so the new document
+is discoverable via semantic search and PageRank re-ranking:
+
+```bash
+uv run bob-optimize graph-build --kb-path docs/knowledge-base --with-semantic
+```
+
+This is not optional — a document written to disk but not indexed is invisible to
+`bob-optimize kb-search` and to any mode querying the graph. The rebuild takes
+~5 seconds and is idempotent.
+
+---
+
 ## Naming Conventions (quick reference)
 
 | Category  | File name pattern          | Example                     |

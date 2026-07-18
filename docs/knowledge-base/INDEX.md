@@ -11,6 +11,8 @@ Last Updated: 2026-07-18
 - [Research](./research/) - Research notes and findings
 
 ## Recent Additions
+- 2026-07-18: [KB Leveraging Across Mode Switches — Lessons Learned](./research/kb-mode-switch-lessons-2026-07.md) - Research ⭐ NEW — session analysis: what was leveraged vs missed, 5 findings, AGENTS.md gap root cause, 19-pair corpus anti-pattern, two distinct KB doc roles, 5 recommendations
+- 2026-07-18: [KM Bobcoin Savings Measurement Guide](./guides/km-bobcoin-savings-measurement-guide.md) - Guide ⭐ NEW — 7-section practical protocol: baseline session logging, shadow comparison, direct token-diff (bob-optimize / tiktoken), amortised ROI formula, reporting standards, stale-KB diagnosis, automation scripts
 - 2026-07-18: [Knowledge Graph Layer](./concepts/knowledge-graph-layer.md) - Concept ⭐ NEW — property graph architecture, 4 modules, NodeProps model, edge types, benefits table (orphan detection, hubs, broken links, PageRank re-ranking)
 - 2026-07-18: [Delegation Analysis Pipeline](./concepts/delegation-analysis-pipeline.md) - Concept ⭐ NEW — 6 parallel agents, thin connector pattern, KB-aware execution, token-compressed output, CLI usage
 - 2026-07-18: [Knowledge Graph Usage Guide](./guides/knowledge-graph-usage-guide.md) - Guide ⭐ NEW — 5-step workflow: build index → build graph → health report → fix orphans → query; troubleshooting; best practices
@@ -74,6 +76,7 @@ Last Updated: 2026-07-18
 - [Dependency Analysis](./concepts/dependency-analysis.md) - Python dependency inventory with security audit and recommendations for dependency management
 
 ### Guides
+- [KM Bobcoin Savings Measurement Guide](./guides/km-bobcoin-savings-measurement-guide.md) - 7-section protocol: baseline sessions, shadow comparison, direct token diff, amortised ROI formula, reporting standards, stale-KB diagnosis, automation ⭐ NEW
 - [Knowledge Graph Usage Guide](./guides/knowledge-graph-usage-guide.md) - 5-step workflow: build embedding index → build graph → run health report → fix orphans → query; CLI and Python API; troubleshooting (T1–T4); best practices ⭐ NEW
 - [KB-TOS Integration Roadmap (P0/P1/P2)](./guides/kb-tos-integration-roadmap.md) - Grounded P0/P1/P2 integration roadmap; P0 fully closed; P1 and P2 scope intact
 - [Dual System Use Case Example](./guides/dual-system-use-case-example.md) - Real-world example: Enterprise AI Assistant Platform for 200-person engineering team, 12-month implementation, 90.3% cost savings (468,000 BC/year), 2,340% ROI, detailed month-by-month breakdown showing KB Manager (78% savings) + Token Optimizer (12% savings) working together
@@ -106,6 +109,7 @@ Last Updated: 2026-07-18
 - [Cache API Reference](./references/cache-api.md) - Complete API documentation for all cache classes, methods, and usage examples
 
 ### Research
+- [KB Leveraging Across Mode Switches — Lessons Learned](./research/kb-mode-switch-lessons-2026-07.md) - Session analysis: KB retrieval vs guidance vs compounding, 5 findings (broken AGENTS.md pointer, cost-tracking miss, mode-reset gap, 19-pair anti-pattern, two KB doc roles), 5 actionable recommendations ⭐ NEW
 - [Knowledge Graph Layer — Live Validation](./research/graph-validation-2026-07-17.md) - P3 graph build on 80-doc corpus: structural metrics, semantic threshold calibration (0.30 confirmed), golden-set p@3 comparison, ADR-017 validation gate results ⭐ NEW
 - [KB Manager ↔ TOS Integration Feasibility Study](./research/kb-tos-integration-feasibility-2026-07-14.md) - Architecture study of integrating the KB Manager with the Token Optimization System. Identifies 3 real overlap points, 8 challenges (C1–C8), evaluates 4 integration patterns, applies SOLID principles, and produces a verdict: integrate the embedding layer (P1) now; persistent index (P2) after TOS reaches v1.0.
 - [Bobcoin Savings Analysis 2026-07-14](./research/bobcoin-savings-analysis-2026-07-14.md) - Comprehensive analysis of expected Bobcoin savings from both sub-projects: Token Optimizer (~20% measured compression), KB Manager (40-80% structural savings, workload-dependent), combined savings (60-75% in ideal conditions), honest variance reporting, applicability boundaries, and institutional recommendations
