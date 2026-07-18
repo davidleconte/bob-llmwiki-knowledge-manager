@@ -1,6 +1,6 @@
 # Dependency Analysis Report
 
-**Generated:** 2026-07-13 01:46:10  
+**Generated:** 2026-07-18 18:09:23  
 **Tool:** analyze-dependencies.sh  
 **Version:** 1.0
 
@@ -8,42 +8,9 @@
 
 ## Executive Summary
 
-### Python Dependencies (requirements.txt)
-
-**Summary:**
-- Total dependencies: 15
-
-#### Dependencies
-
-| Package | Version Constraint |
-|---------|-------------------|
-| tiktoken | >=0.5.0              # Token counting and encoding |
-| numpy | >=1.24.0                # Numerical operations for embeddings |
-| scikit-learn | >=1.3.0          # TF-IDF, cosine similarity, clustering |
-| pytest | >=7.4.0                # Testing framework |
-| pytest-cov | >=4.1.0            # Coverage reporting |
-| pytest-asyncio | >=0.21.0       # Async testing support |
-| pytest-benchmark | >=4.0.0      # Performance benchmarking |
-| prometheus-client | >=0.17.0    # Metrics collection and export |
-| structlog | >=23.1.0            # Structured logging |
-| black | >=23.7.0                # Code formatting |
-| flake8 | >=6.1.0                # Linting |
-| mypy | >=1.5.0                  # Type checking |
-| isort | >=5.12.0                # Import sorting |
-| redis | >=4.6.0                 # Optional: Redis cache backend |
-| psutil | >=5.9.0                # System metrics |
-
-#### Security Audit
-
-```
-No vulnerabilities found or safety check failed
-```
-
----
-
 ## Overall Summary
 
-- ✅ Python dependencies found
+- ❌ No dependency files found
 
 ## Recommendations
 
