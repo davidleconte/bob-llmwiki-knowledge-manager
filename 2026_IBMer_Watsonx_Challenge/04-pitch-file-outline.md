@@ -47,8 +47,9 @@ Show the compounding-knowledge loop graphic (`docs/assets/kb-compounding-loop.sv
 > framing + a cacheable schema layer.
 
 - Andrej Karpathy's LLM-Wiki pattern: persistent, version-controlled KB the LLM maintains itself
-- *"The wiki is a compounding artifact. The cross-references are already there."*
+- *"The wiki is a compounding artifact. The cross-references are already there."* vs. RAG: *"the LLM is rediscovering knowledge from scratch on every question. There's no accumulation."*
 - Three layers: Raw sources → Wiki (KB) → Schema (mode + AGENTS.md)
+- **The distinction from RAG in one line:** RAG retrieves from a snapshot. Mnemox accumulates and compounds. One note on the slide is enough — Slide 7 closes it fully.
 
 **Visual idea:** Three-layer diagram — Raw sources → Wiki (KB) → Schema
 

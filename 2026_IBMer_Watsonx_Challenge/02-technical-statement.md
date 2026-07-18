@@ -13,6 +13,8 @@ An implementation of Andrej Karpathy's **LLM-Wiki** three-layer pattern, made na
 2. **Retrieval layer** — `INDEX.md` (auto-loaded via `.bob/settings.json`) + `save_memory` facts; a session *retrieves* prior knowledge instead of re-reading source.
 3. **Schema layer** — the Bob **mode definition** + `AGENTS.md`: stable rules that make Bob both disciplined *and* cacheable (a fixed prefix hits the cache instead of missing it).
 
+> **Why not RAG?** RAG retrieves passages from a snapshot corpus — it does not accumulate the *reasoning* Bob already did. As Karpathy puts it: *"the LLM is rediscovering knowledge from scratch on every question. There's no accumulation."* Mnemox is the accumulator: knowledge is written once and retrieved as a structured, cross-referenced finding — not re-derived from raw chunks on every query. No infrastructure required beyond Git.
+
 ## How Bob is used (native, no external moving parts)
 
 - **Two custom Bob modes** — `knowledge-manager` and `repo-analyzer`.
