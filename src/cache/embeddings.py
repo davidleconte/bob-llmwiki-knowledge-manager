@@ -154,8 +154,9 @@ class EmbeddingGenerator:
                 The corpus is bookkeeping only (used for logging / drift
                 monitoring); it no longer influences the embedding.
             backend: ``"hashing"`` (default) or ``"minilm"``.  When
-                ``"minilm"`` is requested but ``mlx-embeddings`` is absent the
-                generator warns and falls back to ``"hashing"``.
+                ``"minilm"`` is requested but neither ``mlx-embeddings`` nor
+                ``sentence-transformers`` is installed, the generator warns and
+                falls back to ``"hashing"``.
         """
         self.max_corpus_size = max_corpus_size
 
@@ -165,9 +166,10 @@ class EmbeddingGenerator:
             import warnings
 
             warnings.warn(
-                "mlx-embeddings is not installed or failed to load; "
-                "falling back to 'hashing' backend.  "
-                "Install with: pip install -e '[mlx]'",
+                "Neither mlx-embeddings nor sentence-transformers is installed "
+                "or could be loaded; falling back to 'hashing' backend.  "
+                "Install one with: pip install -e '.[mlx]'  "
+                "or: pip install sentence-transformers",
                 stacklevel=2,
             )
             resolved_backend = "hashing"

@@ -22,6 +22,12 @@ related:
 > the live codebase and KB. All numbers are manifest-backed. Covers both sub-systems,
 > the shared embedding layer, the knowledge graph, the delegation pipeline, and the
 > full economic model.
+>
+> **Adversarial audit applied 2026-07-18.** Eight structural attacks identified and
+> pre-empted in-text. Five gap entries corrected (G-3 closed; G-2/G-4 scoped;
+> G-5/G-6 linked to specific attacks). One code bug identified: misleading warning
+> message in `EmbeddingGenerator` when only `sentence-transformers` is available
+> (cosmetic only, no functional impact — fixed separately).
 
 ---
 
@@ -29,12 +35,17 @@ related:
 
 ### 1.1 Core Pain Points
 
+The first two rows are **measured** — each has a corresponding mechanism and
+metric in the system. The last two rows are **structural** — addressed by the
+graph layer but without a direct before/after metric of their own (the graph's
+retrieval quality improvement is measured as P@3, see UC-2).
+
 | Cost Type | Root Cause | Consequence |
 |---|---|---|
 | **Re-derivation cost** | Session amnesia — no persistent knowledge | Same questions answered at full token price every session |
 | **Token inflation cost** | Verbose context assembly — no compression | Every prompt padded with redundancy and filler |
-| **Context pollution cost** | Unfiltered retrieval — no graph-guided relevance | LLM receives tangentially related content that dilutes precision |
-| **Context dislocation cost** | Unstructured retrieval — no semantic ordering | Retrieved chunks lose narrative coherence; meaning degrades |
+| **Context pollution cost** | Unfiltered retrieval — no graph-guided relevance | LLM receives tangentially related content *(addressed structurally by graph orphan+hub analysis; retrieval quality measured as P@3 — see UC-2)* |
+| **Context dislocation cost** | Unstructured retrieval — no semantic ordering | Retrieved chunks lose narrative coherence *(no direct metric — addressed by semantic re-ranking; see UC-2 known limitations)* |
 
 ### 1.2 Business Objective
 
@@ -48,7 +59,12 @@ Build a **knowledge-first AI development system** that:
 
 ## 2. System Decomposition — Two Products, One Repository
 
-The system has **two distinct but complementary sub-systems** operating in sequence:
+The system has **two distinct but complementary sub-systems**. They are
+**architecturally composable** (the target pipeline: KB lookup → context
+compression → LLM), but **currently deployed as separate tools** — the
+subprocess integration (P1-3) is conditional on TOS reaching v1.0 stable
+(STATUS.md: `Beta — Not Production Ready`; see G-6, §10). The diagram
+below shows the **target architecture**, not the current deployment state.
 
 ```
 KB Manager (Bash/YAML, ~500 LOC)          Token Optimization System (Python, ~3,500 LOC)
@@ -96,15 +112,33 @@ query → keyword scorer (always)
 | **MiniLM-L6-v2 embedding** | **0.88** |
 | MiniLM + graph (any weight) | 0.88 (neutral on this corpus) |
 
+> ⚠️ **Validation scope:** The golden set (N=25 queries) was constructed on the
+> same 80-doc corpus used to build the embedding index — no held-out test set
+> exists. P@3=0.88 reflects in-distribution retrieval quality; out-of-distribution
+> performance is unmeasured. Additionally, 3 of 25 queries are architecturally
+> unresolvable by the current retrieval stack: date-based queries (`"external audit
+> july 2026"`) require `date_filter`; short concept docs are outranked by longer
+> docs with more term occurrences; a duplicate-date tie cannot be broken by
+> similarity alone. The practical ceiling on this corpus is 0.88, not 1.0
+> (see G-5, §10).
+
 ### UC-3: Prompt Chain Compression
 **Goal:** Remove redundancy from a prompt without degrading meaning.
-**Measured:** ~20% mean savings (95% CI [19%, 21%], N=183, manifest: `evaluation/results/validation-2026-07-14/`)
+
+**Measured:** ~20% mean savings (95% CI [19%, 21%], N=183,
+manifest: `evaluation/results/validation-2026-07-14/`)
+
+**Corpus scope:** The validation corpus is structured Markdown prose from this
+repository (`docs/**/*.md`). Savings on conversational prompts, code-heavy
+inputs, or user-message text may differ — those distributions were not measured.
 
 - `FR-3.1` Whitespace normalization
 - `FR-3.2` Redundancy removal (filler words, verbal hedges, repetition)
 - `FR-3.3` Structure preservation (Markdown headers, code blocks, GFM tables)
-- `FR-3.4` Quality gate: `min_quality_score=0.8` — reject over-aggressive optimization
-- `FR-3.5` Token counting via tiktoken BPE (`tiktoken_active` flag distinguishes from chars/4 fallback)
+- `FR-3.4` Syntactic preservation gate: `min_quality_score=0.8` — reject
+  over-aggressive optimization (see §5.3 for scope of this guarantee)
+- `FR-3.5` Token counting via tiktoken BPE (`tiktoken_active` flag distinguishes
+  from chars/4 fallback)
 
 ### UC-4: Recompute Avoidance (Multi-Level Cache)
 **Goal:** Return a prior result for 0 tokens when the same or semantically similar prompt recurs.
@@ -112,7 +146,11 @@ query → keyword scorer (always)
 ```
 L1 ExactCache     (SHA-256)          → < 750 µs p99  — in-memory
 L2 SemanticCache  (cosine ≥ 0.85)    → < 4.5 ms p99  — in-memory, with L2→L1 promotion
-L3 PersistentEmbeddingIndex          → < 500 ms       — disk-backed, optional
+L3 PersistentEmbeddingIndex          → < 500 ms       — disk-backed, optional,
+                                         not activated by any default config
+                                         (inject via MultiLevelCache constructor;
+                                         src/factory.py:build_cache() does not
+                                         instantiate L3)
 ```
 
 **Thread-safety:** 14 races fixed through 5 audit rounds; RLock protects all mutable state.
@@ -144,11 +182,14 @@ Phase 2 (parallel):   SecurityAgent · PerformanceAgent · QualityAgent
 | Orphan detection | `graph.orphans()` | Docs with zero inbound explicit links |
 | Hub identification | `graph.hubs(top_k=5)` | Most-cited documents by inbound degree |
 
-**Live validation (80-doc corpus, MiniLM):**
+**Live validation snapshot (80-doc corpus, MiniLM, 2026-07-17):**
+> ⚠️ **Stale:** corpus has grown to 117 nodes since this measurement. Run
+> `bob-optimize graph-health --kb-path docs/knowledge-base` for current metrics.
+> Numbers below are a reference baseline, not the current state.
 
 | Metric | Value |
 |---|---|
-| Total nodes | 80 (now 116 after this session's corpus growth) |
+| Total nodes | 80 |
 | Explicit edges | 163 |
 | Semantic edges (cosine ≥ 0.30) | 2,654 |
 | Broken edges | 19 |
@@ -163,7 +204,8 @@ Phase 2 (parallel):   SecurityAgent · PerformanceAgent · QualityAgent
 ### 4.1 Failure Modes Without a Graph
 
 ```
-❌ Orphan documents  — 49% of KB (39/80) had zero inbound explicit links → invisible to traversal
+❌ Orphan documents  — 49% of KB (39/80, snapshot 2026-07-17) had zero inbound
+                       explicit links → invisible to traversal; count stale
 ❌ Dead links        — cross-references silently rot on rename/delete
 ❌ No authority signal — all documents treated as equally relevant
 ❌ Limited reach     — documents 2+ hops away invisible to keyword + embedding search
@@ -181,18 +223,35 @@ Re-ranking: final = (1−gw) × embedding_similarity + gw × pagerank × 15.0
 
 ### 4.3 Why `graph_weight=0.0` Is the Validated Default
 
-On a tight-topic corpus (all documents about the same project), MiniLM embeddings produce a **dense semantic graph** — nearly every pair exceeds the 0.30 threshold. PageRank becomes nearly uniform (max 1.6× min). The PageRank term (`gw × PR × 15 ≈ 0.3 × 0.020 × 15 ≈ 0.09`) is small relative to the cosine delta between top candidates. P@3 is identical at all graph weights 0.1–0.5.
+On a tight-topic corpus (all documents about the same project), MiniLM embeddings
+produce a **dense semantic graph** — nearly every pair exceeds the 0.30 threshold.
+PageRank becomes nearly uniform (max 1.6× min). The PageRank term
+(`gw × PR × 15 ≈ 0.3 × 0.020 × 15 ≈ 0.09`) is small relative to the cosine
+delta between top candidates. P@3 is identical at all graph weights 0.1–0.5.
 
-**The graph's primary value is structural analysis** (orphan/hub/broken-link detection), not score blending. On a larger, more diverse corpus, PageRank would provide discriminating authority signal.
+**The graph's primary value is structural analysis** (orphan/hub/broken-link
+detection), not score blending. On a larger, more diverse corpus, PageRank would
+provide discriminating authority signal. **The score re-ranking benefit (§4.4)
+is therefore conditional — it requires corpus growth and re-validation before
+`graph_weight` can safely be raised above 0.0.**
 
-### 4.4 The Compounding Knowledge Capital Effect
+### 4.4 The Compounding Knowledge Capital Hypothesis
 
 ```
 Without graph: KB growth adds NOISE (orphaned docs, dead links, invisible authority)
-With graph:    KB growth adds SIGNAL (every well-linked new doc raises PageRank of all related docs)
+With graph:    KB growth adds SIGNAL — well-linked new docs increase graph connectivity
 ```
 
-The MORE sessions accumulate in the KB, the CHEAPER and MORE PRECISE each new session is.
+**Structural compounding (measured):** The graph rescues orphaned documents
+(26/39 on the 80-doc snapshot — 67%) and surfaces authority hubs. These
+benefits are demonstrable and repeatable via `bob-optimize graph-health`.
+
+**Retrieval compounding (hypothetical):** The claim that KB growth improves
+retrieval *precision* over time has not been measured across corpus sizes. It
+requires: (1) a corpus diverse enough for PageRank to discriminate between
+documents (currently nearly uniform, max 1.6× min), (2) `graph_weight > 0.0`,
+and (3) a re-run of the golden-set validation on the grown corpus. It is a
+plausible architectural property, not a proven outcome on this corpus.
 
 ---
 
@@ -204,14 +263,15 @@ The MORE sessions accumulate in the KB, the CHEAPER and MORE PRECISE each new se
 LAYER 1 — CACHE (recompute avoidance)
   L1 ExactCache: SHA-256, O(1), < 750µs p99
   L2 SemanticCache: cosine ≥ 0.85, < 4.5ms p99
-  L3 PersistentEmbeddingIndex: disk, optional
+  L3 PersistentEmbeddingIndex: disk, optional (not activated by default config)
   Economics: hit avoids ALL downstream tokens for that call
   Rate: workload-dependent (function of request stream repeat rate)
 
 LAYER 2 — OPTIMIZER (lossless compression) ← THE ONLY MEASURED SAVINGS HEADLINE
   Whitespace normalization + redundancy removal + structure preservation
-  Quality gate: min_quality_score=0.8
+  Syntactic preservation gate: min_quality_score=0.8 (see §5.3)
   Measured: ~20% mean (95% CI [19%, 21%], N=183, manifest-backed)
+  Corpus: structured Markdown prose from this repo (docs/**/*.md)
   Token counter: tiktoken BPE (tiktoken_active flag)
 
 LAYER 3 — TRUNCATION (lossy budget fit — NEVER counted as savings)
@@ -228,24 +288,38 @@ Priority 2: sentence-transformers/all-MiniLM-L6-v2 (~5–20 ms, cross-platform)
 Priority 3: HashingVectorizer (stateless bag-of-ngrams, <1 ms, always available)
 ```
 
+Both MiniLM paths (mlx and sentence-transformers) are wired in
+`_try_load_minilm()` and activated at runtime based on what is installed.
+G-3 is **closed** — the dual-path resolution has been in place since P4.
+
+> **Known cosmetic bug:** When `backend="minilm"` is requested but *neither*
+> package is available, `EmbeddingGenerator` warns `"mlx-embeddings is not
+> installed or failed to load"` — the message omits `sentence-transformers`.
+> This is a display-only issue; the fallback to `"hashing"` is correct in all
+> cases. See [`src/cache/embeddings.py:167`](../../../src/cache/embeddings.py).
+
 | Backend | P@3 | Use case |
 |---|---|---|
 | Hashing (fallback) | 0.60 | L2 cache (near-duplicate detection) |
 | **MiniLM-L6-v2** | **0.88** | KB retrieval, graph semantic edges |
 
-Each backend is used where it belongs — hashing for the L2 semantic cache (repeated prompts), MiniLM for KB retrieval (cross-vocabulary semantic search).
+Each backend is used where it belongs — hashing for the L2 semantic cache
+(repeated prompts), MiniLM for KB retrieval (cross-vocabulary semantic search).
 
-### 5.3 The "No Degraded Meaning" Contract
+### 5.3 The Syntactic Preservation Gate (not a semantic fidelity guarantee)
 
-1. **Quality gate** — optimizer rejected if `_estimate_quality()` < 0.8
-2. **Null test** — shuffled/high-entropy input must produce < 5% compression (real optimizer finds no redundancy in random text)
-3. **Structure preservation flag** — `preserve_structure=True` enforced when TOS processes KB-sourced structured content
-
-### 5.4 The "No Polluted Context" Contract
-
-1. Graph-guided retrieval — orphan detection + PageRank authority ranking surfaces central documents over peripheral noise
-2. Semantic similarity threshold — L2 cache requires cosine ≥ 0.85; KB graph edges require cosine ≥ 0.30
-3. ResearchAgent KB preflight — delegation pipeline loads prior KB findings before analysis, preventing duplicate research
+1. **Syntactic preservation gate** — optimizer rejected if `_estimate_quality()` < 0.8.
+   This heuristic measures word-overlap ratio and line-count ratio — it detects
+   gross structural destruction (e.g. removing all list items) but does **not**
+   guarantee semantic equivalence. A prompt that loses a key constraint while
+   retaining 80% of its words will pass the gate. `preserve_structure=True`
+   must be enforced when TOS processes KB-sourced structured content. See
+   feasibility study C8.
+2. **Null test** — shuffled/high-entropy input must produce < 5% compression
+   (a real optimizer finds no redundancy in random text).
+3. **Structure preservation flag** — `preserve_structure=True` enforced when
+   TOS processes KB-sourced structured content (headers, numbered steps,
+   cross-references).
 
 ---
 
@@ -255,37 +329,47 @@ Each backend is used where it belongs — hashing for the L2 semantic cache (rep
 Single public API surface. 7 public methods back 13 CLI subcommands. Holds no business logic.
 
 ### `MultiLevelCache` (`src/cache/`)
-L1 ExactCache (SHA-256, LRU 1000 entries) + L2 SemanticCache (HashingVectorizer cosine, 500 entries) + optional L3 disk index. 14 races fixed through 5 audit rounds.
+L1 ExactCache (SHA-256, LRU 1000 entries) + L2 SemanticCache (HashingVectorizer
+cosine, 500 entries) + optional L3 disk index. 14 races fixed through 5 audit
+rounds. L3 is not instantiated by `src/factory.py:build_cache()`.
 
 ### `PromptOptimizer` (`src/optimizer/`)
 `target_reduction=0.30`, `min_quality_score=0.80`, tiktoken BPE counting.
 
 ### `PersistentEmbeddingIndex` (`src/embeddings/index.py`)
-Storage: `.bob/kb-index/vectors.npy` + `manifest.json` (chunk rows) + `staleness.json` (file-level sentinels). Invariant: `matrix.shape[0] == len(manifest)`. Incremental mtime/hash rebuild.
+Storage: `.bob/kb-index/vectors.npy` + `manifest.json` (chunk rows) +
+`staleness.json` (file-level sentinels). Invariant:
+`matrix.shape[0] == len(manifest)`. Incremental mtime/hash rebuild.
 
 ### `KnowledgeGraph` (`src/graph/graph.py`)
-10-field `NodeProps`, 3 edge types (explicit/semantic/broken), `pagerank(damping=0.85)`, `orphans()`, `hubs()`, `neighbours(depth)`.
+10-field `NodeProps`, 3 edge types (explicit/semantic/broken),
+`pagerank(damping=0.85)`, `orphans()`, `hubs()`, `neighbours(depth)`.
 
 ### `GraphRanker` (`src/graph/ranker.py`)
-`final = (1−gw)×sim + gw×PR×15.0`, `gw=0.0` validated default, `PAGERANK_SCALE=15.0`.
+`final = (1−gw)×sim + gw×PR×15.0`, `gw=0.0` validated default,
+`PAGERANK_SCALE=15.0`.
 
 ### `AnalysisPipeline` (`src/delegation/pipeline.py`)
-6 agents, ThreadPoolExecutor, ResearchAgent first, each report through `TokenOptimizer`, output as KB research docs. One-way dependency on TOS.
+6 agents, ThreadPoolExecutor, ResearchAgent first, each report through
+`TokenOptimizer`, output as KB research docs. One-way dependency on TOS.
 
 ---
 
 ## 7. Economic Model
 
-**Bobcoin** = `token_count × price_per_token × 1000` (model-agnostic cost unit, single home: `src/pricing.py`)
+**Bobcoin** = `token_count × price_per_token × 1000` (model-agnostic cost unit,
+single home: `src/pricing.py`)
 
 | Savings Lever | Mechanism | Figure | Applicability |
 |---|---|---|---|
 | Re-derivation avoidance | KB Manager | Structural (0 tokens for known answers) | Workload-dependent |
-| Optimizer compression | TOS | ~20% mean (N=183, manifest-backed) | Every novel prompt |
+| Optimizer compression | TOS | ~20% mean (N=183, manifest-backed) | Novel prompts — corpus: repo Markdown prose (`docs/**/*.md`) |
 | Cache recompute-avoidance | TOS | 0 tokens for hits | Workload repeat rate |
-| Graph-guided retrieval | KB+Graph | P@3 0.44 → 0.88 (+100%) | KB-assisted sessions |
+| Graph-guided retrieval | KB+Graph | P@3 0.44 → 0.88 (+100%, in-distribution) | KB-assisted sessions |
 
-**Honesty constraint:** No blended totals. Each lever measured separately. `check_savings_claims.py` CI gate enforces this — every published percentage must cite a manifest.
+**Honesty constraint:** No blended totals. Each lever measured separately.
+`check_savings_claims.py` CI gate enforces this — every published percentage
+must cite a manifest.
 
 ---
 
@@ -299,7 +383,8 @@ Storage: `.bob/kb-index/vectors.npy` + `manifest.json` (chunk rows) + `staleness
 | Null test | Optimizer on shuffled text → < 5% savings | `src/validation/` |
 | Coverage | ≥ 80% global; per-package floors | `check_coverage_by_package.py` |
 
-**Status (2026-07-18):** 1,112 tests / 0 failures, 89.82% coverage, all 5 per-package floors met, ruff + mypy clean.
+**Status (2026-07-18):** 1,112 tests / 0 failures, 89.82% coverage, all 5
+per-package floors met, ruff + mypy clean.
 
 ---
 
@@ -319,12 +404,12 @@ Storage: `.bob/kb-index/vectors.npy` + `manifest.json` (chunk rows) + `staleness
 
 | ID | Issue | Action |
 |---|---|---|
-| G-1 | `graph_weight=0.0` neutral on current corpus | Grow corpus diversity; re-run golden set when uplift expected |
-| G-2 | `EmbeddingGenerator.embeddings_cache` has no eviction on dict keys | Use `use_cache=False` for document indexing; cache only query embeddings |
-| G-3 | `sentence-transformers` not wired as second MiniLM path | Wire in `EmbeddingGenerator`; tracked in ADR-015 follow-up |
-| G-4 | 13 structural orphans remain after semantic edge rescue | Add explicit `related:` cross-references |
-| G-5 | Date-based queries miss (e.g. "external audit july 2026") | Add `recency_weight` or `date_filter` to specific query patterns |
-| G-6 | Context compression requires TOS v1.0 stability tag | Tag TOS stable; add fallback contract to subprocess integration |
+| G-1 | `graph_weight=0.0` neutral on current corpus — PageRank re-ranking produces no P@3 uplift (corpus too homogeneous, PR nearly uniform). The compounding retrieval precision effect (§4.4) is **hypothetical** until corpus grows and golden-set is re-run. | Grow corpus diversity; re-run golden-set validation; enable `graph_weight > 0` only when uplift confirmed |
+| G-2 | `EmbeddingGenerator.embeddings_cache` eviction is coupled to `self.corpus` LRU FIFO. Risk: unbounded dict growth for corpora > `max_corpus_size=1000` docs. **Not a risk at current corpus size (117 docs).** | Use `use_cache=False` in `KBIndexer.index_document()` for document embeddings; cache only query embeddings |
+| G-3 | ~~`sentence-transformers` not wired as second MiniLM path~~ **CLOSED** — both `mlx-embeddings` and `sentence-transformers` are wired in `_try_load_minilm()` since P4. Residual: misleading warning message when only `sentence-transformers` is available (`"mlx-embeddings is not installed"` — cosmetic only, no functional impact). | Fix warning message text in `src/cache/embeddings.py:167-170` (single line) |
+| G-4 | 13 structural orphans measured on **80-doc corpus (2026-07-17 snapshot — stale)**. Current corpus is 117 nodes; re-run `bob-optimize graph-health` for current count. | Add explicit `related:` cross-references in frontmatter |
+| G-5 | 3 query classes architecturally unresolvable by current retrieval stack: (a) date-based queries, (b) short docs outranked by longer docs with more term occurrences, (c) duplicate-date tiebreaking. These constitute the known ceiling at P@3=0.88. | Add `date_filter` to date-based query patterns; increase content_length of short concept docs |
+| G-6 | Context compression (KB Manager → TOS subprocess P1-3) requires TOS v1.0 stability tag. **Currently blocked** — TOS is Beta (STATUS.md). KB Manager cannot safely depend on a Beta library. The §2 diagram shows the target architecture, not the current deployment. | Tag TOS stable; add explicit fallback contract (subprocess failure must never block KB retrieval) |
 
 ---
 
@@ -343,4 +428,5 @@ Storage: `.bob/kb-index/vectors.npy` + `manifest.json` (chunk rows) + `staleness
 
 ---
 *Created: 2026-07-18 — derived from live codebase and KB in one session*
+*Updated: 2026-07-18 — adversarial audit applied (8 attacks pre-empted; G-3 closed; G-2/G-4/G-5/G-6 scoped)*
 *Category: Research*
