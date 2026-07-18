@@ -11,6 +11,9 @@ Last Updated: 2026-07-18
 - [Research](./research/) - Research notes and findings
 
 ## Recent Additions
+- 2026-07-18: [Mnemox Challenge Submission](./research/mnemox-challenge-submission-2026-07.md) - Research ⭐ NEW — 2026 IBMer watsonx Challenge submission narrative (Team BobjectifLune)
+- 2026-07-18: [Mnemox Executive Brief](./research/mnemox-executive-brief-2026-07.md) - Research ⭐ NEW — 4-minute CTO/challenge-judge decision summary; ROI table; quality gates; pilot design
+- 2026-07-18: [Mnemox Competitive Positioning Brief](./research/mnemox-positioning-brief-2026-07.md) - Research ⭐ NEW — Mnemox vs. RAG / vector DB / LangChain / fine-tuning; positioning matrix; data residency
 - 2026-07-18: [Mnemox CLI Reference](./references/mnemox-cli-reference.md) - Reference ⭐ NEW — all flags, modes, env vars, auto-detection logic, exit codes, examples
 - 2026-07-18: [bob-optimize CLI Reference](./references/bob-optimize-cli-reference.md) - Reference ⭐ NEW — all 13 subcommands with options, defaults, and examples
 - 2026-07-18: [Mnemox Update — 2026-07-18](./research/mnemox-update-2026-07-18.md) - Research — automated KB update: git log, doc counts, lessons learned scaffold
@@ -82,7 +85,8 @@ Last Updated: 2026-07-18
 ## All Documents
 
 ### 🏛️ Architectural Overviews
-- [Full Technical Design Retro-Engineering — 2026-07](./research/full-technical-design-retro-2026-07.md) - Complete business/functional/use-case-driven architecture: UC-1–UC-6, all component specs, embedding+graph value stack, economic model, quality gates, open gaps — load this first for any architectural question ⭐ NEW
+- [Full Technical Design Retro-Engineering — 2026-07](./research/full-technical-design-retro-2026-07.md) - MECE issue tree architecture: §1 Why (4 pain points) → §2 What (6 UCs mapped to pains) → §3 How built (sub-system boundaries) → §4 How each component works → §5 SLA + quality gates → §6 Economic model with causal chain → §7 Open gaps. Adversarial-audited × 2 (13 factual/structural corrections). Load first for any architectural question. ⭐ UPDATED
+- [Business Case — 2026-07](./research/business-case-2026-07.md) - For Business Owners, CTOs, and Enterprise Architects: §1 The Problem → §2 The Proposition → §3 The Investment → §4 The Return (ROI model) → §5 The Strategy (compounding thesis) → §6 The Fit (IBM architecture integration) → §7 The Risks → §8 The Decision (pilot design, decision owners, timeline). ⭐ NEW
 
 ### Recently Filed (not yet in Recent Additions)
 - [Adversarial Review Pattern](./concepts/adversarial-review-pattern.md) - Two-pass hostile + friendly review technique; pre-emption rule; label separation; fabrication ceiling ⭐ NEW
