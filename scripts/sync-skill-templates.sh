@@ -90,6 +90,7 @@ if not m:
     sys.exit(2)   # heading not found
 
 current_block = m.group(3).rstrip('\n')
+# sha256: use hashlib only (pure Python, portable — no shasum/sha256sum needed)
 if hashlib.sha256(current_block.encode()).hexdigest() == \
    hashlib.sha256(new_block.encode()).hexdigest():
     sys.exit(3)   # already up to date — no write needed

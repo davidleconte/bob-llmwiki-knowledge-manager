@@ -187,8 +187,12 @@ cd ~/Projects/bob-llmwiki-knowledge-manager
 source ~/.bashrc              # or ~/.zshrc
 ```
 
-**Already Mnemoxed?** Re-run `mnemox` at any time to refresh dated KB snapshots,
-rebuild the knowledge graph, and auto-commit — all in one step.
+**Already Mnemoxed?** Re-run `mnemox` at any time. Two speeds:
+
+| Flag | What runs | When to use |
+|------|-----------|-------------|
+| `mnemox` / `mnemox --full` | 7-phase analysis + lessons + graph + commit | New source files, schema changes, architectural decisions |
+| `mnemox --quick` | lessons + graph + commit only | Code housekeeping, doc edits, daily refresh — finishes in seconds |
 
 <details>
 <summary><strong>What happens under the hood (three scripts, ~5 minutes)</strong></summary>
