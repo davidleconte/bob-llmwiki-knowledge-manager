@@ -6,13 +6,14 @@ This note captures what changed since the last run and provides a scaffold
 for lessons learned — synthesised by Bob in the same session.
 
 ## Background
-- Last mnemox run: 2026-07-18T17:15:35Z
+- Last mnemox run: 2026-07-18T17:16:41Z
 - KB location: `docs/knowledge-base`
 
 ## Git Changes Since Last Run
 
 ```
-a27d520 mnemox: update KB 2026-07-18
+e73dcc3 kb: add compact-summary frontmatter tag to all 13 concept docs
+4535482 mnemox: update KB 2026-07-18
 ```
 
 ## KB State

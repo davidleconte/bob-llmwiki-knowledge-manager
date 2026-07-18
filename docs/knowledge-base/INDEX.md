@@ -12,7 +12,6 @@ Last Updated: 2026-07-18
 
 ## Recent Additions
 - 2026-07-18: [Mnemox Update — 2026-07-18](./research/mnemox-update-2026-07-18.md) - Research — automated KB update: git log, doc counts, lessons learned scaffold
-- 2026-07-18: [Mnemox Update — 2026-07-18](./research/mnemox-update-2026-07-18.md) - Research — automated KB update: git log, doc counts, lessons learned scaffold
 - 2026-07-18: [File Naming Conventions](./concepts/file-naming-conventions.md) - Concept ⭐ NEW — kebab-case rule, exclusion zones, `index.md` blast radius, emoji SSoT, drift detection
 - 2026-07-18: [Repo Hygiene Rules](./concepts/repo-hygiene-rules.md) - Concept ⭐ NEW — 5 hygiene classes (H-1–H-5), pre-push verification gate, `.gitignore` leading-`/` rule
 - 2026-07-18: [Cache Thread-Safety Patterns](./concepts/cache-thread-safety-patterns.md) - Concept ⭐ NEW — 4-tier audit, lock map, GIL limits, snapshot pattern, cross-class accessor pattern
