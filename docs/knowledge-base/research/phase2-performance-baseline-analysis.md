@@ -6,8 +6,6 @@ status: active
 priority: P1
 tags: [phase2, performance, analysis, baseline, bottlenecks]
 related:
-  - phase2-performance-optimization-plan.md
-  - phase1-lessons-learned-2026-07-13.md
 created: 2026-07-13
 updated: 2026-07-13
 

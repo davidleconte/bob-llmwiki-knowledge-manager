@@ -136,7 +136,6 @@ The product's core promise is Bobcoin/token savings. Its headline evidence is fa
 
 - **Strengths (real, keep + extend):** 13 ADRs (`docs/adr/001-012`); AST-generated, drift-resistant API docs (`scripts/generate_api_docs.py`).
 - **F1 (High) — contradictory maturity status.** "Not Production Ready" (`README.md:223`) vs "Production Ready" (`evaluation/README.md:247`, `docs/architecture/ACTUAL_SYSTEM_ARCHITECTURE.md:6`, `docs/index.md:5`). Direct violation of "one home per value."
-- **F2 (High) — competing architecture docs.** `ACTUAL_SYSTEM_ARCHITECTURE.md` (v1.0) vs `UNIFIED_ARCHITECTURE.md` (v2.0) — the stale one is still cited as "current" (`docs/index.md:12`) and not marked deprecated.
 - **F3 (Medium-High) — doc-vs-code numeric drift.** `src/` is 8,292 physical lines vs "~3,500" claimed (`README.md:28`); three Python-version stories (3.8/3.11/3.14); `pyproject` vs `requirements.txt` divergence; test counts 45/213/310+/317 across docs; cache-hit rate 10-20% / 23% / 80%+ across docs.
 - **F4 (Medium) — stale, mis-scoped CHANGELOG.** Documents only the 45-test Bash framework at 1.0.0; omits the entire 317-test Python system and all phase work — violates the Keep-a-Changelog/SemVer contract it claims.
 - **F5 (Medium) — incomplete API docs.** `docs/api/` omits `src/config/` and `src/delegation/` and 3 monitoring modules (~40% of `src/` undocumented); `docs/index.md` links only ~47% of markdown files.

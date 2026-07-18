@@ -292,7 +292,6 @@ survives until the next audit.
 - [`src/cache/base.py`](../../../src/cache/base.py) — E: `CacheStatsSnapshot` definition
 - [`src/cache/concurrency.md`](../../../src/cache/concurrency.md) — C: in-tree reference
 - [`tests/cache/test_multi_level_cache.py`](../../../tests/cache/test_multi_level_cache.py) — new regression tests
-- [`docs/project-management/plans/cache-remediation-plan.md`](../../project-management/plans/cache-remediation-plan.md) — full sub-task spec
 
 ## Related Documents
 

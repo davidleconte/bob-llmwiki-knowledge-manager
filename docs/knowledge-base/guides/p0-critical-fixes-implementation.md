@@ -5,6 +5,9 @@ tags: [guides]
 created: 2026-07-18
 updated: 2026-07-18
 status: active
+related:
+  - ../research/full-technical-design-retro-2026-07.md
+  - ../research/audit-2026-07-14-signoff.md
 ---
 
 # P0 Critical Fixes Implementation Guide

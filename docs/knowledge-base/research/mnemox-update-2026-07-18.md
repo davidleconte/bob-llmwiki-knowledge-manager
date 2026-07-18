@@ -5,6 +5,9 @@ tags: [mnemox, lessons-learned]
 created: 2026-07-18
 updated: 2026-07-18
 status: active
+related:
+  - ./full-technical-design-retro-2026-07.md
+  - ./business-case-2026-07.md
 ---
 
 # Mnemox Update — 2026-07-18

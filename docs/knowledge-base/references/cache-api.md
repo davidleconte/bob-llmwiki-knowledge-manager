@@ -651,7 +651,6 @@ def safe_set(key, value):
 - [Multi-Level Caching Concept](../concepts/multi-level-caching.md) - Architecture overview
 - [Token Optimization Concept](../concepts/token-optimization.md) - System overview
 - [Setup Guide](../guides/setup-token-optimization.md) - Installation instructions
-- [Performance Benchmarks](../research/performance-benchmarks.md) - Real-world measurements
 
 ## References
 - [System Architecture](../../architecture/ARCHITECTURE.md) - Complete architecture

@@ -6,6 +6,9 @@ tags: [phase3, monitoring, lessons-learned, best-practices]
 created: 2026-07-13
 updated: 2026-07-13
 status: complete
+related:
+  - ./phase3-real-time-monitoring-implementation.md
+  - ./full-technical-design-retro-2026-07.md
 ---
 
 # Phase 3 Monitoring Infrastructure - Lessons Learned

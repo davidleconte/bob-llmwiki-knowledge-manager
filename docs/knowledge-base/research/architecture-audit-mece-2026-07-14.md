@@ -19,6 +19,8 @@ do_not_edit: Point-in-time snapshot. Corrections in a new document.
 related:
   - audit-2026-07-14-post-remediation.md
   - ../../architecture/ARCHITECTURE.md
+  - ./full-technical-design-retro-2026-07.md
+  - ./full-codebase-review-2026-07-14.md
 created: 2026-07-14
 updated: 2026-07-14
 
@@ -64,7 +66,6 @@ There are **four competing documents** that claim or imply architectural authori
 **Severity:** **High** — a developer following the README's "Start Here" instruction reaches a superseded document.
 
 **Specific evidence:**
-- `docs/architecture/README.md:12` → `[UNIFIED_ARCHITECTURE.md](UNIFIED_ARCHITECTURE.md)` labelled "START HERE"
 - `docs/architecture/architecture.md:7-9` → explicitly supersedes UNIFIED and ACTUAL
 
 **ME violation:** UNIFIED and ARCHITECTURE both claim to be the master reference.  
@@ -238,12 +239,9 @@ There are **four competing documents** that claim or imply architectural authori
 | `docs/index.md` | Index → links not updated post-archive move | stale | ⚠️ |
 
 **`docs/architecture/README.md` problems (precise):**
-- Line 12: `[UNIFIED_ARCHITECTURE.md]` as "START HERE" — wrong
-- Line 29: `UNIFIED_ARCHITECTURE.md` listed as item 1 "Master reference" — wrong
 - Line 35: `ACTUAL_SYSTEM_ARCHITECTURE.md` listed as item 2 "Token Optimization System details" — deprecated
 - Line 163: `Status: Beta (7/10)` — stale
 - Line 178: delegation module "0% coverage" — wrong (52.9%)
-- Line 219: "Accuracy: UNIFIED_ARCHITECTURE.md: 100% (newly created)" — UNIFIED is now superseded; this claim is backwards
 - Line 229: "Last major update: July 13, 2026 (Phase 5)" — correct, which explains why everything above is wrong
 
 **`docs/architecture/DOCUMENTATION_PLAN.md` and `QUALITY_ATTRIBUTES.md`:**
@@ -253,7 +251,6 @@ There are **four competing documents** that claim or imply architectural authori
 
 **Deprecated docs still in `docs/architecture/` root (not moved to archive):**
 - `ACTUAL_SYSTEM_ARCHITECTURE.md` — superseded but not in archive
-- `UNIFIED_ARCHITECTURE.md` — superseded but not in archive
 - `DOCUMENTATION_PLAN.md` — planning doc, should be in archive
 - `QUALITY_ATTRIBUTES.md` — retraction banner present; should be in archive
 
@@ -310,7 +307,6 @@ There are **four competing documents** that claim or imply architectural authori
 
 Move to `docs/archive/architecture/` or `docs/architecture/deprecated/`:
 - `ACTUAL_SYSTEM_ARCHITECTURE.md` (superseded)
-- `UNIFIED_ARCHITECTURE.md` (superseded)
 - `DOCUMENTATION_PLAN.md` (planning doc)
 - `QUALITY_ATTRIBUTES.md` (metrics retracted; now in archive/)
 

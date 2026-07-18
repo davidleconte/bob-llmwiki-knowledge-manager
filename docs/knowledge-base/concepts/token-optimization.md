@@ -293,7 +293,6 @@ Include examples.
 - [Multi-Level Caching](./multi-level-caching.md) - Detailed caching architecture
 - [Cache API Reference](../references/cache-api.md) - API documentation
 - [Setting Up Token Optimization System](../guides/setup-token-optimization.md) - Installation guide
-- [Performance Benchmarks](../research/performance-benchmarks.md) - Real-world measurements
 
 ## References
 - [System Architecture](../../architecture/ARCHITECTURE.md) - Complete technical design

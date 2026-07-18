@@ -6,7 +6,8 @@ status: template
 tags: [phase3, validation, reporting, template]
 related:
   - ./phase3-validation-user-guide.md
-  - ../research/phase3-real-world-validation-plan.md
+  - ./kb-tos-integration-roadmap.md
+  - ../research/full-technical-design-retro-2026-07.md
 created: 2026-07-13
 updated: 2026-07-13
 

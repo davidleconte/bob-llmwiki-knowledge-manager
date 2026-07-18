@@ -394,8 +394,6 @@ fi
 
 - [Phase 3 Validation User Guide](../phase3-validation-user-guide.md)
 - [Phase 3 Testing Plan](../phase3-validation-testing-plan.md)
-- [Session Tracking Guide](./session-tracking-guide.md)
-- [Analysis and Reporting Guide](./analysis-reporting-guide.md)
 
 ## Support
 

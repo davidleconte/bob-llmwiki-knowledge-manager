@@ -6,6 +6,9 @@ tags: [evaluation, quality, institutional-standards, production-readiness]
 created: 2026-07-13
 updated: 2026-07-13
 status: complete
+related:
+  - ./full-technical-design-retro-2026-07.md
+  - ./audit-2026-07-13-institutional.md
 ---
 
 # Institutional Software Vendor Evaluation

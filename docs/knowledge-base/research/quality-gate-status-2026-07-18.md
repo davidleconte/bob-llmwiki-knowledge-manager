@@ -7,6 +7,9 @@ updated: 2026-07-18
 status: active
 priority: P2
 branch: fix-multilevel-cache-race
+related:
+  - ./full-technical-design-retro-2026-07.md
+  - ./cache-race-fix-round5-2026-07.md
 ---
 
 # Quality Gate Status — 2026-07-18

@@ -5,6 +5,9 @@ tags: [research]
 created: 2026-07-18
 updated: 2026-07-18
 status: active
+related:
+  - ./full-technical-design-retro-2026-07.md
+  - ./git-analysis-2026-07-13.md
 ---
 
 # Git History Analysis Report

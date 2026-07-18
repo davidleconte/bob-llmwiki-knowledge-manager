@@ -109,7 +109,6 @@ Adopt unified status: "Beta (7/10) - Not Production Ready"
 ```
 
 **Files to Create:**
-- [ ] docs/architecture/UNIFIED_ARCHITECTURE.md
 
 **Files to Update:**
 - [ ] README.md (update architecture link)

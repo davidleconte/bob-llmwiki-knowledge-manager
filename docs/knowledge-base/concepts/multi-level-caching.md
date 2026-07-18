@@ -161,7 +161,6 @@ result = cache.get(new_query)  # None (miss both L1 and L2)
 - [Token Optimization](./token-optimization.md) - Overall optimization strategy
 - [Cache API Reference](../references/cache-api.md) - Detailed API documentation
 - [Setting Up Token Optimization System](../guides/setup-token-optimization.md) - Installation guide
-- [Performance Benchmarks](../research/performance-benchmarks.md) - Real-world performance data
 
 ## References
 - [System Architecture](../../architecture/ARCHITECTURE.md) - Complete system design

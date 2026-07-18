@@ -685,6 +685,11 @@ except two optional first-use downloads:
 - **[docs/USAGE.md](docs/USAGE.md)** — usage guide with workflow diagrams (arc42 Tier-1)
 - **[docs/kb-manager/ARCHITECTURE.md](docs/kb-manager/ARCHITECTURE.md)** — KB Manager architecture (arc42 v2.1, 13 sections, 8+ diagrams)
 - **[docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md)** — Python token-optimizer architecture (arc42 v3.0, 11 sections, 5 diagrams)
+- **[docs/knowledge-base/research/mnemox-challenge-submission-2026-07.md](docs/knowledge-base/research/mnemox-challenge-submission-2026-07.md)** — ⭐ **2026 IBMer watsonx Challenge submission narrative** (Team BobjectifLune — problem, what was built, IBM Bob principles addressed, measured results, engineering quality, evaluation guide)
+- **[docs/knowledge-base/research/mnemox-executive-brief-2026-07.md](docs/knowledge-base/research/mnemox-executive-brief-2026-07.md)** — executive brief for CTO / VP Engineering / challenge judges (4-minute read: ROI table, quality gates, pilot design, decision summary per role)
+- **[docs/knowledge-base/research/mnemox-positioning-brief-2026-07.md](docs/knowledge-base/research/mnemox-positioning-brief-2026-07.md)** — competitive positioning for Enterprise Architects (Mnemox vs. RAG / vector DB / LangChain memory / fine-tuning; positioning matrix; data residency Q&A)
+- **[docs/knowledge-base/research/full-technical-design-retro-2026-07.md](docs/knowledge-base/research/full-technical-design-retro-2026-07.md)** — unified architecture narrative (MECE issue tree: §1 Why → §2 What → §3 Boundaries → §4 Components → §5 SLA → §6 Economics → §7 Gaps; adversarial-audited; load first for any cross-system architectural question)
+- **[docs/knowledge-base/research/business-case-2026-07.md](docs/knowledge-base/research/business-case-2026-07.md)** — business case for Business Owners, CTOs, and Enterprise Architects (§1 Problem → §2 Proposition → §3 Investment → §4 Return/ROI → §5 Strategy → §6 Architecture fit → §7 Risks → §8 Decision/pilot design)
 - **[docs/MONITORING.md](docs/MONITORING.md)** — monitoring & observability (arc42 Tier-1)
 - **[docs/sla.md](docs/sla.md)** — SLA v1.0: latency, throughput, quality, concurrency targets
 - **[docs/security/threat-model.md](docs/security/threat-model.md)** — STRIDE threat model

@@ -5,6 +5,9 @@ tags: [research]
 created: 2026-07-18
 updated: 2026-07-18
 status: active
+related:
+  - ./full-technical-design-retro-2026-07.md
+  - ./security-scan-2026-07-13.md
 ---
 
 # Security Scan Report

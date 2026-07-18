@@ -5,6 +5,9 @@ tags: [research]
 created: 2026-07-18
 updated: 2026-07-18
 status: active
+related:
+  - ./full-technical-design-retro-2026-07.md
+  - ./test-coverage-2026-07-12.md
 ---
 
 # Test Coverage Report

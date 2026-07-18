@@ -6,9 +6,8 @@ status: active
 priority: P1
 tags: [phase2, performance, optimization, benchmarks, profiling]
 related:
-  - phase1-lessons-learned-2026-07-13.md
-  - remediation-plan-detailed-2026-07-13.md
-  - performance-benchmarks.md
+  - ./kb-tos-integration-roadmap.md
+  - ../research/full-technical-design-retro-2026-07.md
 created: 2026-07-13
 updated: 2026-07-13
 

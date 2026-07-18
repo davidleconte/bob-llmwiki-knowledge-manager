@@ -5,8 +5,9 @@ date: 2026-07-13
 status: complete
 tags: [phase2, monitoring, vocabulary-drift, semantic-cache]
 related:
-  - phase2-completion-summary.md
   - phase2-health-checks-complete.md
+  - ./full-technical-design-retro-2026-07.md
+  - ../guides/kb-tos-integration-roadmap.md
 created: 2026-07-13
 updated: 2026-07-13
 
@@ -320,6 +321,5 @@ Vocabulary drift monitoring is now fully implemented and tested. While optional 
 ---
 
 **Related Documents:**
-- [Phase 2 Completion Summary](phase2-completion-summary.md)
 - [Health Checks Implementation](phase2-health-checks-complete.md)
 - [Thread Safety Fixes](phase2-thread-safety-fixes-complete.md)

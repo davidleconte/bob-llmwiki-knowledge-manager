@@ -7,7 +7,6 @@ priority: P1
 tags: [phase2, concurrency, thread-safety, bugs]
 related:
   - phase2-performance-baseline-results.md
-  - phase2-performance-optimization-plan.md
 created: 2026-07-13
 updated: 2026-07-13
 

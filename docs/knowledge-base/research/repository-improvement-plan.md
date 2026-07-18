@@ -436,8 +436,6 @@ This plan prioritizes **honest value delivery** over feature expansion. The focu
 **Expected ROI:** 300-400% over 12 months  
 
 ## Related Documents
-- [Honest Assessment](./honest-assessment.md) - Critical evaluation of current state
-- [Performance Benchmarks](./performance-benchmarks.md) - Current performance data
 - [Token Optimization](../concepts/token-optimization.md) - Core optimization concepts
 - [Project Status](../../project-management/PROJECT_STATUS.md) - Current project status
 

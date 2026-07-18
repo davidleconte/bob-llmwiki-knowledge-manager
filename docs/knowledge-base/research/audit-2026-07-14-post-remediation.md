@@ -19,7 +19,6 @@ do_not_edit: >
 related:
   - audit-2026-07-14-signoff.md
   - full-codebase-review-2026-07-14.md
-  - remediation-plan.md
 created: 2026-07-14
 updated: 2026-07-14
 

@@ -410,7 +410,6 @@ After successful setup:
 - [Token Optimization Concept](../concepts/token-optimization.md) - Understanding the system
 - [Multi-Level Caching Concept](../concepts/multi-level-caching.md) - Cache architecture details
 - [Cache API Reference](../references/cache-api.md) - Complete API documentation
-- [Performance Benchmarks](../research/performance-benchmarks.md) - Real-world performance data
 
 ## References
 - [System Architecture](../../architecture/ARCHITECTURE.md) - Technical architecture

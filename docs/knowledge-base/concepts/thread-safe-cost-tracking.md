@@ -5,6 +5,9 @@ tags: [cost-tracking, thread-safety, bobcoins, compact-summary]
 created: 2026-07-18
 updated: 2026-07-18
 status: active
+related:
+  - ../research/cache-race-fix-lessons-2026-07.md
+  - ../concepts/cache-thread-safety-patterns.md
 ---
 
 # Thread-Safe Cost Tracking

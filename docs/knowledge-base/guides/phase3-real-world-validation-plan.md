@@ -5,9 +5,9 @@ date: 2026-07-13
 status: ready-to-start
 tags: [phase3, validation, production, deployment]
 related:
-  - phase2-completion-summary.md
-  - phase2-lessons-learned-2026-07-13.md
   - audit-remediation-action-plan.md
+  - ./kb-tos-integration-roadmap.md
+  - ../research/full-technical-design-retro-2026-07.md
 created: 2026-07-13
 updated: 2026-07-13
 

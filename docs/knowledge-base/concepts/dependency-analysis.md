@@ -5,6 +5,9 @@ tags: [dependencies, security, python, compact-summary]
 created: 2026-07-18
 updated: 2026-07-18
 status: active
+related:
+  - ../research/full-technical-design-retro-2026-07.md
+  - ../research/security-scan-2026-07-13.md
 ---
 
 # Dependency Analysis Report

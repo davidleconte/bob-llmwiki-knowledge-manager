@@ -5,6 +5,9 @@ tags: [review, communication, submissions, quality, honesty-brand]
 created: 2026-07-18
 updated: 2026-07-18
 status: active
+related:
+  - ../research/full-technical-design-retro-2026-07.md
+  - ../research/iterative-audit-lessons-2026-07.md
 ---
 
 # Adversarial Review Pattern

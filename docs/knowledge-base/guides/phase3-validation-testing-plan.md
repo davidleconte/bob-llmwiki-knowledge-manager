@@ -470,7 +470,6 @@ pytest tests/validation/test_session_tracker.py::test_token_counting -v
 
 - [pytest Documentation](https://docs.pytest.org/)
 - [Test Suite README](../../tests/README.md)
-- [Phase 3 Validation Plan](../research/phase3-real-world-validation-plan.md)
 - [Phase 3 User Guide](./phase3-validation-user-guide.md)
 
 ---

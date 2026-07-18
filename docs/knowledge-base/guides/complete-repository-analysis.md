@@ -5,6 +5,9 @@ tags: [guides]
 created: 2026-07-18
 updated: 2026-07-18
 status: active
+related:
+  - ../research/full-technical-design-retro-2026-07.md
+  - ../research/repo-scan-2026-07-18.md
 ---
 
 # Complete Repository Analysis: bob-llmwiki-knowledge-manager

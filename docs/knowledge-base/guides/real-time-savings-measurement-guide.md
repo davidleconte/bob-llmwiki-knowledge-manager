@@ -595,7 +595,6 @@ class Phase6Validator:
 
 - [Phase 6 Real-World Validation Plan](phase6-real-world-validation-plan.md)
 - [Cost Tracking Guide](cost-tracking-guide.md)
-- [Cost Comparison Analysis](../research/cost-comparison-analysis.md)
 
 ---
 

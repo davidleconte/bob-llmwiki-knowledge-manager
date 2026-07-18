@@ -9,6 +9,8 @@ related:
   - ../../USAGE.md
   - ../../INSTALLATION.md
   - ../../quick-start.md
+  - ../research/full-technical-design-retro-2026-07.md
+  - ./kb-tos-integration-roadmap.md
 created: 2026-07-14
 updated: 2026-07-14
 

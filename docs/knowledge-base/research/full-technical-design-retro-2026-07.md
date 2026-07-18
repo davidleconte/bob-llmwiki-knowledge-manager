@@ -14,9 +14,21 @@ related:
   - ../concepts/token-optimization.md
   - ../concepts/multi-level-caching.md
   - ../concepts/delegation-analysis-pipeline.md
+  - ../concepts/adversarial-review-pattern.md
+  - ../concepts/dependency-analysis.md
+  - ../concepts/thread-safe-cost-tracking.md
   - ../research/kb-tos-integration-feasibility-2026-07-14.md
   - ../research/graph-validation-2026-07-17.md
+  - ../research/architecture-audit-mece-2026-07-14.md
+  - ../research/institutional-vendor-evaluation.md
+  - ../research/quality-gate-status-2026-07-18.md
+  - ../research/mnemox-update-2026-07-18.md
+  - ../research/phase2-vocabulary-drift-implementation.md
+  - ../research/phase3-additional-work-lessons-learned.md
+  - ../research/performance-benchmarks.md
   - ../guides/kb-tos-integration-roadmap.md
+  - ../guides/complete-repository-analysis.md
+  - ../guides/p0-critical-fixes-implementation.md
 ---
 
 # Mnemox Knowledge Builder — Full Technical Design Retro-Engineering

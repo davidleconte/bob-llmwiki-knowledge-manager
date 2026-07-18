@@ -10,8 +10,6 @@ related:
   - audit-2026-07-13-institutional.md
   - delegation-integration-analysis-2026-07-13.md
   - coverage-measurement-2026-07-13.md
-  - phase2-completion-summary.md
-  - phase1-lessons-learned-2026-07-13.md
 created: 2026-07-14
 updated: 2026-07-14
 
@@ -667,7 +665,6 @@ Provenance:
    - New metrics: ~20% optimizer compression (measured)
 
 2. **Documentation Drift:** Multiple architecture docs with conflicting info
-   - Status: ⚠️ Partially fixed (UNIFIED_ARCHITECTURE.md created)
    - Remaining: Need to remove deprecated docs
 
 3. **Orphaned Code:** ~27% of src/ not integrated
@@ -753,7 +750,6 @@ Provenance:
 1. **Remove Deprecated Docs:**
    - Delete `docs/architecture/ACTUAL_SYSTEM_ARCHITECTURE.md`
    - Move `docs/architecture/deprecated/` to archive
-   - Update all references to point to `UNIFIED_ARCHITECTURE.md`
 
 2. **Fix Status Consistency:**
    - Ensure all docs reference `STATUS.md` as canonical
@@ -900,7 +896,6 @@ The system is suitable for:
 
 **Documentation:**
 - `STATUS.md` - Canonical status
-- `docs/architecture/UNIFIED_ARCHITECTURE.md` - Current architecture
 - `docs/knowledge-base/index.md` - KB master index
 
 **Source Code:**

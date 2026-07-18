@@ -11,6 +11,16 @@ related:
   - ../concepts/kb-tos-embedding-layer.md
   - token-optimizer-quick-install.md
   - setup-token-optimization.md
+  - activating-knowledge-manager-in-new-session.md
+  - phase2-performance-optimization-plan.md
+  - phase3-day7-8-final-validation-template.md
+  - phase3-real-world-validation-plan.md
+  - remediation-plan-detailed-2026-07-13.md
+  - ../research/phase3-monitoring-lessons-learned.md
+  - ../research/phase3-real-time-monitoring-implementation.md
+  - ../research/phase2-completion-summary.md
+  - ../research/phase2-lessons-learned-2026-07-13.md
+  - ../research/phase1-lessons-learned-2026-07-13.md
 created: 2026-07-14
 updated: 2026-07-14
 
