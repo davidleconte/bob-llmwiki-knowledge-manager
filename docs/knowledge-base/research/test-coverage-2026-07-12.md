@@ -1,3 +1,12 @@
+---
+title: "Test Coverage Report"
+category: research
+tags: [research]
+created: 2026-07-18
+updated: 2026-07-18
+status: active
+---
+
 # Test Coverage Report
 
 **Generated:** 2026-07-12 16:13:41  

@@ -1,3 +1,12 @@
+---
+title: "Knowledge Manager Bobcoin Savings — Measurement Guide"
+category: guides
+tags: [guides]
+created: 2026-07-18
+updated: 2026-07-18
+status: active
+---
+
 # Knowledge Manager Bobcoin Savings — Measurement Guide
 
 ## Overview

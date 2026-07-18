@@ -1,3 +1,12 @@
+---
+title: "Cache API Reference"
+category: references
+tags: [references]
+created: 2026-07-18
+updated: 2026-07-18
+status: active
+---
+
 # Cache API Reference
 
 ## Overview

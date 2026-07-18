@@ -1,9 +1,10 @@
 ---
 name: knowledge-manager
 description: >
-  Full workflow instructions for the Knowledge Manager mode -- document templates,
-  naming conventions, cross-reference protocol, and INDEX.md maintenance.
-  Use when creating or updating knowledge base content in Bob IDE.
+  Full workflow instructions for the Mnemox Knowledge Builder mode -- document
+  templates, naming conventions, cross-reference protocol, INDEX.md maintenance,
+  and the mnemox workspace command.
+  Use when creating or updating knowledge base content in Bob IDE or Bob Shell CLI.
 triggers:
   - "create a concept document"
   - "create a guide"
@@ -14,6 +15,11 @@ triggers:
   - "add to the knowledge base"
   - "document this in the KB"
   - "knowledge base template"
+  - "mnemox your workspace"
+  - "mnemox this workspace"
+  - "mnemox this project"
+  - "mnemox"
+  - "initialise mnemox"
 ---
 
 # Knowledge Manager Skill
@@ -29,6 +35,15 @@ knowledge base document.
 ### Concept (`docs/knowledge-base/concepts/concept-name.md`)
 
 ````markdown
+---
+title: "[Concept Name]"
+category: concept
+tags: [tag1, tag2, compact-summary]
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+status: active
+---
+
 # [Concept Name]
 
 ## Overview
@@ -73,6 +88,15 @@ Explanation of the example.
 ### Guide (`docs/knowledge-base/guides/task-name-guide.md`)
 
 ````markdown
+---
+title: "[Task Name] Guide"
+category: guide
+tags: [tag1, tag2]
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+status: active
+---
+
 # [Task Name] Guide
 
 ## Overview
@@ -131,6 +155,15 @@ Expected result
 ### Reference (`docs/knowledge-base/references/api-name-reference.md`)
 
 ````markdown
+---
+title: "[API/Component Name] Reference"
+category: reference
+tags: [tag1, tag2]
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+status: active
+---
+
 # [API/Component Name] Reference
 
 ## Overview
@@ -178,6 +211,15 @@ Example code
 ### Research (`docs/knowledge-base/research/topic-YYYY-MM.md`)
 
 ````markdown
+---
+title: "[Topic] Research - [Month YYYY]"
+category: research
+tags: [tag1, tag2]
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+status: active
+---
+
 # [Topic] Research - [Month YYYY]
 
 ## Objective
@@ -288,3 +330,63 @@ This is not optional — a document written to disk but not indexed is invisible
 Bob IDE has no `save_memory` tool. All knowledge persistence is achieved by
 writing markdown files to `docs/knowledge-base/`. Commit those files to git so they
 survive across sessions and team members can benefit from them.
+
+---
+
+## Mnemox Command Protocol
+
+When the user types `mnemox`, `mnemox your workspace`, `mnemox this workspace`,
+`mnemox this project`, or `initialise mnemox`, follow this protocol:
+
+### Step 1 — Detect mode
+
+Check whether `docs/knowledge-base/INDEX.md` exists in the project root (or in
+`$MNEMOX_HOME` if set).
+
+- **File absent** → **Init path** (first-time setup)
+- **File present** → **Update path** (ongoing refresh)
+
+### Step 2a — Init path (fresh workspace)
+
+1. Tell the user: *"No KB found — initialising Mnemox for this workspace."*
+2. Call `scripts/init-project.sh` via `execute_command`.
+3. Call `scripts/run-full-analysis.sh` via `execute_command`.
+4. Call `scripts/validate-kb.sh` via `execute_command`.
+5. Confirm: *"Workspace Mnemoxed. docs/knowledge-base/ is scaffolded and the
+   7-phase analysis has been filed. Start a new 🧠 Mnemox Knowledge Builder
+   session to query results."*
+6. **Do not** auto-commit on the init path.
+
+### Step 2b — Update path (existing KB)
+
+The update path has two sub-modes — choose based on what the user typed:
+
+| Trigger | Sub-mode | What runs |
+|---|---|---|
+| `mnemox` / `mnemox your workspace` / `--update` | **full** (default) | analysis + lessons + graph + commit |
+| `mnemox --quick` / "quick" / "no analysis" | **quick** | lessons + graph + commit only |
+| `mnemox --full` / "full" | **full** (explicit) | analysis + lessons + graph + commit |
+
+**Full update steps:**
+1. Tell the user: *"KB found — running full Mnemox update (analysis + lessons + graph + commit)."*
+2. Call `bash scripts/mnemox.sh --full` via `execute_command`. This runs all 4 steps.
+3. Parse `MNEMOX_LESSONS_NOTE=<path>` from the last matching stdout line.
+4. **Synthesise lessons in this session**: read `<path>`, present top 3–5 findings immediately.
+
+**Quick update steps:**
+1. Tell the user: *"KB found — running quick Mnemox update (lessons + graph + commit, no analysis)."*
+2. Call `bash scripts/mnemox.sh --quick` via `execute_command`. This runs Steps 2–4 only.
+3. Parse `MNEMOX_LESSONS_NOTE=<path>` from the last matching stdout line.
+4. **Synthesise lessons in this session**: read `<path>`, present top 3–5 findings immediately.
+
+### MNEMOX_HOME resolution order
+
+1. Environment variable `MNEMOX_HOME` if set.
+2. Flag `--km-home <path>` if the user included it.
+3. Current working directory (auto-detect).
+
+### Idempotency guarantee
+
+Every step is idempotent. Running `mnemox` twice on the same workspace is safe:
+the init path creates structure only if absent; the update path only files
+new dated snapshots (never overwrites prior KB work).

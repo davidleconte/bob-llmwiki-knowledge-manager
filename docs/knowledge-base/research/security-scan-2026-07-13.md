@@ -1,3 +1,12 @@
+---
+title: "Security Scan Report"
+category: research
+tags: [research]
+created: 2026-07-18
+updated: 2026-07-18
+status: active
+---
+
 # Security Scan Report
 
 **Generated:** 2026-07-13 01:47:17  

@@ -1,3 +1,12 @@
+---
+title: "Knowledge Graph Usage Guide"
+category: guides
+tags: [guides]
+created: 2026-07-18
+updated: 2026-07-18
+status: active
+---
+
 # Knowledge Graph Usage Guide
 
 ## Overview

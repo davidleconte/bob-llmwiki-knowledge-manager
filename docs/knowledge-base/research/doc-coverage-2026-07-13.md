@@ -1,3 +1,12 @@
+---
+title: "Documentation Coverage Report"
+category: research
+tags: [research]
+created: 2026-07-18
+updated: 2026-07-18
+status: active
+---
+
 # Documentation Coverage Report
 
 **Generated:** 2026-07-13 01:48:01  

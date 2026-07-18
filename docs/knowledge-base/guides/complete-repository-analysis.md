@@ -1,3 +1,12 @@
+---
+title: "Complete Repository Analysis: bob-llmwiki-knowledge-manager"
+category: guides
+tags: [guides]
+created: 2026-07-18
+updated: 2026-07-18
+status: active
+---
+
 # Complete Repository Analysis: bob-llmwiki-knowledge-manager
 
 **Generated:** 2026-07-13 01:48:06  

@@ -1,3 +1,12 @@
+---
+title: "Repository Improvement Plan - Bobcoin Optimization Focus"
+category: research
+tags: [research]
+created: 2026-07-18
+updated: 2026-07-18
+status: active
+---
+
 # Repository Improvement Plan - Bobcoin Optimization Focus
 
 ## Overview

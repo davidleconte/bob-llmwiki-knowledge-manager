@@ -1,3 +1,12 @@
+---
+title: "[API/Component Name] Reference"
+category: reference
+tags: [tag1, tag2]
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+status: active
+---
+
 # [API/Component Name] Reference
 
 ## Overview

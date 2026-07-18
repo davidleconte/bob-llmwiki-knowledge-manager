@@ -1,3 +1,12 @@
+---
+title: "Performance Benchmarks Research"
+category: research
+tags: [research]
+created: 2026-07-18
+updated: 2026-07-18
+status: active
+---
+
 # Performance Benchmarks Research
 
 ## Overview

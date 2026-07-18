@@ -1,3 +1,12 @@
+---
+title: "Code Metrics Report"
+category: research
+tags: [research]
+created: 2026-07-18
+updated: 2026-07-18
+status: active
+---
+
 # Code Metrics Report
 
 **Generated:** 2026-07-13 01:46:16  

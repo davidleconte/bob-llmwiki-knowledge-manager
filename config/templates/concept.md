@@ -1,3 +1,12 @@
+---
+title: "[Concept Name]"
+category: concept
+tags: [tag1, tag2, compact-summary]
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+status: active
+---
+
 # [Concept Name]
 
 ## Overview
@@ -31,7 +40,6 @@ Explanation of the example.
 
 ## References
 - [External Source 1](https://example.com)
-- [External Source 2](https://example.com)
 
 ---
 *Last Updated: YYYY-MM-DD*
