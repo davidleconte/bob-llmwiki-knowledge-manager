@@ -15,6 +15,8 @@ provenance: Senior engineering-soundness review (McKinsey method). Living narrat
 
 > **Reading guide.** §1 is the whole answer in one page. §2 reconciles the grade dispute. §3–8 walk the five MECE branches. §9–13 are the plan: value drivers, prioritisation, roadmap, validation. §14 explains how this document stays honest under the repo's own CI gates.
 
+> **Remediation status (updated 2026-07-19, branch `remediation/engineering-soundness-2026-07-19`).** **H1 (Reconnect & Repair) is done and committed:** the tree is gate-green (all honesty gates + ruff + mypy); the retrieval wiring, never-empty optimiser, and `validate-kb` fixes are landed — including three *real latent bugs* mypy caught that the paired tests missed (the embedding index was constructed without its `embedder`, so the `TypeError` was swallowed and retrieval silently fell back to keyword-only; the optimiser's never-empty fallback imported a non-existent symbol and would have crashed if triggered); 15 broken KB references repaired; RED→GREEN mutation proofs recorded. **Two governance decisions are implemented:** the self-assessed A+ is **withdrawn** from `STATUS.md` pending an independent re-grade, and a **corpus-composition guard** (ATK-GATE-01 — guards composition, not magnitude) is added to the validation harness with tests. **Still open (H2/H3, genuine multi-week work):** index lifecycle (CODE-04/11/15), graph provenance (ATK-MEM-05/06), a committed p@3 golden set (CLM-06), watsonx-correct tokenizer/pricing (CODE-10), perf-at-scale, gate-owner independence (ATK-GATE-07), and the **independent re-grade itself, which must be performed by a third party** — self-grading is the exact anti-pattern this project exists to avoid.
+
 ---
 
 ## 1. The answer, first (SCQA)
