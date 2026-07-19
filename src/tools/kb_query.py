@@ -74,6 +74,14 @@ _TRUST_CONTENT_PLACEHOLDER = "[CONTENT WITHHELD — document not in a verified t
 # Minimal regex to extract trust_tier from YAML frontmatter.
 _TRUST_TIER_RE = re.compile(r"^trust_tier:\s*(\S+)", re.MULTILINE)
 
+# ATK-MEM-03: bound how much a single document can score on keyword signal.
+# Raw term-frequency and the per-heading bonus were both unbounded, letting a
+# term-flooded document dominate ranking. BM25-style TF saturation caps each
+# word's contribution at (k1 + 1) (count==1 is unchanged); the heading bonus is
+# capped at a small repeat count so many query-bearing headings cannot stack.
+_BM25_K1 = 1.5
+_MAX_HEADING_MATCHES = 3
+
 
 def _parse_frontmatter_trust_tier(content: str) -> str:
     """Extract trust_tier from YAML frontmatter, or return '' if absent."""
@@ -456,11 +464,16 @@ class KnowledgeBaseQuery:
             # Count occurrences
             count = content_lower.count(word)
 
+            # ATK-MEM-03: saturate raw term frequency (BM25-style) so a single
+            # document cannot dominate ranking by repeating a query term. The
+            # per-word contribution is bounded by (k1 + 1); count==1 is unchanged.
+            saturated_tf = count * (_BM25_K1 + 1.0) / (count + _BM25_K1) if count else 0.0
+
             # Weight by position (earlier = more relevant)
             first_pos = content_lower.find(word)
             if first_pos >= 0:
                 position_weight = 1.0 - (first_pos / len(content_lower))
-                score += count * 0.5 * (1 + position_weight)
+                score += saturated_tf * 0.5 * (1 + position_weight)
 
         # Bonus for multiple query words appearing together
         if len(query_words) > 1:
@@ -469,11 +482,12 @@ class KnowledgeBaseQuery:
                 if phrase in content_lower:
                     score += 2.0
 
-        # Bonus for matches in headings
+        # Bonus for matches in headings (ATK-MEM-03: cap the repeat count so an
+        # attacker cannot stack unbounded +3.0 bonuses via many query-bearing
+        # headings; an honest doc with a few matching headings is unaffected).
         headings = re.findall(r"^#+\s+(.+)$", content, re.MULTILINE)
-        for heading in headings:
-            if query_lower in heading.lower():
-                score += 3.0
+        heading_hits = sum(1 for h in headings if query_lower in h.lower())
+        score += min(heading_hits, _MAX_HEADING_MATCHES) * 3.0
 
         return score
 
