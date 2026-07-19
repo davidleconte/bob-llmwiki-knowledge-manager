@@ -56,7 +56,15 @@ jobs:
         run: uv run python -c "import tiktoken; tiktoken.encoding_for_model('gpt-4')"
       - name: Run tests with coverage gate
         # --cov enforces fail_under from [tool.coverage.report]; plain pytest does not.
-        run: uv run pytest --cov=src --cov-report=json:coverage.json --cov-report=term-missing
+        # Exclude tests/load and tests/performance from this required gate: their
+        # soak and p99 wall-clock tests hang or flake it (PR #25 stalled ~62 min
+        # here on a suite that runs in ~1 min), and they already have dedicated
+        # jobs — `load + soak (informational)` and `benchmarks (perf regression)`.
+        # They exercise already-covered src, so the coverage floors still hold
+        # (89% total, all per-package floors green). Do NOT use `-m "not slow"`:
+        # slow-marked tests also live in tests/cache/concurrency/delegation and
+        # DO contribute coverage — only the two dirs above are the hang source.
+        run: uv run pytest --cov=src --ignore=tests/load --ignore=tests/performance --cov-report=json:coverage.json --cov-report=term-missing
       - name: Enforce per-package coverage floors
         run: uv run python scripts/check_coverage_by_package.py coverage.json
       - name: Enforce status/coverage "one home per value" consistency
