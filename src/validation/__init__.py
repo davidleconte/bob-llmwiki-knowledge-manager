@@ -20,6 +20,7 @@ from src.facade import TokenOptimizer
 from .corpus import (
     Document,
     hash_corpus,
+    load_holdout,
     load_repo_prose,
     load_session_transcripts,
     make_null_corpus,
@@ -55,6 +56,9 @@ __all__ = [
     "run_validation",
     "validation_ok",
     "composition_ok",
+    "holdout_ok",
+    "load_holdout",
+    "MAX_HOLDOUT_DIVERGENCE_PP",
     "default_out_dir",
     "DEFAULT_CACHE_REPEAT_RATE",
     "DEFAULT_TRUNCATION_BUDGET",
@@ -122,6 +126,26 @@ def run_validation(
     truncation = measure_truncation(facade.model, docs, truncation_budget)
     null_test = run_null_test(facade.config, facade.model, null_docs, null_threshold)
 
+    # C4/ATK-GATE-01: the headline must reproduce on a frozen, independently-composed
+    # hold-out corpus B. A cherry-picked corpus A cannot pre-arrange B, so a large
+    # divergence exposes it (holdout_ok). Absent B (e.g. a synthetic test root)
+    # leaves ``holdout`` None and the check treats it as not-applicable.
+    holdout_docs = load_holdout(root)
+    holdout: Optional[Dict[str, Any]] = None
+    if holdout_docs:
+        holdout_measure = measure_optimizer(facade.config, facade.model, holdout_docs)
+        headline_a = float(optimizer["mean_savings_pct"])
+        headline_b = float(holdout_measure["mean_savings_pct"])
+        holdout = {
+            "n": holdout_measure["n"],
+            "mean_savings_pct": headline_b,
+            "aggregate_savings_pct": holdout_measure["aggregate_savings_pct"],
+            "primary_mean_savings_pct": headline_a,
+            "divergence_pp": round(abs(headline_a - headline_b), 4),
+            "corpus_hash": hash_corpus(holdout_docs),
+            "note": "independent frozen corpus B; the headline must reproduce here (C4)",
+        }
+
     manifest = build_manifest(
         config=facade.config,
         data_hash=hash_corpus(docs),
@@ -138,6 +162,8 @@ def run_validation(
         },
     )
     report = build_report(manifest, optimizer, cache, truncation, null_test)
+    if holdout is not None:
+        report["holdout"] = holdout
 
     if write:
         write_report(out_dir or default_out_dir(root), report, manifest)
@@ -151,6 +177,40 @@ def run_validation(
 MIN_CORPUS_N = 30
 MAX_TOP_DOC_TOKEN_SHARE = 0.5
 MAX_MEAN_MEDIAN_DIVERGENCE_PP = 15.0
+
+# C4/ATK-GATE-01: the primary headline must reproduce on the frozen hold-out slice
+# B within this many percentage points. B is a frozen i.i.d. subset of the SAME
+# corpus, so an honest headline reproduces within sampling error — measured 0.02pp
+# (15% split). A cherry-picked A (the most compressible docs) measured 8.84pp of
+# divergence, and a fabrication-scale figure would diverge tens of points. 5pp sits
+# an order of magnitude above the honest noise and well below the cherry-pick signal.
+MAX_HOLDOUT_DIVERGENCE_PP = 5.0
+
+
+def holdout_ok(report: Dict[str, Any]) -> Tuple[bool, List[str]]:
+    """Gate headline reproduction on the independent hold-out corpus B (C4).
+
+    Fails when the primary corpus's optimizer-compression headline diverges from
+    the hold-out corpus's by more than :data:`MAX_HOLDOUT_DIVERGENCE_PP`. A report
+    with no ``holdout`` block (e.g. a synthetic test root that ships no corpus B) is
+    treated as not-applicable — :func:`run_validation` always measures B against the
+    real repo, so a genuinely published number always carries this check.
+    """
+    holdout = report.get("holdout")
+    if not holdout:
+        return (True, [])
+    div = float(holdout.get("divergence_pp", 0.0))
+    if div > MAX_HOLDOUT_DIVERGENCE_PP:
+        return (
+            False,
+            [
+                "headline does not reproduce on the independent hold-out corpus: "
+                f"primary {holdout.get('primary_mean_savings_pct')}% vs hold-out "
+                f"{holdout.get('mean_savings_pct')}% (divergence {div:.1f}pp > "
+                f"{MAX_HOLDOUT_DIVERGENCE_PP:.1f}pp) — the corpus may be cherry-picked (C4)"
+            ],
+        )
+    return (True, [])
 
 
 def composition_ok(report: Dict[str, Any]) -> Tuple[bool, List[str]]:
@@ -204,4 +264,6 @@ def validation_ok(report: Dict[str, Any]) -> Tuple[bool, List[str]]:
         reasons.append("tiktoken not active: token counts would be a chars/4 approximation")
     _comp_ok, comp_reasons = composition_ok(report)
     reasons.extend(comp_reasons)
+    _hold_ok, hold_reasons = holdout_ok(report)
+    reasons.extend(hold_reasons)
     return (not reasons, reasons)
