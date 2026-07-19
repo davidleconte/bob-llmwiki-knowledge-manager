@@ -44,6 +44,17 @@ _FM_TAGS_BLOCK_RE = re.compile(r"^tags:\s*\n((?:\s+-\s+.+\n?)+)", re.MULTILINE)
 # Regex: inline markdown links  ``[text](url_or_path)``
 _LINK_RE = re.compile(r"\[([^\]]*)\]\(([^)]+)\)")
 
+# ATK-MEM-05: caps + quarantine exclusion for author-controlled explicit edges.
+# The semantic path is already capped (ATK-DOS-02); the explicit path a crafted
+# document fully controls (frontmatter ``related:`` + inline links) was not, so
+# one document could mint unbounded / duplicate edges and skew PageRank.
+_MAX_EXPLICIT_EDGES_PER_NODE = 50
+_MAX_EXPLICIT_TOTAL_EDGES = 5000
+# A quarantined document is excluded from the graph entirely (mirrors the
+# retrieval-side ATK-MEM-02 exclusion). 'unset'/'generated'/'verified' all still
+# participate, so the graph is not gutted (most docs carry no trust_tier yet).
+_QUARANTINE_TIER = "quarantined"
+
 
 def _parse_frontmatter(content: str) -> Dict[str, Any]:
     """Extract scalar and list fields from YAML frontmatter.
@@ -60,7 +71,7 @@ def _parse_frontmatter(content: str) -> Dict[str, Any]:
 
     # Scalar fields
     for key, value in _FM_FIELD_RE.findall(fm_text):
-        if key in ("title", "date", "type", "status"):
+        if key in ("title", "date", "type", "status", "trust_tier"):
             result[key] = value.strip().strip('"').strip("'")
 
     # Tags — inline [a, b, c] or block list
@@ -153,6 +164,7 @@ class KnowledgeGraphBuilder:
         self._kb_path = Path(kb_path)
         self._index = index
         self._semantic_threshold = semantic_threshold
+        self._quarantined_cache: Optional[set[str]] = None
 
     # ---------------------------------------------------------------------- #
     # Public API
@@ -179,18 +191,35 @@ class KnowledgeGraphBuilder:
         )
         return graph
 
-    def build_explicit(self, graph: KnowledgeGraph) -> int:
-        """Parse frontmatter ``related:`` lists and inline markdown links → explicit edges.
+    def build_explicit(
+        self,
+        graph: KnowledgeGraph,
+        max_edges_per_node: int = _MAX_EXPLICIT_EDGES_PER_NODE,
+        max_total_edges: int = _MAX_EXPLICIT_TOTAL_EDGES,
+    ) -> int:
+        """Parse frontmatter ``related:`` lists and inline links → explicit edges.
+
+        ATK-MEM-05: the explicit path is fully author-controlled, so a crafted
+        document could otherwise mint unbounded (and duplicate) edges and skew
+        PageRank. Targets are de-duplicated per source, per-source / global caps
+        mirror the semantic-edge caps (ATK-DOS-02), and quarantined documents
+        neither emit nor receive explicit edges.
 
         Args:
             graph: Graph to populate (nodes must already be added).
+            max_edges_per_node: Maximum explicit edges emitted by one source.
+            max_total_edges: Global cap on explicit edges added.
 
         Returns:
             Number of explicit edges added.
         """
         count = 0
+        quarantined = self._quarantined_ids()
+        capped = False
         for md_file in self._walk_kb():
             source_doc_id = str(md_file.relative_to(self._kb_path))
+            if source_doc_id in quarantined:
+                continue  # ATK-MEM-05: a quarantined source emits no edges
             try:
                 content = md_file.read_text(encoding="utf-8")
             except Exception:
@@ -198,40 +227,65 @@ class KnowledgeGraphBuilder:
 
             fm = _parse_frontmatter(content)
 
-            # 1. Frontmatter related: list
+            # Candidate targets in order: frontmatter ``related:`` first, then
+            # inline links. (target, label) — frontmatter links carry no label.
+            candidates: List[Tuple[str, Optional[str]]] = []
             for raw_link in fm.get("related", []):
                 target = _normalise_kb_link(raw_link, source_doc_id)
-                if target and target != source_doc_id:
-                    exists = (self._kb_path / target).exists()
-                    graph.add_edge(
-                        source_doc_id,
-                        target,
-                        edge_type="explicit" if exists else "broken",
-                        weight=1.0 if exists else 0.0,
-                        label=None,
-                    )
-                    count += 1
-
-            # 2. Inline markdown links
-            # Strip frontmatter block before scanning to avoid double-counting
+                if target:
+                    candidates.append((target, None))
             body = _FRONTMATTER_RE.sub("", content, count=1)
             for link_text, raw_link in _LINK_RE.findall(body):
                 target = _normalise_kb_link(raw_link, source_doc_id)
-                if target and target != source_doc_id:
-                    # Avoid duplicate edges already added from frontmatter
-                    existing_targets = {e.target for e in graph.out_edges(source_doc_id)}
-                    if target not in existing_targets:
-                        exists = (self._kb_path / target).exists()
-                        graph.add_edge(
-                            source_doc_id,
-                            target,
-                            edge_type="explicit" if exists else "broken",
-                            weight=1.0 if exists else 0.0,
-                            label=link_text[:120] if link_text else None,
-                        )
-                        count += 1
+                if target:
+                    candidates.append((target, link_text[:120] if link_text else None))
+
+            seen_targets: set[str] = set()
+            per_node = 0
+            for target, label in candidates:
+                if target == source_doc_id or target in quarantined:
+                    continue  # ATK-MEM-05: no self-edges, none into quarantined docs
+                if target in seen_targets:
+                    continue  # ATK-MEM-05: dedup frontmatter dupes + fm/inline overlap
+                if per_node >= max_edges_per_node:
+                    break  # ATK-MEM-05: per-source explicit-edge cap
+                if count >= max_total_edges:
+                    capped = True
+                    break
+                seen_targets.add(target)
+                exists = (self._kb_path / target).exists()
+                graph.add_edge(
+                    source_doc_id,
+                    target,
+                    edge_type="explicit" if exists else "broken",
+                    weight=1.0 if exists else 0.0,
+                    label=label,
+                )
+                count += 1
+                per_node += 1
+            if capped:
+                break
 
         return count
+
+    def _quarantined_ids(self) -> set[str]:
+        """Doc_ids whose frontmatter marks them ``trust_tier: quarantined``.
+
+        Cached per builder. Mirrors the retrieval-side ATK-MEM-02 exclusion: a
+        quarantined document is not a node, emits/receives no edges, and thus
+        cannot influence PageRank. Only ``quarantined`` is excluded.
+        """
+        if self._quarantined_cache is None:
+            q: set[str] = set()
+            for md_file in self._walk_kb():
+                try:
+                    fm = _parse_frontmatter(md_file.read_text(encoding="utf-8"))
+                except Exception:
+                    continue
+                if fm.get("trust_tier") == _QUARANTINE_TIER:
+                    q.add(str(md_file.relative_to(self._kb_path)))
+            self._quarantined_cache = q
+        return self._quarantined_cache
 
     # ATK-DOS-02: edge caps prevent edge explosion on mutually-similar corpora.
     _DEFAULT_MAX_EDGES_PER_NODE = 50
@@ -353,8 +407,11 @@ class KnowledgeGraphBuilder:
 
     def _add_nodes(self, graph: KnowledgeGraph) -> None:
         """Add all KB documents as nodes, populating props from frontmatter."""
+        quarantined = self._quarantined_ids()
         for md_file in self._walk_kb():
             doc_id = str(md_file.relative_to(self._kb_path))
+            if doc_id in quarantined:
+                continue  # ATK-MEM-05: quarantined docs never enter the graph
             content = ""
             try:
                 content = md_file.read_text(encoding="utf-8")
