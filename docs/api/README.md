@@ -69,7 +69,9 @@ Complete API reference for the Token Optimization System.
 - [cli](root/cli.md) - `cli.py`
 - [facade](root/facade.md) - `facade.py`
 - [factory](root/factory.md) - `factory.py`
+- [kb_paths](root/kb_paths.md) - `kb_paths.py`
 - [pricing](root/pricing.md) - `pricing.py`
+- [provenance](root/provenance.md) - `provenance.py`
 
 ## Tools
 

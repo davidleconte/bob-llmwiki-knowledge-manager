@@ -119,6 +119,18 @@ Returns:
     ``True`` if the document needs re-indexing, ``False`` if up-to-date.
 
 
+##### `stale_files(kb_path: Path) -> Dict[str, List[str]]`
+
+Report KB files that are new/changed or deleted vs the index.
+
+Read-only — does not modify the index. Used by the retrieval entrypoints
+to warn (non-silently) that results may be stale, and to decide whether
+an explicit refresh is worthwhile (W2-2b). ``changed`` includes files not
+yet indexed; ``deleted`` are indexed files no longer on disk.
+
+Returns ``{"changed": [file_doc_id, ...], "deleted": [file_doc_id, ...]}``.
+
+
 ##### `flush() -> None`
 
 Atomically persist the in-memory index to disk.
