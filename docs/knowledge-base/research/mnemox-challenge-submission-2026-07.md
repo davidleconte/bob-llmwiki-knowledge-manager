@@ -114,7 +114,7 @@ documents, tiktoken BPE, null test passed, manifest-backed at
 
 | Layer | What it adds | Key result |
 |---|---|---|
-| **Semantic embedding index** | MiniLM dense-vector KB search instead of keyword matching | A/B-measured p@3 uplift: 44% → 88% (validated configuration; production retrieval wiring in progress) |
+| **Semantic embedding index** | MiniLM dense-vector KB search instead of keyword matching | Manifest-backed p@3 = 0.84 (21/25); re-ranks results but shows **no net lift** over keyword-only (also 0.84) — `evaluation/results/retrieval-2026-07-19/report.json` |
 | **Knowledge graph** | Surfaces orphaned documents, dead cross-references, authority hubs | 26/39 orphan documents rescued; 19 broken links found |
 | **Parallel analysis pipeline** | 6 agents analyse a repository simultaneously, compress output, file into KB | Full repo analysis in one command: `bob-optimize analyze` |
 
@@ -158,7 +158,7 @@ All figures are manifest-backed and independently reproducible. No blended total
 |---|---|---|---|
 | Re-derivation elimination | **51% saving** per query (95% CI [38%, 64%]) | 10 well-formed KB summary pairs from this repo | Prior answer captured in KB; compact-summary document |
 | Prompt compression | **~20% mean** token reduction (95% CI [18.9%, 21.2%]) | N=183 real Markdown documents, tiktoken BPE | Every novel prompt; structured Markdown prose |
-| Retrieval precision uplift | **44% → 88%** correct in top 3 results | 80-doc KB, 25-query golden set | A/B-measured; production retrieval wiring in progress |
+| Retrieval precision (p@3) | **0.84** in top 3 (21/25) — matched by keyword-only (0.84), no net lift | 25-query golden set | Manifest-backed at `evaluation/results/retrieval-2026-07-19/report.json`; corrects an earlier unverified figure |
 | ROI breakeven | **1 session** for well-formed KB pair | 0.80 BC creation cost, 2.22 BC mean saving | Single recurring query on a compact-summary document |
 | Return at 40 queries | **~80×** on well-formed pair | ROI model; amortised creation + maintenance | Stable document, recurring query type |
 

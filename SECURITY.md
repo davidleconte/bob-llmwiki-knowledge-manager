@@ -33,7 +33,7 @@ except two optional first-use downloads:
   the default `"hashing"` backend. No API key required; the model is public.
 
 The realistic threat surface is therefore local — see the full analysis in
-[`docs/security/THREAT_MODEL.md`](docs/security/THREAT_MODEL.md).
+[`docs/security/threat-model.md`](docs/security/threat-model.md).
 
 ## Reporting a vulnerability
 

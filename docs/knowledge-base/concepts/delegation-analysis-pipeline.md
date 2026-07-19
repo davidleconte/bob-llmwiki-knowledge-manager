@@ -144,7 +144,7 @@ print(f"Tokens saved by compression: {result.total_tokens_saved}")
 ## References
 
 - [Architecture §2 — Delegation subsystem](../../architecture/ARCHITECTURE.md)
-- [src/delegation/experimental.md](../../../src/delegation/experimental.md)
+- [src/delegation/EXPERIMENTAL.md](../../../src/delegation/EXPERIMENTAL.md)
 
 ---
 *Last Updated: 2026-07-18*
