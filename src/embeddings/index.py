@@ -131,6 +131,68 @@ class PersistentEmbeddingIndex:
         scores.sort(key=lambda x: x[1], reverse=True)
         return scores[:top_k]
 
+    def search_batch(
+        self, queries: List[str], top_k: int = 10, _block: int = 512
+    ) -> List[List[Tuple[str, float]]]:
+        """Top-*k* semantic search for many queries in one batched pass.
+
+        Parity-equivalent to ``[self.search(q, top_k) for q in queries]`` but
+        computes every query-vs-corpus cosine similarity with a single (blocked)
+        BLAS matrix–matrix product instead of one matrix–vector product per query,
+        and ranks each row with one C-level ``np.lexsort`` instead of a Python
+        ``list.sort`` over ``(doc_id, score)`` tuples.  The per-query loop was the
+        dominant cold-build cost of
+        :meth:`~src.graph.builder.KnowledgeGraphBuilder.build_semantic`
+        (CODE-13/16: one full ``search`` per document → O(N_docs·N_chunks·dim)).
+
+        Embeddings match :meth:`search` exactly: ``generate_batch`` transforms the
+        queries with the same stateless backend, row for row.  The ranking key is
+        ``(descending score, ascending row index)`` — identical to ``search``'s
+        stable reverse-sort — so exact-tie groups (identical embeddings) resolve the
+        same way at the *k*-th boundary.  Scores may differ from ``search`` only by
+        BLAS reassociation (~1e-7), far below any edge threshold.
+
+        Args:
+            queries: Query texts (one per desired result list).
+            top_k: Maximum results per query.
+            _block: Query rows per matmul block; bounds the ``[block × N_chunks]``
+                intermediate so a large corpus cannot blow up memory.
+
+        Returns:
+            One ``[(doc_id, score), ...]`` list per query, in query order. Each
+            inner list is empty when the index is empty.
+        """
+        self._ensure_loaded()
+
+        n = len(queries)
+        if self._matrix is None or self._matrix.shape[0] == 0 or n == 0:
+            return [[] for _ in range(n)]
+
+        # Batched embed: one vectorizer.transform (hashing) / deterministic per-row
+        # (minilm) — bit-identical to per-query generate(), so no drift vs search().
+        embs = self._embedder.generate_batch(list(queries))
+        q_mat = np.asarray(embs, dtype=self._matrix.dtype)  # [n × dim]
+        q_norms = np.linalg.norm(q_mat, axis=1, keepdims=True) + 1e-9
+        q_normed = q_mat / q_norms  # row-normalised, matching search()
+
+        row_norms = self._get_row_norms()  # [N_chunks], cached (ATK-DOS-04)
+        doc_ids = self._doc_ids
+        n_chunks = self._matrix.shape[0]
+        k = min(top_k, n_chunks)
+        # Ascending index is the tie-break key; lexsort's LAST key is primary, so
+        # (index, -score) ranks by descending score then ascending index — exactly
+        # search()'s stable reverse-sort.
+        idx_key = np.arange(n_chunks)
+
+        results: List[List[Tuple[str, float]]] = []
+        for start in range(0, n, _block):
+            block = q_normed[start : start + _block]
+            sims = (block @ self._matrix.T) / row_norms  # [b × N_chunks]
+            for row in sims:
+                order = np.lexsort((idx_key, -row))[:k]
+                results.append([(doc_ids[j], float(row[j])) for j in order])
+        return results
+
     def index_document(self, doc_id: str, content: str) -> None:
         """Embed *content* and update the in-memory index for *doc_id*.
 

@@ -10,7 +10,10 @@ Tests:
 """
 
 import time
+from pathlib import Path
 
+from src.cache.embeddings import EmbeddingGenerator
+from src.embeddings.index import PersistentEmbeddingIndex
 from src.graph.builder import KnowledgeGraphBuilder
 from src.graph.graph import KnowledgeGraph
 
@@ -182,6 +185,61 @@ def test_build_semantic_signature_accepts_caps():
     assert "max_total_edges" in sig.parameters, (
         "build_semantic must accept max_total_edges (ATK-DOS-02)"
     )
+
+
+# ---------------------------------------------------------------------------
+# A2 / CODE-13: build_semantic batched similarity scales sub-quadratically
+# ---------------------------------------------------------------------------
+
+
+def _indexed_kb(tmp_path: Path, n_docs: int):
+    """Write *n_docs* clustered docs and return (kb_path, built index)."""
+    kb = tmp_path / f"kb_{n_docs}"
+    for cat in ("concepts", "guides", "references", "research"):
+        (kb / cat).mkdir(parents=True, exist_ok=True)
+    words = ["alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta"]
+    for i in range(n_docs):
+        w = words[i % len(words)]
+        body = f"{w} cluster{i % 8} shared corpus vocabulary token " + (w + " ") * 8
+        (kb / "concepts" / f"doc_{i}.md").write_text(
+            f"# Doc {i}\n\n{body.strip()}\n", encoding="utf-8"
+        )
+    idx = PersistentEmbeddingIndex(EmbeddingGenerator(), tmp_path / f".bob/idx_{n_docs}")
+    idx.rebuild(kb)
+    return kb, idx
+
+
+def _time_build_semantic(kb: Path, idx) -> tuple[float, int]:
+    """Time build_semantic in isolation (nodes prebuilt); return (seconds, edges)."""
+    builder = KnowledgeGraphBuilder(kb, index=idx, semantic_threshold=0.3)
+    graph = KnowledgeGraph()
+    builder._add_nodes(graph)  # isolate the semantic pass from link/pagerank passes
+    t0 = time.perf_counter()
+    edges = builder.build_semantic(graph, idx)
+    return time.perf_counter() - t0, edges
+
+
+def test_build_semantic_scales_subquadratic(tmp_path):
+    """Batched build_semantic must grow far slower than the per-doc O(N²) loop.
+
+    Times the semantic pass at N ∈ {150, 300, 600}. A quadratic-dominated cost
+    would grow ~16× from 150→600; the batched matmul + single lexsort per row keep
+    the growth well under that. Generous bounds keep the wall-clock assertion
+    non-flaky across machines.
+    """
+    sizes = [150, 300, 600]
+    times: dict[int, float] = {}
+    for n in sizes:
+        elapsed, edges = _time_build_semantic(*_indexed_kb(tmp_path, n))
+        times[n] = elapsed
+        assert edges > 0, f"N={n}: expected clustered edges, got {edges}"
+
+    ratio = times[600] / max(times[150], 1e-6)
+    assert ratio < 8.0, (
+        f"build_semantic 150→600 grew {ratio:.1f}× "
+        f"(quadratic ≈16×): {times} — batching may have regressed to per-doc search"
+    )
+    assert times[600] < 5.0, f"build_semantic at N=600 took {times[600]:.2f}s (budget 5s): {times}"
 
 
 # ---------------------------------------------------------------------------

@@ -5,6 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock
 
+from src.cache.embeddings import EmbeddingGenerator
+from src.embeddings.index import PersistentEmbeddingIndex
 from src.graph.builder import (
     KnowledgeGraphBuilder,
     _normalise_kb_link,
@@ -245,6 +247,9 @@ class TestBuildSemantic:
             return doc_id_scores.get(content[:20], [])
 
         mock.search.side_effect = _search
+        mock.search_batch.side_effect = lambda contents, top_k=50: [
+            _search(c, top_k) for c in contents
+        ]
         return mock
 
     def test_semantic_edge_above_threshold(self, tmp_path):
@@ -264,6 +269,9 @@ class TestBuildSemantic:
             return []
 
         mock_index.search.side_effect = _search
+        mock_index.search_batch.side_effect = lambda contents, top_k=50: [
+            _search(c, top_k) for c in contents
+        ]
 
         builder = KnowledgeGraphBuilder(kb, index=mock_index, semantic_threshold=0.3)
         graph = builder.build()
@@ -284,6 +292,9 @@ class TestBuildSemantic:
             return [("concepts/b.md#preamble", 0.10)]  # below threshold
 
         mock_index.search.side_effect = _search
+        mock_index.search_batch.side_effect = lambda contents, top_k=50: [
+            _search(c, top_k) for c in contents
+        ]
 
         builder = KnowledgeGraphBuilder(kb, index=mock_index, semantic_threshold=0.3)
         graph = builder.build()
@@ -318,6 +329,87 @@ class TestBuildSemantic:
             if e.type == "semantic"
         ]
         assert len(semantic) == 0
+
+    # ---- A2: batched build_semantic (CODE-13/16 cold-build cost) ---- #
+
+    @staticmethod
+    def _build_real_index(tmp_path: Path):
+        """Build a real KB + PersistentEmbeddingIndex with cross-threshold pairs.
+
+        Six topic clusters of five docs each share cluster vocabulary, so
+        within-cluster document pairs exceed the default 0.3 semantic threshold —
+        giving ``build_semantic`` a non-trivial edge set to preserve.
+        """
+        kb = _make_kb(tmp_path)
+        topics = {
+            "cache": "cache eviction lru ttl invalidation warmup hit ratio store",
+            "graph": "graph node edge pagerank ranking traversal centrality adjacency",
+            "embed": "embedding vector cosine similarity index chunk semantic retrieval",
+            "token": "token budget optimizer truncation compression prompt pricing count",
+            "trust": "trust tier provenance frontmatter quarantine review commit audit",
+            "delegate": "delegation agent pipeline research synthesis handoff subagent task",
+        }
+        for topic, words in topics.items():
+            for i in range(5):
+                body = f"{words} {topic} document number {i} " + (words + " ") * 6
+                _write_doc(
+                    kb,
+                    f"concepts/{topic}_{i}.md",
+                    f"# {topic.title()} {i}\n\n{body.strip()}\n",
+                )
+        idx = PersistentEmbeddingIndex(EmbeddingGenerator(), tmp_path / ".bob" / "kb-index")
+        idx.rebuild(kb)
+        assert idx.doc_count >= 30
+        return kb, idx
+
+    @staticmethod
+    def _semantic_edge_set(graph):
+        """Undirected semantic edge set as {(frozenset(pair), round(weight, 6))}."""
+        edges = set()
+        for doc_id, _ in graph.nodes():
+            for e in graph.out_edges(doc_id):
+                if e.type == "semantic":
+                    edges.add((frozenset((doc_id, e.target)), round(e.weight, 6)))
+        return edges
+
+    def test_build_semantic_no_full_rescan(self, tmp_path):
+        """RED->GREEN: build_semantic no longer calls index.search per document.
+
+        Poison ``index.search`` to raise. The batched implementation routes through
+        ``search_batch`` and never touches ``search``, so it still builds edges; the
+        pre-fix per-document loop called ``search`` N times and would raise.
+        """
+        kb, idx = self._build_real_index(tmp_path)
+
+        def _boom(*a, **k):
+            raise AssertionError("index.search must not be called by build_semantic")
+
+        idx.search = _boom  # type: ignore[method-assign]
+
+        graph = KnowledgeGraphBuilder(kb, index=idx, semantic_threshold=0.3).build()
+        edges = self._semantic_edge_set(graph)
+        assert edges, "batched build_semantic produced no edges (expected clusters)"
+
+    def test_build_semantic_edges_match_per_query_search(self, tmp_path):
+        """Parity: batched matmul yields the SAME edge set as per-query search().
+
+        Both runs share the identical downstream aggregation/cap logic inside
+        build_semantic; the only difference is the similarity source — the real
+        batched ``search_batch`` vs a reference that delegates to per-query
+        ``search``. Equal edge sets prove the batching preserves the graph.
+        """
+        kb, idx = self._build_real_index(tmp_path)
+
+        # New path: real batched search_batch.
+        g_new = KnowledgeGraphBuilder(kb, index=idx, semantic_threshold=0.3).build()
+
+        # Reference path: force per-query search() through the same aggregation.
+        ref_batch = lambda qs, top_k=50: [idx.search(q, top_k) for q in qs]  # noqa: E731
+        idx.search_batch = ref_batch  # type: ignore[method-assign]
+        g_ref = KnowledgeGraphBuilder(kb, index=idx, semantic_threshold=0.3).build()
+
+        assert self._semantic_edge_set(g_new) == self._semantic_edge_set(g_ref)
+        assert self._semantic_edge_set(g_new), "fixture produced no semantic edges"
 
 
 # --------------------------------------------------------------------------- #

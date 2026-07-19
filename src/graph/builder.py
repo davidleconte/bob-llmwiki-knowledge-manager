@@ -291,6 +291,11 @@ class KnowledgeGraphBuilder:
     _DEFAULT_MAX_EDGES_PER_NODE = 50
     _DEFAULT_MAX_TOTAL_EDGES = 5000
 
+    # A2/CODE-13: above this doc count the batched semantic pass is still O(N²·dim)
+    # in FLOPs (vectorised), so warn loudly rather than silently running a very
+    # large build. search_batch() already blocks the matmul to bound memory.
+    _SEMANTIC_BUILD_MAX_DOCS = 5000
+
     def build_semantic(
         self,
         graph: KnowledgeGraph,
@@ -328,6 +333,14 @@ class KnowledgeGraphBuilder:
         # doc_sim[A][B] = max cosine score across all chunk pairs (A_chunk, B_chunk)
         doc_sim: Dict[str, Dict[str, float]] = {d: {} for d in doc_ids}
 
+        # Gather each readable document's content as a query, then run ONE batched
+        # similarity pass. The previous code called ``index.search`` once per
+        # document — O(N_docs · N_chunks · dim) with per-query embed/sort overhead,
+        # the dominant cold-build cost (A2, CODE-13/16). ``search_batch`` folds the
+        # N matrix-vector products into one blocked matmul and selects top-k in
+        # numpy; the edge set is preserved (parity test in tests/graph).
+        sources: List[str] = []
+        queries: List[str] = []
         for source_id in doc_ids:
             # Read source document content to use as the query
             md_file = self._kb_path / source_id
@@ -344,10 +357,23 @@ class KnowledgeGraphBuilder:
                 content = md_file.read_text(encoding="utf-8")
             except Exception:
                 continue
+            sources.append(source_id)
+            queries.append(content[:4000])
 
-            # Search using the document content as a query — returns chunk-level results
-            results: List[Tuple[str, float]] = index.search(content[:4000], top_k=50)
+        if len(queries) > self._SEMANTIC_BUILD_MAX_DOCS:
+            logger.warning(
+                "kb_graph_semantic_large_build: %d documents exceeds "
+                "_SEMANTIC_BUILD_MAX_DOCS=%d; the vectorised similarity pass is "
+                "still O(N²·dim) in FLOPs and may be slow",
+                len(queries),
+                self._SEMANTIC_BUILD_MAX_DOCS,
+            )
 
+        # One batched top-k pass — returns chunk-level results per source, in order.
+        batched: List[List[Tuple[str, float]]] = index.search_batch(queries, top_k=50)
+
+        for source_id, results in zip(sources, batched):
+            row = doc_sim[source_id]
             for chunk_doc_id, score in results:
                 # Extract file-level doc_id from chunk id (strip #slug fragment)
                 target_id = chunk_doc_id.split("#")[0]
@@ -357,9 +383,8 @@ class KnowledgeGraphBuilder:
                     continue  # target not in this graph
 
                 # max-aggregation: keep highest chunk score per document pair
-                current_best = doc_sim[source_id].get(target_id, 0.0)
-                if score > current_best:
-                    doc_sim[source_id][target_id] = score
+                if score > row.get(target_id, 0.0):
+                    row[target_id] = score
 
         # Add edges for pairs above threshold (bidirectional), respecting caps
         added_pairs: set = set()
