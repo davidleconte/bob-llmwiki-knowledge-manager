@@ -18,13 +18,15 @@ import logging
 import re
 from typing import Any, Dict, Optional, Protocol, runtime_checkable
 
-from src.pricing import DEFAULT_MODEL, usd_cost
+from src.pricing import DEFAULT_MODEL, UnknownModelPriceError, usd_cost
 
 logger = logging.getLogger(__name__)
 
 # One-warning-per-(process, model): the loud-approximation contract must not spam
 # a warning on every TokenCounter construction for the same unknown model.
 _APPROX_WARNED: set[str] = set()
+# Sibling dedupe for the loud unknown-price path (see estimate_cost).
+_PRICE_WARNED: set[str] = set()
 
 # Model-family prefixes routed to tiktoken (exact OpenAI BPE).
 _OPENAI_PREFIXES = ("gpt", "o1", "o3", "text-", "davinci", "curie", "babbage", "ada")
@@ -271,20 +273,34 @@ class TokenCounter:
 
         return total
 
-    def estimate_cost(self, tokens: int, model: Optional[str] = None) -> float:
-        """Estimate cost for token count.
+    def estimate_cost(self, tokens: int, model: Optional[str] = None) -> Optional[float]:
+        """Estimate the input-token cost for a token count.
+
+        Delegates to the single pricing source (:func:`src.pricing.usd_cost`),
+        pricing *tokens* as input tokens. An unpriced model is **loud, not silent**
+        (B2/CODE-10): one warning per (process, model) and ``None`` — the cost is
+        genuinely unknown, never a default-rate guess.
 
         Args:
-            tokens: Number of tokens
-            model: Model name (uses self.model if not provided)
+            tokens: Number of tokens (priced as input tokens).
+            model: Model name (uses self.model if not provided).
 
         Returns:
-            Estimated cost in USD
+            Estimated USD cost, or ``None`` when the model has no price.
         """
         model = model or self.model
-        # Delegate to the single pricing source (src.pricing) so USD rates and
-        # the default-model fallback have exactly one home.
-        return usd_cost(tokens, model)
+        try:
+            return usd_cost(tokens, model=model)
+        except UnknownModelPriceError:
+            if model not in _PRICE_WARNED:
+                _PRICE_WARNED.add(model)
+                logger.warning(
+                    "no price for model %r; cost estimate unavailable (add it to "
+                    "PRICES in src/pricing.py). A cost figure must not use a "
+                    "default-rate guess for an unpriced model.",
+                    model,
+                )
+            return None
 
     def get_stats(self, text: str) -> Dict[str, Any]:
         """Get comprehensive token statistics.

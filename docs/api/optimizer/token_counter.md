@@ -2,10 +2,97 @@
 
 Token counting utilities for prompt optimization.
 
-This module provides accurate token counting for various LLM models,
-supporting both tiktoken (OpenAI) and approximate counting methods.
+Model-aware counting via a multi-backend resolver (B1/CODE-10):
+
+- ``gpt*`` / ``o1*`` / legacy OpenAI ids  -> tiktoken (exact)
+- ``claude*``                             -> Anthropic backend if installed, else approx
+- ``granite*`` / ``watsonx*`` / ``ibm*``  -> HF/Granite tokenizer if installed, else approx
+- anything else                           -> approximation
+
+An unavailable *exact* tokenizer NEVER raises on the hot path (availability is
+deployment-dependent) but is **loud**: exactly one ``logging.warning`` per
+``(process, model)``, and ``TokenCounter.approximate`` is set so no *published*
+number silently rides on an approximation (the validation manifest's
+``tiktoken_active`` gate already blocks a run whose counts are not exact).
+
+## Constants
+
+- `_OPENAI_PREFIXES`
+
+## Functions
+
+### `_approximate_token_count(text: str) -> int`
+
+Model-blind heuristic: words + special_chars // 2 (~±15% of exact).
+
+
+### `_resolve_openai(model: str) -> Optional[Tokenizer]`
+
+
+### `_resolve_granite(model: str) -> Optional[Tokenizer]`
+
+
+### `resolve_tokenizer(model: str) -> Tokenizer`
+
+Resolve a :class:`Tokenizer` for *model* by family; never raises.
+
+An unavailable exact backend degrades to a loud approximation: exactly one
+``logging.warning`` per ``(process, model)`` and an ``exact=False`` tokenizer.
+
 
 ## Classes
+
+### `Tokenizer(Protocol)`
+
+A resolved counting backend for one model.
+
+``exact`` is True only when the count comes from the model's real tokenizer;
+``False`` marks the loud approximation path.
+
+#### Methods
+
+##### `count(text: str) -> int`
+
+
+
+### `_TiktokenTokenizer`
+
+Exact OpenAI BPE via tiktoken. Exposes ``encoding`` for accurate truncation.
+
+#### Methods
+
+##### `__init__(encoding: Any, name: str) -> None`
+
+
+##### `count(text: str) -> int`
+
+
+
+### `_CallableTokenizer`
+
+Exact count from an external callable (e.g. a HF/Granite ``encode``).
+
+#### Methods
+
+##### `__init__(count_fn: Any, name: str) -> None`
+
+
+##### `count(text: str) -> int`
+
+
+
+### `_ApproxTokenizer`
+
+Model-blind heuristic backend (``exact=False``) — the loud fallback.
+
+#### Methods
+
+##### `__init__(name: str) -> None`
+
+
+##### `count(text: str) -> int`
+
+
 
 ### `TokenCounter`
 
@@ -16,8 +103,10 @@ with fallback to approximation methods.
 
 Attributes:
     model: Model name for token counting
-    encoding: Tiktoken encoding (if available)
-    use_tiktoken: Whether tiktoken is available
+    tokenizer: Resolved counting backend (:class:`Tokenizer`)
+    approximate: True when counts are a heuristic (not the model's tokenizer)
+    encoding: Tiktoken encoding (only when the backend is tiktoken)
+    use_tiktoken: Whether the exact tiktoken backend is in effect
     track_costs: Whether to track costs with CostTracker
 
 #### Methods
@@ -27,7 +116,7 @@ Attributes:
 Initialize token counter.
 
 Args:
-    model: Model name (e.g., "gpt-4", "gpt-3.5-turbo")
+    model: Model name (e.g., "gpt-4", "claude-sonnet-5", "granite-3-8b")
     track_costs: Whether to track costs with CostTracker
 
 
@@ -68,16 +157,21 @@ Returns:
     Total token count including message formatting overhead
 
 
-##### `estimate_cost(tokens: int, model: Optional[str]) -> float`
+##### `estimate_cost(tokens: int, model: Optional[str]) -> Optional[float]`
 
-Estimate cost for token count.
+Estimate the input-token cost for a token count.
+
+Delegates to the single pricing source (:func:`src.pricing.usd_cost`),
+pricing *tokens* as input tokens. An unpriced model is **loud, not silent**
+(B2/CODE-10): one warning per (process, model) and ``None`` — the cost is
+genuinely unknown, never a default-rate guess.
 
 Args:
-    tokens: Number of tokens
-    model: Model name (uses self.model if not provided)
+    tokens: Number of tokens (priced as input tokens).
+    model: Model name (uses self.model if not provided).
 
 Returns:
-    Estimated cost in USD
+    Estimated USD cost, or ``None`` when the model has no price.
 
 
 ##### `get_stats(text: str) -> Dict[str, Any]`
