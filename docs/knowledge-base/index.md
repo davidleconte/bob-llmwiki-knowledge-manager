@@ -2,7 +2,7 @@
 
 > ⚠️ **Metrics correction (2026-07-14).** Earlier drafts cited fabricated figures — "68.96%", "89.3%", "91.80%". **Those are retracted.** The honest, measured figure is **~20% mean optimizer compression** on real prose (manifest-backed: `evaluation/results/validation-2026-07-14/`; see `STATUS.md`).
 
-Last Updated: 2026-07-18
+Last Updated: 2026-07-19
 
 ## Quick Navigation
 - [Concepts](./concepts/) - Core concepts and definitions
@@ -11,6 +11,9 @@ Last Updated: 2026-07-18
 - [Research](./research/) - Research notes and findings
 
 ## Recent Additions
+- 2026-07-19: [Obsidian Integration Guide](./guides/obsidian-integration-guide.md) - Guide ⭐ NEW — Semantic graph export to Obsidian Canvas + Dataview, and Obsidian MCP activation in Bob IDE
+- 2026-07-19: [Independent Counter-Audit](./research/counter-audit-2026-07-19-independent.md) - Research ⭐ NEW — MECE independent counter-audit of Mnemox architecture, memory-layer, retrieval, and governance
+- 2026-07-19: [Innovation Portfolio](./research/innovation-portfolio-2026-07-19.md) - Research ⭐ NEW — Innovation portfolio and roadmap for Mnemox: MCP, watsonx, advanced-RAG integration
 - 2026-07-19: [Mnemox Update — 2026-07-19](./research/mnemox-update-2026-07-19.md) - Research — automated KB update: git log, doc counts, lessons learned scaffold
 - 2026-07-18: [Mnemox Challenge Submission](./research/mnemox-challenge-submission-2026-07.md) - Research ⭐ NEW — 2026 IBMer watsonx Challenge submission narrative (Team BobjectifLune)
 - 2026-07-18: [Mnemox Executive Brief](./research/mnemox-executive-brief-2026-07.md) - Research ⭐ NEW — 4-minute CTO/challenge-judge decision summary; ROI table; quality gates; pilot design
@@ -108,6 +111,7 @@ Last Updated: 2026-07-18
 - [Dependency Analysis](./concepts/dependency-analysis.md) - Python dependency inventory with security audit and recommendations for dependency management
 
 ### Guides
+- [Obsidian Integration Guide](./guides/obsidian-integration-guide.md) - Semantic graph export to Obsidian Canvas + Dataview annotation, and Obsidian MCP activation in Bob IDE ⭐ NEW
 - [KM Bobcoin Savings Measurement Guide](./guides/km-bobcoin-savings-measurement-guide.md) - 7-section protocol: baseline sessions, shadow comparison, direct token diff, amortised ROI formula, reporting standards, stale-KB diagnosis, automation ⭐ NEW
 - [Knowledge Graph Usage Guide](./guides/knowledge-graph-usage-guide.md) - 5-step workflow: build embedding index → build graph → run health report → fix orphans → query; CLI and Python API; troubleshooting (T1–T4); best practices ⭐ NEW
 - [KB-TOS Integration Roadmap (P0/P1/P2)](./guides/kb-tos-integration-roadmap.md) - Grounded P0/P1/P2 integration roadmap; P0 fully closed; P1 and P2 scope intact

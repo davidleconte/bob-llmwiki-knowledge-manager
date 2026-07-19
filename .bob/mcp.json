@@ -16,6 +16,17 @@
         "list_updates"
       ]
     },
+    "obsidian": {
+      "command": "npx",
+      "args": ["-y", "obsidian-mcp"],
+      "env": {
+        "OBSIDIAN_API_KEY": "YOUR-OBSIDIAN-LOCAL-REST-API-KEY-HERE",
+        "OBSIDIAN_HOST": "https://127.0.0.1:27123",
+        "OBSIDIAN_VAULT_PATH": "docs/knowledge-base"
+      },
+      "disabled": false,
+      "description": "Obsidian MCP — read/write access to the live Mnemox KB vault via Obsidian Local REST API plugin. PREREQUISITES: (1) Obsidian installed with the 'Local REST API' community plugin enabled. (2) Replace OBSIDIAN_API_KEY with the key shown in the plugin settings. (3) Vault open in Obsidian, plugin server running on port 27123. (4) OBSIDIAN_VAULT_PATH is relative; expand to absolute path locally if required — do not commit an absolute path. Tools: list-files, get-file, search, create-file, update-file, append-to-file, delete-file."
+    },
     "atlassian": {
       "type": "streamable-http",
       "url": "https://mcp.atlassian.com/v1/mcp/authv2",

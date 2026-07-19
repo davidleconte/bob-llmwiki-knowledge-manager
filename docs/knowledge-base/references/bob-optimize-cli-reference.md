@@ -253,6 +253,7 @@ uv run bob-optimize kb-search "coverage floor" --max-results 5 --date-filter 202
 ## Related Documents
 
 - [Mnemox CLI Reference](./mnemox-cli-reference.md)
+- [Obsidian Integration Guide](../guides/obsidian-integration-guide.md)
 - [Token Optimization Concepts](../concepts/token-optimization.md)
 - [Multi-Level Caching Architecture](../concepts/multi-level-caching-architecture-patterns.md)
 - [Knowledge Graph Layer](../concepts/knowledge-graph-layer.md)

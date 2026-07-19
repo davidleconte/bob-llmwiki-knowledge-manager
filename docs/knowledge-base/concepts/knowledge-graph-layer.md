@@ -129,6 +129,7 @@ bob-optimize graph-query  "caching strategy" --kb-path docs/knowledge-base
 ## Related Documents
 
 - [Knowledge Graph Usage Guide](../guides/knowledge-graph-usage-guide.md)
+- [Obsidian Integration Guide](../guides/obsidian-integration-guide.md)
 - [KB-TOS Shared Embedding Layer](./kb-tos-embedding-layer.md)
 - [Multi-Level Caching](./multi-level-caching.md)
 - [ADR-017: Knowledge Graph Layer](../../adr/017-knowledge-graph-layer.md)

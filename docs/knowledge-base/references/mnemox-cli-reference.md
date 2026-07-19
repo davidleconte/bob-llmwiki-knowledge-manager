@@ -126,5 +126,6 @@ bash scripts/mnemox.sh --quick --km-home ~/Projects/bob-llmwiki-knowledge-manage
 
 - [Setup Token Optimization](../guides/setup-token-optimization.md)
 - [Knowledge Graph Usage Guide](../guides/knowledge-graph-usage-guide.md)
+- [Obsidian Integration Guide](../guides/obsidian-integration-guide.md)
 - [Bob Optimize CLI Reference](./bob-optimize-cli-reference.md)
 - [KB Document Types](../concepts/kb-document-types.md)

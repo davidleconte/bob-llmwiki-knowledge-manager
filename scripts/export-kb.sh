@@ -53,7 +53,34 @@ OBSIDIAN
         echo "✅ Exported to $OUTPUT_DIR/ (Obsidian vault)"
         echo "   Open $OUTPUT_DIR in Obsidian as a vault"
         ;;
-        
+
+    obsidian-graph)
+        echo "📝 Exporting for Obsidian with semantic graph..."
+
+        # Step 1: Obsidian vault copy (same as obsidian case)
+        cp -r "$KB_DIR" "$OUTPUT_DIR/knowledge-base"
+
+        mkdir -p "$OUTPUT_DIR/.obsidian"
+        cat > "$OUTPUT_DIR/.obsidian/app.json" << 'OBSIDIAN'
+{
+  "livePreview": true,
+  "readableLineLength": true,
+  "strictLineBreaks": false
+}
+OBSIDIAN
+
+        # Step 2: Generate Obsidian Canvas from semantic graph
+        python3 scripts/export-kb-graph-canvas.py || exit $?
+
+        # Step 3: Inject Dataview semantic_links frontmatter
+        python3 scripts/export-kb-graph-dataview.py || exit $?
+
+        echo "✅ Exported to $OUTPUT_DIR/ (Obsidian vault + semantic graph)"
+        echo "   Open $OUTPUT_DIR in Obsidian as a vault"
+        echo "   Canvas file  : $OUTPUT_DIR/kb-semantic-graph.canvas"
+        echo "   KB documents : $OUTPUT_DIR/knowledge-base/ (annotated with semantic_links)"
+        ;;
+
     html)
         echo "🌐 Exporting as HTML..."
         
@@ -118,12 +145,14 @@ OBSIDIAN
         echo "Available formats:"
         echo "  markdown, md    - Flat markdown structure (default)"
         echo "  obsidian        - Obsidian vault format"
+        echo "  obsidian-graph  - Obsidian vault + Canvas semantic graph + Dataview annotations"
         echo "  html            - HTML files (requires pandoc)"
         echo "  pdf             - PDF files (requires pandoc)"
         echo ""
         echo "Examples:"
         echo "  $0              # Export as markdown"
         echo "  $0 obsidian     # Export for Obsidian"
+        echo "  $0 obsidian-graph  # Export for Obsidian with semantic graph"
         echo "  $0 html         # Export as HTML"
         exit 1
         ;;

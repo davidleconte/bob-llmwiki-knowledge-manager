@@ -105,13 +105,13 @@ prompt before it is sent — independently of whether a KB exists.
 documents, tiktoken BPE, null test passed, manifest-backed at
 `evaluation/results/validation-2026-07-14/`).
 
-**Technology:** Python 3.11+, ~3,500 lines, 1,112 tests, A+ engineering grade.
+**Technology:** Python 3.11+, ~3,500 lines, 1,124+ tests, self-assessed A+ engineering grade (D− → A+ across 8 remediation phases; independent counter-audit commissioned July 2026).
 
 ### Three shared infrastructure layers
 
 | Layer | What it adds | Key result |
 |---|---|---|
-| **Semantic embedding index** | MiniLM dense-vector KB search instead of keyword matching | Retrieval precision: 44% → 88% correct in top 3 results |
+| **Semantic embedding index** | MiniLM dense-vector KB search instead of keyword matching | A/B-measured p@3 uplift: 44% → 88% (validated configuration; production retrieval wiring in progress) |
 | **Knowledge graph** | Surfaces orphaned documents, dead cross-references, authority hubs | 26/39 orphan documents rescued; 19 broken links found |
 | **Parallel analysis pipeline** | 6 agents analyse a repository simultaneously, compress output, file into KB | Full repo analysis in one command: `bob-optimize analyze` |
 
@@ -155,7 +155,7 @@ All figures are manifest-backed and independently reproducible. No blended total
 |---|---|---|---|
 | Re-derivation elimination | **51% saving** per query (95% CI [38%, 64%]) | 10 well-formed KB summary pairs from this repo | Prior answer captured in KB; compact-summary document |
 | Prompt compression | **~20% mean** token reduction (95% CI [18.9%, 21.2%]) | N=183 real Markdown documents, tiktoken BPE | Every novel prompt; structured Markdown prose |
-| Retrieval precision uplift | **44% → 88%** correct in top 3 results | 80-doc KB, 25-query golden set | MiniLM installed + KB indexed |
+| Retrieval precision uplift | **44% → 88%** correct in top 3 results | 80-doc KB, 25-query golden set | A/B-measured; production retrieval wiring in progress |
 | ROI breakeven | **1 session** for well-formed KB pair | 0.80 BC creation cost, 2.22 BC mean saving | Single recurring query on a compact-summary document |
 | Return at 40 queries | **~80×** on well-formed pair | ROI model; amortised creation + maintenance | Stable document, recurring query type |
 
@@ -172,18 +172,16 @@ This submission is engineered to institutional standard:
 
 | Gate | Result |
 |---|---|
-| Tests | **1,112 passing / 0 failures** |
+| Tests | **1,124+ passing / 1 pre-existing failure** (research template missing `## Methodology` section — unrelated to KB Manager) |
 | Code coverage | **89.82% global** (≥80% gate enforced by CI); all 5 per-package floors met |
 | Static analysis | **ruff + mypy clean** (Python 3.11 + 3.12 matrix) |
 | Concurrency | **14 race conditions fixed** across 5 adversarial audit rounds; all state protected by `RLock` |
 | Savings integrity | **Manifest-backed** — `check_savings_claims.py` CI gate rejects any published % without a manifest file |
 | Architecture decisions | **19 ADRs** on record; all decisions traceable |
 | Security | STRIDE threat model; bandit SAST; CycloneDX SBOM; `pip-audit` (0 CVEs) |
-| Grade | **A+ (4.30/4.30)** against Tier-1 institutional standard |
+| Grade | **D− (0.9) → self-assessed A+** across 8 remediation phases; independent counter-audit commissioned July 2026 (see `docs/knowledge-base/research/counter-audit-2026-07-19-independent.md`) |
 
-**Trajectory:** D− (0.9) → A+ (4.30) across 8 remediation phases, driven by
-adversarial audits that retracted fabricated metrics and replaced them with
-manifest-backed measurements.
+**Trajectory:** D− (0.9) → self-assessed A+ across 8 adversarial remediation phases. An independent counter-audit (July 2026) confirmed the honesty machinery and retraction discipline while identifying specific retrieval-wiring and KB-integrity items. Remediation is in progress.
 
 ---
 
@@ -213,8 +211,8 @@ external corpus validation and the v1.0 stability milestone.
 | **KB retrieval quality** | `bob-optimize kb-search "your query"` → shows P@k results |
 | **Knowledge graph health** | `bob-optimize graph-health` → orphan count, hub list, broken links |
 | **Parallel repo analysis** | `bob-optimize analyze` → 6 agents, compressed output, KB documents filed |
-| **Full test suite** | `uv run pytest tests/` → 1,112 tests, 0 failures |
-| **Engineering grade** | [`STATUS.md`](../../../STATUS.md) — single authoritative source |
+| **Full test suite** | `uv run pytest tests/ --ignore=tests/load --ignore=tests/performance` → 1,124+ passing, 1 pre-existing failure |
+| **Engineering grade** | [`counter-audit-2026-07-19-independent.md`](./counter-audit-2026-07-19-independent.md) — independent assessment on file |
 
 ---
 
