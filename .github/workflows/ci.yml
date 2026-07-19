@@ -82,6 +82,27 @@ jobs:
         # resolves to a missing file. Research snapshots emit warnings only.
         run: bash scripts/validate-kb.sh
 
+  gate-integrity:
+    name: gate integrity (ATK-GATE-07)
+    runs-on: ubuntu-latest
+    # Only meaningful on a PR (needs the base...HEAD diff). Structural substitute
+    # for a second gate reviewer — see SECURITY.md §Gate Independence.
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Forbid weakening a gate + planting a claim in one PR
+        # Fails a PR whose diff touches BOTH a gate definition
+        # (config/gates/**, scripts/check_*.py, src/validation/**) and a claim
+        # surface (STATUS.md, README.md, docs/** except generated docs/api/**).
+        run: |
+          git fetch -q origin "${{ github.base_ref }}"
+          python scripts/check_gate_integrity.py --base "origin/${{ github.base_ref }}"
+
   lint:
     name: lint + format (ruff)
     runs-on: ubuntu-latest

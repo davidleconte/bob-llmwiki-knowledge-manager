@@ -112,3 +112,36 @@ Source audits:
 - Counter-audit (MECE, scored 2.9/5): `counter-audit-2026-07-19-independent.md`
 - Remediation plan: `adversarial-remediation-plan.md`
 
+## Gate Independence
+
+The honesty gates (savings, metric-claim, value-homes, status/grade-provenance,
+coverage, API-doc freshness, KB integrity) are authored and maintained by a single
+owner (`@davidleconte`), who also authors the code and the claims those gates check.
+This is **bus-factor 1**: absent a second reviewer, nothing structurally stops the
+same actor from weakening a gate and, in the same change, planting a claim the gate
+would otherwise have caught (ATK-GATE-07).
+
+Because a second *required human* reviewer is not currently staffed, the honest
+substitute is a **structural CI check** — `scripts/check_gate_integrity.py`, run by
+the `gate integrity (ATK-GATE-07)` job on every pull request:
+
+- It **fails any PR whose diff touches BOTH a gate definition and a claim surface.**
+  - Gate definitions: `config/gates/**`, `scripts/check_*.py`, `src/validation/**`.
+  - Claim surfaces: `STATUS.md`, `README.md`, `docs/**` (except the generated
+    `docs/api/**`, which the API-doc freshness gate already pins to `src/`).
+- A gate-only PR (tightening a check) and a claim-only PR (updating a doc) each
+  pass; only their **combination** in one PR is blocked. To land a change that
+  genuinely needs both, split it: land the gate change in its own PR first, where it
+  is independently reviewable, then update the claim in a follow-up PR.
+
+This mechanically forbids the single-PR "weaken the gate + plant the overclaim"
+attack without a second human. It does **not** eliminate the single-owner risk — a
+determined owner can still land two sequential PRs. That residual is **disclosed
+here, not silently accepted**; the standing invitation below is the path to closing
+it.
+
+**Standing invitation.** An independent reviewer for `config/gates/**` and
+`scripts/check_*.py` is welcome. Onboarding one adds a second `CODEOWNERS` entry for
+those paths and upgrades this structural check from a *substitute* to a *backstop*.
+Contact via the channel in §Reporting a vulnerability.
+
