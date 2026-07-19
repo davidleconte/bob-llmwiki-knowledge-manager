@@ -1,0 +1,27 @@
+{
+  "code_sha": "4fe2a0b1781eb3e15dee841da2a640749d7a97e9",
+  "git_dirty": true,
+  "data_hash": "a15e0b6d8fbd12b3",
+  "config": {
+    "embedding_weight": 0.7,
+    "graph_weight": 0.3,
+    "embedding_backend": "hashing",
+    "k": 3
+  },
+  "seed": 0,
+  "library_versions": {
+    "tiktoken": "0.13.0",
+    "scikit-learn": "1.9.0",
+    "numpy": "2.5.1"
+  },
+  "tiktoken_active": false,
+  "model": "hashing-embeddings",
+  "python_version": "3.12.10",
+  "platform": "macOS-26.4.1-arm64-arm-64bit",
+  "timestamp": "2026-07-19T16:10:17.285132+00:00",
+  "extra": {
+    "corpus": "docs/knowledge-base",
+    "n_queries": 25,
+    "n_docs": 116
+  }
+}

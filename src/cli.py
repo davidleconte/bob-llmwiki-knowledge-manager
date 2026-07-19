@@ -361,7 +361,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         from src.tools.kb_query import KnowledgeBaseQuery
 
         # CODE-02: wire the canonical index and graph into kb-search so the
-        # validated p@3=0.88 stack is actually used (previously keyword-only).
+        # retrieval stack is actually used (previously keyword-only). Retrieval
+        # quality is measured in evaluation/results/retrieval-2026-07-19/ (CLM-06).
         _ks_kb_path = Path(args.kb_path)
         _ks_index = None
         _ks_graph = None
@@ -554,11 +555,14 @@ def main(argv: Optional[List[str]] = None) -> int:
                 and graph_exists
                 and compression_available
             ):
-                # CODE-02/MEM-01: p@3=0.88 only claimed when the wired stack is
-                # confirmed active. No golden set is committed yet so we state
-                # the figure as "per ADR-017" (lab-measured, not re-verified here).
+                # CLM-06: retrieval quality is now a committed, manifest-backed
+                # measurement (evaluation/scripts/score_retrieval.py over a golden
+                # set) rather than a hardcoded p@3 literal. State it as measured,
+                # and point at the report instead of restating a number here.
                 print(
-                    "✅ Full stack active — index+graph wired (p@3=0.88 per ADR-017), compression enabled"
+                    "✅ Full stack active — index+graph wired "
+                    "(retrieval p@3 measured in evaluation/results/retrieval-2026-07-19/report.json), "
+                    "compression enabled"
                 )
             else:
                 print(
