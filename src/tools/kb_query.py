@@ -69,6 +69,11 @@ def _wrap_kb_content(content: str) -> str:
 # ---------------------------------------------------------------------------
 TRUSTED_TIERS = {"verified"}
 QUARANTINE_TIER = "quarantined"
+ARCHIVED_TIER = "archived"
+# Tiers excluded from the retrieval set entirely (skipped, not just content-withheld):
+# quarantined (ATK-MEM-02, security) and archived (D2/MEM-12, curation — marketing /
+# process artifacts kept on disk but out of retrieval). Both remain readable on disk.
+EXCLUDED_FROM_RETRIEVAL = {QUARANTINE_TIER, ARCHIVED_TIER}
 _TRUST_CONTENT_PLACEHOLDER = "[CONTENT WITHHELD — document not in a verified trust tier. Pass include_unverified=True to retrieve.]"
 
 # Minimal regex to extract trust_tier from YAML frontmatter.
@@ -265,9 +270,9 @@ class KnowledgeBaseQuery:
                     with open(md_file, "r", encoding="utf-8") as f:
                         content = f.read()
 
-                    # ATK-MEM-02: skip quarantined documents entirely
+                    # ATK-MEM-02 / D2: skip quarantined AND archived docs entirely
                     tier = _parse_frontmatter_trust_tier(content)
-                    if tier == QUARANTINE_TIER:
+                    if tier in EXCLUDED_FROM_RETRIEVAL:
                         continue
 
                     score = self._calculate_relevance(query, content, md_file.name)
@@ -358,9 +363,9 @@ class KnowledgeBaseQuery:
             except Exception:
                 continue
 
-            # ATK-MEM-02: skip quarantined documents entirely
+            # ATK-MEM-02 / D2: skip quarantined AND archived docs entirely
             tier = _parse_frontmatter_trust_tier(content)
-            if tier == QUARANTINE_TIER:
+            if tier in EXCLUDED_FROM_RETRIEVAL:
                 continue
 
             # Keyword score as tie-breaker (blended at _embedding_weight)

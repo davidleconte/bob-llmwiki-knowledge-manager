@@ -26,6 +26,7 @@ detects tampering. Keep ``.bob/provenance.key`` out of version control.
 - `_KEY_FILE`
 - `_FM_RE`
 - `_FM_FIELD_RE`
+- `_PROMOTED_BY_FIELD`
 
 ## Functions
 
@@ -62,6 +63,20 @@ Return *markdown* with a ``provenance_sig`` field added to its frontmatter.
 
 No-op (returns the input unchanged) if the document has no frontmatter block,
 so an unsignable document is left unsigned rather than silently corrupted.
+
+
+### `promote_document(markdown: str, to_tier: str, promoter: str, key: bytes) -> str`
+
+Promote *markdown* to ``trust_tier: to_tier``, record the promoter, re-sign.
+
+The ``generated → verified`` path (D2/MEM): flips the tier, records
+``promoted_by: <promoter>``, strips the now-stale ``provenance_sig``, and
+re-signs so :func:`verify_document` passes for the promoted tier. A forged
+promotion (editing the tier by hand) fails verification because it lacks a
+signature over the new signed fields.
+
+Raises:
+    ValueError: If the document has no frontmatter to promote.
 
 
 ### `verify_document(markdown: str, key: bytes) -> bool`
