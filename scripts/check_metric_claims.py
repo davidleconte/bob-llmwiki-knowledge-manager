@@ -24,16 +24,33 @@ from __future__ import annotations
 
 import sys
 
-from scripts.check_savings_claims import (
-    BACKED_TOKENS,
-    PERCENT_RE,
-    REPO_ROOT,
-    RETRACTION_TOKENS,
-    _is_backed_by_manifest_path,
-    _scan_despite_banner,
-    has_banner,
-    iter_surfaces,
-)
+try:
+    # Package import: works under pytest / an editable install (repo root on path).
+    from scripts.check_savings_claims import (
+        BACKED_TOKENS,
+        PERCENT_RE,
+        REPO_ROOT,
+        RETRACTION_TOKENS,
+        _is_backed_by_manifest_path,
+        _scan_despite_banner,
+        has_banner,
+        iter_surfaces,
+    )
+except ModuleNotFoundError:
+    # Direct-script run (`python scripts/check_metric_claims.py`, as in CI's ruff
+    # job): only scripts/ is on sys.path[0], not the repo root, so the `scripts`
+    # package is not importable. Fall back to the sibling-module import. This is
+    # the exact condition that failed CI (no `pip install -e .` in the lint job).
+    from check_savings_claims import (  # type: ignore[no-redef]
+        BACKED_TOKENS,
+        PERCENT_RE,
+        REPO_ROOT,
+        RETRACTION_TOKENS,
+        _is_backed_by_manifest_path,
+        _scan_despite_banner,
+        has_banner,
+        iter_surfaces,
+    )
 
 # Retrieval-ranking-quality metric keywords, deliberately scoped to the named
 # retrieval metrics so ordinary English ("recall that…", "with precision") and

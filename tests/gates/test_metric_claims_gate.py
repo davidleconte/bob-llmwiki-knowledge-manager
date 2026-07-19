@@ -9,7 +9,14 @@ inherits the savings gate's banner/frozen logic (C1): frozen records stay exempt
 outward-facing live docs are scanned regardless of any banner.
 """
 
+import subprocess
+import sys
+from pathlib import Path
+
 from scripts.check_metric_claims import line_is_unbacked_metric, scan_text_metrics
+
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+_GATE = _REPO_ROOT / "scripts" / "check_metric_claims.py"
 
 # ---------------------------------------------------------------------------
 # The demonstrated hole: precision / p@N percentage overclaims must be flagged.
@@ -85,3 +92,39 @@ def test_outward_live_doc_metric_scanned_despite_banner():
 def test_frozen_doc_metric_banner_suppressed():
     text = "---\nstatus: superseded\n---\n\n> **HISTORICAL SNAPSHOT.**\n\n- p@3 uplift to 88%.\n"
     assert not scan_text_metrics(text), "a frozen record's banner suppresses the metric scan"
+
+
+# ---------------------------------------------------------------------------
+# CI-invocation regression: the gate must run as a direct script with only
+# scripts/ on sys.path (no editable install, no repo root on the path) — exactly
+# how CI's ruff/lint job invokes `python scripts/check_metric_claims.py`.
+#
+# The original C2 gate used `from scripts.check_savings_claims import ...`, which
+# resolves under pytest / an editable install but raised
+# `ModuleNotFoundError: No module named 'scripts'` on CI, where the lint job never
+# runs `pip install -e .`. `-S` disables site-packages so the editable install is
+# invisible, reproducing that condition; the sibling-import fallback keeps it green.
+# ---------------------------------------------------------------------------
+
+
+def test_gate_runs_as_direct_script_without_repo_on_path(tmp_path):
+    """`python -S scripts/check_metric_claims.py --selftest` from a foreign cwd exits 0.
+
+    Under ``-S`` the editable install is not on the path, so ``scripts`` is not an
+    importable package — precisely the CI lint-job condition. Without the
+    ModuleNotFoundError fallback this crashes at import time (RED); with it, the
+    sibling import resolves and the selftest passes (GREEN).
+    """
+    result = subprocess.run(
+        [sys.executable, "-S", str(_GATE), "--selftest"],
+        capture_output=True,
+        text=True,
+        cwd=tmp_path,  # not the repo root: only scripts/ ends up on sys.path[0]
+    )
+    assert "No module named 'scripts'" not in result.stderr, (
+        f"gate crashed on the sibling package import under CI conditions:\n{result.stderr}"
+    )
+    assert result.returncode == 0, (
+        f"gate must run as a direct script without the repo on sys.path:\n"
+        f"stdout={result.stdout}\nstderr={result.stderr}"
+    )
