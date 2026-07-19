@@ -40,6 +40,26 @@ REPO_PROSE_GLOBS: tuple[str, ...] = (
     "docs/**/*.md",
 )
 
+# The frozen hold-out slice (corpus B, C4/ATK-GATE-01): a fixed i.i.d. subset of the
+# real repo prose, held out from corpus A. Because B is drawn from the SAME
+# distribution as A, an honest headline reproduces on B within sampling error (~0.5pp
+# measured), while a cherry-picked A diverges (~9pp measured). The path list is FROZEN
+# in this manifest so a cherry-pick cannot pre-arrange B.
+HOLDOUT_MANIFEST: str = "evaluation/holdout/holdout-manifest.json"
+
+
+def load_holdout_paths(repo_root: Path) -> set[str]:
+    """Return the frozen set of hold-out relative paths (empty if the manifest absent)."""
+    manifest = repo_root / HOLDOUT_MANIFEST
+    if not manifest.exists():
+        return set()
+    try:
+        data = json.loads(manifest.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return set()
+    return {str(p) for p in data.get("paths", [])}
+
+
 # Path fragments that mark synthetic / mock / invalid inputs. Any candidate whose
 # path contains one of these is dropped -- measuring there is the fraud undone.
 EXCLUDE_FRAGMENTS: tuple[str, ...] = (
@@ -66,15 +86,18 @@ def load_repo_prose(
     """Load the committed real-prose corpus (the CI tier).
 
     Deterministic: files are returned sorted by relative path so the corpus hash
-    and per-document ordering are stable across runs.
+    and per-document ordering are stable across runs. The frozen hold-out slice
+    (corpus B, C4) is **excluded** so A and B are disjoint — a headline measured
+    here must reproduce on the held-out prose it never saw.
     """
+    holdout = load_holdout_paths(repo_root)
     seen: dict[str, Document] = {}
     for pattern in globs:
         for path in repo_root.glob(pattern):
             if not path.is_file() or _is_excluded(path):
                 continue
             rel = path.relative_to(repo_root).as_posix()
-            if rel in seen:
+            if rel in seen or rel in holdout:
                 continue
             try:
                 text = path.read_text(encoding="utf-8")
@@ -84,6 +107,34 @@ def load_repo_prose(
                 continue
             seen[rel] = Document(source=rel, text=text)
     return [seen[key] for key in sorted(seen)]
+
+
+def load_holdout(
+    repo_root: Path,
+    min_words: int = MIN_WORDS,
+) -> List[Document]:
+    """Load the frozen hold-out slice (corpus B, C4) named in the manifest.
+
+    Loads exactly the paths frozen in
+    ``evaluation/holdout/holdout-manifest.json`` that still exist. Deterministic
+    (sorted). Returns ``[]`` when the manifest is absent (e.g. a synthetic test
+    root), so a corpus-B-less run degrades gracefully — :func:`src.validation.holdout_ok`
+    then treats the check as not-applicable.
+    """
+    holdout_paths = load_holdout_paths(repo_root)
+    docs: dict[str, Document] = {}
+    for rel in holdout_paths:
+        path = repo_root / rel
+        if not path.is_file():
+            continue  # frozen path since removed/renamed -> skip (graceful)
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        if len(text.split()) < min_words:
+            continue
+        docs[rel] = Document(source=rel, text=text)
+    return [docs[key] for key in sorted(docs)]
 
 
 def _extract_prompt(payload: object) -> Optional[str]:

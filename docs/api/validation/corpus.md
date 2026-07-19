@@ -19,6 +19,11 @@ compression must collapse to near zero (the "shuffled-labels" analogue).
 
 ## Functions
 
+### `load_holdout_paths(repo_root: Path) -> set[str]`
+
+Return the frozen set of hold-out relative paths (empty if the manifest absent).
+
+
 ### `_is_excluded(path: Path) -> bool`
 
 
@@ -27,7 +32,20 @@ compression must collapse to near zero (the "shuffled-labels" analogue).
 Load the committed real-prose corpus (the CI tier).
 
 Deterministic: files are returned sorted by relative path so the corpus hash
-and per-document ordering are stable across runs.
+and per-document ordering are stable across runs. The frozen hold-out slice
+(corpus B, C4) is **excluded** so A and B are disjoint — a headline measured
+here must reproduce on the held-out prose it never saw.
+
+
+### `load_holdout(repo_root: Path, min_words: int) -> List[Document]`
+
+Load the frozen hold-out slice (corpus B, C4) named in the manifest.
+
+Loads exactly the paths frozen in
+``evaluation/holdout/holdout-manifest.json`` that still exist. Deterministic
+(sorted). Returns ``[]`` when the manifest is absent (e.g. a synthetic test
+root), so a corpus-B-less run degrades gracefully — :func:`src.validation.holdout_ok`
+then treats the check as not-applicable.
 
 
 ### `_extract_prompt(payload: object) -> Optional[str]`
