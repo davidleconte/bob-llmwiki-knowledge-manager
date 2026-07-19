@@ -146,7 +146,7 @@ Replace `git clone github.com/yourusername/...` with the real repo URL from
 **Revised P0-5 scope:**
 1. Add an explicit note to `src/facade.py` docstring clarifying L1/L2 scope:
    `optimize()` uses L1 only; L2 is accessible only via `facade.cache.get()` directly
-2. Add the same note to `docs/architecture/architecture.md §5` (cache section)
+2. Add the same note to `docs/architecture/ARCHITECTURE.md §5` (cache section)
 3. Do NOT change `STATUS.md` overall status string without also updating
    `check_status_consistency.py:CANONICAL_STATUS` — update both atomically
 
@@ -159,7 +159,7 @@ Replace `git clone github.com/yourusername/...` with the real repo URL from
 
 S3 and S4 from the original checklist are **removed** — both bugs were already fixed.
 S5 is **done** — scope notes already present in `src/facade.py:49–53` and
-`docs/architecture/architecture.md:238`.
+`docs/architecture/ARCHITECTURE.md:238`.
 S1 and S2 are **done** — retraction banner at line 11 of the summary doc; broken URL no longer in `INSTALLATION.md`.
 S6 is **partially done** — `pyproject.toml` is already at `1.0.0`; CHANGELOG token-optimization content remains under `[Unreleased]`.
 
@@ -427,7 +427,7 @@ path is the exact maturity anti-pattern this plan avoids.
 - **Feasibility study:** [`../research/kb-tos-integration-feasibility-2026-07-14.md`](../research/kb-tos-integration-feasibility-2026-07-14.md)
 - **Embedding layer concept:** [`../concepts/kb-tos-embedding-layer.md`](../concepts/kb-tos-embedding-layer.md)
 - **Phase-8 sign-off audit:** [`../research/audit-2026-07-14-signoff.md`](../research/audit-2026-07-14-signoff.md)
-- **Current TOS architecture:** [`../../../docs/architecture/architecture.md`](../../../docs/architecture/architecture.md)
+- **Current TOS architecture:** [`../../../docs/architecture/ARCHITECTURE.md`](../../../docs/architecture/ARCHITECTURE.md)
 - **Gap closure plan:** [`../../project-management/planning/gap-closure-plan.md`](../../project-management/planning/gap-closure-plan.md)
 - **A+ plan:** [`../../project-management/planning/a-plus-plan.md`](../../project-management/planning/a-plus-plan.md)
 

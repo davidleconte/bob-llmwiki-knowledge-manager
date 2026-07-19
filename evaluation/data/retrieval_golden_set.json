@@ -1,0 +1,131 @@
+{
+  "description": "Retrieval p@3 golden set (25 queries, one expected doc each). Extracted from docs/knowledge-base/research/kb-query-ab-validation-2026-07.md.",
+  "k": 3,
+  "queries": [
+    {
+      "query": "multi-level caching L1 L2 hierarchy",
+      "expected": "multi-level-caching-architecture-patterns",
+      "expected_doc_id": "concepts/multi-level-caching-architecture-patterns.md"
+    },
+    {
+      "query": "exact match semantic cache layers",
+      "expected": "multi-level-caching.md",
+      "expected_doc_id": "concepts/multi-level-caching.md"
+    },
+    {
+      "query": "embedding layer persistent index",
+      "expected": "kb-tos-embedding-layer",
+      "expected_doc_id": "concepts/kb-tos-embedding-layer.md"
+    },
+    {
+      "query": "token optimization compression savings",
+      "expected": "token-optimization.md",
+      "expected_doc_id": "concepts/token-optimization.md"
+    },
+    {
+      "query": "dependency security audit packages",
+      "expected": "dependency-analysis.md",
+      "expected_doc_id": "concepts/dependency-analysis.md"
+    },
+    {
+      "query": "kb tos integration roadmap P0 P1 P2",
+      "expected": "kb-tos-integration-roadmap",
+      "expected_doc_id": "guides/kb-tos-integration-roadmap.md"
+    },
+    {
+      "query": "using both systems token optimizer KB",
+      "expected": "using-both-systems-together",
+      "expected_doc_id": "guides/using-both-systems-together.md"
+    },
+    {
+      "query": "dual system use case example",
+      "expected": "dual-system-use-case-example",
+      "expected_doc_id": "guides/dual-system-use-case-example.md"
+    },
+    {
+      "query": "quick install token optimizer bob-optimize",
+      "expected": "token-optimizer-quick-install",
+      "expected_doc_id": "guides/token-optimizer-quick-install.md"
+    },
+    {
+      "query": "setup token optimization guide",
+      "expected": "setup-token-optimization",
+      "expected_doc_id": "guides/setup-token-optimization.md"
+    },
+    {
+      "query": "cost tracking guide",
+      "expected": "cost-tracking-guide",
+      "expected_doc_id": "guides/cost-tracking-guide.md"
+    },
+    {
+      "query": "activate knowledge manager new session",
+      "expected": "activating-knowledge-manager",
+      "expected_doc_id": "guides/activating-knowledge-manager-in-new-session.md"
+    },
+    {
+      "query": "e2e end-to-end testing setup",
+      "expected": "e2e-testing-setup-guide",
+      "expected_doc_id": "guides/e2e-testing-setup-guide.md"
+    },
+    {
+      "query": "remediation action plan audit",
+      "expected": "audit-remediation-action-plan",
+      "expected_doc_id": "guides/audit-remediation-action-plan.md"
+    },
+    {
+      "query": "real time monitoring guide",
+      "expected": "real-time-monitoring-guide",
+      "expected_doc_id": "guides/real-time-monitoring-guide.md"
+    },
+    {
+      "query": "cache API reference interface",
+      "expected": "cache-api.md",
+      "expected_doc_id": "references/cache-api.md"
+    },
+    {
+      "query": "savings estimation methodology",
+      "expected": "kb-savings-estimation",
+      "expected_doc_id": "references/kb-savings-estimation-methodology.md"
+    },
+    {
+      "query": "integration feasibility study challenges",
+      "expected": "kb-tos-integration-feasibility",
+      "expected_doc_id": "research/kb-tos-integration-feasibility-2026-07-14.md"
+    },
+    {
+      "query": "external audit codebase 2026-07-12",
+      "expected": "external-audit-2026-07-12",
+      "expected_doc_id": "research/external-audit-2026-07-12.md"
+    },
+    {
+      "query": "performance benchmarks latency",
+      "expected": "performance-benchmarks",
+      "expected_doc_id": "research/performance-benchmarks.md"
+    },
+    {
+      "query": "test coverage report",
+      "expected": "test-coverage",
+      "expected_doc_id": "research/test-coverage-2026-07-12.md"
+    },
+    {
+      "query": "security scan vulnerabilities",
+      "expected": "security-scan",
+      "expected_doc_id": "research/security-scan-2026-07-12.md"
+    },
+    {
+      "query": "phase2 thread safety concurrency",
+      "expected": "phase2-thread-safety",
+      "expected_doc_id": "research/phase2-thread-safety-fixes-complete.md"
+    },
+    {
+      "query": "delegation module analysis integration",
+      "expected": "delegation-integration-analysis",
+      "expected_doc_id": "research/delegation-integration-analysis-2026-07-13.md"
+    },
+    {
+      "query": "adversarial review round1 critical",
+      "expected": "adversarial-review-round1",
+      "expected_doc_id": "research/adversarial-review-round1-2026-07-13.md"
+    }
+  ]
+}

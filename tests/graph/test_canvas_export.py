@@ -98,9 +98,7 @@ def test_edge_colours(tmp_path: Path) -> None:
     def nid(doc_id: str) -> str:
         return hashlib.md5(doc_id.encode()).hexdigest()[:8]
 
-    color_by_pair = {
-        (e["fromNode"], e["toNode"]): e["color"] for e in canvas["edges"]
-    }
+    color_by_pair = {(e["fromNode"], e["toNode"]): e["color"] for e in canvas["edges"]}
 
     explicit_pair = (nid("concepts/alpha.md"), nid("concepts/beta.md"))
     semantic_pair = (nid("concepts/alpha.md"), nid("guides/gamma.md"))
@@ -120,9 +118,7 @@ def test_semantic_edge_label_format(tmp_path: Path) -> None:
         return hashlib.md5(doc_id.encode()).hexdigest()[:8]
 
     semantic_pair = (nid("concepts/alpha.md"), nid("guides/gamma.md"))
-    label_by_pair = {
-        (e["fromNode"], e["toNode"]): e.get("label") for e in canvas["edges"]
-    }
+    label_by_pair = {(e["fromNode"], e["toNode"]): e.get("label") for e in canvas["edges"]}
     assert label_by_pair[semantic_pair] == "0.42"
 
 
@@ -135,9 +131,7 @@ def test_explicit_edge_label_preserved(tmp_path: Path) -> None:
         return hashlib.md5(doc_id.encode()).hexdigest()[:8]
 
     explicit_pair = (nid("concepts/alpha.md"), nid("concepts/beta.md"))
-    label_by_pair = {
-        (e["fromNode"], e["toNode"]): e.get("label") for e in canvas["edges"]
-    }
+    label_by_pair = {(e["fromNode"], e["toNode"]): e.get("label") for e in canvas["edges"]}
     assert label_by_pair[explicit_pair] == "see Beta"
 
 

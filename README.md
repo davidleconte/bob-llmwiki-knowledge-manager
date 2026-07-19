@@ -361,8 +361,13 @@ emits a `UserWarning` and silently uses `HashingVectorizer` (1000-dim, <1 ms, no
 KB retrieval is **never blocked** by a missing MiniLM installation.
 
 > **Why it matters:** `HashingVectorizer` p@3=0.60 vs MiniLM-L6-v2 p@3=0.88 on the
-> 25-query KB golden set (live validation, 80-doc corpus). Use MiniLM for best retrieval
-> quality. See ADR-014 and the [graph validation report](docs/knowledge-base/research/graph-validation-2026-07-17.md).
+> 25-query KB golden set (live validation, 80-doc corpus). That 0.88 is a MiniLM
+> (`w=1.0`) lab number **not reproducible in CI** (MiniLM needs the optional
+> `mlx-embeddings`/`sentence-transformers`); on the shipped default backend
+> (`HashingVectorizer`, `w=0.7`, current 116-doc golden set) the reproducible,
+> manifest-backed result is **p@3=0.84 with no net lift over keyword-only** (keyword
+> baseline also 0.84), in `evaluation/results/retrieval-2026-07-19/`. Use MiniLM for best
+> retrieval quality. See ADR-014 and the [graph validation report](docs/knowledge-base/research/graph-validation-2026-07-17.md).
 
 ---
 
@@ -398,9 +403,12 @@ Each KB document becomes a **node** with 10 properties (`NodeProps`): title, cat
 
 > **`graph_weight=0.0` is the validated default.** Live validation on an 80-doc corpus with MiniLM
 > showed no uplift and no regression from graph re-ranking at any tested weight (0.1–0.5): p@3
-> remained 0.88 with or without graph. The graph adds value through structural analysis (orphan/hub
-> detection), not through score blending, on the current corpus size. See
-> [ADR-017](docs/adr/017-knowledge-graph-layer.md).
+> remained 0.88 with or without graph. That 0.88 is a MiniLM (`w=1.0`) lab number not reproducible
+> in CI (MiniLM needs the optional `mlx-embeddings`/`sentence-transformers`); the reproducible
+> default-backend number (`HashingVectorizer`, `w=0.7`, current 116-doc golden set) is p@3=0.84 with
+> no net lift over keyword-only (`evaluation/results/retrieval-2026-07-19/`). The graph adds value
+> through structural analysis (orphan/hub detection), not through score blending, on the current
+> corpus size. See [ADR-017](docs/adr/017-knowledge-graph-layer.md).
 
 ```python
 from pathlib import Path
@@ -441,7 +449,11 @@ bob-optimize graph-health  --kb-path docs/knowledge-base   # orphans, hubs, brok
 
 **Live validation (80-doc corpus, MiniLM):** 2 836 edges, 39→13 orphans rescued,
 p@3=0.88 — identical with or without graph re-ranking at the validated
-`graph_weight=0.0` default. See [ADR-017](docs/adr/017-knowledge-graph-layer.md) and
+`graph_weight=0.0` default. That 0.88 is a MiniLM (`w=1.0`) lab number not reproducible in CI
+(MiniLM needs the optional `mlx-embeddings`/`sentence-transformers`); the reproducible
+default-backend result (`HashingVectorizer`, `w=0.7`, current 116-doc golden set) is p@3=0.84 with
+no net lift over keyword-only (`evaluation/results/retrieval-2026-07-19/`). See
+[ADR-017](docs/adr/017-knowledge-graph-layer.md) and
 the [validation report](docs/knowledge-base/research/graph-validation-2026-07-17.md).
 
 ### How `bob-optimize` works inside Bob Shell and Bob IDE
@@ -630,9 +642,9 @@ Trajectory: D− (0.9) → B+/A− (3.46) → A− (3.70) → A (3.89) → A (4.
 | Dimension | Self-assessed | Independent (2026-07-19) | Notes |
 |-----------|:-------------:|:------------------------:|-------|
 | Product Integrity & Claims | A+ | 3.5/5 | Honesty machinery best-in-class; honesty gates have guard rot; A+ grade self-conferred |
-| Architecture & Design | A+ | 2.0/5 | Validated retrieval engine (p@3=0.88) unwired from every production path |
+| Architecture & Design | A+ | 2.0/5 | Retrieval engine now wired into `kb-search`, but on the default backend measures p@3=0.84 with no net lift over keyword (`evaluation/results/retrieval-2026-07-19/`); the 0.88 was a MiniLM (`w=1.0`) lab result not reproducible in CI |
 | Code Correctness | A+ | 2.5/5 | Cache, truncation trustworthy; optimizer can return empty string; L2→L1 promotion mislabels |
-| Testing & Verification | A+ | 4.0/5 | **~1 200+ tests** · ≥80% coverage gate (89.82%) · 3 CI gates currently failing (working tree) |
+| Testing & Verification | A+ | 4.0/5 | **~1 200+ tests** · ≥80% coverage gate (measured snapshot in STATUS.md) · 3 CI gates currently failing (working tree) |
 | Build, Release & Supply-Chain | A+ | 4.0/5 | `uv sync --frozen` · `pip-audit --strict` · 0 CVEs · CycloneDX SBOM · 3.11+3.12 matrix |
 | Documentation | A+ | — | Two arc42 docs · 19 ADRs · STRIDE threat model · formal SLA; ~35–40 broken cross-references |
 | Governance & Compliance | A+ | — | CODEOWNERS complete; validate-kb.sh subshell bug always passes link check |

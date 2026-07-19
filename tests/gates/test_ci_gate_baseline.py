@@ -4,6 +4,7 @@ If any of these tests start failing it means a gate that was passing has been
 broken by a subsequent commit — exactly the kind of silent regression this
 sub-task exists to catch early.
 """
+
 from __future__ import annotations
 
 import subprocess

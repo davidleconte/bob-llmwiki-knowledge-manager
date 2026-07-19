@@ -1,0 +1,288 @@
+{
+  "metric": "p_at_3",
+  "k": 3,
+  "p_at_3_wired": 0.84,
+  "p_at_3_keyword_baseline": 0.84,
+  "hits_wired": 21,
+  "hits_keyword": 21,
+  "n_queries": 25,
+  "per_query": [
+    {
+      "query": "multi-level caching L1 L2 hierarchy",
+      "expected": "concepts/multi-level-caching-architecture-patterns.md",
+      "top_k": [
+        "concepts/multi-level-caching-architecture-patterns.md",
+        "concepts/token-optimization.md",
+        "concepts/multi-level-caching.md"
+      ],
+      "hit": true
+    },
+    {
+      "query": "exact match semantic cache layers",
+      "expected": "concepts/multi-level-caching.md",
+      "top_k": [
+        "references/cache-api.md",
+        "concepts/multi-level-caching.md",
+        "research/kb-query-ab-validation-2026-07.md"
+      ],
+      "hit": true
+    },
+    {
+      "query": "embedding layer persistent index",
+      "expected": "concepts/kb-tos-embedding-layer.md",
+      "top_k": [
+        "concepts/kb-tos-embedding-layer.md",
+        "guides/kb-tos-integration-roadmap.md",
+        "guides/knowledge-graph-usage-guide.md"
+      ],
+      "hit": true
+    },
+    {
+      "query": "token optimization compression savings",
+      "expected": "concepts/token-optimization.md",
+      "top_k": [
+        "concepts/token-optimization.md",
+        "research/bobcoin-savings-analysis-2026-07-14.md",
+        "guides/setup-token-optimization.md"
+      ],
+      "hit": true
+    },
+    {
+      "query": "dependency security audit packages",
+      "expected": "concepts/dependency-analysis.md",
+      "top_k": [
+        "research/graph-validation-2026-07-17.md",
+        "research/kb-query-ab-validation-2026-07.md",
+        "guides/complete-repository-analysis.md"
+      ],
+      "hit": false
+    },
+    {
+      "query": "kb tos integration roadmap P0 P1 P2",
+      "expected": "guides/kb-tos-integration-roadmap.md",
+      "top_k": [
+        "research/kb-query-ab-validation-2026-07.md",
+        "guides/kb-tos-integration-roadmap.md",
+        "research/full-technical-design-retro-2026-07.md"
+      ],
+      "hit": true
+    },
+    {
+      "query": "using both systems token optimizer KB",
+      "expected": "guides/using-both-systems-together.md",
+      "top_k": [
+        "research/bobcoin-savings-analysis-2026-07-14.md",
+        "guides/using-both-systems-together.md",
+        "guides/dual-system-use-case-example.md"
+      ],
+      "hit": true
+    },
+    {
+      "query": "dual system use case example",
+      "expected": "guides/dual-system-use-case-example.md",
+      "top_k": [
+        "guides/dual-system-use-case-example.md",
+        "references/kb-savings-estimation-methodology.md",
+        "research/kb-query-ab-validation-2026-07.md"
+      ],
+      "hit": true
+    },
+    {
+      "query": "quick install token optimizer bob-optimize",
+      "expected": "guides/token-optimizer-quick-install.md",
+      "top_k": [
+        "guides/token-optimizer-quick-install.md",
+        "research/business-case-2026-07.md",
+        "guides/using-both-systems-together.md"
+      ],
+      "hit": true
+    },
+    {
+      "query": "setup token optimization guide",
+      "expected": "guides/setup-token-optimization.md",
+      "top_k": [
+        "references/bob-optimize-cli-reference.md",
+        "research/kb-query-ab-validation-2026-07.md",
+        "guides/cost-tracking-guide.md"
+      ],
+      "hit": false
+    },
+    {
+      "query": "cost tracking guide",
+      "expected": "guides/cost-tracking-guide.md",
+      "top_k": [
+        "guides/real-time-savings-measurement-guide.md",
+        "research/cost-tracking-lessons-learned.md",
+        "references/kb-savings-estimation-methodology.md"
+      ],
+      "hit": false
+    },
+    {
+      "query": "activate knowledge manager new session",
+      "expected": "guides/activating-knowledge-manager-in-new-session.md",
+      "top_k": [
+        "guides/activating-knowledge-manager-in-new-session.md",
+        "research/kb-mode-switch-lessons-2026-07.md",
+        "guides/km-bobcoin-savings-measurement-guide.md"
+      ],
+      "hit": true
+    },
+    {
+      "query": "e2e end-to-end testing setup",
+      "expected": "guides/e2e-testing-setup-guide.md",
+      "top_k": [
+        "research/kb-query-ab-validation-2026-07.md",
+        "guides/cost-tracking-guide.md",
+        "research/cost-tracking-lessons-learned.md"
+      ],
+      "hit": false
+    },
+    {
+      "query": "remediation action plan audit",
+      "expected": "guides/audit-remediation-action-plan.md",
+      "top_k": [
+        "guides/phase6-real-world-validation-plan.md",
+        "guides/audit-remediation-action-plan.md",
+        "guides/phase5-documentation-reconciliation-complete.md"
+      ],
+      "hit": true
+    },
+    {
+      "query": "real time monitoring guide",
+      "expected": "guides/real-time-monitoring-guide.md",
+      "top_k": [
+        "guides/real-time-monitoring-guide.md",
+        "research/phase3-real-time-monitoring-implementation.md",
+        "research/phase3-monitoring-lessons-learned.md"
+      ],
+      "hit": true
+    },
+    {
+      "query": "cache API reference interface",
+      "expected": "references/cache-api.md",
+      "top_k": [
+        "references/cache-api.md",
+        "guides/setup-token-optimization.md",
+        "concepts/token-optimization.md"
+      ],
+      "hit": true
+    },
+    {
+      "query": "savings estimation methodology",
+      "expected": "references/kb-savings-estimation-methodology.md",
+      "top_k": [
+        "references/kb-savings-estimation-methodology.md",
+        "research/cost-tracking-lessons-learned.md",
+        "research/kb-mode-switch-lessons-2026-07.md"
+      ],
+      "hit": true
+    },
+    {
+      "query": "integration feasibility study challenges",
+      "expected": "research/kb-tos-integration-feasibility-2026-07-14.md",
+      "top_k": [
+        "research/kb-tos-integration-feasibility-2026-07-14.md",
+        "concepts/kb-tos-embedding-layer.md",
+        "research/kb-query-ab-validation-2026-07.md"
+      ],
+      "hit": true
+    },
+    {
+      "query": "external audit codebase 2026-07-12",
+      "expected": "research/external-audit-2026-07-12.md",
+      "top_k": [
+        "research/external-audit-2026-07-12.md",
+        "research/audit-2026-07-13-institutional.md",
+        "research/full-codebase-review-2026-07-14.md"
+      ],
+      "hit": true
+    },
+    {
+      "query": "performance benchmarks latency",
+      "expected": "research/performance-benchmarks.md",
+      "top_k": [
+        "research/performance-benchmarks.md",
+        "research/phase1-lessons-learned-2026-07-13.md",
+        "research/adversarial-review-round2-2026-07-13.md"
+      ],
+      "hit": true
+    },
+    {
+      "query": "test coverage report",
+      "expected": "research/test-coverage-2026-07-12.md",
+      "top_k": [
+        "research/test-coverage-2026-07-13.md",
+        "research/test-coverage-2026-07-12.md",
+        "guides/complete-repository-analysis.md"
+      ],
+      "hit": true
+    },
+    {
+      "query": "security scan vulnerabilities",
+      "expected": "research/security-scan-2026-07-12.md",
+      "top_k": [
+        "research/security-scan-2026-07-13.md",
+        "research/security-scan-2026-07-12.md",
+        "guides/complete-repository-analysis.md"
+      ],
+      "hit": true
+    },
+    {
+      "query": "phase2 thread safety concurrency",
+      "expected": "research/phase2-thread-safety-fixes-complete.md",
+      "top_k": [
+        "research/phase2-thread-safety-fixes-complete.md",
+        "research/phase2-concurrency-test-results.md",
+        "concepts/cache-thread-safety-patterns.md"
+      ],
+      "hit": true
+    },
+    {
+      "query": "delegation module analysis integration",
+      "expected": "research/delegation-integration-analysis-2026-07-13.md",
+      "top_k": [
+        "research/delegation-integration-analysis-2026-07-13.md",
+        "concepts/delegation-analysis-pipeline.md",
+        "guides/audit-remediation-status.md"
+      ],
+      "hit": true
+    },
+    {
+      "query": "adversarial review round1 critical",
+      "expected": "research/adversarial-review-round1-2026-07-13.md",
+      "top_k": [
+        "research/adversarial-review-round1-2026-07-13.md",
+        "research/adversarial-review-round2-2026-07-13.md",
+        "guides/remediation-plan-detailed-2026-07-13.md"
+      ],
+      "hit": true
+    }
+  ],
+  "manifest": {
+    "code_sha": "4fe2a0b1781eb3e15dee841da2a640749d7a97e9",
+    "git_dirty": true,
+    "data_hash": "a15e0b6d8fbd12b3",
+    "config": {
+      "embedding_weight": 0.7,
+      "graph_weight": 0.3,
+      "embedding_backend": "hashing",
+      "k": 3
+    },
+    "seed": 0,
+    "library_versions": {
+      "tiktoken": "0.13.0",
+      "scikit-learn": "1.9.0",
+      "numpy": "2.5.1"
+    },
+    "tiktoken_active": false,
+    "model": "hashing-embeddings",
+    "python_version": "3.12.10",
+    "platform": "macOS-26.4.1-arm64-arm-64bit",
+    "timestamp": "2026-07-19T16:10:17.285132+00:00",
+    "extra": {
+      "corpus": "docs/knowledge-base",
+      "n_queries": 25,
+      "n_docs": 116
+    }
+  }
+}

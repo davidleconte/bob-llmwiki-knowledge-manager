@@ -205,7 +205,7 @@ See [`STATUS.md`](../../../STATUS.md) for full dimension breakdown and roadmap.
 
 **Documentation:**
 - [Complete Documentation Index](../../INDEX.md)
-- [Knowledge Base](../INDEX.md)
+- [Knowledge Base](../index.md)
 
 **Issues:**
 - GitHub Issues (if public repo)

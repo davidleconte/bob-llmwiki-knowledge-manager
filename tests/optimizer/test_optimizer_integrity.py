@@ -1,5 +1,5 @@
 """CODE-03/ATK-FS-03 regression: optimizer must never return empty, must preserve structure."""
-import pytest
+
 from src.optimizer.prompt_optimizer import PromptOptimizer
 
 
@@ -10,6 +10,7 @@ def _make_optimizer(max_tokens: int) -> PromptOptimizer:
 # ---------------------------------------------------------------------------
 # Never-empty post-condition (CODE-03)
 # ---------------------------------------------------------------------------
+
 
 def test_optimize_never_empty_for_long_input():
     """optimize() must not return empty string even for inputs >4096 tokens (CODE-03)."""
@@ -43,6 +44,7 @@ def test_optimize_never_empty_for_any_nonempty_input():
 # Structure preservation (CODE-07)
 # ---------------------------------------------------------------------------
 
+
 def test_frontmatter_preserved_through_optimization():
     """YAML frontmatter must survive _remove_redundancy (CODE-07)."""
     text = "---\ntitle: Test Document\ndate: 2026-07-19\ntrust_tier: verified\n---\n\n# Heading\n\nBody text here."
@@ -55,7 +57,9 @@ def test_frontmatter_preserved_through_optimization():
 
 def test_fenced_code_block_preserved_through_optimization():
     """Fenced code blocks must survive _remove_redundancy (CODE-07)."""
-    text = "# Doc\n\nSome text here.\n\n```python\ndef hello():\n    return 'hello'\n```\n\nMore text."
+    text = (
+        "# Doc\n\nSome text here.\n\n```python\ndef hello():\n    return 'hello'\n```\n\nMore text."
+    )
     optimizer = _make_optimizer(max_tokens=4096)
     result = optimizer.optimize(text)
     optimized = result["optimized_text"]
@@ -78,9 +82,10 @@ def test_multiline_structure_preserved():
 # Truncation flag (ATK-FS-03)
 # ---------------------------------------------------------------------------
 
+
 def test_truncated_flag_set_when_content_dropped():
     """result['truncated'] must be True when content is dropped (ATK-FS-03).
-    
+
     Use a text where each line is unique (not repeated phrases), so truncation
     rather than redundancy removal is the mechanism that reduces size.
     """
@@ -98,16 +103,16 @@ def test_truncated_flag_false_for_short_input():
     """result['truncated'] must be False when no content is dropped."""
     optimizer = _make_optimizer(max_tokens=4096)
     result = optimizer.optimize("short text")
-    assert result.get("truncated") is False, (
-        "result['truncated'] incorrectly True for short input"
-    )
+    assert result.get("truncated") is False, "result['truncated'] incorrectly True for short input"
 
 
 def test_regression_3756_token_input():
     """Regression: a 3756-token input with max_tokens=100 must not return empty (CODE-03)."""
     # Build a markdown document that was observed to produce empty output
-    sections = ["# Section {i}\n\nThis is content for section {i}. It discusses topic {i}.".format(i=i)
-                for i in range(50)]
+    sections = [
+        "# Section {i}\n\nThis is content for section {i}. It discusses topic {i}.".format(i=i)
+        for i in range(50)
+    ]
     text = "\n\n".join(sections)
     optimizer = _make_optimizer(max_tokens=100)
     result = optimizer.optimize(text)

@@ -37,7 +37,6 @@ from __future__ import annotations
 import re
 import sys
 from pathlib import Path
-from typing import Optional
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -76,10 +75,18 @@ _GRADE_RE = re.compile(r"\*\*([A-F][+-]?)\s+\((\d+\.\d+)/4\.30\)\*\*")
 _MAX_NUMERIC_GRADE = 4.30
 # Minimum numeric threshold for each letter prefix (A+ = ≥4.0, A = ≥3.7, etc.)
 _GRADE_THRESHOLDS = {
-    "A+": 4.0, "A": 3.7, "A-": 3.3,
-    "B+": 3.0, "B": 2.7, "B-": 2.3,
-    "C+": 2.0, "C": 1.7, "C-": 1.3,
-    "D+": 1.0, "D": 0.7, "D-": 0.3,
+    "A+": 4.0,
+    "A": 3.7,
+    "A-": 3.3,
+    "B+": 3.0,
+    "B": 2.7,
+    "B-": 2.3,
+    "C+": 2.0,
+    "C": 1.7,
+    "C-": 1.3,
+    "D+": 1.0,
+    "D": 0.7,
+    "D-": 0.3,
     "F": 0.0,
 }
 
@@ -186,7 +193,33 @@ def gate_claims(text: str) -> list[tuple[int, float, str]]:
     return claims
 
 
-def _doc_problems(text: str, fail_under: float, delegation_floor: float) -> list[str]:
+_DECIMAL_PCT = re.compile(r"\d+\.\d+\s*%")
+
+
+def measured_coverage_snapshots(text: str) -> list[tuple[int, str]]:
+    """(line_no, line) for coverage lines carrying a *measured* decimal snapshot.
+
+    CLM-03: a measured coverage number (e.g. "89.12%") has a single home,
+    STATUS.md; every other live doc must defer to it rather than restate a value
+    that rots as coverage moves. Gate-shaped tokens (``>=80%``, ``80%+``,
+    ``fail_under=80``) are legitimate anywhere and are stripped before the check,
+    so only a residual decimal percentage on a coverage line is flagged.
+    """
+    out: list[tuple[int, str]] = []
+    for line_no, line in enumerate(text.splitlines(), start=1):
+        if "cover" not in line.lower():
+            continue
+        if _DECIMAL_PCT.search(_GATE_TOKEN.sub("", line)):
+            out.append((line_no, line.strip()))
+    return out
+
+
+def _doc_problems(
+    text: str,
+    fail_under: float,
+    delegation_floor: float,
+    is_status_home: bool = False,
+) -> list[str]:
     """Every single-home inconsistency in one doc's text. Pure (no I/O)."""
     problems: list[str] = []
 
@@ -228,6 +261,15 @@ def _doc_problems(text: str, fail_under: float, delegation_floor: float) -> list
     # (2d) ATK-GATE-06: grade validation — numeric must not exceed 4.30
     problems.extend(_validate_grade(text))
 
+    # (2e) CLM-03: a measured coverage snapshot belongs only in STATUS.md.
+    if not is_status_home:
+        for line_no, line in measured_coverage_snapshots(text):
+            problems.append(
+                f"    L{line_no}: measured coverage snapshot outside STATUS.md — "
+                "defer to STATUS.md, the single home for the measured number\n"
+                f"        {line}"
+            )
+
     return problems
 
 
@@ -246,6 +288,16 @@ def _selftest() -> int:
         got = bool(_doc_problems(text, fail_under, floor))
         if got != expect:
             failures.append(f"{label}: problems={got}, expected={expect}: {text!r}")
+
+    # CLM-03: measured snapshot flagged off-home, allowed on-home; gate token clean.
+    snap = "Point-in-time snapshot: 89.12% global coverage."
+    if not _doc_problems(snap, fail_under, floor, is_status_home=False):
+        failures.append("measured coverage snapshot off-home not flagged")
+    if _doc_problems(snap, fail_under, floor, is_status_home=True):
+        failures.append("measured coverage snapshot on-home wrongly flagged")
+    if _doc_problems("Coverage gate is >= 80% enforced.", fail_under, floor, is_status_home=False):
+        failures.append("coverage gate token wrongly flagged as measured snapshot")
+
     if failures:
         print("SELFTEST FAILED:", file=sys.stderr)
         for f in failures:
@@ -277,7 +329,9 @@ def main() -> int:
             print(f"  SKIP {rel}: banner-marked deprecated/stale")
             continue
 
-        problems = _doc_problems(text, fail_under, delegation_floor)
+        problems = _doc_problems(
+            text, fail_under, delegation_floor, is_status_home=(rel == "STATUS.md")
+        )
 
         if problems:
             failures.append(rel)

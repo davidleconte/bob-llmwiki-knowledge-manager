@@ -58,6 +58,8 @@ docs/knowledge-base/.DS_Store
 evaluation/reports/
 .bob/kb-index/
 .bob/kb-graph.json
+# Provenance signing key (ATK-MEM-06) — local integrity secret, never commit
+.bob/provenance.key
 
 # Bob IDE Labs and Recipes — unrelated to this project's topic
 LABs/

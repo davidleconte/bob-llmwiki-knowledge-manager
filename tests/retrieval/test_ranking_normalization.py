@@ -1,19 +1,17 @@
 """CODE-05/06 regression: recency and PageRank normalization."""
-import time
+
 from datetime import datetime, timezone
-import pytest
 
-from src.tools.kb_query import KnowledgeBaseQuery
 from src.graph.ranker import GraphRanker
-
+from src.tools.kb_query import KnowledgeBaseQuery
 
 # ---------------------------------------------------------------------------
 # CODE-05: recency normalization must be result-set-relative
 # ---------------------------------------------------------------------------
 
+
 def test_recency_normalization_is_result_set_relative(tmp_kb):
     """A 2020 doc and a 2026 doc must score 0.0 and 1.0 recency respectively (CODE-05)."""
-    from datetime import datetime, timezone
     import os
 
     doc_old = tmp_kb / "concepts" / "old-doc.md"
@@ -38,7 +36,7 @@ def test_recency_normalization_is_result_set_relative(tmp_kb):
 
     if new_idx is not None and old_idx is not None:
         assert new_idx < old_idx, (
-            f"New doc (rank {new_idx+1}) should rank above old doc (rank {old_idx+1}) "
+            f"New doc (rank {new_idx + 1}) should rank above old doc (rank {old_idx + 1}) "
             f"when recency_weight=1.0"
         )
 
@@ -53,6 +51,7 @@ def test_recency_single_doc_does_not_crash(tmp_kb):
 # ---------------------------------------------------------------------------
 # CODE-06: PageRank normalization must be result-set-relative
 # ---------------------------------------------------------------------------
+
 
 def test_pagerank_normalization_moves_rank():
     """A high-PageRank doc must overtake a lower-ranked doc at graph_weight=0.9 (CODE-06).

@@ -19,6 +19,9 @@ Design decisions: ADR-017.
 - `_FM_TAGS_INLINE_RE`
 - `_FM_TAGS_BLOCK_RE`
 - `_LINK_RE`
+- `_MAX_EXPLICIT_EDGES_PER_NODE`
+- `_MAX_EXPLICIT_TOTAL_EDGES`
+- `_QUARANTINE_TIER`
 - `_DEFAULT_MAX_EDGES_PER_NODE`
 - `_DEFAULT_MAX_TOTAL_EDGES`
 
@@ -96,12 +99,20 @@ Returns:
     A fully populated :class:`~src.graph.graph.KnowledgeGraph`.
 
 
-##### `build_explicit(graph: KnowledgeGraph) -> int`
+##### `build_explicit(graph: KnowledgeGraph, max_edges_per_node: int, max_total_edges: int) -> int`
 
-Parse frontmatter ``related:`` lists and inline markdown links → explicit edges.
+Parse frontmatter ``related:`` lists and inline links → explicit edges.
+
+ATK-MEM-05: the explicit path is fully author-controlled, so a crafted
+document could otherwise mint unbounded (and duplicate) edges and skew
+PageRank. Targets are de-duplicated per source, per-source / global caps
+mirror the semantic-edge caps (ATK-DOS-02), and quarantined documents
+neither emit nor receive explicit edges.
 
 Args:
     graph: Graph to populate (nodes must already be added).
+    max_edges_per_node: Maximum explicit edges emitted by one source.
+    max_total_edges: Global cap on explicit edges added.
 
 Returns:
     Number of explicit edges added.

@@ -161,6 +161,7 @@ class PersistentEmbeddingIndex:
         categories = ["concepts", "guides", "references", "research"]
         chunker = MarkdownChunker()
         updated = 0
+        seen_files: set[str] = set()
 
         for cat in categories:
             cat_path = kb_path / cat
@@ -168,6 +169,7 @@ class PersistentEmbeddingIndex:
                 continue
             for md_file in sorted(cat_path.glob("*.md")):
                 file_doc_id = str(md_file.relative_to(kb_path))
+                seen_files.add(file_doc_id)
                 try:
                     content = md_file.read_text(encoding="utf-8")
                 except Exception:
@@ -181,6 +183,11 @@ class PersistentEmbeddingIndex:
                 existing = self._file_manifest.get(file_doc_id, {})
                 if existing.get("mtime") == mtime and existing.get("hash") == chash:
                     continue  # unchanged — skip all chunks for this file
+
+                # CODE-11: drop this file's existing chunk rows before re-embedding
+                # so sections removed from the file do not leave orphaned #slug rows
+                # behind (index_document only appends/updates, never deletes).
+                self._drop_chunks(self._chunks_for_file(file_doc_id))
 
                 # Re-embed all chunks for this file.
                 for slug, chunk_text in chunker.chunk(file_doc_id, content):
@@ -196,11 +203,57 @@ class PersistentEmbeddingIndex:
                 }
                 updated += 1
 
-        if updated > 0:
-            self.flush()
-            logger.info("kb_index_rebuilt updated=%d total=%d", updated, len(self._doc_ids))
+        # CODE-04: reconcile deletions. A file removed from disk is never visited
+        # above, so its chunk rows would persist forever ("index grows forever").
+        # Drop chunk rows + staleness sentinels for files no longer present.
+        removed = self._reconcile_deletions(seen_files)
+
+        if updated > 0 or removed > 0:
+            if self._doc_ids:
+                self.flush()
+            else:
+                # Everything was deleted — flush()'s empty-guard would leave the
+                # stale on-disk rows behind, so remove the index directory instead.
+                self._store.delete(self._index_path)
+            logger.info(
+                "kb_index_rebuilt updated=%d removed=%d total=%d",
+                updated,
+                removed,
+                len(self._doc_ids),
+            )
 
         return len(self._doc_ids)
+
+    def _chunks_for_file(self, file_doc_id: str) -> set[str]:
+        """All chunk doc_ids (``file.md#slug``) currently indexed for *file_doc_id*."""
+        return {d for d in self._doc_ids if d.split("#")[0] == file_doc_id}
+
+    def _drop_chunks(self, chunk_ids: set[str]) -> int:
+        """Remove chunk rows and their manifest entries, keeping ``_doc_ids`` /
+        ``_matrix`` / ``_manifest`` in sync.
+
+        Returns the number of rows removed.
+        """
+        if not chunk_ids:
+            return 0
+        keep = [i for i, d in enumerate(self._doc_ids) if d not in chunk_ids]
+        removed = len(self._doc_ids) - len(keep)
+        if removed == 0:
+            return 0
+        self._doc_ids = [self._doc_ids[i] for i in keep]
+        if self._matrix is not None:
+            self._matrix = self._matrix[keep] if keep else None
+        for cid in chunk_ids:
+            self._manifest.pop(cid, None)
+        return removed
+
+    def _reconcile_deletions(self, seen_files: set[str]) -> int:
+        """Drop chunk rows + staleness sentinels for files no longer on disk."""
+        stale = {d for d in self._doc_ids if d.split("#")[0] not in seen_files}
+        removed = self._drop_chunks(stale)
+        for f in [f for f in self._file_manifest if f not in seen_files]:
+            self._file_manifest.pop(f, None)
+        return removed
 
     def is_stale(self, doc_path: Path, kb_path: Optional[Path] = None) -> bool:
         """Check whether *doc_path* is newer or changed vs the staleness map.
@@ -250,6 +303,31 @@ class PersistentEmbeddingIndex:
             return True
 
         return existing.get("mtime") != mtime or existing.get("hash") != chash
+
+    def stale_files(self, kb_path: Path) -> Dict[str, List[str]]:
+        """Report KB files that are new/changed or deleted vs the index.
+
+        Read-only — does not modify the index. Used by the retrieval entrypoints
+        to warn (non-silently) that results may be stale, and to decide whether
+        an explicit refresh is worthwhile (W2-2b). ``changed`` includes files not
+        yet indexed; ``deleted`` are indexed files no longer on disk.
+
+        Returns ``{"changed": [file_doc_id, ...], "deleted": [file_doc_id, ...]}``.
+        """
+        self._ensure_loaded()
+        on_disk: set[str] = set()
+        changed: List[str] = []
+        for cat in ("concepts", "guides", "references", "research"):
+            cat_path = kb_path / cat
+            if not cat_path.exists():
+                continue
+            for md_file in sorted(cat_path.glob("*.md")):
+                file_doc_id = str(md_file.relative_to(kb_path))
+                on_disk.add(file_doc_id)
+                if self.is_stale(md_file, kb_path=kb_path):
+                    changed.append(file_doc_id)
+        deleted = sorted(set(self._file_manifest.keys()) - on_disk)
+        return {"changed": changed, "deleted": deleted}
 
     def flush(self) -> None:
         """Atomically persist the in-memory index to disk.
@@ -303,6 +381,19 @@ class PersistentEmbeddingIndex:
             # New or corrupt index — start empty (rebuild on first explicit call)
             return
         matrix, manifest, staleness = result
+        # CODE-15: enforce embedding-dimension match. store.load() only checks the
+        # row count (shape[0]); a backend/dimension change (e.g. hashing→minilm,
+        # 1000→384) would otherwise load a stale matrix and crash in search()'s
+        # matmul. Discard the mismatched index instead — the next rebuild() call
+        # regenerates it at the active dimension.
+        if matrix.ndim != 2 or matrix.shape[1] != self._embedder.embedding_dim:
+            logger.warning(
+                "kb_index_dim_mismatch path=%s stored_dim=%s embedder_dim=%d — discarding stale index",
+                self._index_path,
+                matrix.shape[1] if matrix.ndim == 2 else "nd!=2",
+                self._embedder.embedding_dim,
+            )
+            return
         self._matrix = matrix.astype(np.float32)
         self._manifest = manifest  # chunk-level entries only
         self._file_manifest = staleness  # file-level staleness sentinels

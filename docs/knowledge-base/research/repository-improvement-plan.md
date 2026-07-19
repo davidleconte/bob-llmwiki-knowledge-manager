@@ -7,6 +7,9 @@ updated: 2026-07-18
 status: active
 ---
 
+> **RETRACTED FIGURE.** The 68.96% "token savings" cited below was fabricated on synthetic data and has been retracted; the honest, manifest-backed figure is ~20% mean compression (`evaluation/results/validation-2026-07-14/manifest.json`). This plan is retained verbatim for the audit trail.
+
+
 # Repository Improvement Plan - Bobcoin Optimization Focus
 
 ## Overview

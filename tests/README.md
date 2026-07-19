@@ -215,8 +215,8 @@ python3 -m pytest tests/monitoring/ -v
 Coverage is enforced by a single gate — `fail_under` in
 `pyproject.toml` (`[tool.coverage.report]`) — **not** by hand-maintained numbers
 in this file. Per-package floors (e.g. `monitoring`, `delegation`) live in
-`scripts/check_coverage_by_package.py`. Measured total was **82.4%** as of
-2026-07-13; regenerate with:
+`scripts/check_coverage_by_package.py`. The measured total lives in
+[`STATUS.md`](../STATUS.md) (not restated here, per above); regenerate with:
 
 ```bash
 pytest --cov=src --cov-report=term-missing

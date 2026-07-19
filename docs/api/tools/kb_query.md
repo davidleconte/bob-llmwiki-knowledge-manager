@@ -33,6 +33,8 @@ design decisions.
 - `QUARANTINE_TIER`
 - `_TRUST_CONTENT_PLACEHOLDER`
 - `_TRUST_TIER_RE`
+- `_BM25_K1`
+- `_MAX_HEADING_MATCHES`
 - `_DATE_FIELD_RE`
 
 ## Functions

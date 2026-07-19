@@ -9,8 +9,9 @@ Tests:
   6. Value > 5 pp above a real manifest → not cross-checked when path doesn't exist.
 """
 
-
 from scripts.check_savings_claims import (
+    _is_excluded,
+    has_banner,
     line_is_unbacked_claim,
     scan_text,
 )
@@ -18,6 +19,7 @@ from scripts.check_savings_claims import (
 # ---------------------------------------------------------------------------
 # ATK-GATE-03: bare "manifest" no longer backs a claim
 # ---------------------------------------------------------------------------
+
 
 def test_bare_manifest_is_unbacked():
     """'68.96% token savings (see manifest)' must be flagged (ATK-GATE-03)."""
@@ -37,12 +39,11 @@ def test_fabricated_with_no_backing_is_unbacked():
 # ATK-GATE-03: manifest.json path form does back a claim
 # ---------------------------------------------------------------------------
 
+
 def test_manifest_json_path_backs_claim():
     """'manifest.json' path form must back a savings claim."""
     line = "Optimizer compression: mean 20.0% (manifest: evaluation/results/validation-2026-07-14/manifest.json)."
-    assert not line_is_unbacked_claim(line), (
-        "'manifest.json' path form must back the claim"
-    )
+    assert not line_is_unbacked_claim(line), "'manifest.json' path form must back the claim"
 
 
 def test_retraction_marker_backs_claim():
@@ -54,6 +55,7 @@ def test_retraction_marker_backs_claim():
 # ---------------------------------------------------------------------------
 # ATK-GATE-05: paragraph-level scanner (wrapped citations)
 # ---------------------------------------------------------------------------
+
 
 def test_wrapped_citation_not_flagged():
     """Claim on line N, manifest path on line N+1 → considered backed (ATK-GATE-05).
@@ -78,9 +80,7 @@ def test_scan_text_paragraph_level():
         "More text here."
     )
     violations = scan_text(text)
-    assert not violations, (
-        f"scan_text should not flag the wrapped citation but got: {violations}"
-    )
+    assert not violations, f"scan_text should not flag the wrapped citation but got: {violations}"
 
 
 def test_genuinely_unbacked_is_flagged_by_scan():
@@ -92,8 +92,28 @@ def test_genuinely_unbacked_is_flagged_by_scan():
 
 def test_banner_suppresses_scan():
     """A retraction banner in the file head must suppress all violations."""
-    text = (
-        "> **RETRACTED METRICS.** The 89.3% figure was fabricated.\n\n"
-        "- 89.3% token savings\n"
-    )
+    text = "> **RETRACTED METRICS.** The 89.3% figure was fabricated.\n\n- 89.3% token savings\n"
     assert not scan_text(text), "Bannered file must pass even with fabricated numbers"
+
+
+# ---------------------------------------------------------------------------
+# ATK-GATE-04: research exemption narrowed to dated snapshots only
+# ---------------------------------------------------------------------------
+
+
+def test_undated_research_doc_is_scanned():
+    """An un-dated research doc must NOT be wholesale-exempt (ATK-GATE-04)."""
+    assert not _is_excluded("docs/knowledge-base/research/performance-benchmarks.md")
+
+
+def test_dated_research_snapshot_is_exempt():
+    """A dated research snapshot (YYYY-MM-DD in the name) stays exempt."""
+    assert _is_excluded("docs/knowledge-base/research/adversarial-audit-2026-07-19.md")
+
+
+def test_banner_detected_after_long_frontmatter():
+    """A banner below a >20-line frontmatter must still be detected."""
+    fm = "---\ntitle: T\nrelated:\n" + "".join(f"  - a{i}.md\n" for i in range(30)) + "---\n"
+    text = fm + "\n> **HISTORICAL SNAPSHOT.** Point-in-time.\n\n- 89.3% token savings\n"
+    assert has_banner(text), "banner after a long frontmatter must be found"
+    assert not scan_text(text), "long-frontmatter banner must still suppress the scan"

@@ -59,7 +59,7 @@ def main() -> None:
         min_weight=args.min_weight,
     )
 
-    print(f"✅ Dataview injection complete")
+    print("✅ Dataview injection complete")
     print(f"   files_annotated : {stats['files_annotated']}")
     print(f"   total_links     : {stats['total_links']}")
     print()

@@ -1,4 +1,5 @@
 """Shared fixtures for adversarial security regression tests."""
+
 import os
 import textwrap
 from pathlib import Path

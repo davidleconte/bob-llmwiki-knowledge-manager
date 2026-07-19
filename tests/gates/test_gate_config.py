@@ -12,6 +12,7 @@ import pytest
 
 try:
     import yaml  # optional — PyYAML
+
     HAS_YAML = True
 except ImportError:
     HAS_YAML = False
@@ -32,6 +33,7 @@ def test_gate_config_exists():
 def test_fail_under_matches_pyproject():
     """coverage_gate.fail_under in gate-config.yaml must match pyproject.toml."""
     import re
+
     pyproject = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
     m = re.search(r"^\s*fail_under\s*=\s*(\d+)", pyproject, re.MULTILINE)
     assert m, "fail_under not found in pyproject.toml"

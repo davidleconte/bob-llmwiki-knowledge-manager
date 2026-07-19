@@ -193,6 +193,12 @@ def analyze_and_ingest(
     out_path = Path(output_dir)
     out_path.mkdir(parents=True, exist_ok=True)
 
+    # ATK-MEM-06: sign each generated document's provenance so a hand-forged
+    # `generated_by: delegation-pipeline` stamp (or a tampered body) is detectable.
+    from src.provenance import attach_signature, load_or_create_key
+
+    _prov_key = load_or_create_key(out_path)
+
     date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     target_slug = re.sub(r"[^a-zA-Z0-9]+", "-", target_dir).strip("-")
 
@@ -225,6 +231,7 @@ def analyze_and_ingest(
         except ValueError:
             continue  # skip unsafe filenames
 
+        content = attach_signature(content, _prov_key)
         full_out.write_text(content, encoding="utf-8")
         output_files.append(str(full_out))
 

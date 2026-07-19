@@ -15,25 +15,25 @@ from pathlib import Path
 
 # Column x-positions for each category (pixels)
 _CATEGORY_X = {
-    "concepts":   0,
-    "guides":     800,
+    "concepts": 0,
+    "guides": 800,
     "references": 1600,
-    "research":   2400,
+    "research": 2400,
 }
 
 # Node dimensions
-_NODE_WIDTH  = 320
+_NODE_WIDTH = 320
 _NODE_HEIGHT = 60
 
 # Vertical spacing inside a group and gap between groups
 _VERT_SPACING = 140
-_GROUP_GAP    = 120
+_GROUP_GAP = 120
 
 # Obsidian edge colour codes
 _EDGE_COLOR = {
-    "explicit": "2",   # green
-    "semantic": "4",   # blue
-    "broken":   "1",   # red
+    "explicit": "2",  # green
+    "semantic": "4",  # blue
+    "broken": "1",  # red
 }
 
 
@@ -101,21 +101,23 @@ def build_canvas(graph_dict: dict, output_path) -> dict:
     for doc_id, meta in raw_nodes.items():
         nid = _node_id(doc_id)
         x, y = positions.get(doc_id, (0, 0))
-        canvas_nodes.append({
-            "id":     nid,
-            "type":   "file",
-            "file":   f"knowledge-base/{doc_id}",
-            "x":      x,
-            "y":      y,
-            "width":  _NODE_WIDTH,
-            "height": _NODE_HEIGHT,
-        })
+        canvas_nodes.append(
+            {
+                "id": nid,
+                "type": "file",
+                "file": f"knowledge-base/{doc_id}",
+                "x": x,
+                "y": y,
+                "width": _NODE_WIDTH,
+                "height": _NODE_HEIGHT,
+            }
+        )
 
     # Build canvas edges
     canvas_edges = []
     for edge in raw_edges:
-        src  = edge.get("source", "")
-        tgt  = edge.get("target", "")
+        src = edge.get("source", "")
+        tgt = edge.get("target", "")
         etype = edge.get("type", "semantic")
         weight = edge.get("weight")
         label = edge.get("label")
@@ -127,10 +129,10 @@ def build_canvas(graph_dict: dict, output_path) -> dict:
             edge_label = label  # may be None
 
         canvas_edge: dict = {
-            "id":       _edge_id(src, tgt, etype),
+            "id": _edge_id(src, tgt, etype),
             "fromNode": _node_id(src),
-            "toNode":   _node_id(tgt),
-            "color":    _EDGE_COLOR.get(etype, "4"),
+            "toNode": _node_id(tgt),
+            "color": _EDGE_COLOR.get(etype, "4"),
         }
         if edge_label is not None:
             canvas_edge["label"] = edge_label
