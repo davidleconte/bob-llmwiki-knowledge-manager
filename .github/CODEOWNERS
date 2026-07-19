@@ -18,7 +18,9 @@
 # KM savings measurement tests — validation harness for re-derivation savings.
 /tests/validation/test_km_savings.py @davidleconte
 
-# Gate configuration and thresholds — requires independent review (ATK-GATE-07).
-# Until a second reviewer is onboarded, any change here must be tracked in
-# SECURITY.md §Gate Independence as a documented gap.
+# Gate configuration and thresholds — single-owner today (ATK-GATE-07). Until a
+# second reviewer is onboarded, the `gate integrity (ATK-GATE-07)` CI job
+# (scripts/check_gate_integrity.py) structurally blocks weakening a gate and
+# planting a claim in the same PR; the single-owner residual is disclosed in
+# SECURITY.md §Gate Independence (the standing invitation to add a reviewer).
 /config/gates/ @davidleconte
