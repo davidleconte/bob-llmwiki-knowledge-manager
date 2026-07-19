@@ -17,3 +17,8 @@
 
 # KM savings measurement tests — validation harness for re-derivation savings.
 /tests/validation/test_km_savings.py @davidleconte
+
+# Gate configuration and thresholds — requires independent review (ATK-GATE-07).
+# Until a second reviewer is onboarded, any change here must be tracked in
+# SECURITY.md §Gate Independence as a documented gap.
+/config/gates/ @davidleconte

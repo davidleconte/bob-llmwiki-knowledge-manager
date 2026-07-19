@@ -32,6 +32,55 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from src.tools.safe_paths import resolve_within
 
+# ---------------------------------------------------------------------------
+# ATK-MEM-01: KB content boundary markers
+# ---------------------------------------------------------------------------
+# Every document body returned with include_content=True is wrapped in these
+# delimiters.  The agent system rule (SKILL.md) instructs the model to treat
+# content between the markers as *reference data only*, never instructions.
+KB_CONTENT_OPEN = "<<<KB_REFERENCE_START>>>"
+KB_CONTENT_CLOSE = "<<<KB_REFERENCE_END>>>"
+
+# Patterns that indicate a potential exfiltration or injection payload.
+# Presence → result["security_flags"] is populated; the content is still
+# returned (wrapped) so the agent can make an informed decision.
+_EXFIL_PATTERNS = [
+    r"\$\(",  # shell command substitution
+    r"\bcurl\b",  # curl invocations
+    r"env\s*\|",  # env|base64 style pipes
+    r"\bbase64\b",  # base64 encoding (common exfil channel)
+    r"https?://\S+/\S+",  # external URLs (possible C2/exfil endpoints)
+]
+_EXFIL_RE = re.compile("|".join(_EXFIL_PATTERNS))
+
+
+def _flag_exfil_patterns(content: str) -> List[str]:
+    """Return a list of matched exfiltration/injection patterns, or empty list."""
+    return [m.group(0) for m in _EXFIL_RE.finditer(content)]
+
+
+def _wrap_kb_content(content: str) -> str:
+    """Wrap document body in trust-boundary delimiters (ATK-MEM-01)."""
+    return f"{KB_CONTENT_OPEN}\n{content}\n{KB_CONTENT_CLOSE}"
+
+
+# ---------------------------------------------------------------------------
+# ATK-MEM-02: Trust tier constants and frontmatter parser
+# ---------------------------------------------------------------------------
+TRUSTED_TIERS = {"verified"}
+QUARANTINE_TIER = "quarantined"
+_TRUST_CONTENT_PLACEHOLDER = "[CONTENT WITHHELD — document not in a verified trust tier. Pass include_unverified=True to retrieve.]"
+
+# Minimal regex to extract trust_tier from YAML frontmatter.
+_TRUST_TIER_RE = re.compile(r"^trust_tier:\s*(\S+)", re.MULTILINE)
+
+
+def _parse_frontmatter_trust_tier(content: str) -> str:
+    """Extract trust_tier from YAML frontmatter, or return '' if absent."""
+    m = _TRUST_TIER_RE.search(content[:4096])  # only scan the head
+    return m.group(1).strip().strip('"').strip("'") if m else ""
+
+
 if TYPE_CHECKING:
     from src.cache.embeddings import EmbeddingGenerator
     from src.embeddings.index import PersistentEmbeddingIndex
@@ -110,6 +159,7 @@ class KnowledgeBaseQuery:
         max_results: int = 10,
         include_content: bool = False,
         date_filter: Optional[str] = None,
+        include_unverified: bool = False,
     ) -> Dict:
         """Query the knowledge base.
 
@@ -130,6 +180,9 @@ class KnowledgeBaseQuery:
             date_filter: Optional ISO date prefix (e.g. ``"2026-07"``).  When
                 set, only results whose frontmatter ``date:`` field starts with
                 this string are returned.  ``None`` (default) disables filtering.
+            include_unverified: When ``True``, include real content even from
+                documents not in the ``verified`` trust tier.  Default ``False``
+                replaces such content with a placeholder (ATK-MEM-02).
 
         Returns:
             Dictionary with search results
@@ -144,9 +197,13 @@ class KnowledgeBaseQuery:
 
         # --- P2 fast path: persistent index available ---
         if self._index is not None and self._index.doc_count > 0:
-            result = self._query_via_index(query, categories, max_results, include_content)
+            result = self._query_via_index(
+                query, categories, max_results, include_content, include_unverified
+            )
         else:
-            result = self._query_full_scan(query, categories, max_results, include_content)
+            result = self._query_full_scan(
+                query, categories, max_results, include_content, include_unverified
+            )
 
         # --- P3 graph re-ranking (optional, backward-compatible) ---
         if self._graph is not None and self._graph_weight > 0.0 and "results" in result:
@@ -178,6 +235,7 @@ class KnowledgeBaseQuery:
         categories: List[str],
         max_results: int,
         include_content: bool,
+        include_unverified: bool = False,
     ) -> Dict:
         """Full filesystem scan — keyword (+ optional P1 embedding) scoring."""
         all_results: list[Dict[str, Any]] = []
@@ -188,9 +246,21 @@ class KnowledgeBaseQuery:
                 continue
 
             for md_file in category_path.glob("*.md"):
+                # ATK-FS-01: reject symlinks and paths that escape the KB root
+                if md_file.is_symlink():
+                    continue
+                try:
+                    resolve_within(self.kb_path, str(md_file.relative_to(self.kb_path)))
+                except ValueError:
+                    continue
                 try:
                     with open(md_file, "r", encoding="utf-8") as f:
                         content = f.read()
+
+                    # ATK-MEM-02: skip quarantined documents entirely
+                    tier = _parse_frontmatter_trust_tier(content)
+                    if tier == QUARANTINE_TIER:
+                        continue
 
                     score = self._calculate_relevance(query, content, md_file.name)
 
@@ -204,9 +274,17 @@ class KnowledgeBaseQuery:
                             "last_modified": datetime.fromtimestamp(
                                 md_file.stat().st_mtime
                             ).isoformat(),
+                            "trust_tier": tier or "unset",
                         }
                         if include_content:
-                            result["content"] = content
+                            # ATK-MEM-01: wrap in trust-boundary delimiters; flag exfil patterns
+                            flags = _flag_exfil_patterns(content)
+                            if include_unverified or tier in TRUSTED_TIERS:
+                                result["content"] = _wrap_kb_content(content)
+                            else:
+                                result["content"] = _TRUST_CONTENT_PLACEHOLDER
+                            if flags:
+                                result["security_flags"] = flags
                         else:
                             result["preview"] = self._generate_preview(content, query)
                         all_results.append(result)
@@ -228,6 +306,7 @@ class KnowledgeBaseQuery:
         categories: List[str],
         max_results: int,
         include_content: bool,
+        include_unverified: bool = False,
     ) -> Dict:
         """P2 fast path: rank via PersistentEmbeddingIndex, load matching files.
 
@@ -249,13 +328,31 @@ class KnowledgeBaseQuery:
             if category not in categories:
                 continue
 
-            md_file = self.kb_path / doc_id
+            # CODE-01: chunk doc_ids are "file.md#slug" — strip the fragment before
+            # the path join, otherwise md_file.exists() is always False and every
+            # candidate is silently discarded (silent full-scan fallback).
+            file_doc_id = doc_id.split("#")[0]
+            category = file_doc_id.split("/", 1)[0] if "/" in file_doc_id else category
+
+            md_file = self.kb_path / file_doc_id
             if not md_file.exists():
+                continue
+            # ATK-FS-01: reject symlinks and paths that escape the KB root
+            if md_file.is_symlink():
+                continue
+            try:
+                resolve_within(self.kb_path, str(md_file.relative_to(self.kb_path)))
+            except ValueError:
                 continue
 
             try:
                 content = md_file.read_text(encoding="utf-8")
             except Exception:
+                continue
+
+            # ATK-MEM-02: skip quarantined documents entirely
+            tier = _parse_frontmatter_trust_tier(content)
+            if tier == QUARANTINE_TIER:
                 continue
 
             # Keyword score as tie-breaker (blended at _embedding_weight)
@@ -270,9 +367,17 @@ class KnowledgeBaseQuery:
                 "score": blended,
                 "matches": self._find_matches(query, content),
                 "last_modified": datetime.fromtimestamp(md_file.stat().st_mtime).isoformat(),
+                "trust_tier": tier or "unset",
             }
             if include_content:
-                result["content"] = content
+                # ATK-MEM-01: wrap in trust-boundary delimiters; flag exfil patterns
+                flags = _flag_exfil_patterns(content)
+                if include_unverified or tier in TRUSTED_TIERS:
+                    result["content"] = _wrap_kb_content(content)
+                else:
+                    result["content"] = _TRUST_CONTENT_PLACEHOLDER
+                if flags:
+                    result["security_flags"] = flags
             else:
                 result["preview"] = self._generate_preview(content, query)
             all_results.append(result)
@@ -282,7 +387,9 @@ class KnowledgeBaseQuery:
 
         # If index returned nothing useful, fall back to full scan
         if not all_results:
-            return self._query_full_scan(query, categories, max_results, include_content)
+            return self._query_full_scan(
+                query, categories, max_results, include_content, include_unverified
+            )
 
         all_results.sort(key=lambda x: x["score"], reverse=True)
         return {
@@ -396,13 +503,17 @@ class KnowledgeBaseQuery:
             except (KeyError, ValueError):
                 epochs.append(0.0)
 
-        mtime_max = max(epochs) if epochs else 1.0
-        if mtime_max == 0.0:
-            mtime_max = 1.0  # avoid division by zero on all-zero mtimes
+        # CODE-05 fix: normalize relative to the result set, not to the Unix epoch.
+        # epoch/max_epoch ≈ 0.97–1.0 for any realistic corpus (2020 vs 2026 documents
+        # differ by <0.03), making the signal nearly inert. Min-max within the result
+        # set yields 0.0 for the oldest and 1.0 for the newest document.
+        epoch_min = min(epochs) if epochs else 0.0
+        epoch_max = max(epochs) if epochs else 1.0
+        epoch_span = epoch_max - epoch_min or 1.0  # guard against all-same mtimes
 
         for r, epoch in zip(results, epochs):
-            norm_mtime = epoch / mtime_max
-            r["score"] = (1.0 - weight) * r["score"] + weight * (norm_mtime * 15.0)
+            norm_mtime = (epoch - epoch_min) / epoch_span  # 0.0 (oldest) → 1.0 (newest)
+            r["score"] = (1.0 - weight) * r["score"] + weight * norm_mtime
 
         results.sort(key=lambda x: x["score"], reverse=True)
         return results
@@ -479,6 +590,13 @@ class KnowledgeBaseQuery:
 
             docs = []
             for md_file in md_files:
+                # ATK-FS-01: reject symlinks and paths that escape the KB root
+                if md_file.is_symlink():
+                    continue
+                try:
+                    resolve_within(self.kb_path, str(md_file.relative_to(self.kb_path)))
+                except ValueError:
+                    continue
                 try:
                     with open(md_file, "r", encoding="utf-8") as f:
                         content = f.read()
@@ -582,15 +700,24 @@ class KnowledgeBaseQuery:
             if not cat_path.exists():
                 continue
 
-            md_files = list(cat_path.glob("*.md"))
+            # ATK-FS-01: only count files that pass the symlink / containment guard
+            safe_files = []
+            for md_file in cat_path.glob("*.md"):
+                if md_file.is_symlink():
+                    continue
+                try:
+                    resolve_within(self.kb_path, str(md_file.relative_to(self.kb_path)))
+                except ValueError:
+                    continue
+                safe_files.append(md_file)
 
             cat_stats: Dict[str, Any] = {
-                "document_count": len(md_files),
+                "document_count": len(safe_files),
                 "total_size": 0,
                 "total_lines": 0,
             }
 
-            for md_file in md_files:
+            for md_file in safe_files:
                 try:
                     size = md_file.stat().st_size
                     with open(md_file, "r", encoding="utf-8") as f:

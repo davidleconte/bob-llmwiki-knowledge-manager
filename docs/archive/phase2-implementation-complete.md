@@ -1,3 +1,9 @@
+> **HISTORICAL SNAPSHOT — RETRACTED METRICS.** The savings/cost percentages in
+> this document (50%, 80%, 70%) are pre-measurement projections that were never
+> validated by the manifest-backed harness. They are preserved here as an audit
+> trail only and are superseded by the measured results in STATUS.md.
+
+
 # Phase 2 Implementation Complete: Repository Analyzer Mode
 
 **Date:** July 12, 2026  

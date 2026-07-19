@@ -1,3 +1,9 @@
+> **HISTORICAL SNAPSHOT — RETRACTED METRICS.** The savings/cost percentages in
+> this document (30-40%, 60%, 90%, 95%) are pre-measurement projections that were
+> never validated by the manifest-backed harness. They are preserved here as an
+> audit trail only and are superseded by the measured results in STATUS.md.
+
+
 # Phase 3 Implementation Complete: Enhanced Automation Utilities
 
 **Status:** ✅ Complete  

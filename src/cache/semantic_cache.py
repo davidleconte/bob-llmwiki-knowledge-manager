@@ -92,6 +92,10 @@ class SemanticCache(CacheInterface):
         # Statistics
         self._stats = CacheStats()
         self._similarity_scores: List[float] = []  # Track similarity scores for hits
+        # ATK-FS-02: tracks whether the most recent get() was an exact key hit
+        # (True) or a cosine-similarity hit (False). Reset to False on each get().
+        # Read by MultiLevelCache to gate L2→L1 promotion.
+        self._last_hit_was_exact: bool = False
 
         # Initialize monitoring
         self._logger = get_logger("cache.semantic")
@@ -182,9 +186,16 @@ class SemanticCache(CacheInterface):
             # unambiguous, so short-circuit before embedding + similarity.
             versioned_key = self._make_versioned_key(key, target_version)
             if versioned_key in self.responses:
+                # ATK-FS-02: mark this as an exact hit so MultiLevelCache can
+                # safely promote it to L1 under the caller's key.
+                self._last_hit_was_exact = True
                 return self._finalize_hit(
                     versioned_key, 1.0, start_time, target_version, vocab_changed=False
                 )
+
+            # ATK-FS-02: similarity fallback — mark as non-exact so MultiLevelCache
+            # will NOT promote this match under the caller's key.
+            self._last_hit_was_exact = False
 
             # Semantic fallback: embed the query and find the most similar key.
             # Check if query will cause vocabulary change
@@ -197,20 +208,29 @@ class SemanticCache(CacheInterface):
             if will_change_vocab and len(self.embeddings) > 0:
                 self._regenerate_all_embeddings()
 
+            # ATK-DOS-03: BLAS matmul path — single np.dot replaces the O(n) loop.
+            # Build a local snapshot of keys+matrix within the lock so concurrent
+            # evictions cannot invalidate the index lookup.
+            version_keys = [
+                k for k in self.embeddings if self._extract_version(k) == target_version
+            ]
+
             # Find most similar cached prompt (only within target version)
             best_match = None
             best_similarity = 0.0
 
-            for versioned_prompt, cached_embedding in self.embeddings.items():
-                # Only consider entries from target version
-                if self._extract_version(versioned_prompt) != target_version:
-                    continue
-
-                similarity = cosine_similarity_vectors(query_embedding, cached_embedding)
-
-                if similarity > best_similarity:
-                    best_similarity = similarity
-                    best_match = versioned_prompt
+            if version_keys:
+                try:
+                    matrix = np.stack([self.embeddings[k] for k in version_keys])
+                    # Single BLAS matmul: shape (N,)
+                    similarities = matrix @ query_embedding
+                    best_idx = int(np.argmax(similarities))
+                    best_similarity = float(similarities[best_idx])
+                    best_match = version_keys[best_idx] if best_similarity > 0 else None
+                except (KeyError, ValueError):
+                    # Concurrent eviction: fall back gracefully (miss)
+                    best_match = None
+                    best_similarity = 0.0
 
             # Check if best match exceeds threshold
             if best_match and best_similarity >= self.similarity_threshold:

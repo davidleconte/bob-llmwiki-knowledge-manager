@@ -298,7 +298,7 @@ Include examples.
 - [System Architecture](../../architecture/ARCHITECTURE.md) - Complete technical design
 - [ADR-001: Python Choice](../../adr/001-python-choice.md) - Language selection rationale
 - [ADR-008: Token Counting](../../adr/008-token-counting.md) - Token counting strategy
-- [Design Document](../../archive/DESIGN_DOCUMENT.md) - Original system design (archived; metrics retracted)
+- [Design Document](../../archive/design-document.md) - Original system design (archived; metrics retracted)
 
 ---
 *Last Updated: 2026-07-13*

@@ -582,8 +582,8 @@ Update weekly with:
 
 - [External Audit 2026-07-12](../research/external-audit-2026-07-12.md)
 - [Repository Improvement Plan](../research/repository-improvement-plan.md)
-- [Project Status](../../project-management/PROJECT_STATUS.md)
-- [Honest Assessment](../../evaluation/HONEST_ASSESSMENT.md)
+- [Project Status](../../project-management/project-status.md)
+- [Honest Assessment](../../../evaluation/validation-disclaimer.md)
 
 ---
 

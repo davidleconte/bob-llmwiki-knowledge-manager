@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from src.graph.graph import KnowledgeGraph
+from src.tools.safe_paths import resolve_within  # ATK-FS-01: path containment
 
 if TYPE_CHECKING:
     from src.embeddings.index import PersistentEmbeddingIndex
@@ -232,10 +233,16 @@ class KnowledgeGraphBuilder:
 
         return count
 
+    # ATK-DOS-02: edge caps prevent edge explosion on mutually-similar corpora.
+    _DEFAULT_MAX_EDGES_PER_NODE = 50
+    _DEFAULT_MAX_TOTAL_EDGES = 5000
+
     def build_semantic(
         self,
         graph: KnowledgeGraph,
         index: "PersistentEmbeddingIndex",
+        max_edges_per_node: int = _DEFAULT_MAX_EDGES_PER_NODE,
+        max_total_edges: int = _DEFAULT_MAX_TOTAL_EDGES,
     ) -> int:
         """Derive semantic edges from the embedding index.
 
@@ -244,9 +251,14 @@ class KnowledgeGraphBuilder:
         (ADR-017 Decision 2).  Adds a bidirectional semantic edge if the
         aggregated score ≥ ``self._semantic_threshold``.
 
+        ATK-DOS-02: *max_edges_per_node* and *max_total_edges* caps prevent an
+        O(N²) edge explosion when many documents are mutually similar.
+
         Args:
             graph: Graph to populate.
             index: Pre-built :class:`~src.embeddings.index.PersistentEmbeddingIndex`.
+            max_edges_per_node: Maximum outbound semantic edges per source node.
+            max_total_edges: Global cap on total semantic edges added.
 
         Returns:
             Number of semantic edges added (each bidirectional pair counts as 1).
@@ -266,6 +278,13 @@ class KnowledgeGraphBuilder:
             # Read source document content to use as the query
             md_file = self._kb_path / source_id
             if not md_file.exists():
+                continue
+            # ATK-FS-01: reject symlinks and paths that escape the KB root
+            if md_file.is_symlink():
+                continue
+            try:
+                resolve_within(self._kb_path, str(md_file.relative_to(self._kb_path)))
+            except ValueError:
                 continue
             try:
                 content = md_file.read_text(encoding="utf-8")
@@ -288,21 +307,43 @@ class KnowledgeGraphBuilder:
                 if score > current_best:
                     doc_sim[source_id][target_id] = score
 
-        # Add edges for pairs above threshold (bidirectional)
+        # Add edges for pairs above threshold (bidirectional), respecting caps
         added_pairs: set = set()
+        edges_per_node: Dict[str, int] = {}
+        capped = False
         for source_id, targets in doc_sim.items():
-            for target_id, score in targets.items():
+            # Sort by score descending to keep the strongest edges under per-node cap
+            for target_id, score in sorted(targets.items(), key=lambda x: x[1], reverse=True):
                 if score < self._semantic_threshold:
                     continue
                 pair = tuple(sorted([source_id, target_id]))
                 if pair in added_pairs:
                     continue
+                # ATK-DOS-02: check per-node cap
+                if edges_per_node.get(source_id, 0) >= max_edges_per_node:
+                    continue
+                # ATK-DOS-02: check global cap
+                if count >= max_total_edges:
+                    capped = True
+                    break
                 added_pairs.add(pair)
+                edges_per_node[source_id] = edges_per_node.get(source_id, 0) + 1
 
                 # Bidirectional: add both directions with the same weight
                 graph.add_edge(source_id, target_id, "semantic", score)
                 graph.add_edge(target_id, source_id, "semantic", score)
                 count += 1
+            if capped:
+                break
+
+        if capped:
+            logger.warning(
+                "kb_graph_semantic_edge_cap_reached: stopped at %d edges "
+                "(max_total_edges=%d, max_edges_per_node=%d)",
+                count,
+                max_total_edges,
+                max_edges_per_node,
+            )
 
         return count
 
@@ -342,12 +383,24 @@ class KnowledgeGraphBuilder:
             )
 
     def _walk_kb(self):
-        """Yield all ``*.md`` files across the four KB category directories."""
+        """Yield all ``*.md`` files across the four KB category directories.
+
+        ATK-FS-01: symlinks and paths that escape the KB root are silently
+        skipped so callers (_add_nodes, _build_explicit_edges) never open
+        adversarially-crafted files.
+        """
         for cat in _CATEGORIES:
             cat_path = self._kb_path / cat
             if not cat_path.exists():
                 continue
-            yield from sorted(cat_path.glob("*.md"))
+            for md_file in sorted(cat_path.glob("*.md")):
+                if md_file.is_symlink():
+                    continue
+                try:
+                    resolve_within(self._kb_path, str(md_file.relative_to(self._kb_path)))
+                except ValueError:
+                    continue
+                yield md_file
 
     @staticmethod
     def _nodes_from_graph(graph: KnowledgeGraph) -> List[str]:

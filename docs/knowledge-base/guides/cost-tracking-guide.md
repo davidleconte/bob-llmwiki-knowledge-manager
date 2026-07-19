@@ -470,7 +470,7 @@ print(f"Using tiktoken: {counter.use_tiktoken}")
 
 ## Related Documentation
 
-- [Monitoring Guide](../MONITORING.md) - Overall monitoring system
+- [Monitoring Guide](../../MONITORING.md) - Overall monitoring system
 - [E2E Testing Setup Guide](./e2e-testing-setup-guide.md) - Testing with cost tracking
 - [Token Optimization Concept](../concepts/token-optimization.md) - Core optimization concepts
 

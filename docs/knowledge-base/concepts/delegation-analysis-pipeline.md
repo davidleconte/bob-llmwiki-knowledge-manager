@@ -59,7 +59,7 @@ bob-optimize analyze <target>
          └─► DocumentationAgent┘
                    │
                    ▼ (each result)
-           TokenOptimizer.optimize()   ← ~20% compression applied
+           TokenOptimizer.optimize()   ← ~20% compression (manifest-backed)
                    │
                    ▼
          output_dir/<agent>-<timestamp>.md   ← written as KB research doc

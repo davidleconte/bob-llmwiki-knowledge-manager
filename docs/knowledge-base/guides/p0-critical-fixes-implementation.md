@@ -12,7 +12,7 @@ related:
 
 # P0 Critical Fixes Implementation Guide
 
-> ⚠️ **Metrics correction (2026-07-14).** Earlier drafts of this document cited fabricated token-savings/quality figures — "68.96%", "89.3%", "91.80%" — produced by a simulation that never invoked the optimizer. **Those figures are retracted.** The honest, measured figure is **~20% mean optimizer compression** on real prose (manifest-backed: `evaluation/results/validation-2026-07-14/`; see `STATUS.md` and `CHANGELOG.md`). Inline numbers below have been corrected where they appeared.
+> ⚠️ **WITHDRAWN metrics — frozen planning document.** Earlier drafts cited fabricated token-savings/quality figures — "68.96%", "89.3%", "91.80%" — produced by a simulation that never invoked the optimizer. **Those figures are retracted and withdrawn.** Inline projections below (e.g. "40-60%", "100% cache savings") are illustrative planning targets, not measured outcomes. The only measured optimizer compression figure is **~20%** (provenance: `evaluation/results/validation-2026-07-14/manifest.json`; see `STATUS.md`).
 
 
 ## Overview
@@ -536,13 +536,13 @@ After completing P0:
 
 ## Related Documents
 - [Repository Improvement Plan](../research/repository-improvement-plan.md) - Overall improvement strategy
-- [Honest Assessment](../../../evaluation/HONEST_ASSESSMENT.md) - Critical evaluation
-- [Project Status](../../project-management/PROJECT_STATUS.md) - Current status
+- [Validation Disclaimer](../../../evaluation/validation-disclaimer.md) - Critical evaluation / retraction record
+- [Project Status](../../project-management/project-status.md) - Current status
 
 ## References
 - [Test Suite](../../../tests/) - All test files
 - [README](../../../README.md) - Project overview
-- [Requirements](../../../requirements.txt) - Dependencies
+- [Dependencies](../../../pyproject.toml) - Dependencies (requirements.txt was removed in favour of pyproject + uv.lock)
 
 ---
 *Last Updated: 2026-07-13*

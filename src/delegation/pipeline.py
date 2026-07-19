@@ -262,8 +262,10 @@ title: "{title}"
 date: {date_str}
 type: research
 status: generated
+trust_tier: generated
 tags: [delegation, {agent_type}, analysis]
 generated_by: delegation-pipeline
+source: delegation-pipeline
 target: {target_dir}
 task_id: {task_id}
 ---

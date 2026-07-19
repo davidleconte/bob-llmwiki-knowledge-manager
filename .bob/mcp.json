@@ -117,7 +117,7 @@
         "MQ_HOST": "localhost",
         "MQ_PORT": "9443",
         "MQ_USER": "admin",
-        "MQ_PASSWORD": "passw0rd"
+        "MQ_PASSWORD": "<rotate-and-set-via-env-secret>"
       },
       "description": "IBM MQ MCP Server for managing WebSphere MQ queue managers",
       "tools": [

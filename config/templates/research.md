@@ -15,6 +15,9 @@ What we're researching and why.
 ## Background
 Context and motivation.
 
+## Methodology
+How the research was conducted (data sources, approach, criteria).
+
 ## Findings
 
 ### Finding 1: [Title]

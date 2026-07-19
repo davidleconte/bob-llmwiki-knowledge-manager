@@ -186,25 +186,26 @@ def test_documentation_files_exist(project_root):
     """Test that all documentation files exist."""
     docs_dir = project_root / "docs"
     # Live Diátaxis-spine and reference docs at docs/ root.
+    # Git-tracked canonical names are UPPERCASE on this project.
     required_docs = [
-        "installation.md",
-        "usage.md",
-        "customization.md",
-        "workflows.md",
+        "INSTALLATION.md",
+        "USAGE.md",
+        "CUSTOMIZATION.md",
+        "WORKFLOWS.md",
     ]
     for doc in required_docs:
         doc_path = docs_dir / doc
         assert doc_path.exists(), f"Documentation {doc} should exist"
 
-    # architecture.md was moved to docs/kb-manager/ in Sub-Task 7 to avoid
+    # ARCHITECTURE.md was moved to docs/kb-manager/ in Sub-Task 7 to avoid
     # the dual-architecture-doc confusion identified in the gap-fix audit.
-    assert (docs_dir / "kb-manager" / "architecture.md").exists(), (
-        "architecture.md should exist under docs/kb-manager/"
+    assert (docs_dir / "kb-manager" / "ARCHITECTURE.md").exists(), (
+        "ARCHITECTURE.md should exist under docs/kb-manager/"
     )
 
-    # comparison.md was moved to docs/archive/ when the docs/ root was curated.
-    assert (docs_dir / "archive" / "comparison.md").exists(), (
-        "comparison.md should exist under docs/archive/"
+    # COMPARISON.md was moved to docs/archive/ when the docs/ root was curated.
+    assert (docs_dir / "archive" / "COMPARISON.md").exists(), (
+        "COMPARISON.md should exist under docs/archive/"
     )
 
 

@@ -144,7 +144,13 @@ class TestExactCache:
 
         entry = cache.get_entry("key1")
         assert entry is not None
-        assert entry.metadata == metadata
+        # The stored metadata contains the caller's keys PLUS the injected "version".
+        # ATK-FS-05 fix: the caller's original dict is no longer mutated (deep-copy in set()).
+        assert entry.metadata["tokens"] == metadata["tokens"]
+        assert entry.metadata["quality"] == metadata["quality"]
+        assert "version" in entry.metadata  # version key is always injected
+        # Caller's original dict must NOT have been mutated (the deep-copy fix)
+        assert "version" not in metadata, "set() mutated the caller's metadata dict (ATK-FS-05 regression)"
 
     def test_entry_access_tracking(self):
         """Test that entry access count and timestamp are tracked."""

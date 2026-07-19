@@ -3,9 +3,11 @@ title: "Phase 6: Real-World Validation - Execution Plan"
 category: guides
 tags: [guides]
 created: 2026-07-18
-updated: 2026-07-18
-status: active
+updated: 2026-07-19
+status: superseded
 ---
+
+> **SUPERSEDED — this Phase-6 *plan* was superseded by the executed Phase-5 validation** (`evaluation/results/validation-2026-07-14/`). The **68.96%** figure quoted below under "Current Claims (Synthetic)" is **FABRICATED and RETRACTED** — see `evaluation/validation-disclaimer.md`. The honest, manifest-backed compression figure (~20%) lives in the validation manifest. This document is retained only as a historical planning record.
 
 # Phase 6: Real-World Validation - Execution Plan
 

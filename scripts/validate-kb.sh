@@ -25,38 +25,79 @@ for dir in concepts guides references research; do
     echo "✅ Directory exists: $dir"
 done
 
-# Check for broken links
+# ── Broken-link check ─────────────────────────────────────────────────────────
+# FIX: Use process substitution < <(find ...) so the counter lives in the main
+# shell, not a subshell created by `find | while read`.  The old pipe idiom
+# incremented $broken_links inside a subshell that was discarded at the end of
+# the loop, making the counter always 0.
 echo ""
 echo "🔗 Checking for broken links..."
 broken_links=0
 
-find "$KB_DIR" -name "*.md" -type f | while read -r file; do
-    grep -oP '\[.*?\]\(\K[^)]+' "$file" 2>/dev/null | while read -r link; do
-        if [[ $link =~ ^https?:// ]]; then
-            continue
-        fi
-        
-        dir=$(dirname "$file")
-        target="$dir/$link"
-        
-        if [ ! -f "$target" ]; then
-            echo "❌ Broken link in $file: $link"
-            broken_links=$((broken_links + 1))
-        fi
-    done
-done
+while IFS= read -r file; do
+    # Extract hrefs: [text](href) — use grep -oP to pull only the path portion.
+    # We skip:
+    #   - http(s):// external URLs
+    #   - mailto: links
+    #   - pure anchor #fragment links
+    #   - empty hrefs
+    #   - hrefs that appear inside fenced code blocks (stripped by sed below)
+    #
+    # Strip fenced code blocks before scanning so we don't treat example hrefs
+    # like [text](path) inside ``` blocks as real links.
+    cleaned=$(perl -0777 -pe 's/^```.*?^```//gms; s/^~~~.*?^~~~//gms; s/`[^`\n]*`//g' "$file" 2>/dev/null)
 
-if [ $broken_links -eq 0 ]; then
+    while IFS= read -r link; do
+        # Strip optional title: href "title" → just href
+        link="${link%%\"*}"
+        link="${link%%\'*}"
+        link="${link%% *}"
+        link="${link%% }"
+
+        # Skip externals, mailto, anchors, empty
+        case "$link" in
+            http://*|https://*|mailto:*|//*)  continue ;;
+            \#*)                              continue ;;
+            "")                               continue ;;
+        esac
+
+        # Strip any trailing fragment
+        path_part="${link%%\#*}"
+        [[ -z "$path_part" ]] && continue
+
+        dir=$(dirname "$file")
+        target="$dir/$path_part"
+
+        # Resolve symlinks and normalise (pure bash; no realpath needed on macOS)
+        # Accept both file and directory targets.
+        if [ ! -e "$target" ]; then
+            # Determine if this link is inside a frozen research snapshot.
+            # Research docs are dated evidence; broken refs to deleted artefacts
+            # are noted but do NOT increment the exit-code counter.
+            if [[ "$file" == "$KB_DIR/research/"* ]]; then
+                echo "⚠️  Broken link (research snapshot — informational): $file: $link"
+            else
+                echo "❌ Broken link in $file: $link"
+                broken_links=$((broken_links + 1))
+            fi
+        fi
+    done < <(echo "$cleaned" | perl -ne 'while (/\[[^\]]*\]\(([^)]+)\)/g) { print "$1\n" }' 2>/dev/null)
+
+done < <(find "$KB_DIR" -name "*.md" -type f)
+
+if [ "$broken_links" -eq 0 ]; then
     echo "✅ No broken links found"
+else
+    echo "❌ $broken_links broken link(s) found (research-snapshot links are informational only)"
 fi
 
 echo ""
 echo "📊 Knowledge Base Statistics:"
-echo "  Concepts: $(find "$KB_DIR/concepts" -name "*.md" -type f 2>/dev/null | wc -l)"
-echo "  Guides: $(find "$KB_DIR/guides" -name "*.md" -type f 2>/dev/null | wc -l)"
-echo "  References: $(find "$KB_DIR/references" -name "*.md" -type f 2>/dev/null | wc -l)"
-echo "  Research: $(find "$KB_DIR/research" -name "*.md" -type f 2>/dev/null | wc -l)"
-echo "  Total: $(find "$KB_DIR" -name "*.md" -type f 2>/dev/null | wc -l)"
+echo "  Concepts:  $(find "$KB_DIR/concepts"   -name "*.md" -type f 2>/dev/null | wc -l)"
+echo "  Guides:    $(find "$KB_DIR/guides"     -name "*.md" -type f 2>/dev/null | wc -l)"
+echo "  References:$(find "$KB_DIR/references" -name "*.md" -type f 2>/dev/null | wc -l)"
+echo "  Research:  $(find "$KB_DIR/research"   -name "*.md" -type f 2>/dev/null | wc -l)"
+echo "  Total:     $(find "$KB_DIR"            -name "*.md" -type f 2>/dev/null | wc -l)"
 
 # ── Orphan check — KB docs not referenced in index.md ────────────────────────
 echo ""
@@ -115,4 +156,9 @@ for f in *.md; do
 done
 if [[ $root_hygiene_ok -eq 1 ]]; then
     echo "✅ Root-file hygiene OK (no stray .md files)"
+fi
+
+# ── Exit code ─────────────────────────────────────────────────────────────────
+if [ "$broken_links" -gt 0 ]; then
+    exit 1
 fi

@@ -155,16 +155,16 @@ class CacheStatsSnapshot:
         total_requests: Total get() + query_l3() calls (hits + misses).
         total_hits: Total L1 + L2 + L3 hits.
         total_misses: Total cache misses.
-        hit_rate: Overall hit rate (0–100 %).
+        hit_rate: Overall hit ratio expressed as a percentage (range 0–100).
         avg_lookup_time_ms: Rolling average lookup latency in milliseconds.
         version: Cache version string.
         l1_hits: L1 (exact) cache hit count.
-        l1_hit_rate: L1 hit rate (0–100 %).
+        l1_hit_rate: L1 cache hit ratio expressed as a percentage (range 0–100).
         l1_size: Current number of entries in L1.
         l1_max_size: Maximum capacity of L1 (construction-time constant).
         l1_utilization: l1_size / l1_max_size * 100.
         l2_hits: L2 (semantic) cache hit count.
-        l2_hit_rate: L2 hit rate (0–100 %).
+        l2_hit_rate: L2 cache hit ratio expressed as a percentage (range 0–100).
         l2_size: Current number of entries in L2.
         l2_max_size: Maximum capacity of L2 (construction-time constant).
         l2_utilization: l2_size / l2_max_size * 100.

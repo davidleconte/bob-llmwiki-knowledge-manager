@@ -266,9 +266,13 @@ class ExactCache(CacheInterface):
         if not is_update and len(self.cache) >= self.max_size:
             self._evict_lru()
 
-        # Create cache entry
+        # Create cache entry — ATK-FS-05: deep-copy caller's dict so later
+        # mutations by the caller do not corrupt the stored entry, and entries
+        # at different cache levels do not share the same dict object.
         if metadata is None:
             metadata = {}
+        else:
+            metadata = dict(metadata)
 
         # Add version to metadata
         metadata["version"] = version or self.VERSION
@@ -397,7 +401,14 @@ class ExactCache(CacheInterface):
         """
         versioned_key = self._make_versioned_key(key, version)
         hashed_key = self._hash_key(versioned_key)
-        return hashed_key in self.cache
+        if hashed_key not in self.cache:
+            return False
+        # ATK-FS-04: enforce TTL — contains() must agree with get() on expiry
+        entry = self.cache[hashed_key]
+        if self.ttl_seconds is not None and (self._clock() - entry.timestamp) > self.ttl_seconds:
+            del self.cache[hashed_key]
+            return False
+        return True
 
     @_synchronized
     def evict(self, key: str, version: Optional[str] = None) -> bool:

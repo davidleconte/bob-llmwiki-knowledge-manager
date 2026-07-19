@@ -215,20 +215,25 @@ else
     echo -e "${YELLOW}⚠️  uv not found — skipping graph rebuild (install uv to enable)${NC}"
 fi
 
-# Auto-commit KB changes to git
+# Stage KB changes on a review branch (ATK-MEM-04: no unreviewed direct-to-main commits)
 echo ""
-echo -e "${CYAN}Committing KB changes to git...${NC}"
+echo -e "${CYAN}Staging KB changes for review...${NC}"
 if git -C . rev-parse --git-dir &>/dev/null; then
     git add docs/knowledge-base/
     COMMIT_DATE=$(date +%Y-%m-%d)
     if git diff --cached --quiet; then
         echo -e "${YELLOW}ℹ️  Nothing new to commit in docs/knowledge-base/${NC}"
     else
-        COMMIT_SHA=$(git commit -m "mnemox: update KB $COMMIT_DATE" --quiet && git rev-parse --short HEAD)
-        echo -e "${GREEN}✅ Committed: mnemox: update KB $COMMIT_DATE (${COMMIT_SHA})${NC}"
+        BRANCH="kb/update-$(date +%Y-%m-%d-%H%M%S)"
+        git checkout -b "$BRANCH" --quiet
+        COMMIT_SHA=$(git commit -m "kb: staged update $COMMIT_DATE" --quiet && git rev-parse --short HEAD)
+        echo -e "${GREEN}✅ Staged on branch ${BRANCH} (${COMMIT_SHA})${NC}"
+        echo -e "${YELLOW}⚠  Review required before merging. Open a PR:${NC}"
+        echo -e "     gh pr create --base main --head $BRANCH --title 'kb: update $COMMIT_DATE'"
+        git checkout - --quiet 2>/dev/null || true
     fi
 else
-    echo -e "${YELLOW}⚠️  Not a git repository — skipping auto-commit${NC}"
+    echo -e "${YELLOW}⚠️  Not a git repository — skipping staging${NC}"
 fi
 
 # Write last-run timestamp

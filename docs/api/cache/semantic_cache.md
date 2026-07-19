@@ -163,6 +163,18 @@ Returns:
     True if similar key exists, False otherwise
 
 
+##### `get_threshold() -> float`
+
+Return the current similarity threshold under ``self._lock``.
+
+Thread-safe read for callers (e.g. ``MultiLevelCache.stats()``) that
+need a consistent snapshot of the threshold without holding their own
+lock.  Mirrors the pattern of :meth:`average_similarity_score`.
+
+Returns:
+    Current similarity threshold (0-1).
+
+
 ##### `update_threshold(new_threshold: float) -> None`
 
 Update similarity threshold.
@@ -174,6 +186,10 @@ Args:
 ##### `get_entry(key: str, version: Optional[str]) -> Optional[CacheEntry]`
 
 Get full cache entry.
+
+Thread-safe: Uses lock to protect shared state. The entries dict can be
+mutated by a concurrent set(), _evict_lru(), or clear() — acquiring
+self._lock here prevents a read of a partially-removed entry.
 
 Args:
     key: The cache key
@@ -187,6 +203,10 @@ Returns:
 
 Get average similarity score for cache hits.
 
+Thread-safe: Takes a snapshot of ``_similarity_scores`` under
+``self._lock`` so that a concurrent ``reset_stats()`` cannot clear the
+list between the ``if not`` guard and the ``sum()`` call.
+
 Returns:
     Average similarity score (0-1)
 
@@ -195,7 +215,12 @@ Returns:
 
 Migrate entries from one version to another.
 
-Thread-safe: Uses lock to protect shared state.
+Thread-safe: Holds ``self._lock`` (a re-entrant ``RLock``) for the full
+duration — both the collection phase and all ``set()`` calls — so the
+migration is atomic with respect to concurrent writers.  ``set()`` also
+acquires ``self._lock``, which is safe because ``RLock`` allows
+re-entrant acquisition from the same thread.
+
 Creates new versioned entries for all entries matching from_version.
 Original entries are preserved.
 
@@ -223,5 +248,10 @@ Returns:
 ##### `reset_stats() -> None`
 
 Reset statistics counters.
+
+Thread-safe: Both ``_stats.reset()`` and ``_similarity_scores.clear()``
+are performed atomically under ``self._lock`` so that a concurrent
+``average_similarity_score()`` or ``stats()`` call cannot observe a
+half-reset state.
 
 

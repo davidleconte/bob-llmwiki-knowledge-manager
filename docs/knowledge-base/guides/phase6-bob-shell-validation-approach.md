@@ -416,7 +416,7 @@ savings_percent = (savings / baseline_cost) * 100
 
 - [Phase 6 Real-World Validation Plan](phase6-real-world-validation-plan.md) - Original plan
 - [Real-Time Savings Measurement Guide](real-time-savings-measurement-guide.md) - Measurement strategies
-- [SavingsEstimator Implementation](../../examples/savings_estimator.py) - Estimation tool
+- [SavingsEstimator Implementation](../../../examples/savings_estimator.py) - Estimation tool
 
 ---
 

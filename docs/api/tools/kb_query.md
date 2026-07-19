@@ -25,9 +25,32 @@ design decisions.
 
 ## Constants
 
+- `KB_CONTENT_OPEN`
+- `KB_CONTENT_CLOSE`
+- `_EXFIL_PATTERNS`
+- `_EXFIL_RE`
+- `TRUSTED_TIERS`
+- `QUARANTINE_TIER`
+- `_TRUST_CONTENT_PLACEHOLDER`
+- `_TRUST_TIER_RE`
 - `_DATE_FIELD_RE`
 
 ## Functions
+
+### `_flag_exfil_patterns(content: str) -> List[str]`
+
+Return a list of matched exfiltration/injection patterns, or empty list.
+
+
+### `_wrap_kb_content(content: str) -> str`
+
+Wrap document body in trust-boundary delimiters (ATK-MEM-01).
+
+
+### `_parse_frontmatter_trust_tier(content: str) -> str`
+
+Extract trust_tier from YAML frontmatter, or return '' if absent.
+
 
 ### `_doc_date_matches(file_key: str, kb_path: 'Path', date_filter: str) -> bool`
 
@@ -93,7 +116,7 @@ Args:
 ##### `__init__(kb_path: str)`
 
 
-##### `query(query: str, categories: Optional[List[str]], max_results: int, include_content: bool, date_filter: Optional[str]) -> Dict`
+##### `query(query: str, categories: Optional[List[str]], max_results: int, include_content: bool, date_filter: Optional[str], include_unverified: bool) -> Dict`
 
 Query the knowledge base.
 
@@ -114,6 +137,9 @@ Args:
     date_filter: Optional ISO date prefix (e.g. ``"2026-07"``).  When
         set, only results whose frontmatter ``date:`` field starts with
         this string are returned.  ``None`` (default) disables filtering.
+    include_unverified: When ``True``, include real content even from
+        documents not in the ``verified`` trust tier.  Default ``False``
+        replaces such content with a placeholder (ATK-MEM-02).
 
 Returns:
     Dictionary with search results

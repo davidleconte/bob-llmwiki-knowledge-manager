@@ -127,6 +127,9 @@ Returns:
 
 Get cache statistics.
 
+Snapshot ``size`` once so that ``"size"`` and ``"utilization"`` are
+consistent even if a concurrent eviction runs between the two calls.
+
 Returns:
     Dictionary with cache statistics
 
@@ -187,15 +190,20 @@ Returns:
 
 Migrate entries from one version to another.
 
-Creates new versioned entries for all entries matching from_version.
-Original entries are preserved.
+.. note::
+    **Always returns 0.**  ExactCache stores prompts as irreversible
+    SHA-256 hashes.  Without the original key string it is impossible to
+    reconstruct a new versioned entry, so migration between version
+    namespaces is not supported.  The log event ``cache_migration_skipped``
+    (with ``reason="irreversible_hash"``) is emitted so callers can
+    distinguish "nothing to migrate" from "migration not supported".
 
 Args:
-    from_version: Source version
-    to_version: Target version
+    from_version: Source version (ignored — keys are not reversible)
+    to_version: Target version (ignored — keys are not reversible)
 
 Returns:
-    Number of entries migrated
+    Always 0.
 
 
 ##### `cleanup_version(version: str) -> int`

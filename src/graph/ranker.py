@@ -77,16 +77,21 @@ class GraphRanker:
 
         pr = self.pagerank_scores()
 
-        for result in results:
-            doc_id = result.get("file", "")
-            # Strip any chunk suffix that may have leaked through
-            file_doc_id = doc_id.split("#")[0]
+        # CODE-06 fix: min-max normalize PageRank scores within the result set.
+        # Raw PageRank 1/N ≈ 0.013 for a 78-doc KB; ×15 ≈ 0.2 — still 75× smaller
+        # than a 15-point keyword score at equal weight. Normalizing to [0,1] within
+        # the candidate set makes the weight parameter behave as documented.
+        pr_values = [pr.get(r.get("file", "").split("#")[0], 0.0) for r in results]
+        pr_min = min(pr_values) if pr_values else 0.0
+        pr_max = max(pr_values) if pr_values else 1.0
+        pr_span = pr_max - pr_min or 1.0
 
-            pr_score = pr.get(file_doc_id, 0.0)
+        for result, pr_score in zip(results, pr_values):
             result["graph_score"] = pr_score
+            norm_pr = (pr_score - pr_min) / pr_span  # 0.0 → 1.0 within result set
 
             similarity = result.get("score", 0.0)
-            result["score"] = (1.0 - weight) * similarity + weight * pr_score * PAGERANK_SCALE
+            result["score"] = (1.0 - weight) * similarity + weight * norm_pr
 
         results.sort(key=lambda r: r["score"], reverse=True)
         return results
