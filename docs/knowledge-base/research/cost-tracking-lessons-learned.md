@@ -7,6 +7,9 @@ created: 2026-07-13
 updated: 2026-07-13
 ---
 
+> **HISTORICAL SNAPSHOT (2026-07).** Point-in-time research/analysis retained for the audit trail. Figures below reflect what was measured or projected at the time of writing; the canonical current numbers live in `STATUS.md` and the validation manifest (`evaluation/results/validation-2026-07-14/manifest.json`).
+
+
 # Cost Tracking System - Lessons Learned
 
 ## Overview

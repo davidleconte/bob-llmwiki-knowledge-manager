@@ -26,9 +26,12 @@ tree unedited: a one-line banner that names the numbers as retracted annotates
 the whole file, so historical snapshots are preserved verbatim below the banner
 without re-asserting fabricated results as current fact.
 
-Only genuinely frozen dated records are exempt from scanning entirely:
-``docs/knowledge-base/research/**`` (dated audit snapshots) and
-``PHASE*_IMPLEMENTATION_COMPLETE.md``.
+Only genuinely frozen *dated* records are exempt from scanning entirely: a
+``docs/knowledge-base/research/**`` file whose name carries a ``YYYY-MM-DD`` stamp
+(a dated audit snapshot) and ``PHASE*_IMPLEMENTATION_COMPLETE.md``. Un-dated,
+editable research docs ARE scanned (ATK-GATE-04) — they pass via the banner
+exception or a per-line retraction/manifest, so a fabricated figure can no longer
+hide in an un-dated research file.
 
 Usage::
 
@@ -59,7 +62,12 @@ TOP_LEVEL_DOCS = ("README.md", "STATUS.md", "AGENTS.md", "CHANGELOG.md")
 # Frozen dated records: not scanned at all (preserved verbatim, reflect what was
 # believed at their date). Everything else under docs/ is scanned; frozen
 # planning/audit-trail docs stay clean via the banner exception, not exclusion.
-EXCLUDED_DIR_PARTS = ("knowledge-base/research",)
+# ATK-GATE-04: research docs are NOT wholesale-exempt. A research file is exempt
+# only if it is a frozen *dated* snapshot (its filename carries a YYYY-MM-DD
+# stamp); un-dated, editable research docs are scanned like any other doc, so a
+# fabricated figure can no longer hide under docs/knowledge-base/research/.
+_RESEARCH_DIR = "knowledge-base/research"
+_DATED_SNAPSHOT_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
 EXCLUDED_NAME_RE = re.compile(r"PHASE.*_IMPLEMENTATION_COMPLETE", re.IGNORECASE)
 
 # A line is a savings/cost claim when it pairs one of these keywords with a
@@ -130,10 +138,16 @@ BANNER_MARKERS = (
 )
 BANNER_SCAN_LINES = 20
 
+# Strip a leading YAML frontmatter block before scanning for a banner, so a long
+# frontmatter (e.g. a big `related:` list) cannot push the banner out of the
+# scan window and defeat the banner exception.
+_FRONTMATTER_RE = re.compile(r"^---\n.*?\n---\n", re.DOTALL)
+
 
 def has_banner(text: str) -> bool:
-    """True if the file's head carries a retraction/deprecation banner."""
-    head = "\n".join(text.splitlines()[:BANNER_SCAN_LINES]).upper()
+    """True if the file's head (after any YAML frontmatter) carries a banner."""
+    body = _FRONTMATTER_RE.sub("", text, count=1)
+    head = "\n".join(body.splitlines()[:BANNER_SCAN_LINES]).upper()
     return any(marker in head for marker in BANNER_MARKERS)
 
 
@@ -231,8 +245,9 @@ def scan_text(text: str) -> list[tuple[int, str]]:
 
 
 def _is_excluded(rel: str) -> bool:
-    if any(part in rel for part in EXCLUDED_DIR_PARTS):
-        return True
+    if _RESEARCH_DIR in rel:
+        # Exempt only frozen dated snapshots; un-dated research docs are scanned.
+        return bool(_DATED_SNAPSHOT_RE.search(Path(rel).name))
     if EXCLUDED_NAME_RE.search(Path(rel).name):
         return True
     return False
@@ -287,6 +302,12 @@ def _selftest() -> int:
     # ... but the same content WITHOUT a banner must be flagged.
     if not scan_text("# Results\n\n- 89.3% token savings\n"):
         failures.append("TREE SCAN BROKEN: un-bannered fabricated number not flagged")
+
+    # ATK-GATE-04: an un-dated research doc IS scanned; a dated snapshot is exempt.
+    if _is_excluded("docs/knowledge-base/research/performance-benchmarks.md"):
+        failures.append("ATK-GATE-04: un-dated research doc wrongly exempt from scanning")
+    if not _is_excluded("docs/knowledge-base/research/adversarial-audit-2026-07-19.md"):
+        failures.append("ATK-GATE-04: dated research snapshot wrongly scanned")
 
     if failures:
         print("SELFTEST FAILED:", file=sys.stderr)

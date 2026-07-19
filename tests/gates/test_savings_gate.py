@@ -11,6 +11,8 @@ Tests:
 
 
 from scripts.check_savings_claims import (
+    _is_excluded,
+    has_banner,
     line_is_unbacked_claim,
     scan_text,
 )
@@ -97,3 +99,25 @@ def test_banner_suppresses_scan():
         "- 89.3% token savings\n"
     )
     assert not scan_text(text), "Bannered file must pass even with fabricated numbers"
+
+
+# ---------------------------------------------------------------------------
+# ATK-GATE-04: research exemption narrowed to dated snapshots only
+# ---------------------------------------------------------------------------
+
+def test_undated_research_doc_is_scanned():
+    """An un-dated research doc must NOT be wholesale-exempt (ATK-GATE-04)."""
+    assert not _is_excluded("docs/knowledge-base/research/performance-benchmarks.md")
+
+
+def test_dated_research_snapshot_is_exempt():
+    """A dated research snapshot (YYYY-MM-DD in the name) stays exempt."""
+    assert _is_excluded("docs/knowledge-base/research/adversarial-audit-2026-07-19.md")
+
+
+def test_banner_detected_after_long_frontmatter():
+    """A banner below a >20-line frontmatter must still be detected."""
+    fm = "---\ntitle: T\nrelated:\n" + "".join(f"  - a{i}.md\n" for i in range(30)) + "---\n"
+    text = fm + "\n> **HISTORICAL SNAPSHOT.** Point-in-time.\n\n- 89.3% token savings\n"
+    assert has_banner(text), "banner after a long frontmatter must be found"
+    assert not scan_text(text), "long-frontmatter banner must still suppress the scan"

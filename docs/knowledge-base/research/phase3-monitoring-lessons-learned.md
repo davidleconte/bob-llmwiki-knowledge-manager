@@ -11,6 +11,9 @@ related:
   - ./full-technical-design-retro-2026-07.md
 ---
 
+> **HISTORICAL SNAPSHOT (2026-07).** Point-in-time research/analysis retained for the audit trail. Figures below reflect what was measured or projected at the time of writing; the canonical current numbers live in `STATUS.md` and the validation manifest (`evaluation/results/validation-2026-07-14/manifest.json`).
+
+
 # Phase 3 Monitoring Infrastructure - Lessons Learned
 
 ## Executive Summary
