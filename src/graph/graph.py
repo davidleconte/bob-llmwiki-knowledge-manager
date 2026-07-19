@@ -395,19 +395,33 @@ class KnowledgeGraph:
         # Outbound weight sums for normalisation
         out_totals = [sum(w for _, w in out_weighted[i]) for i in range(n)]
 
-        for _ in range(max_iter):
-            new_scores = [(1.0 - damping) / n] * n
+        # Dangling nodes (no positive-weight out-edge) and their pre-normalised
+        # out-edges. Both are loop-invariant, so hoist them out of the power
+        # iteration (ATK-DOS-01: the old code recomputed w/total every iteration).
+        dangling = [out_totals[i] == 0.0 for i in range(n)]
+        non_dangling = [i for i in range(n) if not dangling[i]]
+        out_normalised: List[List[Tuple[int, float]]] = [
+            [(ti, w / out_totals[si]) for ti, w in out_weighted[si]] if not dangling[si] else []
+            for si in range(n)
+        ]
 
+        for _ in range(max_iter):
+            # A dangling node distributes its whole score uniformly across all n
+            # nodes. The old code did this with a (dangling x all-nodes) double
+            # loop — O(N^2) per iteration, the DoS surface. Aggregate the total
+            # dangling mass once (O(N)) and fold it into every node's baseline
+            # instead: mathematically identical, O(N) per iteration (ATK-DOS-01).
+            dangling_mass = 0.0
             for si in range(n):
-                total = out_totals[si]
-                if total == 0.0:
-                    # Dangling node: distribute its score uniformly
-                    contribution = damping * scores[si] / n
-                    for ti in range(n):
-                        new_scores[ti] += contribution
-                else:
-                    for ti, w in out_weighted[si]:
-                        new_scores[ti] += damping * scores[si] * (w / total)
+                if dangling[si]:
+                    dangling_mass += scores[si]
+            base = (1.0 - damping) / n + damping * dangling_mass / n
+            new_scores = [base] * n
+
+            for si in non_dangling:
+                factor = damping * scores[si]
+                for ti, w_norm in out_normalised[si]:
+                    new_scores[ti] += factor * w_norm
 
             # L∞ convergence check
             delta = max(abs(new_scores[i] - scores[i]) for i in range(n))
