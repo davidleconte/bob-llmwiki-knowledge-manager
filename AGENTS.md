@@ -444,7 +444,7 @@ metrics.record_optimization(1000, 800, 10.0)
 
 **Authoritative status: [`STATUS.md`](STATUS.md)** — single source of truth. Do not derive status from this file.
 
-Summary (2026-07-18): grade **A+ (4.30/4.30)**, 1 112 tests passing, the ≥80% coverage gate met (measured coverage lives in `STATUS.md`), all per-package floors met, SLA defined, load tests present. See `STATUS.md` for the full scorecard.
+Summary (2026-07-18): grade **A+ (4.30/4.30)** (self-assessed; since **withdrawn** — self-grading is not independent verification, see `STATUS.md`), 1 112 tests passing, the ≥80% coverage gate met (measured coverage lives in `STATUS.md`), all per-package floors met, SLA defined, load tests present. See `STATUS.md` for the full scorecard.
 
 ### Bob Shell Knowledge Manager
 - **Status:** Functional. KB at `docs/knowledge-base/` (90+ documents).

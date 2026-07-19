@@ -176,6 +176,50 @@ def _validate_grade(text: str) -> list[str]:
     return problems
 
 
+# C5 / CLM-02: grade *provenance*. `_validate_grade` checks a grade's arithmetic;
+# this checks whether a live grade is independently sourced or honestly self-labeled.
+# The arithmetic gate cannot tell a self-conferred A+ from an independent one, so a
+# syntactically valid but self-conferred grade (the withdrawn A+) could read as a live
+# verdict. A grade token passes only if a small window around it carries a
+# self-assessment/withdrawal marker OR an independent-re-grade citation.
+_SELF_LABEL_TOKENS = (
+    "self-assessed",
+    "self-conferred",
+    "self-graded",
+    "self-awarded",
+    "withdrawn",
+)
+# An independent re-grade is cited by a grader identity + a committed regrade artifact.
+_INDEPENDENT_GRADE_MARKERS = ("grader:", "evaluation/regrade")
+_GRADE_PROVENANCE_WINDOW = 2
+
+
+def _validate_grade_provenance(text: str) -> list[str]:
+    """Return problems for live grade tokens lacking provenance (C5 / CLM-02).
+
+    A grade token passes only if a window of ±2 lines around it carries a
+    self-assessment/withdrawal marker OR an independent-re-grade citation
+    (``grader:`` AND an ``evaluation/regrade/…`` artifact). This is the mechanical
+    half of CLM-02: a bare live grade with no provenance is rejected, so the only way
+    to state a live grade is to cite the independent re-grade or mark it self-assessed.
+    """
+    problems: list[str] = []
+    lines = text.splitlines()
+    for i, line in enumerate(lines):
+        for m in _GRADE_RE.finditer(line):
+            lo = max(0, i - _GRADE_PROVENANCE_WINDOW)
+            window = "\n".join(lines[lo : i + _GRADE_PROVENANCE_WINDOW + 1]).lower()
+            has_self_label = any(tok in window for tok in _SELF_LABEL_TOKENS)
+            has_independent = all(tok in window for tok in _INDEPENDENT_GRADE_MARKERS)
+            if not (has_self_label or has_independent):
+                problems.append(
+                    f"    unprovenanced live grade: {m.group(0)} — a live grade must cite an "
+                    "independent re-grade (grader: + evaluation/regrade/…) or be marked "
+                    "self-assessed/withdrawn (CLM-02)"
+                )
+    return problems
+
+
 def gate_claims(text: str) -> list[tuple[int, float, str]]:
     """Return (line_no, value, line) for every coverage-gate assertion in text.
 
@@ -261,6 +305,10 @@ def _doc_problems(
     # (2d) ATK-GATE-06: grade validation — numeric must not exceed 4.30
     problems.extend(_validate_grade(text))
 
+    # (2d') C5 / CLM-02: grade provenance — a live grade must be independently sourced
+    # or honestly self-labeled (the arithmetic gate cannot tell the two apart).
+    problems.extend(_validate_grade_provenance(text))
+
     # (2e) CLM-03: a measured coverage snapshot belongs only in STATUS.md.
     if not is_status_home:
         for line_no, line in measured_coverage_snapshots(text):
@@ -282,6 +330,15 @@ def _selftest() -> int:
         ("wrong delegation floor", "delegation held at a 60% per-package floor", True),
         ("forbidden maturity", "Status: All Phases Complete.", True),
         ("forbidden stale claim", "Note: correctness bugs remain open.", True),
+        # C5 / CLM-02: grade provenance.
+        ("unprovenanced grade", "Final grade **A+ (4.30/4.30)** achieved.", True),
+        ("self-labeled grade", "The self-assessed **A+ (4.30/4.30)** has been withdrawn.", False),
+        (
+            "independent grade",
+            "Grade **A (3.80/4.30)**\ngrader: external-panel; method: dual-rubric\n"
+            "see evaluation/regrade/verdict-2026-08.md",
+            False,
+        ),
     ]
     failures: list[str] = []
     for label, text, expect in checks:

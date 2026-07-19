@@ -17,6 +17,22 @@ savings_gate:
   # percentage by more than this, the claim is considered unbacked.
   magnitude_tolerance_pct: 5.0
 
+metric_gate:
+  # C2: retrieval/accuracy metric overclaims (precision, p@N, nDCG, MRR, uplift) are
+  # invisible to the savings gate (no savings keyword). A metric keyword + percentage
+  # on a live surface must cite a report (evaluation/results/retrieval-*/report.json)
+  # or be retracted. Deliberately scoped to named retrieval metrics — bare English
+  # "accuracy"/"recall" are OUT of scope to avoid false positives. Reuses the savings
+  # gate's surface list and banner/frozen logic (C1).
+  metric_keywords:
+    - "p@"
+    - "recall@"
+    - "ndcg"
+    - "mrr"
+    - "map@"
+    - "precision"
+    - "uplift"
+
 status_gate:
   # Live documents whose undated claims must agree with the single homes.
   # If any file in this list is missing (renamed/deleted), the gate fails closed.

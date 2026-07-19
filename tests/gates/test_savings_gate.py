@@ -117,3 +117,53 @@ def test_banner_detected_after_long_frontmatter():
     text = fm + "\n> **HISTORICAL SNAPSHOT.** Point-in-time.\n\n- 89.3% token savings\n"
     assert has_banner(text), "banner after a long frontmatter must be found"
     assert not scan_text(text), "long-frontmatter banner must still suppress the scan"
+
+
+# ---------------------------------------------------------------------------
+# C1: the banner exception must NOT mute an outward-facing live claim surface
+# (a submission with `audience:` + `status: active`). This is the exact hole a
+# stale marketing projection used — a "HISTORICAL SNAPSHOT" banner over a live
+# challenge-submission doc — so it is scanned per line regardless of any banner.
+# ---------------------------------------------------------------------------
+
+
+def test_outward_facing_live_doc_ignores_banner():
+    """C1: an outward-facing (audience) + live (status: active) doc is scanned despite a banner."""
+    text = (
+        "---\n"
+        "status: active\n"
+        "audience: [challenge-judges, ibm-leadership]\n"
+        "---\n\n"
+        "> **HISTORICAL SNAPSHOT.** Point-in-time; canonical numbers in STATUS.md.\n\n"
+        "- Combined savings: 60% Bobcoin reduction in production.\n"
+    )
+    assert scan_text(text), (
+        "C1: an outward-facing live doc must be scanned per line despite a banner — "
+        "an unbacked '60% reduction' must be flagged"
+    )
+
+
+def test_frozen_doc_banner_still_suppresses():
+    """A genuinely frozen record (non-live status) keeps the banner exception."""
+    text = (
+        "---\nstatus: superseded\naudience: [challenge-judges]\n---\n\n"
+        "> **HISTORICAL SNAPSHOT.** Retained for the audit trail.\n\n"
+        "- 89.3% token savings\n"
+    )
+    assert not scan_text(text), (
+        "A frozen (status: superseded) bannered doc keeps the banner exception, "
+        "even with an external audience"
+    )
+
+
+def test_internal_active_doc_banner_still_suppresses():
+    """C1 is scoped: an internal live doc (no external audience) keeps the banner exception."""
+    text = (
+        "---\nstatus: active\n---\n\n"
+        "> **RETRACTED.** These numbers were fabricated.\n\n"
+        "- 89.3% token savings\n"
+    )
+    assert not scan_text(text), (
+        "C1 targets outward-facing docs; an internal active doc without an audience "
+        "field keeps the banner exception"
+    )

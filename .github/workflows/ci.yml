@@ -96,6 +96,10 @@ jobs:
         # Fails if a live surface publishes a savings/cost/hit-rate percentage
         # without citing a reproducible manifest (STATUS.md publishing rule).
         run: python scripts/check_savings_claims.py
+      - name: Enforce report-backed retrieval/accuracy metrics (C2)
+        # Sibling of the savings gate: a retrieval-precision / p@N overclaim carries
+        # no savings keyword, so this gate requires a report citation or retraction.
+        run: python scripts/check_metric_claims.py
       - name: Enforce "one home per value" (no cross-file value drift)
         # Generic value-homes guard: a value duplicated across files (version,
         # python floor, model pricing) must match its single canonical home.
