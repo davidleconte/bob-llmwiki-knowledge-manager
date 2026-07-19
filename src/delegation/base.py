@@ -7,7 +7,26 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
+
+if TYPE_CHECKING:
+    from src.optimizer.token_counter import TokenCounter
+
+# Process-wide TokenCounter shared by every sub-agent (B3/CODE-10): delegation
+# token counts route through the ONE counting home in src.optimizer.token_counter
+# instead of a per-agent ``len(str(data)) // 4`` heuristic, so totals are
+# model-correct and the tokenizer's exact/approximate flag is honoured.
+_shared_token_counter: Optional["TokenCounter"] = None
+
+
+def _get_shared_token_counter() -> "TokenCounter":
+    """Return the lazily-constructed process-wide TokenCounter."""
+    global _shared_token_counter
+    if _shared_token_counter is None:
+        from src.optimizer.token_counter import TokenCounter
+
+        _shared_token_counter = TokenCounter()
+    return _shared_token_counter
 
 
 class SubAgentStatus(Enum):
@@ -104,7 +123,12 @@ class SubAgent(ABC):
     """
 
     def __init__(
-        self, agent_id: str, agent_type: str, cache_enabled: bool = True, max_cache_size: int = 1000
+        self,
+        agent_id: str,
+        agent_type: str,
+        cache_enabled: bool = True,
+        max_cache_size: int = 1000,
+        token_counter: Optional["TokenCounter"] = None,
     ):
         """
         Initialize sub-agent
@@ -114,11 +138,14 @@ class SubAgent(ABC):
             agent_type: Type of agent (e.g., "security", "performance")
             cache_enabled: Whether to enable caching
             max_cache_size: Maximum cache entries
+            token_counter: TokenCounter for result token counts; defaults to the
+                shared process-wide counter (B3 single counting home).
         """
         self.agent_id = agent_id
         self.agent_type = agent_type
         self.cache_enabled = cache_enabled
         self.max_cache_size = max_cache_size
+        self._token_counter = token_counter or _get_shared_token_counter()
 
         # Local cache for this agent
         self._cache: Dict[str, Any] = {}
@@ -210,6 +237,16 @@ class SubAgent(ABC):
             )
         finally:
             self._current_task = None
+
+    def count_tokens(self, data: Any) -> int:
+        """Count tokens in *data* via the shared TokenCounter (single home, B3).
+
+        Replaces the per-agent ``len(str(data)) // 4`` heuristic so delegation
+        token totals are model-correct and route through one counter. Non-string
+        data is stringified with ``str()`` before counting.
+        """
+        text = data if isinstance(data, str) else str(data)
+        return self._token_counter.count_tokens(text)
 
     def _get_cache_key(self, task: SubAgentTask) -> str:
         """Generate cache key for task"""

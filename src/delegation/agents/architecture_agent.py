@@ -77,7 +77,7 @@ class ArchitectureAgent(SubAgent):
                 agent_type=self.agent_type,
                 status=SubAgentStatus.SUCCESS,
                 data=result_data,
-                token_count=len(str(result_data)) // 4,
+                token_count=self.count_tokens(result_data),
             )
 
         except Exception as e:
