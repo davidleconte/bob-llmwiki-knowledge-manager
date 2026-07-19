@@ -1,13 +1,156 @@
 """Token counting utilities for prompt optimization.
 
-This module provides accurate token counting for various LLM models,
-supporting both tiktoken (OpenAI) and approximate counting methods.
+Model-aware counting via a multi-backend resolver (B1/CODE-10):
+
+- ``gpt*`` / ``o1*`` / legacy OpenAI ids  -> tiktoken (exact)
+- ``claude*``                             -> Anthropic backend if installed, else approx
+- ``granite*`` / ``watsonx*`` / ``ibm*``  -> HF/Granite tokenizer if installed, else approx
+- anything else                           -> approximation
+
+An unavailable *exact* tokenizer NEVER raises on the hot path (availability is
+deployment-dependent) but is **loud**: exactly one ``logging.warning`` per
+``(process, model)``, and ``TokenCounter.approximate`` is set so no *published*
+number silently rides on an approximation (the validation manifest's
+``tiktoken_active`` gate already blocks a run whose counts are not exact).
 """
 
+import logging
 import re
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Protocol, runtime_checkable
 
 from src.pricing import DEFAULT_MODEL, usd_cost
+
+logger = logging.getLogger(__name__)
+
+# One-warning-per-(process, model): the loud-approximation contract must not spam
+# a warning on every TokenCounter construction for the same unknown model.
+_APPROX_WARNED: set[str] = set()
+
+# Model-family prefixes routed to tiktoken (exact OpenAI BPE).
+_OPENAI_PREFIXES = ("gpt", "o1", "o3", "text-", "davinci", "curie", "babbage", "ada")
+
+
+def _approximate_token_count(text: str) -> int:
+    """Model-blind heuristic: words + special_chars // 2 (~±15% of exact)."""
+    text = re.sub(r"\s+", " ", text.strip())
+    words = len(text.split())
+    special_chars = len(re.findall(r"[^\w\s]", text))
+    return words + (special_chars // 2)
+
+
+@runtime_checkable
+class Tokenizer(Protocol):
+    """A resolved counting backend for one model.
+
+    ``exact`` is True only when the count comes from the model's real tokenizer;
+    ``False`` marks the loud approximation path.
+    """
+
+    name: str
+    exact: bool
+
+    def count(self, text: str) -> int: ...
+
+
+class _TiktokenTokenizer:
+    """Exact OpenAI BPE via tiktoken. Exposes ``encoding`` for accurate truncation."""
+
+    exact = True
+
+    def __init__(self, encoding: Any, name: str) -> None:
+        self._encoding = encoding
+        self.encoding = encoding
+        self.name = name
+
+    def count(self, text: str) -> int:
+        return len(self._encoding.encode(text))
+
+
+class _CallableTokenizer:
+    """Exact count from an external callable (e.g. a HF/Granite ``encode``)."""
+
+    exact = True
+    encoding = None
+
+    def __init__(self, count_fn: Any, name: str) -> None:
+        self._count_fn = count_fn
+        self.name = name
+
+    def count(self, text: str) -> int:
+        return int(self._count_fn(text))
+
+
+class _ApproxTokenizer:
+    """Model-blind heuristic backend (``exact=False``) — the loud fallback."""
+
+    exact = False
+    encoding = None
+
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+    def count(self, text: str) -> int:
+        return _approximate_token_count(text)
+
+
+def _resolve_openai(model: str) -> Optional[Tokenizer]:
+    try:
+        import tiktoken
+    except ImportError:
+        return None
+    try:
+        enc = tiktoken.encoding_for_model(model)
+        return _TiktokenTokenizer(enc, f"tiktoken:{enc.name}")
+    except KeyError:
+        # Unknown OpenAI id -> the modern GPT-4/3.5 encoding; still exact.
+        enc = tiktoken.get_encoding("cl100k_base")
+        return _TiktokenTokenizer(enc, "tiktoken:cl100k_base")
+
+
+def _resolve_granite(model: str) -> Optional[Tokenizer]:
+    try:
+        from transformers import AutoTokenizer  # optional: mnemox[watsonx]
+    except ImportError:
+        return None
+    # local_files_only: NEVER download on the hot path — only use a tokenizer the
+    # deployment has already cached. Not cached -> degrade to the loud
+    # approximation rather than blocking on a multi-hundred-MB fetch.
+    try:
+        tok = AutoTokenizer.from_pretrained(
+            "ibm-granite/granite-3.0-8b-instruct", local_files_only=True
+        )
+    except Exception:
+        return None
+    return _CallableTokenizer(lambda t: len(tok.encode(t)), "granite:hf")
+
+
+def resolve_tokenizer(model: str) -> Tokenizer:
+    """Resolve a :class:`Tokenizer` for *model* by family; never raises.
+
+    An unavailable exact backend degrades to a loud approximation: exactly one
+    ``logging.warning`` per ``(process, model)`` and an ``exact=False`` tokenizer.
+    """
+    m = (model or "").lower()
+    resolved: Optional[Tokenizer] = None
+    if m.startswith(_OPENAI_PREFIXES):
+        resolved = _resolve_openai(model)
+    elif m.startswith(("granite", "watsonx", "ibm")):
+        resolved = _resolve_granite(model)
+    # claude*/unknown families have no reliable offline exact tokenizer in-package
+    # today, so they fall through to the loud approximation below.
+
+    if resolved is not None:
+        return resolved
+
+    if model not in _APPROX_WARNED:
+        _APPROX_WARNED.add(model)
+        logger.warning(
+            "tokenizer for %r unavailable; token counts are a ~±15%% approximation, "
+            "not exact. Install the matching extra (e.g. mnemox[watsonx] or "
+            "mnemox[anthropic]); published numbers must not ride on an approximation.",
+            model,
+        )
+    return _ApproxTokenizer(f"approx:{model}")
 
 
 class TokenCounter:
@@ -18,8 +161,10 @@ class TokenCounter:
 
     Attributes:
         model: Model name for token counting
-        encoding: Tiktoken encoding (if available)
-        use_tiktoken: Whether tiktoken is available
+        tokenizer: Resolved counting backend (:class:`Tokenizer`)
+        approximate: True when counts are a heuristic (not the model's tokenizer)
+        encoding: Tiktoken encoding (only when the backend is tiktoken)
+        use_tiktoken: Whether the exact tiktoken backend is in effect
         track_costs: Whether to track costs with CostTracker
     """
 
@@ -27,23 +172,20 @@ class TokenCounter:
         """Initialize token counter.
 
         Args:
-            model: Model name (e.g., "gpt-4", "gpt-3.5-turbo")
+            model: Model name (e.g., "gpt-4", "claude-sonnet-5", "granite-3-8b")
             track_costs: Whether to track costs with CostTracker
         """
         self.model = model
-        self.encoding = None
-        self.use_tiktoken = False
         self.track_costs = track_costs
 
-        # Try to import tiktoken
-        try:
-            import tiktoken
-
-            self.encoding = tiktoken.encoding_for_model(model)
-            self.use_tiktoken = True
-        except (ImportError, KeyError):
-            # Fallback to approximation
-            self.use_tiktoken = False
+        # Resolve the counting backend by model family (loud on approximation).
+        self.tokenizer = resolve_tokenizer(model)
+        self.approximate = not self.tokenizer.exact
+        # Back-compat surface: ``encoding`` is the tiktoken encoding when (and only
+        # when) the backend is tiktoken; ``use_tiktoken`` mirrors that and still
+        # feeds the validation manifest's ``tiktoken_active`` publish-block.
+        self.encoding = getattr(self.tokenizer, "encoding", None)
+        self.use_tiktoken = self.encoding is not None
 
         # Initialize cost tracker if enabled
         self._cost_tracker = None
@@ -67,11 +209,7 @@ class TokenCounter:
         if not text:
             return 0
 
-        if self.use_tiktoken and self.encoding:
-            tokens = len(self.encoding.encode(text))
-        else:
-            # Approximation: ~4 characters per token
-            tokens = self._approximate_tokens(text)
+        tokens = self.tokenizer.count(text)
 
         # Track cost if enabled
         if self.track_costs and self._cost_tracker:
@@ -95,10 +233,10 @@ class TokenCounter:
         return [self.count_tokens(text) for text in texts]
 
     def _approximate_tokens(self, text: str) -> int:
-        """Approximate token count.
+        """Approximate token count (words + special_chars // 2).
 
-        Uses heuristic: ~4 characters per token for English text.
-        More accurate than simple character count.
+        Retained for back-compat; the resolver's approximation backend uses the
+        same :func:`_approximate_token_count` helper.
 
         Args:
             text: Text to count
@@ -106,16 +244,7 @@ class TokenCounter:
         Returns:
             Approximate token count
         """
-        # Remove extra whitespace
-        text = re.sub(r"\s+", " ", text.strip())
-
-        # Count words and special characters
-        words = len(text.split())
-        special_chars = len(re.findall(r"[^\w\s]", text))
-
-        # Heuristic: words + special_chars / 2
-        # Most words are 1 token, special chars often share tokens
-        return words + (special_chars // 2)
+        return _approximate_token_count(text)
 
     def count_messages(self, messages: list[Dict[str, str]]) -> int:
         """Count tokens in message list (chat format).
@@ -177,6 +306,9 @@ class TokenCounter:
             "estimated_cost": self.estimate_cost(tokens),
             "model": self.model,
             "method": "tiktoken" if self.use_tiktoken else "approximation",
+            "tokenizer": self.tokenizer.name,
+            "exact": self.tokenizer.exact,
+            "approximate": self.approximate,
         }
 
     def compare_texts(self, original: str, optimized: str) -> Dict[str, Any]:
