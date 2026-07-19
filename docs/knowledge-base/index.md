@@ -12,6 +12,7 @@ Last Updated: 2026-07-19
 
 ## Recent Additions
 - 2026-07-19: [Obsidian Integration Guide](./guides/obsidian-integration-guide.md) - Guide ⭐ NEW — Semantic graph export to Obsidian Canvas + Dataview, and Obsidian MCP activation in Bob IDE
+- 2026-07-19: [Adversarial Audit 2026-07-19](./research/adversarial-audit-2026-07-19.md) - Research ⭐ NEW — Adversarial audit of Mnemox codebase, KB integrity, and challenge submission (external)
 - 2026-07-19: [Independent Counter-Audit](./research/counter-audit-2026-07-19-independent.md) - Research ⭐ NEW — MECE independent counter-audit of Mnemox architecture, memory-layer, retrieval, and governance
 - 2026-07-19: [Innovation Portfolio](./research/innovation-portfolio-2026-07-19.md) - Research ⭐ NEW — Innovation portfolio and roadmap for Mnemox: MCP, watsonx, advanced-RAG integration
 - 2026-07-19: [Mnemox Update — 2026-07-19](./research/mnemox-update-2026-07-19.md) - Research — automated KB update: git log, doc counts, lessons learned scaffold
