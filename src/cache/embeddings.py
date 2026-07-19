@@ -124,8 +124,9 @@ class EmbeddingGenerator:
 
     The two backends are **not interchangeable**: their output dimensionality
     differs (1000 vs 384).  Callers that persist vectors on disk (e.g.
-    ``PersistentEmbeddingIndex``) detect a dimension mismatch on load and
-    trigger a full rebuild automatically.
+    ``PersistentEmbeddingIndex``) compare the stored matrix width against the
+    active embedder's :attr:`embedding_dim` on load and **discard** a mismatched
+    index; the next ``rebuild()`` regenerates it at the new dimension.
 
     Note: the fixed hashing feature space means distinct short texts can collide
     to the same vector. Exact-match correctness therefore does not rely on the
