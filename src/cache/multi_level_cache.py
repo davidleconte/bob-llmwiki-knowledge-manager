@@ -177,11 +177,16 @@ class MultiLevelCache(CacheInterface):
                 do_promote = self.promote_l2_hits
 
             # Promote to L1 for future fast access (only if L1 is enabled).
-            if do_promote and self.l1_enabled:
+            # ATK-FS-02: only promote on exact key match, never on cosine-similarity
+            # match — a fuzzy match promoted under the caller's key would permanently
+            # store an attacker's payload as a forged exact hit.
+            l2_was_exact = getattr(self.l2_cache, "_last_hit_was_exact", True)
+            if do_promote and self.l1_enabled and l2_was_exact:
                 # Get metadata from L2 if available
                 l2_entry = self.l2_cache.get_entry(key, version)
-                metadata = l2_entry.metadata if l2_entry else {}
-                self.l1_cache.set(key, result, version, metadata)
+                meta = dict(l2_entry.metadata) if (l2_entry and l2_entry.metadata) else {}
+                meta["match_type"] = "exact"
+                self.l1_cache.set(key, result, version, meta)
 
                 # Record promotion
                 self._metrics.record_cache_promotion()

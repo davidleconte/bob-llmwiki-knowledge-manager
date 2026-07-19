@@ -9,6 +9,13 @@ status: active
 
 # Knowledge Manager Bobcoin Savings — Measurement Guide
 
+> ⚠️ **Illustrative figures — not independently measured outcomes.** Percentage figures in this
+> guide (e.g. 86%, 83%, 82%) are *worked examples and methodology illustrations*, not results from
+> a reproducible manifest run. They show how to compute savings — they are not validated claims.
+> The only manifest-backed optimizer compression figure for this repo is **~20%**
+> (provenance: `evaluation/results/validation-2026-07-14/manifest.json`; see `STATUS.md`).
+> KB re-derivation saving on well-formed pairs: **51%** (manifest: `tests/validation/test_km_savings.py`).
+
 ## Overview
 
 How to establish **credible, evidence-backed** Bobcoin savings from the Knowledge Manager (KM)
@@ -84,9 +91,9 @@ Date         | Query type              | Mode  | Input tokens | Output tokens | 
 savings_pct = (raw_bc - kb_bc) / raw_bc × 100
 ```
 
-Example:
-- Architecture query: (0.44 - 0.06) / 0.44 = **86% savings**
-- Logging config query: (0.09 - 0.015) / 0.09 = **83% savings**
+Example (illustrative — not validated; your workload will differ):
+- Architecture query: (0.44 - 0.06) / 0.44 = **86% savings** ← illustrative, not validated
+- Logging config query: (0.09 - 0.015) / 0.09 = **83% savings** ← illustrative, not validated
 
 > **Honesty note:** These are *best-case* figures. The KB document must fully answer the query —
 > if Bob still needs to consult raw source, savings shrink proportionally.
@@ -226,18 +233,18 @@ Savings claims must include all four elements:
    [`kb-savings-estimation-methodology.md`](../references/kb-savings-estimation-methodology.md))
 4. **Applicability boundary** — what workload type the figure applies to
 
-### Example compliant claim
+### Example compliant claim (illustrative — not validated; fill in your own measured values)
 
 > "Over 4 weeks of working on the Token Optimizer codebase (N=34 sessions),
 > KB-primary sessions cost an average of 0.07 BC vs 0.38 BC for raw-source sessions —
-> an **82% measured reduction** (conservative range: 70–85%) on architecture and
-> configuration queries. This figure does not apply to debugging sessions or
+> an **82% measured reduction** (conservative range: 70–85%; not validated — illustrative template)
+> on architecture and configuration queries. This figure does not apply to debugging sessions or
 > first-time exploratory tasks."
 
 ### Non-compliant claims to avoid
 
 - ❌ "The KM saves 80% of your Bobcoins" (no sample, no boundary)
-- ❌ "Combined savings: 20% + 80% = 100%" (additive fallacy)
+- ❌ "Combined savings: 20% + 80% = 100%" (additive fallacy; not validated)
 - ❌ "Every session is 90% cheaper with the KM" (ignores raw-source fallback)
 
 ---
@@ -284,7 +291,7 @@ metrics.record_cache_hit("KB", savings_bc=0.38)
 
 - [Bobcoin Savings Analysis 2026-07-14](../research/bobcoin-savings-analysis-2026-07-14.md) — Theoretical analysis, scenarios, institutional audit
 - [KB Savings Estimation Methodology](../references/kb-savings-estimation-methodology.md) — Confidence levels and estimation formulas
-- [Token Optimization](../concepts/token-optimization.md) — TOS layer: ~20% measured compression
+- [Token Optimization](../concepts/token-optimization.md) — TOS layer: ~20% measured compression (manifest-backed)
 - [Multi-Level Caching](../concepts/multi-level-caching.md) — Cache hit-rate contribution
 - [Cost Tracking Guide](./cost-tracking-guide.md) — Bobcoin budget management
 

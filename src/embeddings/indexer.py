@@ -89,8 +89,11 @@ class KBIndexer:
         from src.tools.kb_query import KnowledgeBaseQuery
 
         self.sync()
+        # CODE-02: pass the built index so the validated embedding path is used
+        # (previously only the embedder was passed, which left the index unwired).
         kb = KnowledgeBaseQuery(
             str(self._kb_path),
+            index=self._index,
             embedder=self._index.embedder,
             embedding_weight=embedding_weight,
         )

@@ -392,8 +392,8 @@ fi
 
 ## Related Documentation
 
-- [Phase 3 Validation User Guide](../phase3-validation-user-guide.md)
-- [Phase 3 Testing Plan](../phase3-validation-testing-plan.md)
+- [Phase 3 Validation User Guide](./phase3-validation-user-guide.md)
+- [Phase 3 Testing Plan](./phase3-validation-testing-plan.md)
 
 ## Support
 

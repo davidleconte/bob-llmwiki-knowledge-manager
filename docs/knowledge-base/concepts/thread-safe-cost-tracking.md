@@ -19,7 +19,7 @@ Cost tracking in `src/monitoring/cost_tracker.py` is opt-in (`track_costs=True`)
 - Always opt-in: `TokenCounter(model="gpt-4", track_costs=True)`
 - Thread-safe via a single `Lock` in `CostTracker.__init__`; all counter writes inside `with self._lock:`
 - Tracking (data collection) and reporting (presentation) are separate classes
-- Never provide point estimates for KB savings — always three confidence levels (conservative 95%, realistic 70%, optimistic 30%)
+- Never provide point estimates for KB savings — always three confidence tiers (conservative / realistic / optimistic; the tier probabilities live in `kb-savings-estimation-methodology.md`)
 - `1 Bobcoin = 1,000 tokens` is the single pricing constant; define it once at module level
 
 ## Details
@@ -69,7 +69,7 @@ Never report point estimates. Always provide three confidence levels:
 ```python
 conservative, realistic, optimistic = estimate_research_tokens(kb_doc_path, source_path)
 
-print(f"Savings: {realistic} tokens (70% confidence)")
+print(f"Savings estimate: {realistic} tokens (realistic tier)")
 print(f"Range: {conservative}–{optimistic} tokens")
 ```
 

@@ -31,7 +31,7 @@ manufactured, so they are reported separately and labelled:
 
 ## Honest gates (what CI enforces)
 
-The exit code encodes three checks — none of them a savings *magnitude* (gating a
+The exit code encodes four checks — none of them a savings *magnitude* (gating a
 measurement would re-incentivise fabrication):
 
 1. **Null test** — the optimizer over a shuffled/high-entropy corpus must show
@@ -40,6 +40,22 @@ measurement would re-incentivise fabrication):
 2. **Manifest complete** — `code_sha`, `git_dirty`, `data_hash`, `config`, `seed`,
    `library_versions`, `tiktoken_active`, … all present.
 3. **tiktoken active** — token counts are real, not the `chars/4` approximation.
+4. **Corpus composition** (ATK-GATE-01, `composition_ok`) — guards *composition, not
+   magnitude*. A number is only publishable if its corpus is representative: at least
+   `MIN_CORPUS_N` documents, no single document exceeding `MAX_TOP_DOC_TOKEN_SHARE` of
+   the total token weight, and a mean within `MAX_MEAN_MEDIAN_DIVERGENCE_PP` of the
+   median. This closes the cherry-pick loophole — the *denominator* cannot be stacked
+   with a few favourable documents while the measured *value* itself stays ungated.
+   The report also carries a `trimmed_mean_savings_pct` (10% trimmed) so outlier
+   influence is always visible alongside the headline mean.
+
+### Corpus-selection rule (documented, so the denominator can't be quietly curated)
+
+The published corpus is the committed repo-prose corpus (`--corpus repo`): every
+Markdown document under `docs/` plus the top-level narrative docs, selected by path
+and hashed into the manifest (`data_hash`) — **not** hand-picked per run. Changing the
+corpus changes `data_hash`, so any curation is visible in the manifest diff. The
+composition guard above then rejects a corpus that is too small or outlier-dominated.
 
 The companion guard `scripts/check_savings_claims.py` (in the CI `lint` job) fails
 if any live doc publishes a savings/cost/hit-rate percentage without citing a

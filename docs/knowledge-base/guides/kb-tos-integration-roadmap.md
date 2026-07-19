@@ -428,8 +428,8 @@ path is the exact maturity anti-pattern this plan avoids.
 - **Embedding layer concept:** [`../concepts/kb-tos-embedding-layer.md`](../concepts/kb-tos-embedding-layer.md)
 - **Phase-8 sign-off audit:** [`../research/audit-2026-07-14-signoff.md`](../research/audit-2026-07-14-signoff.md)
 - **Current TOS architecture:** [`../../../docs/architecture/architecture.md`](../../../docs/architecture/architecture.md)
-- **Gap closure plan:** [`../../../gap-closure-plan.md`](../../../gap-closure-plan.md)
-- **A+ plan:** [`../../../a-plus-plan.md`](../../../a-plus-plan.md)
+- **Gap closure plan:** [`../../project-management/planning/gap-closure-plan.md`](../../project-management/planning/gap-closure-plan.md)
+- **A+ plan:** [`../../project-management/planning/a-plus-plan.md`](../../project-management/planning/a-plus-plan.md)
 
 ---
 

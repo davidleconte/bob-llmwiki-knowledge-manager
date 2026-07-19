@@ -59,7 +59,7 @@ cd ~/your-project
 ~/Projects/bob-llmwiki-knowledge-manager/scripts/start-kb.sh
 ```
 
-What it does (see [`scripts/start-kb.sh`](../../scripts/start-kb.sh)):
+What it does (see [`scripts/start-kb.sh`](../../../scripts/start-kb.sh)):
 1. Verifies `docs/knowledge-base/` exists — exits with a helpful error if not
 2. Prints document count and confirms `CONTEXT.md` is present
 3. Launches `bob --chat-mode=knowledge-manager`

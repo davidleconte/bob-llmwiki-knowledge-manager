@@ -19,6 +19,8 @@ Design decisions: ADR-017.
 - `_FM_TAGS_INLINE_RE`
 - `_FM_TAGS_BLOCK_RE`
 - `_LINK_RE`
+- `_DEFAULT_MAX_EDGES_PER_NODE`
+- `_DEFAULT_MAX_TOTAL_EDGES`
 
 ## Functions
 
@@ -105,7 +107,7 @@ Returns:
     Number of explicit edges added.
 
 
-##### `build_semantic(graph: KnowledgeGraph, index: 'PersistentEmbeddingIndex') -> int`
+##### `build_semantic(graph: KnowledgeGraph, index: 'PersistentEmbeddingIndex', max_edges_per_node: int, max_total_edges: int) -> int`
 
 Derive semantic edges from the embedding index.
 
@@ -114,9 +116,14 @@ Aggregates chunk-level cosine scores to a per-document score using ``max``
 (ADR-017 Decision 2).  Adds a bidirectional semantic edge if the
 aggregated score ≥ ``self._semantic_threshold``.
 
+ATK-DOS-02: *max_edges_per_node* and *max_total_edges* caps prevent an
+O(N²) edge explosion when many documents are mutually similar.
+
 Args:
     graph: Graph to populate.
     index: Pre-built :class:`~src.embeddings.index.PersistentEmbeddingIndex`.
+    max_edges_per_node: Maximum outbound semantic edges per source node.
+    max_total_edges: Global cap on total semantic edges added.
 
 Returns:
     Number of semantic edges added (each bidirectional pair counts as 1).

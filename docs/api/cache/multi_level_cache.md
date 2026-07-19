@@ -201,6 +201,14 @@ Disable L2 to L1 promotion.
 
 Get cached response with cache level information.
 
+Delegates to :meth:`get` so that stats accounting (l1_hits / l2_hits /
+misses, _lookup_times) and L2→L1 promotion are applied identically to a
+plain ``get()`` call.  The cache level is inferred from which counter
+was incremented.
+
+Respects :attr:`l1_enabled` and :attr:`l2_enabled` flags — disabled
+levels are skipped, consistent with the behaviour of :meth:`get`.
+
 Args:
     key: The cache key (prompt)
     version: Optional version
@@ -213,12 +221,16 @@ Returns:
 
 Check if key exists in either cache.
 
+Respects :attr:`l1_enabled` and :attr:`l2_enabled` flags — disabled
+levels are not queried, consistent with the behaviour of :meth:`get`
+and :meth:`set`.
+
 Args:
     key: The cache key
     version: Optional version
 
 Returns:
-    True if key exists in L1 or L2, False otherwise
+    True if key exists in an enabled L1 or L2 cache, False otherwise
 
 
 ##### `average_lookup_time_ms() -> float`
@@ -233,12 +245,20 @@ Returns:
 
 Migrate entries from one version to another in both caches.
 
+.. note::
+    L1 always contributes 0 migrated entries because
+    :class:`~src.cache.exact_cache.ExactCache` stores keys as
+    irreversible SHA-256 hashes and cannot reconstruct the original
+    key string required for re-insertion under a new version prefix.
+    Only L2 (:class:`~src.cache.semantic_cache.SemanticCache`) performs
+    actual migration.
+
 Args:
     from_version: Source version
     to_version: Target version
 
 Returns:
-    Total number of entries migrated across both caches
+    Total number of entries migrated across both caches (L1 always 0)
 
 
 ##### `cleanup_version(version: str) -> int`

@@ -30,6 +30,22 @@ Percentile bootstrap CI for the mean; degenerate-safe for tiny N.
 ### `_percentile(values: Sequence[float], pct: float) -> float`
 
 
+### `_trimmed_mean(values: List[float], trim: float) -> float`
+
+Mean after dropping the top/bottom ``trim`` fraction -- robust to outliers.
+
+
+### `_corpus_composition(scored: List[Dict[str, Any]], total_original: int) -> Dict[str, Any]`
+
+Composition metrics that expose corpus cherry-picking (ATK-GATE-01).
+
+Guard *composition, not magnitude*: we deliberately do NOT gate the savings
+*value* -- gating a measurement re-incentivises fabrication. Instead these
+metrics let :func:`composition_ok` gate whether the corpus is representative
+enough to publish a number. Cherry-pick signatures: too few docs, a single doc
+dominating the token weight, or a mean pulled far from the median by outliers.
+
+
 ### `measure_optimizer(config: 'ConfigSchema', model: str, docs: Sequence['Document']) -> Dict[str, Any]`
 
 Per-document lossless-ish compression -- the only savings headline.

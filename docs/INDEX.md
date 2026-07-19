@@ -321,7 +321,7 @@ from src.facade import TokenOptimizer
 optimizer = TokenOptimizer()
 result = optimizer.optimize("Your prompt here")
 print(result["optimized_text"])        # compressed text
-print(result["compression_ratio"])     # e.g. 0.80 → 20% smaller
+print(result["compression_ratio"])     # e.g. 0.80 means output is 0.8x the input size
 ```
 
 **Run a repository analysis:**

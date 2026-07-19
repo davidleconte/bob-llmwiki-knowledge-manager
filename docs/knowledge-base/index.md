@@ -13,6 +13,7 @@ Last Updated: 2026-07-19 · **115 documents** (14 concepts · 27 guides · 4 ref
 - [Research](./research/) - Research notes and findings
 
 ## Recent Additions
+- 2026-07-19: [Engineering-Soundness Audit (frozen evidence)](./research/engineering-soundness-audit-2026-07-19.md) - Research ⭐ NEW — McKinsey-method engineering-soundness review: reconciled scorecard (~2.9/5 → ~4.2/5), ~55-finding MECE register, value-driver tree; frozen evidence home for the consulting report
 - 2026-07-19: [Adversarial Remediation Plan (root)](../../adversarial-remediation-plan.md) - Planning ⭐ NEW — v2 detailed technical specification (14 sub-tasks) for closing all Critical/High audit findings; adversarially audited before implementation; gating independent re-grade
 - 2026-07-19: [Obsidian Integration Guide](./guides/obsidian-integration-guide.md) - Guide ⭐ NEW — Semantic graph export to Obsidian Canvas + Dataview, and Obsidian MCP activation in Bob IDE
 - 2026-07-19: [Adversarial Audit 2026-07-19](./research/adversarial-audit-2026-07-19.md) - Research ⭐ NEW — Red-team audit: 19 CONFIRMED exploits across file-read, cache-poisoning, prompt-injection, and honesty-gate surfaces
@@ -155,6 +156,7 @@ Last Updated: 2026-07-19 · **115 documents** (14 concepts · 27 guides · 4 ref
 - [Cache API Reference](./references/cache-api.md) - Complete API documentation for all cache classes, methods, and usage examples
 
 ### Research
+- [Engineering-Soundness Audit — 2026-07-19 (frozen evidence)](./research/engineering-soundness-audit-2026-07-19.md) - McKinsey-method review: reconciled scorecard, ~55-finding MECE register with file:line, value-driver tree; single home for the consulting report's numbers ⭐ NEW
 - [Mnemox Update — 2026-07-19 (documentation sync)](./research/mnemox-update-2026-07-19b.md) - `mnemox --quick` session: STATUS.md grade qualification, CHANGELOG [Unreleased], index.md case fix, .docx hygiene, remediation-plan root placement ⭐ NEW
 - [Quality Gate Status — 2026-07-18](./research/quality-gate-status-2026-07-18.md) - Status-only audit snapshot: 1112 tests / 0 failures, 89.82% global coverage, all 5 per-package floors met (delegation 84%, embeddings 88.8%, monitoring 97.1%, tools 92%, validation 90.8%), ruff + mypy clean; script-output hygiene warning; merge checklist ⭐ NEW
 - [Repo Hygiene — Lessons Learned](./research/repo-hygiene-lessons-2026-07.md) - H-1–H-5 issue taxonomy; gitignore `/`-anchoring rule; hygiene audit protocol (5 shell commands); `.gitignore` design table; verification gate

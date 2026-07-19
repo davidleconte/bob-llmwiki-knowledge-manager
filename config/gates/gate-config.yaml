@@ -1,0 +1,36 @@
+# Gate configuration for check_savings_claims.py and check_status_consistency.py
+# (ATK-GATE-07: externalize thresholds from gate scripts so a PR that weakens a
+# threshold is conspicuous even to reviewers unfamiliar with the script internals.)
+#
+# OWNERSHIP: see .github/CODEOWNERS — this file requires a separate review token.
+# Any change to thresholds here must be reviewed independently of any change to
+# the claim or measurement it guards.
+
+savings_gate:
+  # Directory path fragments excluded from scanning (frozen dated records).
+  excluded_dir_parts:
+    - "knowledge-base/research"
+  # Number of lines at the head of a file to check for a retraction/banner marker.
+  banner_scan_lines: 20
+  # Tolerance in percentage points for manifest value cross-check.
+  # If a cited manifest exists and its mean_savings differs from the stated
+  # percentage by more than this, the claim is considered unbacked.
+  magnitude_tolerance_pct: 5.0
+
+status_gate:
+  # Live documents whose undated claims must agree with the single homes.
+  # If any file in this list is missing (renamed/deleted), the gate fails closed.
+  live_docs:
+    - STATUS.md
+    - README.md
+    - AGENTS.md
+    - tests/README.md
+    - docs/project-management/project-status.md
+  # The canonical maturity string that STATUS.md must assert.
+  canonical_status_string: "Not Production Ready"
+
+coverage_gate:
+  # Must match [tool.coverage.report] fail_under in pyproject.toml.
+  # The gate script reads pyproject.toml directly; this entry documents the
+  # expected value and triggers a review whenever it changes here.
+  fail_under: 80

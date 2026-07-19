@@ -102,8 +102,9 @@ Args:
         The corpus is bookkeeping only (used for logging / drift
         monitoring); it no longer influences the embedding.
     backend: ``"hashing"`` (default) or ``"minilm"``.  When
-        ``"minilm"`` is requested but ``mlx-embeddings`` is absent the
-        generator warns and falls back to ``"hashing"``.
+        ``"minilm"`` is requested but neither ``mlx-embeddings`` nor
+        ``sentence-transformers`` is installed, the generator warns and
+        falls back to ``"hashing"``.
 
 
 ##### `embedding_dim() -> int`

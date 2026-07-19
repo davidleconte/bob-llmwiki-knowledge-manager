@@ -37,6 +37,7 @@ from __future__ import annotations
 import re
 import sys
 from pathlib import Path
+from typing import Optional
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -48,7 +49,7 @@ LIVE_DOCS = (
     "README.md",
     "AGENTS.md",
     "tests/README.md",
-    "docs/project-management/PROJECT_STATUS.md",
+    "docs/project-management/project-status.md",
 )
 
 # A doc carrying one of these in its first lines has explicitly recused itself
@@ -68,6 +69,19 @@ FORBIDDEN_STALE_CLAIMS = ("correctness bugs remain open",)
 
 # The canonical maturity string that STATUS.md must continue to assert.
 CANONICAL_STATUS = "Not Production Ready"
+
+# ATK-GATE-06: Grade validation constants.
+# A fabricated grade like "A+ (5.00/4.30)" must be rejected.
+_GRADE_RE = re.compile(r"\*\*([A-F][+-]?)\s+\((\d+\.\d+)/4\.30\)\*\*")
+_MAX_NUMERIC_GRADE = 4.30
+# Minimum numeric threshold for each letter prefix (A+ = ≥4.0, A = ≥3.7, etc.)
+_GRADE_THRESHOLDS = {
+    "A+": 4.0, "A": 3.7, "A-": 3.3,
+    "B+": 3.0, "B": 2.7, "B-": 2.3,
+    "C+": 2.0, "C": 1.7, "C-": 1.3,
+    "D+": 1.0, "D": 0.7, "D-": 0.3,
+    "F": 0.0,
+}
 
 # The delegation per-package coverage floor is cited in prose (AGENTS.md); its
 # single home is scripts/check_coverage_by_package.py. This catches the stale
@@ -111,6 +125,48 @@ def read_delegation_floor() -> float:
 def is_deprecated(text: str) -> bool:
     head = "\n".join(text.splitlines()[:DEPRECATION_SCAN_LINES]).upper()
     return any(marker in head for marker in DEPRECATION_MARKERS)
+
+
+# Ordered grade scale from highest to lowest (for upper-bound checking).
+_GRADE_ORDER = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "D-", "F"]
+
+
+def _validate_grade(text: str) -> list[str]:
+    """Return problems for any grade strings that exceed the maximum or mismatch their letter.
+
+    Catches fabricated grades like 'A+ (5.00/4.30)' (ATK-GATE-06).
+    Checks both lower bound (numeric ≥ threshold for letter) and upper bound
+    (numeric < threshold for the grade one step above).
+    """
+    problems: list[str] = []
+    for m in _GRADE_RE.finditer(text):
+        letter = m.group(1)
+        numeric = float(m.group(2))
+        if numeric > _MAX_NUMERIC_GRADE:
+            problems.append(
+                f"    fabricated grade: {m.group(0)} — numeric {numeric} exceeds max {_MAX_NUMERIC_GRADE}"
+            )
+            continue
+        threshold = _GRADE_THRESHOLDS.get(letter)
+        if threshold is not None and numeric < threshold:
+            problems.append(
+                f"    grade mismatch: {m.group(0)} — {letter} requires numeric ≥ {threshold}, "
+                f"got {numeric}"
+            )
+            continue
+        # Upper bound: numeric must not be ≥ threshold of the grade one step above.
+        # e.g. "C (4.29/4.30)" — 4.29 ≥ threshold for A+ (4.0) → mismatch.
+        if letter in _GRADE_ORDER:
+            idx = _GRADE_ORDER.index(letter)
+            if idx > 0:  # there is a grade above
+                grade_above = _GRADE_ORDER[idx - 1]
+                threshold_above = _GRADE_THRESHOLDS.get(grade_above, _MAX_NUMERIC_GRADE)
+                if numeric >= threshold_above:
+                    problems.append(
+                        f"    grade mismatch: {m.group(0)} — numeric {numeric} qualifies for "
+                        f"{grade_above} (threshold ≥ {threshold_above}), not {letter}"
+                    )
+    return problems
 
 
 def gate_claims(text: str) -> list[tuple[int, float, str]]:
@@ -169,6 +225,9 @@ def _doc_problems(text: str, fail_under: float, delegation_floor: float) -> list
                     f"        {line.strip()}"
                 )
 
+    # (2d) ATK-GATE-06: grade validation — numeric must not exceed 4.30
+    problems.extend(_validate_grade(text))
+
     return problems
 
 
@@ -209,7 +268,9 @@ def main() -> int:
     for rel in LIVE_DOCS:
         path = REPO_ROOT / rel
         if not path.exists():
-            print(f"  SKIP {rel}: not found")
+            # ATK-GATE-02: fail closed on missing live docs; skipping masks renames
+            failures.append(rel)
+            print(f"  FAIL {rel}: not found — rename must be reflected in LIVE_DOCS list")
             continue
         text = path.read_text(encoding="utf-8")
         if is_deprecated(text):

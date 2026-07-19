@@ -99,12 +99,18 @@ class TestQuery:
 
     def test_include_content_returns_full_body(self, tmp_path):
         _make_kb(tmp_path)
-        body = "# Deep Learning\n\nContent about deep learning goes here.\n"
-        (tmp_path / "concepts" / "dl.md").write_text(body)
+        body_text = "# Deep Learning\n\nContent about deep learning goes here.\n"
+        # Trust tier must be "verified" for real content to be returned (ATK-MEM-02).
+        doc_text = "---\ntitle: Deep Learning\ntrust_tier: verified\n---\n\n" + body_text
+        (tmp_path / "concepts" / "dl.md").write_text(doc_text)
         kb = KnowledgeBaseQuery(str(tmp_path))
         result = kb.query("deep learning", include_content=True)
         top = result["results"][0]
-        assert top["content"] == body
+        # ATK-MEM-01: content is wrapped in trust-boundary delimiters; the
+        # original body must be present inside the wrapper.
+        assert body_text.strip() in top["content"]
+        assert "<<<KB_REFERENCE_START>>>" in top["content"]
+        assert "<<<KB_REFERENCE_END>>>" in top["content"]
         assert "preview" not in top
 
     def test_invalid_categories_returns_error(self, tmp_path):

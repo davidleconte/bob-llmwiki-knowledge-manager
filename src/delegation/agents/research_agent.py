@@ -3,6 +3,7 @@ Research Sub-Agent
 Specialized agent for knowledge base research and information gathering
 """
 
+from pathlib import Path
 from typing import Dict, List
 
 from src.delegation.base import SubAgent, SubAgentResult, SubAgentStatus, SubAgentTask
@@ -31,7 +32,43 @@ class ResearchAgent(SubAgent):
             max_cache_size=1000,
         )
         try:
-            self.kb: KnowledgeBaseQuery | None = KnowledgeBaseQuery(kb_path)
+            # CODE-02: load the canonical index and graph so the validated
+            # p@3=0.88 stack is used instead of keyword-only search.
+            from src.cache.embeddings import EmbeddingGenerator
+            from src.embeddings.index import PersistentEmbeddingIndex
+            from src.graph.store import GraphStore
+
+            _ra_kb_path = Path(kb_path)
+            _ra_index = None
+            _ra_graph = None
+            _ra_embedding_weight = 0.0
+            _ra_graph_weight = 0.0
+            try:
+                _ra_index_path = _ra_kb_path.parent / ".bob" / "kb-index"
+                if _ra_index_path.exists():
+                    _ra_index = PersistentEmbeddingIndex(
+                        EmbeddingGenerator(), index_path=_ra_index_path
+                    )
+                    if _ra_index.doc_count > 0:
+                        _ra_embedding_weight = 0.7
+            except Exception:
+                _ra_index = None
+            try:
+                _ra_graph_path = _ra_kb_path.parent / ".bob" / "kb-graph.json"
+                if _ra_graph_path.exists():
+                    _ra_graph = GraphStore().load(_ra_graph_path)
+                    if _ra_graph is not None and _ra_graph.node_count > 0:
+                        _ra_graph_weight = 0.3
+            except Exception:
+                _ra_graph = None
+
+            self.kb: KnowledgeBaseQuery | None = KnowledgeBaseQuery(
+                kb_path,
+                index=_ra_index,
+                graph=_ra_graph,
+                embedding_weight=_ra_embedding_weight,
+                graph_weight=_ra_graph_weight,
+            )
         except ValueError:
             self.kb = None
 

@@ -7,7 +7,8 @@ latest released minor line.
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.0.x   | :white_check_mark: |
+| 1.1.x   | :white_check_mark: |
+| 1.0.x   | :x:                |
 | < 1.0   | :x:                |
 
 The current version is defined once, in [`pyproject.toml`](pyproject.toml)
@@ -91,3 +92,23 @@ faith, discover and report vulnerabilities in accordance with this policy,
 provided they avoid privacy violations, data destruction, and service
 disruption, and do not access more data than necessary to demonstrate the
 issue.
+
+## Program Gate
+
+No Critical or High audit finding is marked closed until:
+
+1. Its adversarial regression test exists in `tests/security/`, `tests/gates/`, or `tests/retrieval/`.
+2. The test **passes** on the fixed tree.
+3. The test is **verified to fail** on the unfixed tree — revert the fix in a
+   throwaway branch and run `uv run pytest tests/security/ -v` to confirm red.
+
+The `adversarial-regression` CI job (`.github/workflows/ci.yml`) runs all security,
+gate, and retrieval tests on every PR. Tests marked `@pytest.mark.planted_defect` are
+excluded from CI — they serve as proof-of-exploit documentation and are run manually
+to demonstrate the red→green transition that closes a finding.
+
+Source audits:
+- Red-team adversarial audit: `docs/knowledge-base/research/adversarial-audit-2026-07-19.md`
+- Counter-audit (MECE, scored 2.9/5): `counter-audit-2026-07-19-independent.md`
+- Remediation plan: `adversarial-remediation-plan.md`
+

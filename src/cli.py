@@ -344,10 +344,48 @@ def main(argv: Optional[List[str]] = None) -> int:
     elif args.command == "kb-search":
         from pathlib import Path
 
+        from src.cache.embeddings import EmbeddingGenerator
+        from src.embeddings.index import PersistentEmbeddingIndex
+        from src.graph.store import GraphStore
         from src.tools.kb_query import KnowledgeBaseQuery
+
+        # CODE-02: wire the canonical index and graph into kb-search so the
+        # validated p@3=0.88 stack is actually used (previously keyword-only).
+        _ks_kb_path = Path(args.kb_path)
+        _ks_index = None
+        _ks_graph = None
+        _ks_embedding_weight = 0.0
+        _ks_graph_weight = 0.0
+        try:
+            _ks_index_path = _ks_kb_path.parent / ".bob" / "kb-index"
+            if _ks_index_path.exists():
+                _ks_index = PersistentEmbeddingIndex(
+                    EmbeddingGenerator(), index_path=_ks_index_path
+                )
+                if _ks_index.doc_count > 0:
+                    _ks_embedding_weight = 0.7  # A/B-validated weight (ADR-017)
+        except Exception as exc:
+            _ks_index = None
+            # Not silent: surface why the validated stack fell back to keyword-only.
+            print(
+                f"⚠️  embedding index unavailable, using keyword-only retrieval: {exc}",
+                file=sys.stderr,
+            )
+        try:
+            _ks_graph_path = _ks_kb_path.parent / ".bob" / "kb-graph.json"
+            if _ks_graph_path.exists():
+                _ks_graph = GraphStore().load(_ks_graph_path)
+                if _ks_graph is not None and _ks_graph.node_count > 0:
+                    _ks_graph_weight = 0.3
+        except Exception:
+            _ks_graph = None
 
         kbq = KnowledgeBaseQuery(
             kb_path=args.kb_path,
+            index=_ks_index,
+            graph=_ks_graph,
+            embedding_weight=_ks_embedding_weight,
+            graph_weight=_ks_graph_weight,
             recency_weight=args.recency_weight,
         )
         result = kbq.query(
@@ -487,7 +525,12 @@ def main(argv: Optional[List[str]] = None) -> int:
                 and graph_exists
                 and compression_available
             ):
-                print("✅ Full stack active — p@3=0.88, index fresh, compression enabled")
+                # CODE-02/MEM-01: p@3=0.88 only claimed when the wired stack is
+                # confirmed active. No golden set is committed yet so we state
+                # the figure as "per ADR-017" (lab-measured, not re-verified here).
+                print(
+                    "✅ Full stack active — index+graph wired (p@3=0.88 per ADR-017), compression enabled"
+                )
             else:
                 print(
                     "⚠️  Partial stack — run: bob-optimize graph-build --kb-path docs/knowledge-base --with-semantic"

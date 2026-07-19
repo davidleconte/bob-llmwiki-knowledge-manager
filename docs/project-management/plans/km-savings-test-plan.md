@@ -1,3 +1,8 @@
+> **HISTORICAL SNAPSHOT — RETRACTED METRICS.** The savings/cost percentages
+> cited in this plan are from before the manifest-backed harness was in place.
+> Preserved as an audit trail; see STATUS.md for validated results.
+
+
 # KM Bobcoin Savings — Automated Test Plan
 
 ## Overview

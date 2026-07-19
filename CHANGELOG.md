@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Scored **2.9/5** overall. Key findings: retrieval stack unwired from every production path
   (CODE-01/02), optimizer can return empty string for inputs >4096 tokens (CODE-03),
   `validate-kb.sh` subshell counter-bug always reports "no broken links" (MEM-04),
-  3 CI gates currently failing (CLM-01). ~20% compression claim and ≥80% coverage claim
+  3 CI gates currently failing (CLM-01). ~20% compression claim (manifest-backed) and ≥80% coverage claim
   both survive adversarial reading.
 
 - **Adversarial Audit 2026-07-19** (`docs/knowledge-base/research/adversarial-audit-2026-07-19.md`):

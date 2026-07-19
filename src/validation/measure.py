@@ -74,6 +74,40 @@ def _percentile(values: Sequence[float], pct: float) -> float:
     return ordered[idx]
 
 
+def _trimmed_mean(values: List[float], trim: float = 0.1) -> float:
+    """Mean after dropping the top/bottom ``trim`` fraction -- robust to outliers."""
+    if not values:
+        return 0.0
+    ordered = sorted(values)
+    k = int(len(ordered) * trim)
+    core = ordered[k : len(ordered) - k] or ordered
+    return statistics.mean(core)
+
+
+def _corpus_composition(scored: List[Dict[str, Any]], total_original: int) -> Dict[str, Any]:
+    """Composition metrics that expose corpus cherry-picking (ATK-GATE-01).
+
+    Guard *composition, not magnitude*: we deliberately do NOT gate the savings
+    *value* -- gating a measurement re-incentivises fabrication. Instead these
+    metrics let :func:`composition_ok` gate whether the corpus is representative
+    enough to publish a number. Cherry-pick signatures: too few docs, a single doc
+    dominating the token weight, or a mean pulled far from the median by outliers.
+    """
+    savings = [float(d["savings_percentage"]) for d in scored]
+    tokens = [int(d["original_tokens"]) for d in scored]
+    total = total_original or 1
+    mean_s = statistics.mean(savings) if savings else 0.0
+    median_s = statistics.median(savings) if savings else 0.0
+    return {
+        "n_docs": len(scored),
+        "top_doc_token_share": round(max(tokens) / total, 4) if tokens else 0.0,
+        "mean_savings_pct": round(mean_s, 4),
+        "median_savings_pct": round(median_s, 4),
+        "mean_median_divergence_pp": round(abs(mean_s - median_s), 4),
+        "trimmed_mean_savings_pct": round(_trimmed_mean(savings), 4),
+    }
+
+
 def measure_optimizer(
     config: "ConfigSchema", model: str, docs: Sequence["Document"]
 ) -> Dict[str, Any]:
@@ -138,6 +172,7 @@ def measure_optimizer(
         "mean_latency_ms": round(statistics.mean(latencies_ms), 4) if latencies_ms else 0.0,
         "p95_latency_ms": round(_percentile(latencies_ms, 95), 4),
         "tiktoken_active": optimizer.token_counter.use_tiktoken,
+        "corpus_composition": _corpus_composition(scored, total_original),
         "per_document": per_document,
     }
 

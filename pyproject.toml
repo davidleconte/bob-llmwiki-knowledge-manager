@@ -93,6 +93,7 @@ markers = [
     "integration: marks tests as integration tests",
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "e2e: marks tests as end-to-end tests",
+    "planted_defect: adversarial test that must fail before fix is applied and pass after; excluded from CI until the fix lands",
 ]
 # Per-test wall-clock ceiling: a hung test (e.g. a lock deadlock or a leaked
 # background thread) FAILS with a full thread dump instead of stalling the whole

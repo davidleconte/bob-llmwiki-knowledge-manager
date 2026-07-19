@@ -1,3 +1,9 @@
+> **HISTORICAL SNAPSHOT — RETRACTED METRICS.** The savings/cost percentages in
+> this document (80-90%, 60%) are pre-measurement projections that were never
+> validated by the manifest-backed harness. They are preserved here as an audit
+> trail only and are superseded by the measured results in STATUS.md.
+
+
 # Phase 4 Implementation Complete: Sub-Agent Delegation Framework
 
 **Status:** ✅ Complete  

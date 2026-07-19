@@ -232,8 +232,27 @@ class PromptOptimizer:
         # Apply token limit: a per-call max_tokens overrides the instance default
         # (self.max_tokens, set from config); otherwise fall back to that default.
         effective_max = max_tokens if max_tokens is not None else self.max_tokens
+        truncated = False
         if effective_max:
+            before_trunc = optimized
             optimized = self._truncate_to_limit(optimized, effective_max)
+            if len(optimized) < len(before_trunc):
+                truncated = True
+
+        # CODE-03 never-empty post-condition: if the optimized text is empty but
+        # the original was not, fall back to token-accurate truncation of the
+        # original so the caller always receives usable content.
+        if not optimized.strip() and prompt.strip():
+            from src.truncation import Truncator
+
+            _budget = effective_max or self.max_tokens or 4096
+            optimized = Truncator().truncate(prompt, _budget)["truncated"]
+            truncated = True
+            self._logger.warning(
+                "optimizer_empty_output_fallback",
+                original_tokens=self.token_counter.count_tokens(prompt),
+                fallback="truncator",
+            )
 
         # Count optimized tokens
         optimized_tokens = self.token_counter.count_tokens(optimized)
@@ -280,6 +299,11 @@ class PromptOptimizer:
             "savings_percentage": savings_pct * 100,
             "quality_score": quality,
             "meets_target": savings_pct >= self.target_savings and quality >= self.min_quality,
+            # ATK-FS-03 / CODE-03: explicit truncation flag for downstream consumers
+            "truncated": truncated,
+            "content_dropped_bytes": max(0, len(prompt.encode()) - len(optimized.encode()))
+            if truncated
+            else 0,
         }
 
         # Cache result
@@ -317,36 +341,81 @@ class PromptOptimizer:
         return text
 
     def _remove_redundancy(self, text: str) -> str:
-        """Remove redundant content.
+        """Remove redundant content while preserving document structure.
+
+        CODE-03/CODE-07 fix: the previous implementation called ``text.split()``
+        which collapsed all whitespace (including newlines), producing a single
+        giant line. ``_truncate_to_limit`` then operated on that single line and
+        returned ``""`` for any input above ``max_tokens``. This version operates
+        line-by-line, exempting YAML frontmatter and fenced code blocks, so that
+        markdown structure is preserved through the optimization pass.
 
         Args:
             text: Text to process
 
         Returns:
-            Text with redundancy removed
+            Text with redundancy removed, structure intact
         """
-        # Remove repeated phrases (3+ words)
-        words = text.split()
-        seen_phrases = set()
-        result = []
+        lines = text.splitlines(keepends=True)
+        result_lines: list[str] = []
+        seen_phrases: set[str] = set()
 
-        i = 0
-        while i < len(words):
-            # Check for repeated 3-word phrases
-            if i + 2 < len(words):
-                phrase = " ".join(words[i : i + 3])
-                if phrase.lower() not in seen_phrases:
-                    seen_phrases.add(phrase.lower())
-                    result.append(words[i])
-                    i += 1
-                else:
-                    # Skip repeated phrase
-                    i += 3
+        # Track structural regions that must be preserved verbatim
+        in_frontmatter = False
+        frontmatter_closed = False
+        in_code_fence = False
+        code_fence_marker = ""
+
+        for idx, line in enumerate(lines):
+            stripped = line.rstrip("\n")
+
+            # YAML frontmatter: first line "---" opens, next "---" or "..." closes
+            if idx == 0 and stripped == "---":
+                in_frontmatter = True
+                result_lines.append(line)
+                continue
+            if in_frontmatter and not frontmatter_closed:
+                result_lines.append(line)
+                if stripped in ("---", "..."):
+                    in_frontmatter = False
+                    frontmatter_closed = True
+                continue
+
+            # Fenced code blocks: preserve verbatim
+            if not in_code_fence:
+                if stripped.startswith("```") or stripped.startswith("~~~"):
+                    in_code_fence = True
+                    code_fence_marker = stripped[:3]
+                    result_lines.append(line)
+                    continue
             else:
-                result.append(words[i])
-                i += 1
+                result_lines.append(line)
+                if stripped.startswith(code_fence_marker):
+                    in_code_fence = False
+                continue
 
-        return " ".join(result)
+            # For regular lines: deduplicate 3-word phrases within the line
+            words = stripped.split()
+            line_result: list[str] = []
+            i = 0
+            while i < len(words):
+                if i + 2 < len(words):
+                    phrase = " ".join(words[i : i + 3])
+                    if phrase.lower() not in seen_phrases:
+                        seen_phrases.add(phrase.lower())
+                        line_result.append(words[i])
+                        i += 1
+                    else:
+                        i += 3  # skip the repeated phrase
+                else:
+                    line_result.append(words[i])
+                    i += 1
+
+            # Reconstruct the line preserving its original newline suffix
+            eol = "\n" if line.endswith("\n") else ""
+            result_lines.append(" ".join(line_result) + eol)
+
+        return "".join(result_lines)
 
     def _compress_content(self, text: str, preserve_structure: bool) -> str:
         """Compress content while preserving meaning.
