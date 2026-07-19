@@ -12,12 +12,13 @@ Target metrics:
 
 import threading
 import time
+from collections import OrderedDict
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 
 from src.cache.base import CacheEntry, CacheInterface, CacheStats, escape_version, unescape_version
-from src.cache.embeddings import EmbeddingGenerator, cosine_similarity_vectors
+from src.cache.embeddings import EmbeddingGenerator
 from src.monitoring import get_logger, get_metrics_collector
 
 
@@ -80,11 +81,13 @@ class SemanticCache(CacheInterface):
         # Thread safety lock
         self._lock = threading.RLock()
 
-        # Storage (keys are versioned)
+        # Storage (keys are versioned). ``entries`` is access-ordered (A4): each
+        # read move_to_end()s its key, so the oldest key is always at the front and
+        # _evict_lru() is O(1) (popitem) instead of an O(N) min() scan.
         self.embeddings: Dict[str, np.ndarray] = {}
         self.responses: Dict[str, str] = {}
         self.metadata_store: Dict[str, Dict[str, Any]] = {}
-        self.entries: Dict[str, CacheEntry] = {}
+        self.entries: "OrderedDict[str, CacheEntry]" = OrderedDict()
 
         # Embedding generator
         self.embedding_generator = EmbeddingGenerator()
@@ -298,9 +301,11 @@ class SemanticCache(CacheInterface):
             )
             return None
 
-        # Update entry access stats
+        # Update entry access stats and mark most-recently-used (A4: keeps the
+        # access-ordered OrderedDict in sync so _evict_lru stays O(1)).
         if matched_key in self.entries:
             self.entries[matched_key].access()
+            self.entries.move_to_end(matched_key)
 
         # Record hit and similarity score
         self._stats.record_hit()
@@ -374,9 +379,11 @@ class SemanticCache(CacheInterface):
             metadata["version"] = version or self.VERSION
             self.metadata_store[versioned_key] = metadata
 
-            # Create cache entry
+            # Create cache entry; a set (insert or update) is the most recent
+            # touch, so move it to the MRU end (A4 access-order invariant).
             entry = CacheEntry(response=value, metadata=metadata, timestamp=self._clock())
             self.entries[versioned_key] = entry
+            self.entries.move_to_end(versioned_key)
 
             # Update cache size metric
             self._metrics.update_cache_size("L2", len(self.embeddings))
@@ -431,17 +438,15 @@ class SemanticCache(CacheInterface):
         if not self.entries:
             return
 
-        # Find entry with oldest last_access time
-        lru_key = min(self.entries.keys(), key=lambda k: self.entries[k].last_access)
-
-        evicted_entry = self.entries[lru_key]
+        # A4: entries is access-ordered, so the LRU key is the front — O(1) vs the
+        # old O(N) min() over last_access.
+        lru_key, evicted_entry = self.entries.popitem(last=False)
         evicted_version = self._extract_version(lru_key)
 
-        # Remove from all stores
-        del self.embeddings[lru_key]
-        del self.responses[lru_key]
-        del self.metadata_store[lru_key]
-        del self.entries[lru_key]
+        # Remove from the remaining stores
+        self.embeddings.pop(lru_key, None)
+        self.responses.pop(lru_key, None)
+        self.metadata_store.pop(lru_key, None)
 
         self._stats.record_eviction()
 
@@ -565,22 +570,30 @@ class SemanticCache(CacheInterface):
             if will_change_vocab and len(self.embeddings) > 0:
                 self._regenerate_all_embeddings()
 
-            # Calculate similarities for all cached prompts in target version
-            similarities = []
-            for versioned_prompt, cached_embedding in self.embeddings.items():
-                # Only consider entries from target version
-                if self._extract_version(versioned_prompt) != target_version:
-                    continue
+            # A4: BLAS matmul over a locked snapshot instead of a per-entry Python
+            # cosine loop. Embeddings are L2-normalised, so the raw dot equals
+            # cosine (same path as get()).
+            version_keys = [
+                k for k in self.embeddings if self._extract_version(k) == target_version
+            ]
+            if not version_keys:
+                return []
 
-                similarity = cosine_similarity_vectors(query_embedding, cached_embedding)
-                base_prompt = self._extract_base_key(versioned_prompt)
-                response = self.responses[versioned_prompt]
-                similarities.append((base_prompt, similarity, response))
+            matrix = np.stack([self.embeddings[k] for k in version_keys])
+            sims = matrix @ query_embedding  # shape (N,)
+            # Stable descending sort (ties keep snapshot order) matches the old
+            # list.sort(reverse=True); take the top_k.
+            order = np.argsort(-sims, kind="stable")[:top_k]
 
-            # Sort by similarity (descending)
-            similarities.sort(key=lambda x: x[1], reverse=True)
-
-            return similarities[:top_k]
+            return [
+                (
+                    self._extract_base_key(version_keys[i]),
+                    # Clamp to [0, 1] to match cosine_similarity_vectors' contract.
+                    float(min(1.0, max(0.0, sims[i]))),
+                    self.responses[version_keys[i]],
+                )
+                for i in order
+            ]
 
     def get_with_similarity(
         self, key: str, version: Optional[str] = None
@@ -608,19 +621,23 @@ class SemanticCache(CacheInterface):
             if will_change_vocab and len(self.embeddings) > 0:
                 self._regenerate_all_embeddings()
 
+            # A4: single BLAS matmul over a locked snapshot instead of a Python
+            # cosine loop. Embeddings are L2-normalised (HashingVectorizer
+            # norm="l2", non-negative features), so the raw dot equals cosine — the
+            # same path get() uses at the top of this class.
+            version_keys = [
+                k for k in self.embeddings if self._extract_version(k) == target_version
+            ]
             best_match = None
             best_similarity = 0.0
-
-            for versioned_prompt, cached_embedding in self.embeddings.items():
-                # Only consider entries from target version
-                if self._extract_version(versioned_prompt) != target_version:
-                    continue
-
-                similarity = cosine_similarity_vectors(query_embedding, cached_embedding)
-
-                if similarity > best_similarity:
-                    best_similarity = similarity
-                    best_match = versioned_prompt
+            if version_keys:
+                matrix = np.stack([self.embeddings[k] for k in version_keys])
+                similarities = matrix @ query_embedding
+                best_idx = int(np.argmax(similarities))
+                # Clamp to [0, 1] to match cosine_similarity_vectors' contract (a
+                # self-match's dot can be 1 + float epsilon).
+                best_similarity = float(min(1.0, max(0.0, similarities[best_idx])))
+                best_match = version_keys[best_idx] if best_similarity > 0 else None
 
             if best_match and best_similarity >= self.similarity_threshold:
                 return (self.responses[best_match], best_similarity)

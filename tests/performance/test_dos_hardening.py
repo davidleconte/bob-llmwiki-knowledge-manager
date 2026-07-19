@@ -310,3 +310,36 @@ def test_l2_miss_latency_under_200ms():
         f"p95 L2 miss latency = {p95:.1f}ms (limit 200ms). "
         "BLAS matmul optimisation may not be effective (ATK-DOS-03)."
     )
+
+
+# ---------------------------------------------------------------------------
+# A4: L2 _evict_lru is O(1), not an O(N) min() scan
+# ---------------------------------------------------------------------------
+
+
+def _per_eviction_seconds(n_entries: int, n_evictions: int) -> float:
+    """Fill a cache to n_entries, then time n_evictions direct _evict_lru calls."""
+    from src.cache.semantic_cache import SemanticCache
+
+    cache = SemanticCache(max_size=n_entries + 10, similarity_threshold=0.99)
+    for i in range(n_entries):
+        cache.set(f"key_{i}_unique_content", f"resp_{i}")
+    t0 = time.perf_counter()
+    for _ in range(n_evictions):
+        cache._evict_lru()
+    return (time.perf_counter() - t0) / n_evictions
+
+
+def test_l2_eviction_is_constant_time(tmp_path):
+    """Per-eviction cost must stay ~flat as the cache grows 8× (O(1), not O(N)).
+
+    Times _evict_lru() in isolation at 500 vs 4000 entries. The old min()-scan was
+    O(N) — ~8× slower at 8× size; the OrderedDict popitem is O(1).
+    """
+    small = _per_eviction_seconds(500, 200)
+    large = _per_eviction_seconds(4000, 200)
+    ratio = large / max(small, 1e-9)
+    assert ratio < 3.0, (
+        f"per-eviction grew {ratio:.1f}× from 500→4000 entries "
+        f"(O(N) would be ~8×): small={small * 1e6:.1f}µs large={large * 1e6:.1f}µs"
+    )
