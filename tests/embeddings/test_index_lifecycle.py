@@ -13,6 +13,7 @@ GREEN once ``rebuild()`` reconciles deletions and ``_ensure_loaded`` guards dim.
 The chunker splits on ``##`` (H2) sections and drops sections shorter than
 ``MIN_CHUNK_CHARS`` (50), so fixtures use H2 headings with padded bodies.
 """
+
 from pathlib import Path
 
 from src.cache.embeddings import EmbeddingGenerator

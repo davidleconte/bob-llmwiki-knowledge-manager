@@ -94,8 +94,7 @@ class TestValidateKbScript:
         _make_minimal_kb(tmp_path, with_broken_link=False)
         result = _run_script(tmp_path)
         assert result.returncode == 0, (
-            f"Expected exit 0 on clean KB.\nstdout:\n{result.stdout}\n"
-            f"stderr:\n{result.stderr}"
+            f"Expected exit 0 on clean KB.\nstdout:\n{result.stdout}\nstderr:\n{result.stderr}"
         )
         assert "No broken links found" in result.stdout
 
@@ -128,9 +127,7 @@ class TestValidateKbScript:
             [Deleted artefact](./deleted-artefact.md)
             """
         )
-        (tmp_path / "research" / "old-research.md").write_text(
-            research_doc, encoding="utf-8"
-        )
+        (tmp_path / "research" / "old-research.md").write_text(research_doc, encoding="utf-8")
         result = _run_script(tmp_path)
         # Should still exit 0 — research/ links are informational
         assert result.returncode == 0, (

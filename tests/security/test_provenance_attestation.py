@@ -6,6 +6,7 @@ as plaintext frontmatter, so any hand-written document could claim
 tampered document detectable: it verifies only if it carries a signature that
 matches its provenance fields + body under the repo-local key.
 """
+
 from src.delegation.pipeline import _result_to_markdown
 from src.provenance import (
     SIG_FIELD,

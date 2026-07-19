@@ -13,9 +13,8 @@ legitimate title match; a flooded doc scores in the hundreds) and GREEN once TF
 is BM25-saturated and heading matches are capped.
 """
 
-from tests.security.conftest import plant_document
 from src.tools.kb_query import KnowledgeBaseQuery
-
+from tests.security.conftest import plant_document
 
 QUERY = "quantization"
 

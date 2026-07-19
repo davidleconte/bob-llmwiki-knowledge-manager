@@ -102,7 +102,7 @@ BACKED_TOKENS = (
     "validation-2",
     "reproducible run",
     "manifest-backed",  # compound form: clearly a provenance reference
-    "manifest:",        # explicit key-value citation form  e.g. "manifest: eval/..."
+    "manifest:",  # explicit key-value citation form  e.g. "manifest: eval/..."
 )
 # Tolerance for manifest value cross-check (± percentage points)
 _MANIFEST_TOLERANCE_PCT = 5.0
@@ -164,7 +164,9 @@ def _manifest_value_ok(manifest_path: Path, pct_in_line: float) -> bool:
         return False
     # mean_savings may be 0–1 (fraction) or 0–100 (percent); normalise to percent.
     if isinstance(mean_savings, (int, float)):
-        manifest_pct = float(mean_savings) * 100.0 if float(mean_savings) <= 1.0 else float(mean_savings)
+        manifest_pct = (
+            float(mean_savings) * 100.0 if float(mean_savings) <= 1.0 else float(mean_savings)
+        )
     else:
         return False
     return abs(pct_in_line - manifest_pct) <= _MANIFEST_TOLERANCE_PCT

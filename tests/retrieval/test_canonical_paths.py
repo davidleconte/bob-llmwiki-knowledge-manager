@@ -8,6 +8,7 @@
 * W2-2(b) — the index must report staleness (changed/deleted docs) so the read
   path can warn instead of silently serving stale vectors.
 """
+
 from pathlib import Path
 
 from src.cache.embeddings import EmbeddingGenerator

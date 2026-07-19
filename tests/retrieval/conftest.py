@@ -1,8 +1,10 @@
 """Shared fixtures for retrieval regression tests.
 Re-exports the tmp_kb fixture from tests/security/conftest.py for convenience.
 """
+
 import textwrap
 from pathlib import Path
+
 import pytest
 
 

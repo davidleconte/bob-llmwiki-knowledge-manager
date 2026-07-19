@@ -5,10 +5,9 @@ the committed measurement is manifest-backed (code_sha/git_dirty/data_hash/seed/
 library_versions), so the headline retrieval number can never again be an
 un-provenanced literal.
 """
+
 import json
 from pathlib import Path
-
-import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 KB = REPO_ROOT / "docs" / "knowledge-base"

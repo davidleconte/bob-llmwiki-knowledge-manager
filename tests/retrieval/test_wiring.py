@@ -1,13 +1,13 @@
 """CODE-01/CODE-02 regression: #slug fix and retrieval stack wiring."""
-from pathlib import Path
-from unittest.mock import MagicMock, patch
-import pytest
-from src.tools.kb_query import KnowledgeBaseQuery
 
+from unittest.mock import MagicMock
+
+from src.tools.kb_query import KnowledgeBaseQuery
 
 # ---------------------------------------------------------------------------
 # CODE-01: #slug fragment in index doc_ids caused silent full-scan fallback
 # ---------------------------------------------------------------------------
+
 
 def test_slug_stripped_from_doc_id_before_path_join(tmp_kb):
     """doc_ids like 'concepts/foo.md#intro' must resolve to 'concepts/foo.md' (CODE-01)."""
@@ -60,6 +60,7 @@ def test_slug_with_missing_file_falls_back_gracefully(tmp_kb):
 # ---------------------------------------------------------------------------
 # CODE-02: index and graph must be wired (passed to KnowledgeBaseQuery)
 # ---------------------------------------------------------------------------
+
 
 def test_index_wired_to_kb_search(tmp_kb):
     """KnowledgeBaseQuery constructed with index= must use it for search (CODE-02)."""

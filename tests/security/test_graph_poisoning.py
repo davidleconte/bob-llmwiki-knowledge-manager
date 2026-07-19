@@ -11,6 +11,7 @@ RED on the unfixed builder (200 edges from one node; 10 parallel dupes;
 quarantined doc present), GREEN once explicit edges are capped + de-duped and
 quarantined docs are excluded.
 """
+
 from pathlib import Path
 
 from src.graph.builder import KnowledgeGraphBuilder

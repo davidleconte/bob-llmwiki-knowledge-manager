@@ -4,11 +4,13 @@ Verifies that KnowledgeBaseQuery never returns content from files that
 are symlinks or whose resolved path escapes the KB root, regardless of
 which internal code path (full-scan vs index) is exercised.
 """
-import os
-import pytest
-from pathlib import Path
-from src.tools.kb_query import KnowledgeBaseQuery
 
+import os
+from pathlib import Path
+
+import pytest
+
+from src.tools.kb_query import KnowledgeBaseQuery
 
 # --------------------------------------------------------------------------- #
 # Fixtures
@@ -48,9 +50,7 @@ def kb_with_symlink(tmp_path):
 
 def _all_content(result: dict) -> str:
     """Concatenate every content/preview string from a query result dict."""
-    return " ".join(
-        r.get("content", r.get("preview", "")) for r in result.get("results", [])
-    )
+    return " ".join(r.get("content", r.get("preview", "")) for r in result.get("results", []))
 
 
 # --------------------------------------------------------------------------- #

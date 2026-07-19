@@ -108,7 +108,7 @@ def test_top_n_zero_returns_all(kb_export: Path) -> None:
 
     # alpha has two semantic neighbours above 0.50 (beta at 0.80, gamma at 0.60)
     content = (kb_export / "concepts/alpha.md").read_text(encoding="utf-8")
-    assert content.count('- doc:') == 2
+    assert content.count("- doc:") == 2
 
 
 def test_top_n_positive_caps(tmp_path: Path) -> None:
@@ -127,17 +127,37 @@ def test_top_n_positive_caps(tmp_path: Path) -> None:
     graph: dict = {
         "nodes": {d: {} for d in docs},
         "edges": [
-            {"source": "concepts/a.md", "target": "concepts/b.md", "type": "semantic", "weight": 0.90},
-            {"source": "concepts/a.md", "target": "concepts/c.md", "type": "semantic", "weight": 0.85},
-            {"source": "concepts/a.md", "target": "concepts/d.md", "type": "semantic", "weight": 0.80},
-            {"source": "concepts/a.md", "target": "concepts/e.md", "type": "semantic", "weight": 0.75},
+            {
+                "source": "concepts/a.md",
+                "target": "concepts/b.md",
+                "type": "semantic",
+                "weight": 0.90,
+            },
+            {
+                "source": "concepts/a.md",
+                "target": "concepts/c.md",
+                "type": "semantic",
+                "weight": 0.85,
+            },
+            {
+                "source": "concepts/a.md",
+                "target": "concepts/d.md",
+                "type": "semantic",
+                "weight": 0.80,
+            },
+            {
+                "source": "concepts/a.md",
+                "target": "concepts/e.md",
+                "type": "semantic",
+                "weight": 0.75,
+            },
         ],
     }
 
     inject_dataview(export, graph, top_n=2, min_weight=0.30)
 
     content = (export / "concepts/a.md").read_text(encoding="utf-8")
-    assert content.count('- doc:') == 2
+    assert content.count("- doc:") == 2
 
 
 def test_min_weight_filters(kb_export: Path) -> None:

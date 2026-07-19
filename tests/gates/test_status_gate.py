@@ -26,6 +26,7 @@ from scripts.check_status_consistency import (
 # Unit tests: _validate_grade
 # ---------------------------------------------------------------------------
 
+
 def test_fabricated_grade_fails():
     """'A+ (5.00/4.30)' must be flagged — numeric exceeds max (ATK-GATE-06)."""
     problems = _validate_grade("Grade: **A+ (5.00/4.30)**")
@@ -53,6 +54,7 @@ def test_no_grade_no_problems():
 # ---------------------------------------------------------------------------
 # Unit tests: _doc_problems canonical-status and grade guards
 # ---------------------------------------------------------------------------
+
 
 def test_canonical_status_missing_triggers_failure(tmp_path):
     """STATUS.md without 'Not Production Ready' string must trigger a failure."""
@@ -87,6 +89,7 @@ def test_grade_in_doc_problems():
 # Unit tests: CLM-03 measured-coverage snapshot single-home
 # ---------------------------------------------------------------------------
 
+
 def test_measured_snapshot_detected_off_home():
     """A decimal coverage % outside STATUS.md must be flagged (CLM-03)."""
     text = "Testing: ~1200 tests, >=80% coverage gate (89.82%)."
@@ -108,6 +111,7 @@ def test_gate_token_not_a_measured_snapshot():
 # ---------------------------------------------------------------------------
 # Integration test: status gate subprocess (ATK-GATE-02/06)
 # ---------------------------------------------------------------------------
+
 
 def test_status_gate_exits_0_on_live_tree():
     """The current live tree must pass the status gate."""

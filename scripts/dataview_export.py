@@ -14,17 +14,17 @@ from pathlib import Path
 
 # Matches the closing --- of a YAML frontmatter block.
 # A frontmatter block starts at line 0 with "---" and ends at the next "---" line.
-_FM_START_RE = re.compile(r'^---\s*\n', re.MULTILINE)
-_FM_CLOSE_RE = re.compile(r'^---\s*$', re.MULTILINE)
+_FM_START_RE = re.compile(r"^---\s*\n", re.MULTILINE)
+_FM_CLOSE_RE = re.compile(r"^---\s*$", re.MULTILINE)
 
 # Matches an existing semantic_links: block (key + all following indented lines)
 _SEMANTIC_LINKS_RE = re.compile(
-    r'^semantic_links:[ \t]*\n(?:[ \t]+.*\n)*',
+    r"^semantic_links:[ \t]*\n(?:[ \t]+.*\n)*",
     re.MULTILINE,
 )
 # Also matches the scalar form: semantic_links: []
 _SEMANTIC_LINKS_SCALAR_RE = re.compile(
-    r'^semantic_links:[ \t]*\[\][ \t]*\n',
+    r"^semantic_links:[ \t]*\[\][ \t]*\n",
     re.MULTILINE,
 )
 
@@ -74,7 +74,7 @@ def _inject_into_content(content: str, links: list[tuple[str, float]]) -> str | 
     lines = content.split("\n")
     close_idx = None
     for i in range(1, len(lines)):
-        if re.match(r'^---\s*$', lines[i]):
+        if re.match(r"^---\s*$", lines[i]):
             close_idx = i
             break
 
@@ -83,17 +83,18 @@ def _inject_into_content(content: str, links: list[tuple[str, float]]) -> str | 
 
     # Extract frontmatter body (between opening and closing ---)
     fm_body = "\n".join(lines[1:close_idx])
-    rest = "\n".join(lines[close_idx + 1:])  # everything after the closing ---
+    rest = "\n".join(lines[close_idx + 1 :])  # everything after the closing ---
 
     # Build new semantic_links block
     new_block = _render_semantic_links(links)
 
     # Check if semantic_links already present in frontmatter
-    if re.search(r'^semantic_links:', fm_body, re.MULTILINE):
+    if re.search(r"^semantic_links:", fm_body, re.MULTILINE):
         # Replace existing semantic_links block (key + all following indented lines,
         # or scalar form like `semantic_links: []`)
         def _replacer(m):
             return new_block
+
         # Try multi-line form first, then scalar form
         new_fm_body, n = _SEMANTIC_LINKS_RE.subn(new_block, fm_body + "\n")
         if n == 0:
@@ -139,8 +140,7 @@ def inject_dataview(
     live_kb = Path("docs/knowledge-base").resolve()
     if str(export_path).startswith(str(live_kb)):
         raise ValueError(
-            f"export_path must not point inside the live KB at {live_kb}. "
-            f"Got: {export_path}"
+            f"export_path must not point inside the live KB at {live_kb}. Got: {export_path}"
         )
 
     if not export_path.exists():

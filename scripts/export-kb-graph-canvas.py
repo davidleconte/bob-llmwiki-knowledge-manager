@@ -18,14 +18,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from canvas_export import build_canvas
 
-_DEFAULT_GRAPH  = ".bob/kb-graph.json"
+_DEFAULT_GRAPH = ".bob/kb-graph.json"
 _DEFAULT_OUTPUT = "kb-export/kb-semantic-graph.canvas"
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Export kb-graph.json as an Obsidian Canvas file."
-    )
+    parser = argparse.ArgumentParser(description="Export kb-graph.json as an Obsidian Canvas file.")
     parser.add_argument(
         "--graph-path",
         default=_DEFAULT_GRAPH,
@@ -38,7 +36,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    graph_path  = Path(args.graph_path)
+    graph_path = Path(args.graph_path)
     output_path = Path(args.output_path)
 
     if not graph_path.exists():
@@ -53,6 +51,7 @@ def main() -> None:
     # Summary
     raw_edges = graph_dict.get("edges", [])
     from collections import Counter
+
     type_counts = Counter(e.get("type", "unknown") for e in raw_edges)
 
     print(f"Canvas export complete: {output_path}")

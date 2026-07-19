@@ -8,15 +8,13 @@ Tests:
 
 import time
 
-import pytest
-
 from src.graph.builder import KnowledgeGraphBuilder
 from src.graph.graph import KnowledgeGraph
-
 
 # ---------------------------------------------------------------------------
 # ATK-DOS-01: PageRank on 2,000 dangling nodes — already fixed verification
 # ---------------------------------------------------------------------------
+
 
 def test_pagerank_2000_dangling_nodes_under_1s():
     """PageRank on 2,000 dangling nodes must complete in < 1.0 s (ATK-DOS-01 regression)."""
@@ -39,6 +37,7 @@ def test_pagerank_2000_dangling_nodes_under_1s():
 # ---------------------------------------------------------------------------
 # ATK-DOS-02: Semantic edge cap via build_semantic
 # ---------------------------------------------------------------------------
+
 
 def test_edge_cap_respected():
     """build_semantic with a low cap must not exceed max_total_edges (ATK-DOS-02)."""
@@ -67,6 +66,7 @@ def test_edge_cap_respected():
 def test_build_semantic_signature_accepts_caps():
     """build_semantic must accept max_edges_per_node and max_total_edges parameters."""
     import inspect
+
     sig = inspect.signature(KnowledgeGraphBuilder.build_semantic)
     assert "max_edges_per_node" in sig.parameters, (
         "build_semantic must accept max_edges_per_node (ATK-DOS-02)"
@@ -79,6 +79,7 @@ def test_build_semantic_signature_accepts_caps():
 # ---------------------------------------------------------------------------
 # ATK-DOS-03: L2 BLAS matmul latency
 # ---------------------------------------------------------------------------
+
 
 def test_l2_miss_latency_under_200ms():
     """500 L2 cache entries: p95 miss latency must be < 200 ms (ATK-DOS-03)."""
