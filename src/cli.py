@@ -369,30 +369,34 @@ def main(argv: Optional[List[str]] = None) -> int:
         _ks_embedding_weight = 0.0
         _ks_graph_weight = 0.0
         try:
-            _ks_index_path = resolve_index_path(_ks_kb_path)
-            if _ks_index_path.exists():
-                _ks_index = PersistentEmbeddingIndex(
-                    EmbeddingGenerator(), index_path=_ks_index_path
-                )
-                # W2-2b: freshen on explicit --refresh (single-writer entrypoint),
-                # otherwise warn — non-silently — when the index is stale instead
-                # of serving stale vectors with no signal.
-                if getattr(args, "refresh", False):
-                    from src.embeddings.indexer import KBIndexer
+            from src.embeddings.indexer import KBIndexer
 
-                    KBIndexer(_ks_kb_path, _ks_index).sync()
-                elif _ks_index.doc_count > 0:
-                    _stale = _ks_index.stale_files(_ks_kb_path)
-                    _n = len(_stale["changed"]) + len(_stale["deleted"])
-                    if _n:
-                        print(
-                            f"⚠️  embedding index is stale ({len(_stale['changed'])} changed/new, "
-                            f"{len(_stale['deleted'])} deleted); results may be out of date — "
-                            f"re-run with --refresh to rebuild.",
-                            file=sys.stderr,
-                        )
-                if _ks_index.doc_count > 0:
-                    _ks_embedding_weight = 0.7  # A/B-validated weight (ADR-017)
+            _ks_index_path = resolve_index_path(_ks_kb_path)
+            _ks_index = PersistentEmbeddingIndex(EmbeddingGenerator(), index_path=_ks_index_path)
+            if not _ks_index_path.exists():
+                # D1/MEM-08: first-query auto-build instead of silently degrading to
+                # keyword-only. Build the validated retrieval index once, with a
+                # notice, so first-run retrieval uses embeddings rather than quietly
+                # dropping to keyword search.
+                print("ℹ️  building embedding index (first run)…", file=sys.stderr)
+                KBIndexer(_ks_kb_path, _ks_index).sync()
+            elif getattr(args, "refresh", False):
+                # W2-2b: freshen on explicit --refresh (single-writer entrypoint).
+                KBIndexer(_ks_kb_path, _ks_index).sync()
+            elif _ks_index.doc_count > 0:
+                # Otherwise warn — non-silently — when the index is stale instead of
+                # serving stale vectors with no signal.
+                _stale = _ks_index.stale_files(_ks_kb_path)
+                _n = len(_stale["changed"]) + len(_stale["deleted"])
+                if _n:
+                    print(
+                        f"⚠️  embedding index is stale ({len(_stale['changed'])} changed/new, "
+                        f"{len(_stale['deleted'])} deleted); results may be out of date — "
+                        f"re-run with --refresh to rebuild.",
+                        file=sys.stderr,
+                    )
+            if _ks_index.doc_count > 0:
+                _ks_embedding_weight = 0.7  # A/B-validated weight (ADR-017)
         except Exception as exc:
             _ks_index = None
             # Not silent: surface why the validated stack fell back to keyword-only.
