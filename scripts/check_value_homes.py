@@ -116,14 +116,14 @@ REGISTRY: tuple[ValueHome, ...] = (
             Mirror("AGENTS.md", "contains", "{value}", 'the "Python 3.11+" line'),
         ),
     ),
-    # Model list price (USD per 1K tokens). Canonical: src/pricing.py. Two docs
-    # restate the gpt-4 / gpt-4-32k rates in worked cost examples. Semi-frozen
-    # long-form docs (BOOK_*) are deliberately NOT mirrored -- keep the home the
-    # live concept doc, not the narrative.
+    # Model list price (USD per 1K tokens). Canonical: src/pricing.py PRICES table
+    # (split into input/output per ModelPrice, B2). One doc restates the gpt-4
+    # input/output rates in a worked cost example. Semi-frozen long-form docs
+    # (BOOK_*) are deliberately NOT mirrored -- keep the home the live concept doc.
     ValueHome(
-        name="price_gpt4_per_1k",
+        name="price_gpt4_input_per_1k",
         file="src/pricing.py",
-        pattern=r'"gpt-4":\s*([\d.]+)',
+        pattern=r'"gpt-4":\s*ModelPrice\(\s*input_per_1k=([\d.]+)',
         mirrors=(
             Mirror(
                 "docs/knowledge-base/concepts/token-optimization.md",
@@ -134,9 +134,9 @@ REGISTRY: tuple[ValueHome, ...] = (
         ),
     ),
     ValueHome(
-        name="price_gpt4_32k_per_1k",
+        name="price_gpt4_output_per_1k",
         file="src/pricing.py",
-        pattern=r'"gpt-4-32k":\s*([\d.]+)',
+        pattern=r'"gpt-4":\s*ModelPrice\([^)]*?output_per_1k=([\d.]+)',
         mirrors=(
             Mirror(
                 "docs/knowledge-base/concepts/token-optimization.md",

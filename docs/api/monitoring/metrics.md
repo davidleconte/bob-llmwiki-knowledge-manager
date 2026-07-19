@@ -32,6 +32,13 @@ Statistics for latency measurements.
 
 Record a latency measurement.
 
+O(1): appends to the bounded window and updates running aggregates only.
+Percentiles are computed lazily on read (:meth:`_recompute_percentiles`),
+not here. ATK-DOS-05/06: the previous implementation sorted the whole
+window (up to 1000 elements) on *every* record — and callers invoke
+record() while holding the collector's shared lock, so that O(k log k)
+sort serialised every recorded operation across all threads.
+
 
 ##### `get_average() -> float`
 
@@ -40,7 +47,7 @@ Get average latency.
 
 ##### `to_dict() -> Dict[str, Any]`
 
-Convert to dictionary.
+Convert to dictionary (recomputes percentiles from the recent window).
 
 
 

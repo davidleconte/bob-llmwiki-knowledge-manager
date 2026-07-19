@@ -84,7 +84,7 @@ class QualityAgent(SubAgent):
                 status=SubAgentStatus.SUCCESS,
                 data=result_data,
                 warnings=warnings,
-                token_count=len(str(result_data)) // 4,
+                token_count=self.count_tokens(result_data),
             )
 
         except Exception as e:

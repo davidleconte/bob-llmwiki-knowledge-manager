@@ -188,8 +188,5 @@ class SecurityAgent(SubAgent):
         return recommendations
 
     def _estimate_tokens(self, data: Dict) -> int:
-        """Estimate token count for result"""
-        import json
-
-        # Rough estimate: 1 token per 4 characters
-        return len(json.dumps(data)) // 4
+        """Count result tokens via the shared TokenCounter (B3 single home)."""
+        return self.count_tokens(data)

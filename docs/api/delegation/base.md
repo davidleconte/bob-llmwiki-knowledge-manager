@@ -15,6 +15,13 @@ Foundation for all specialized sub-agents
 - `HIGH`
 - `CRITICAL`
 
+## Functions
+
+### `_get_shared_token_counter() -> 'TokenCounter'`
+
+Return the lazily-constructed process-wide TokenCounter.
+
+
 ## Classes
 
 ### `SubAgentStatus(Enum)`
@@ -80,7 +87,7 @@ in parallel. Each sub-agent has its own cache and operates independently.
 
 #### Methods
 
-##### `__init__(agent_id: str, agent_type: str, cache_enabled: bool, max_cache_size: int)`
+##### `__init__(agent_id: str, agent_type: str, cache_enabled: bool, max_cache_size: int, token_counter: Optional['TokenCounter'])`
 
 Initialize sub-agent
 
@@ -89,6 +96,8 @@ Args:
     agent_type: Type of agent (e.g., "security", "performance")
     cache_enabled: Whether to enable caching
     max_cache_size: Maximum cache entries
+    token_counter: TokenCounter for result token counts; defaults to the
+        shared process-wide counter (B3 single counting home).
 
 
 ##### `analyze(task: SubAgentTask) -> SubAgentResult`
@@ -119,6 +128,15 @@ Args:
 
 Returns:
     SubAgentResult with execution results
+
+
+##### `count_tokens(data: Any) -> int`
+
+Count tokens in *data* via the shared TokenCounter (single home, B3).
+
+Replaces the per-agent ``len(str(data)) // 4`` heuristic so delegation
+token totals are model-correct and route through one counter. Non-string
+data is stringified with ``str()`` before counting.
 
 
 ##### `clear_cache()`

@@ -74,8 +74,23 @@ class PersistentEmbeddingIndex:
         # Stored in staleness.json, never included in manifest.json.
         self._file_manifest: Dict[str, Any] = {}
         self._matrix: Optional[np.ndarray] = None  # [N × dim] float32
+        # Cached per-row L2 norms (ATK-DOS-04 residual). Matrix-invariant, so
+        # recomputed once after any _matrix mutation rather than on every query.
+        # MUST be reset to None wherever _matrix is mutated (see _invalidate_norms).
+        self._row_norms: Optional[np.ndarray] = None
 
         self._loaded = False
+
+    def _invalidate_norms(self) -> None:
+        """Drop the cached row-norms. Call after any mutation of ``self._matrix``."""
+        self._row_norms = None
+
+    def _get_row_norms(self) -> np.ndarray:
+        """Per-row L2 norms of ``self._matrix``, recomputed only after a mutation."""
+        if self._row_norms is None:
+            assert self._matrix is not None  # callers guard on an empty matrix
+            self._row_norms = np.linalg.norm(self._matrix, axis=1) + 1e-9
+        return self._row_norms
 
     # ---------------------------------------------------------------------- #
     # Public interface (ADR-015)
@@ -105,12 +120,78 @@ class PersistentEmbeddingIndex:
         # Avoids O(N) Python loop; scales to thousands of KB documents without
         # degrading latency (ADR-015 performance requirement).
         q_norm = q_vec / (np.linalg.norm(q_vec) + 1e-9)
-        m_norms = np.linalg.norm(self._matrix, axis=1, keepdims=True) + 1e-9
-        sims = (self._matrix / m_norms) @ q_norm  # shape [N]
+        # cosine_i = (row_i . q_norm) / ||row_i||. The per-row norms are matrix-
+        # invariant, so use the cache (recomputed only after a mutation) instead of
+        # renormalising the whole matrix — and its full O(N*dim) copy — on every
+        # query (ATK-DOS-04 residual: search is the hot retrieval path).
+        row_norms = self._get_row_norms()
+        sims = (self._matrix @ q_norm) / row_norms  # shape [N]
         scores: List[Tuple[str, float]] = list(zip(self._doc_ids, sims.tolist()))
 
         scores.sort(key=lambda x: x[1], reverse=True)
         return scores[:top_k]
+
+    def search_batch(
+        self, queries: List[str], top_k: int = 10, _block: int = 512
+    ) -> List[List[Tuple[str, float]]]:
+        """Top-*k* semantic search for many queries in one batched pass.
+
+        Parity-equivalent to ``[self.search(q, top_k) for q in queries]`` but
+        computes every query-vs-corpus cosine similarity with a single (blocked)
+        BLAS matrix–matrix product instead of one matrix–vector product per query,
+        and ranks each row with one C-level ``np.lexsort`` instead of a Python
+        ``list.sort`` over ``(doc_id, score)`` tuples.  The per-query loop was the
+        dominant cold-build cost of
+        :meth:`~src.graph.builder.KnowledgeGraphBuilder.build_semantic`
+        (CODE-13/16: one full ``search`` per document → O(N_docs·N_chunks·dim)).
+
+        Embeddings match :meth:`search` exactly: ``generate_batch`` transforms the
+        queries with the same stateless backend, row for row.  The ranking key is
+        ``(descending score, ascending row index)`` — identical to ``search``'s
+        stable reverse-sort — so exact-tie groups (identical embeddings) resolve the
+        same way at the *k*-th boundary.  Scores may differ from ``search`` only by
+        BLAS reassociation (~1e-7), far below any edge threshold.
+
+        Args:
+            queries: Query texts (one per desired result list).
+            top_k: Maximum results per query.
+            _block: Query rows per matmul block; bounds the ``[block × N_chunks]``
+                intermediate so a large corpus cannot blow up memory.
+
+        Returns:
+            One ``[(doc_id, score), ...]`` list per query, in query order. Each
+            inner list is empty when the index is empty.
+        """
+        self._ensure_loaded()
+
+        n = len(queries)
+        if self._matrix is None or self._matrix.shape[0] == 0 or n == 0:
+            return [[] for _ in range(n)]
+
+        # Batched embed: one vectorizer.transform (hashing) / deterministic per-row
+        # (minilm) — bit-identical to per-query generate(), so no drift vs search().
+        embs = self._embedder.generate_batch(list(queries))
+        q_mat = np.asarray(embs, dtype=self._matrix.dtype)  # [n × dim]
+        q_norms = np.linalg.norm(q_mat, axis=1, keepdims=True) + 1e-9
+        q_normed = q_mat / q_norms  # row-normalised, matching search()
+
+        row_norms = self._get_row_norms()  # [N_chunks], cached (ATK-DOS-04)
+        doc_ids = self._doc_ids
+        n_chunks = self._matrix.shape[0]
+        k = min(top_k, n_chunks)
+        # Ascending index is the tie-break key; lexsort's LAST key is primary, so
+        # (index, -score) ranks by descending score then ascending index — exactly
+        # search()'s stable reverse-sort.
+        idx_key = np.arange(n_chunks)
+
+        results: List[List[Tuple[str, float]]] = []
+        for start in range(0, n, _block):
+            block = q_normed[start : start + _block]
+            sims = (block @ self._matrix.T) / row_norms  # [b × N_chunks]
+            for row in sims:
+                order = np.lexsort((idx_key, -row))[:k]
+                results.append([(doc_ids[j], float(row[j])) for j in order])
+        return results
 
     def index_document(self, doc_id: str, content: str) -> None:
         """Embed *content* and update the in-memory index for *doc_id*.
@@ -131,6 +212,7 @@ class PersistentEmbeddingIndex:
             idx = self._doc_ids.index(doc_id)
             if self._matrix is not None:
                 self._matrix[idx] = vec.astype(np.float32)
+                self._invalidate_norms()
         else:
             # Append new row and add a manifest entry (path/mtime/hash are unknown
             # at index_document time — set to sentinel values; rebuild() will
@@ -138,6 +220,7 @@ class PersistentEmbeddingIndex:
             self._doc_ids.append(doc_id)
             new_row = vec.astype(np.float32).reshape(1, -1)
             self._matrix = new_row if self._matrix is None else np.vstack([self._matrix, new_row])
+            self._invalidate_norms()
             if doc_id not in self._manifest:
                 self._manifest[doc_id] = {"path": doc_id, "mtime": 0.0, "hash": ""}
 
@@ -162,6 +245,11 @@ class PersistentEmbeddingIndex:
         chunker = MarkdownChunker()
         updated = 0
         seen_files: set[str] = set()
+        # A3(ii): collect every changed file's chunks and append them in ONE
+        # batched embed + one np.vstack after the walk. The old per-chunk
+        # index_document call re-allocated the whole matrix on every chunk —
+        # O(N²·dim) on a cold/full rebuild.
+        pending: List[Tuple[str, str]] = []
 
         for cat in categories:
             cat_path = kb_path / cat
@@ -189,10 +277,10 @@ class PersistentEmbeddingIndex:
                 # behind (index_document only appends/updates, never deletes).
                 self._drop_chunks(self._chunks_for_file(file_doc_id))
 
-                # Re-embed all chunks for this file.
+                # Collect this file's chunks; they are appended in one batch below
+                # (all are new rows — _drop_chunks removed any prior ones).
                 for slug, chunk_text in chunker.chunk(file_doc_id, content):
-                    chunk_doc_id = f"{file_doc_id}#{slug}"
-                    self.index_document(chunk_doc_id, chunk_text)
+                    pending.append((f"{file_doc_id}#{slug}", chunk_text))
 
                 # Record file-level staleness metadata in _file_manifest
                 # (never written to manifest.json — kept in staleness.json).
@@ -207,6 +295,9 @@ class PersistentEmbeddingIndex:
         # above, so its chunk rows would persist forever ("index grows forever").
         # Drop chunk rows + staleness sentinels for files no longer present.
         removed = self._reconcile_deletions(seen_files)
+
+        # A3(ii): single batched embed + append for all changed files' chunks.
+        self._batch_append(pending)
 
         if updated > 0 or removed > 0:
             if self._doc_ids:
@@ -223,6 +314,44 @@ class PersistentEmbeddingIndex:
             )
 
         return len(self._doc_ids)
+
+    def _batch_append(self, pending: List[Tuple[str, str]]) -> None:
+        """Embed and append many ``(doc_id, content)`` rows in one pass.
+
+        A3(ii): the per-chunk :meth:`index_document` re-allocated the entire matrix
+        with ``np.vstack`` on every chunk, making a cold rebuild O(N²·dim). This
+        embeds all pending chunks with a single ``generate_batch`` and appends them
+        with a single ``np.vstack`` — one allocation regardless of chunk count.
+
+        Every pending id is guaranteed new (``rebuild`` drops a file's prior chunks
+        before collecting its fresh ones), so this is pure append. Duplicate ids
+        within one batch — two sections sharing a heading slug — collapse to the
+        last occurrence, matching the in-place overwrite the old per-chunk loop did.
+
+        The stored rows are byte-identical to the old path: ``generate_batch`` uses
+        the same stateless backend row-for-row, and each vector is cast to float32
+        just as :meth:`index_document` does.
+        """
+        if not pending:
+            return
+
+        # Collapse duplicate ids, keeping the last content (last-writer-wins) while
+        # preserving first-seen row order — exactly the old loop's net effect.
+        deduped: Dict[str, str] = {}
+        for cid, text in pending:
+            deduped[cid] = text
+
+        vecs = self._embedder.generate_batch([text[:6000] for text in deduped.values()])
+        new_rows = np.asarray(vecs, dtype=np.float32)
+        if new_rows.ndim == 1:  # single row -> [1 × dim]
+            new_rows = new_rows.reshape(1, -1)
+
+        for cid in deduped:
+            self._doc_ids.append(cid)
+            self._manifest[cid] = {"path": cid, "mtime": 0.0, "hash": ""}
+
+        self._matrix = new_rows if self._matrix is None else np.vstack([self._matrix, new_rows])
+        self._invalidate_norms()
 
     def _chunks_for_file(self, file_doc_id: str) -> set[str]:
         """All chunk doc_ids (``file.md#slug``) currently indexed for *file_doc_id*."""
@@ -243,6 +372,7 @@ class PersistentEmbeddingIndex:
         self._doc_ids = [self._doc_ids[i] for i in keep]
         if self._matrix is not None:
             self._matrix = self._matrix[keep] if keep else None
+            self._invalidate_norms()
         for cid in chunk_ids:
             self._manifest.pop(cid, None)
         return removed
@@ -395,6 +525,7 @@ class PersistentEmbeddingIndex:
             )
             return
         self._matrix = matrix.astype(np.float32)
+        self._invalidate_norms()
         self._manifest = manifest  # chunk-level entries only
         self._file_manifest = staleness  # file-level staleness sentinels
         self._doc_ids = list(manifest.keys())

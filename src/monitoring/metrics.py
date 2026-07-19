@@ -28,26 +28,38 @@ class LatencyStats:
     recent: Deque[float] = field(default_factory=lambda: deque(maxlen=1000))
 
     def record(self, latency: float) -> None:
-        """Record a latency measurement."""
+        """Record a latency measurement.
+
+        O(1): appends to the bounded window and updates running aggregates only.
+        Percentiles are computed lazily on read (:meth:`_recompute_percentiles`),
+        not here. ATK-DOS-05/06: the previous implementation sorted the whole
+        window (up to 1000 elements) on *every* record — and callers invoke
+        record() while holding the collector's shared lock, so that O(k log k)
+        sort serialised every recorded operation across all threads.
+        """
         self.count += 1
         self.total += latency
         self.min = min(self.min, latency)
         self.max = max(self.max, latency)
         self.recent.append(latency)
 
-        # Update percentiles
-        if len(self.recent) > 0:
-            sorted_recent = sorted(self.recent)
-            self.p50 = statistics.median(sorted_recent)
-            self.p95 = sorted_recent[int(len(sorted_recent) * 0.95)]
-            self.p99 = sorted_recent[int(len(sorted_recent) * 0.99)]
+    def _recompute_percentiles(self) -> None:
+        """Refresh p50/p95/p99 from the recent window. O(k log k); read path only."""
+        if not self.recent:
+            return
+        sorted_recent = sorted(self.recent)
+        k = len(sorted_recent)
+        self.p50 = statistics.median(sorted_recent)
+        self.p95 = sorted_recent[min(int(k * 0.95), k - 1)]
+        self.p99 = sorted_recent[min(int(k * 0.99), k - 1)]
 
     def get_average(self) -> float:
         """Get average latency."""
         return self.total / self.count if self.count > 0 else 0.0
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary."""
+        """Convert to dictionary (recomputes percentiles from the recent window)."""
+        self._recompute_percentiles()
         return {
             "count": self.count,
             "avg_ms": round(self.get_average(), 2),

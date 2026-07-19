@@ -70,6 +70,37 @@ Returns:
     List of ``(doc_id, score)`` tuples, score in [0, 1].
 
 
+##### `search_batch(queries: List[str], top_k: int, _block: int) -> List[List[Tuple[str, float]]]`
+
+Top-*k* semantic search for many queries in one batched pass.
+
+Parity-equivalent to ``[self.search(q, top_k) for q in queries]`` but
+computes every query-vs-corpus cosine similarity with a single (blocked)
+BLAS matrix–matrix product instead of one matrix–vector product per query,
+and ranks each row with one C-level ``np.lexsort`` instead of a Python
+``list.sort`` over ``(doc_id, score)`` tuples.  The per-query loop was the
+dominant cold-build cost of
+:meth:`~src.graph.builder.KnowledgeGraphBuilder.build_semantic`
+(CODE-13/16: one full ``search`` per document → O(N_docs·N_chunks·dim)).
+
+Embeddings match :meth:`search` exactly: ``generate_batch`` transforms the
+queries with the same stateless backend, row for row.  The ranking key is
+``(descending score, ascending row index)`` — identical to ``search``'s
+stable reverse-sort — so exact-tie groups (identical embeddings) resolve the
+same way at the *k*-th boundary.  Scores may differ from ``search`` only by
+BLAS reassociation (~1e-7), far below any edge threshold.
+
+Args:
+    queries: Query texts (one per desired result list).
+    top_k: Maximum results per query.
+    _block: Query rows per matmul block; bounds the ``[block × N_chunks]``
+        intermediate so a large corpus cannot blow up memory.
+
+Returns:
+    One ``[(doc_id, score), ...]`` list per query, in query order. Each
+    inner list is empty when the index is empty.
+
+
 ##### `index_document(doc_id: str, content: str) -> None`
 
 Embed *content* and update the in-memory index for *doc_id*.

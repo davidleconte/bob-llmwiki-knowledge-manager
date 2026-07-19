@@ -130,20 +130,20 @@ class TestTokenCounter:
         assert cost == pytest.approx(0.03, rel=0.01)
 
     def test_estimate_cost_gpt35(self):
-        """Test cost estimation for GPT-3.5."""
+        """Test cost estimation for GPT-3.5 (real dated input list price)."""
         counter = TokenCounter(model="gpt-3.5-turbo")
 
         cost = counter.estimate_cost(1000)
 
-        assert cost == pytest.approx(0.002, rel=0.01)
+        assert cost == pytest.approx(0.0005, rel=0.01)
 
     def test_estimate_cost_custom_model(self):
-        """Test cost estimation with custom model."""
+        """Test cost estimation with custom model (real dated input list price)."""
         counter = TokenCounter()
 
         cost = counter.estimate_cost(1000, model="gpt-3.5-turbo")
 
-        assert cost == pytest.approx(0.002, rel=0.01)
+        assert cost == pytest.approx(0.0005, rel=0.01)
 
     def test_get_stats(self):
         """Test getting comprehensive statistics."""

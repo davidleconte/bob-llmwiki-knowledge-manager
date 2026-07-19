@@ -3,7 +3,7 @@ title: "Token Optimization"
 category: concept
 tags: [token-optimization, cache, compression, compact-summary]
 created: 2026-07-18
-updated: 2026-07-18
+updated: 2026-07-19
 status: active
 ---
 
@@ -32,6 +32,16 @@ Large Language Models charge based on token consumption:
 - 1,000 input tokens: $0.03
 - 1,000 output tokens: $0.06
 - 1M tokens/day: $30-60/day = $900-1,800/month
+
+**Tokenizer & pricing provenance (B1/B2):** the rates above are GPT-4 list prices
+from the dated table in [`src/pricing.py`](../../../src/pricing.py) (`PRICES`, split
+into `input_per_1k` / `output_per_1k`, each carrying an `as_of_date` and
+`source_url`). Token counts here use **tiktoken**, which is exact for GPT models.
+For a Claude or watsonx/Granite deployment the count comes from that model's own
+tokenizer when it is installed, otherwise a **loud approximation** that is flagged
+in the validation manifest — and the cost uses that model's own `PRICES` entry, not
+a silent GPT-4 fallback (an unpriced model is a loud error). Recompute any published
+cost figure against the deployment's actual model, never GPT-4 by default.
 
 **Optimization Impact** (illustrative):
 - Before: 2,000 tokens → $0.06-0.12 per request
@@ -72,7 +82,9 @@ cache.get("Can you explain Python?")  # L2 hit → 100% savings
 **Purpose**: Compress prompts while preserving meaning
 
 **Components**:
-- **TokenCounter**: Accurate token counting with tiktoken
+- **TokenCounter**: Model-aware token counting — tiktoken for GPT models (exact),
+  and a loud, manifest-flagged approximation for Claude / watsonx / other models
+  whose exact tokenizer is not installed (B1)
 - **PromptOptimizer**: Multi-strategy compression
 
 **Optimization Strategies**:
@@ -301,5 +313,5 @@ Include examples.
 - [Design Document](../../archive/design-document.md) - Original system design (archived; metrics retracted)
 
 ---
-*Last Updated: 2026-07-13*
+*Last Updated: 2026-07-19*
 *Category: Concept*
