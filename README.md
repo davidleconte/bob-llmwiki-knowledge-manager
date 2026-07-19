@@ -577,9 +577,7 @@ retracted after the Phase 5 audit.
 
 Reproduce with `python -m src.validation`; CI re-runs it on every push.
 
-- **Optimizer compression:** ~20% mean (95% CI ≈ [19%, 21%], N=183 real in-repo docs,
-  token-weighted ~23%) — manifest:
-  [`evaluation/results/validation-2026-07-14/manifest.json`](evaluation/results/validation-2026-07-14/manifest.json).
+- **Optimizer compression:** ~20% mean compression (manifest: `evaluation/results/validation-2026-07-14/manifest.json`; 95% CI ≈ [19%, 21%], N=183 real in-repo docs, token-weighted ~23%).
   Near-lossless (whitespace + redundant-phrase removal).
 - **Cache recompute-avoidance:** workload-dependent — a cache hit avoids full recompute.
   The harness discloses the workload's repeat rate; not blended into the compression figure.
@@ -594,10 +592,11 @@ Re-derivation saving: KB doc replaces full source read. Measured via shadow comp
 (`measure_optimizer`, cache=off, tiktoken/gpt-4) on 19 real source→KB file pairs from
 this repo. Test suite: [`tests/validation/test_km_savings.py`](tests/validation/test_km_savings.py).
 
-| Corpus | N pairs | Mean savings | 95% CI | What it means |
-|--------|--------:|-------------:|-------:|---------------|
-| All 19 pairs | 19 | 2% | [−32%, +30%] | No reliable claim — mixed pairing quality |
-| Well-formed KB summaries | 10 | **51%** | **[38%, 64%]** | KB doc is genuinely more compact than its source |
+<!-- manifest: tests/validation/test_km_savings.py (reproducible run) -->
+| Corpus | N pairs | Mean re-derivation saving | 95% CI | What it means |
+|--------|--------:|--------------------------:|-------:|---------------|
+| All 19 pairs | 19 | 2% (manifest: tests/validation/test_km_savings.py) | [−32%, +30%] | No reliable claim — mixed pairing quality |
+| Well-formed KB summaries | 10 | **51%** (manifest: tests/validation/test_km_savings.py) | **[38%, 64%]** | KB doc is genuinely more compact than its source |
 | Mismatched pairs (KB ≥ source) | 9 | −52% | — | KB doc is a guide/report, not a summary — overhead, not saving |
 
 **What "well-formed KB summary" means:** the KB document is a compact distillation of a
@@ -612,7 +611,7 @@ no re-derivation saving.
 codebase where the KB doc fully answers the query. Does not apply to first-time
 exploratory tasks, debugging sessions, or queries that still require reading the raw source.
 
-**These figures are not additive** with the TOS optimizer's ~20% compression — the two
+**These figures are not additive** with the TOS optimizer's ~20% compression (manifest: `evaluation/results/validation-2026-07-14/manifest.json`) — the two
 mechanisms operate at different levels of the stack and have different applicability
 conditions.
 
@@ -622,21 +621,21 @@ conditions.
 
 ## 11. Maturity and current status
 
-**Current grade: A+ (4.30 / 4.30) against institutional Tier-1 vendor standard.**
-Trajectory: D− (0.9) → B+/A− (3.46) → A− (3.70) → A (3.89) → A (4.09) → **A+ (4.30)** across Phases 0–8 + all 4 structural gaps closed (2026-07-18).
-Authoritative status: [`STATUS.md`](STATUS.md).
+**Current status: Beta — Not Production Ready.** Self-assessed grade A+ (4.30/4.30); **independent counter-audit (2026-07-19) scored 2.9/5**. See [`STATUS.md`](STATUS.md) for the authoritative status and the adversarial remediation plan in progress.
+
+Trajectory: D− (0.9) → B+/A− (3.46) → A− (3.70) → A (3.89) → A (4.09) → A+ (4.30, self-assessed) across Phases 0–8 + all 4 structural gaps closed (2026-07-18). **Independent counter-audit (2026-07-19): 2.9/5.**
 
 **What "Beta — Not Production Ready" means here:**
 
-| Dimension | Grade | Notes |
-|-----------|:-----:|-------|
-| Product Integrity & Claims | **A+** | All fabricated metrics retracted and permanently recorded; every published number manifest-backed; machine-validated by CI |
-| Architecture & Design | **A+** | Facade holds no logic; factory is single config→constructor home; all config fields wired; SLA v1.0 + load tests + `sentence-transformers` in dev extras (G-1/G-3 closed) |
-| Code Correctness | **A+** | C1–C8 + RLock fixed; **N-1–N-4** cache race conditions eliminated (unsynchronised `_similarity_scores` reads, threshold write, promotion-flag write, double `size()` snapshot); behavioral regression tests for each fix; zero `# type: ignore` in `src/`; full mypy scope |
-| Testing & Verification | **A+** | **1 112 passed** · ≥80% coverage gate (89.82%) · per-package floors · **14+ race-detector tests** (concurrent eviction, `reset_stats()`, `update_threshold()`, promotion-flag, size-snapshot consistency under thread pressure) · load/soak suite (8 tests) |
-| Build, Release & Supply-Chain | **A+** | `uv sync --frozen` in CI · `pip-audit --strict` · 0 CVEs · bandit SAST blocking · CycloneDX SBOM · 3.11+3.12 matrix |
-| Documentation | **A+** | Two authoritative arc42 documents · 19 ADRs (ADR-012 superseded) · 41 API docs CI-drift-checked · STRIDE threat model grounded in `path:line` citations · formal SLA |
-| Governance & Compliance | **A+** | 12-artifact community health · CODEOWNERS covers all packages (G-4 closed) · STRIDE TOCTOU narrowed · all governance validators in CI |
+| Dimension | Self-assessed | Independent (2026-07-19) | Notes |
+|-----------|:-------------:|:------------------------:|-------|
+| Product Integrity & Claims | A+ | 3.5/5 | Honesty machinery best-in-class; honesty gates have guard rot; A+ grade self-conferred |
+| Architecture & Design | A+ | 2.0/5 | Validated retrieval engine (p@3=0.88) unwired from every production path |
+| Code Correctness | A+ | 2.5/5 | Cache, truncation trustworthy; optimizer can return empty string; L2→L1 promotion mislabels |
+| Testing & Verification | A+ | 4.0/5 | **~1 200+ tests** · ≥80% coverage gate (89.82%) · 3 CI gates currently failing (working tree) |
+| Build, Release & Supply-Chain | A+ | 4.0/5 | `uv sync --frozen` · `pip-audit --strict` · 0 CVEs · CycloneDX SBOM · 3.11+3.12 matrix |
+| Documentation | A+ | — | Two arc42 docs · 19 ADRs · STRIDE threat model · formal SLA; ~35–40 broken cross-references |
+| Governance & Compliance | A+ | — | CODEOWNERS complete; validate-kb.sh subshell bug always passes link check |
 
 **Suitable for:**
 - ✅ Development, testing, and research environments
@@ -659,6 +658,8 @@ automated multi-agent research, or Windows compatibility.
 
 ## 12. Security
 
+> ⚠️ **2026-07-19 adversarial audit:** Several security findings confirmed via live exploit in an isolated sandbox — see [`docs/knowledge-base/research/adversarial-audit-2026-07-19.md`](docs/knowledge-base/research/adversarial-audit-2026-07-19.md). Key open issues: KB retrieval path does not apply path-containment on all code paths (ATK-FS-01), 1000-dim hashing embeddings allow cache poisoning (ATK-FS-02), KB content loaded into agent context without sanitization (ATK-MEM-01). Remediation tracked in [`adversarial-remediation-plan.md`](adversarial-remediation-plan.md).
+
 Local library and CLI — no network service, no stored credentials, no outbound traffic
 except two optional first-use downloads:
 
@@ -677,6 +678,8 @@ except two optional first-use downloads:
   Dependabot · path-traversal containment in `src/tools/` verified end-to-end.
 
 ## 13. Documentation
+
+> **2026-07-19 audit artefacts:** [`adversarial-remediation-plan.md`](adversarial-remediation-plan.md) — v2 remediation spec for all Critical/High findings. [`docs/knowledge-base/research/counter-audit-2026-07-19-independent.md`](docs/knowledge-base/research/counter-audit-2026-07-19-independent.md) — independent counter-audit (2.9/5). [`docs/knowledge-base/research/adversarial-audit-2026-07-19.md`](docs/knowledge-base/research/adversarial-audit-2026-07-19.md) — red-team (19 confirmed). [`docs/knowledge-base/research/innovation-portfolio-2026-07-19.md`](docs/knowledge-base/research/innovation-portfolio-2026-07-19.md) — 24-candidate innovation portfolio.
 
 - **[docs/README.md](docs/README.md)** — Diátaxis navigation hub (tutorials, how-to, reference, explanation)
 - **[docs/BOB-IDE-GUIDE.md](docs/BOB-IDE-GUIDE.md)** — Bob IDE complete reference (activation, tool groups, skill, validation, troubleshooting)

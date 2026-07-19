@@ -1,8 +1,10 @@
 # Knowledge Base Index
 
 > ⚠️ **Metrics correction (2026-07-14).** Earlier drafts cited fabricated figures — "68.96%", "89.3%", "91.80%". **Those are retracted.** The honest, measured figure is **~20% mean optimizer compression** on real prose (manifest-backed: `evaluation/results/validation-2026-07-14/`; see `STATUS.md`).
+>
+> ⚠️ **Grade correction (2026-07-19).** The self-assessed A+ (4.30/4.30) grade is not independently confirmed. The independent counter-audit (2026-07-19) scored **2.9/5**; the last graded independent verdict is NO-GO at 3.46/4.3 (2026-07-14). `STATUS.md` is the authoritative source.
 
-Last Updated: 2026-07-19
+Last Updated: 2026-07-19 · **115 documents** (14 concepts · 27 guides · 4 references · 69 research · 1 architectural overview)
 
 ## Quick Navigation
 - [Concepts](./concepts/) - Core concepts and definitions
@@ -11,10 +13,12 @@ Last Updated: 2026-07-19
 - [Research](./research/) - Research notes and findings
 
 ## Recent Additions
+- 2026-07-19: [Adversarial Remediation Plan (root)](../../adversarial-remediation-plan.md) - Planning ⭐ NEW — v2 detailed technical specification (14 sub-tasks) for closing all Critical/High audit findings; adversarially audited before implementation; gating independent re-grade
 - 2026-07-19: [Obsidian Integration Guide](./guides/obsidian-integration-guide.md) - Guide ⭐ NEW — Semantic graph export to Obsidian Canvas + Dataview, and Obsidian MCP activation in Bob IDE
-- 2026-07-19: [Adversarial Audit 2026-07-19](./research/adversarial-audit-2026-07-19.md) - Research ⭐ NEW — Adversarial audit of Mnemox codebase, KB integrity, and challenge submission (external)
-- 2026-07-19: [Independent Counter-Audit](./research/counter-audit-2026-07-19-independent.md) - Research ⭐ NEW — MECE independent counter-audit of Mnemox architecture, memory-layer, retrieval, and governance
-- 2026-07-19: [Innovation Portfolio](./research/innovation-portfolio-2026-07-19.md) - Research ⭐ NEW — Innovation portfolio and roadmap for Mnemox: MCP, watsonx, advanced-RAG integration
+- 2026-07-19: [Adversarial Audit 2026-07-19](./research/adversarial-audit-2026-07-19.md) - Research ⭐ NEW — Red-team audit: 19 CONFIRMED exploits across file-read, cache-poisoning, prompt-injection, and honesty-gate surfaces
+- 2026-07-19: [Independent Counter-Audit](./research/counter-audit-2026-07-19-independent.md) - Research ⭐ NEW — MECE independent counter-audit: 46 findings, scored 2.9/5; retrieval stack unwired, optimizer can return empty, 3 CI gates failing
+- 2026-07-19: [Innovation Portfolio](./research/innovation-portfolio-2026-07-19.md) - Research ⭐ NEW — 24-candidate portfolio in 3 horizons: MCP server, cold-start index, Docling bridge, memory-lifecycle intelligence, trust-tiered memory
+- 2026-07-19: [Mnemox Update — 2026-07-19 (documentation sync)](./research/mnemox-update-2026-07-19b.md) - Research ⭐ NEW — `mnemox --quick` session lessons: STATUS.md grade qualification, CHANGELOG [Unreleased], INDEX.md case fix, .docx hygiene, remediation-plan root placement
 - 2026-07-19: [Mnemox Update — 2026-07-19](./research/mnemox-update-2026-07-19.md) - Research — automated KB update: git log, doc counts, lessons learned scaffold
 - 2026-07-18: [Mnemox Challenge Submission](./research/mnemox-challenge-submission-2026-07.md) - Research ⭐ NEW — 2026 IBMer watsonx Challenge submission narrative (Team BobjectifLune)
 - 2026-07-18: [Mnemox Executive Brief](./research/mnemox-executive-brief-2026-07.md) - Research ⭐ NEW — 4-minute CTO/challenge-judge decision summary; ROI table; quality gates; pilot design
@@ -96,6 +100,9 @@ Last Updated: 2026-07-19
 ### Recently Filed (not yet in Recent Additions)
 - [Adversarial Review Pattern](./concepts/adversarial-review-pattern.md) - Two-pass hostile + friendly review technique; pre-emption rule; label separation; fabrication ceiling ⭐ NEW
 
+### Planning Artefacts (root-level, outside KB tree)
+- [Adversarial Remediation Plan](../../adversarial-remediation-plan.md) — v2 detailed technical specification for closing all Critical/High findings from the 2026-07-19 audits; 14 sub-tasks; adversarially audited before implementation. **The gate document for independent re-grade.** ⭐ NEW
+
 ### Concepts
 - [File Naming Conventions](./concepts/file-naming-conventions.md) - Kebab-case rule for all `.md` files, exclusion zones, `index.md` blast radius, emoji single source of truth, drift detection command ⭐ NEW
 - [Repo Hygiene Rules](./concepts/repo-hygiene-rules.md) - 5 hygiene failure classes (H-1–H-5): unrelated dirs, root plan files, machine-specific paths, cross-user paths, committed secrets; pre-push gate ⭐ NEW
@@ -148,6 +155,7 @@ Last Updated: 2026-07-19
 - [Cache API Reference](./references/cache-api.md) - Complete API documentation for all cache classes, methods, and usage examples
 
 ### Research
+- [Mnemox Update — 2026-07-19 (documentation sync)](./research/mnemox-update-2026-07-19b.md) - `mnemox --quick` session: STATUS.md grade qualification, CHANGELOG [Unreleased], index.md case fix, .docx hygiene, remediation-plan root placement ⭐ NEW
 - [Quality Gate Status — 2026-07-18](./research/quality-gate-status-2026-07-18.md) - Status-only audit snapshot: 1112 tests / 0 failures, 89.82% global coverage, all 5 per-package floors met (delegation 84%, embeddings 88.8%, monitoring 97.1%, tools 92%, validation 90.8%), ruff + mypy clean; script-output hygiene warning; merge checklist ⭐ NEW
 - [Repo Hygiene — Lessons Learned](./research/repo-hygiene-lessons-2026-07.md) - H-1–H-5 issue taxonomy; gitignore `/`-anchoring rule; hygiene audit protocol (5 shell commands); `.gitignore` design table; verification gate
 - [Cache Thread-Safety Audit — Round 5 Lessons Learned](./research/cache-race-fix-round5-2026-07.md) - Round 5 findings: l3_hits missing (5A), contains() flag bug (5B), CONCURRENCY.md (5C), max_size comment (5D), CacheStatsSnapshot structural enforcement (5E); new counter checklist; 1112 tests ⭐ NEW

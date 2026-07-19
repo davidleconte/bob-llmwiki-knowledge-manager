@@ -6,66 +6,61 @@ and the Python **token-optimization system** — are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2026-07-12
+<!-- oldest-release marker; see [1.1.0] above for the current release -->
+## [Unreleased] — 2026-07-19 Adversarial Audit & Remediation
 
-### Added
-- Initial release of Bob Shell Knowledge Manager
-- Custom knowledge-manager mode for Bob Shell
-- Four document templates (concept, guide, reference, research)
-- Knowledge base structure (concepts, guides, references, research)
-- Automation scripts:
-  - `install.sh` - Install mode to Bob Shell
-  - `init-project.sh` - Initialize KB structure in projects
-  - `validate-kb.sh` - Validate KB structure and integrity
-  - `export-kb.sh` - Export KB to multiple formats (markdown, Obsidian, HTML, PDF)
-- Comprehensive documentation:
-  - Quick Start Guide (5-minute setup)
-  - Installation Guide
-  - Usage Guide
-  - Customization Guide
-  - Workflows Guide
-  - Architecture Documentation
-  - Comparison with LLM-Wiki
-- Three complete example knowledge bases:
-  - Software project (e-commerce platform, 7 documents)
-  - Research project (consensus algorithms, 6 documents)
-  - Personal wiki (knowledge management, 6 documents)
-- Comprehensive test suite:
-  - 45 automated tests (100% passing)
-  - Mode configuration validation (10 tests)
-  - Template structure verification (16 tests)
-  - Script functionality and syntax (19 tests)
-  - pytest configuration with unit/integration markers
+### Research / Audits Added
+- **Independent Counter-Audit 2026-07-19** (`docs/knowledge-base/research/counter-audit-2026-07-19-independent.md`):
+  MECE 5-dimension audit, methodology McKinsey issue-tree, empirical test execution.
+  Scored **2.9/5** overall. Key findings: retrieval stack unwired from every production path
+  (CODE-01/02), optimizer can return empty string for inputs >4096 tokens (CODE-03),
+  `validate-kb.sh` subshell counter-bug always reports "no broken links" (MEM-04),
+  3 CI gates currently failing (CLM-01). ~20% compression claim and ≥80% coverage claim
+  both survive adversarial reading.
 
-### Features
-- Structured knowledge organization with four document types
-- Full-text search across all documents using Bob Shell's native tools
-- Persistent memory integration with save_memory tool
-- Automatic cross-referencing between documents
-- Template-driven document creation
-- Zero external dependencies (uses only Bob Shell native features)
-- Export to multiple formats (markdown, Obsidian, HTML, PDF)
-- File restrictions to protect knowledge base integrity
-- Naming conventions enforcement
-- INDEX.md automatic maintenance
+- **Adversarial Audit 2026-07-19** (`docs/knowledge-base/research/adversarial-audit-2026-07-19.md`):
+  Red-team audit with 19 CONFIRMED live exploits (15 executed in isolated sandbox,
+  4 plausible). Headline findings: arbitrary file read via KB retrieval path (ATK-FS-01),
+  persistent cache poisoning via hashing collision (ATK-FS-02/CODE-08), indirect prompt
+  injection through KB auto-load (ATK-MEM-01), end-to-end defeat of honesty gates
+  (ATK-GATE-01–03). Measurement core (manifest, null-test, supply-chain) held under
+  direct attack.
 
-### Documentation
-- README with badges, quick start, and comprehensive overview
-- Quick Start Guide for 5-minute setup
-- Detailed installation instructions
-- Usage patterns and workflows
-- Customization options
-- Architecture documentation
-- Feature comparison with LLM-Wiki
-- Three working examples with best practices
+- **Innovation Portfolio 2026-07-19** (`docs/knowledge-base/research/innovation-portfolio-2026-07-19.md`):
+  24-candidate innovation portfolio in three horizons (H1 ship on existing assets,
+  H2 lifecycle intelligence, H3 frontier). Top 5: Mnemox MCP Server, Compact Cold-Start
+  Index, Docling Ingestion Bridge, Memory-Lifecycle Intelligence ("the Gardener"),
+  Trust-Tiered Memory.
 
-### Testing
-- pytest configuration with markers
-- 10 mode configuration tests
-- 16 template structure tests
-- 19 workflow and integration tests
-- Bash syntax validation for all scripts
-- Example knowledge base integrity checks
+### Added — Adversarial Regression Test Suites (untracked, pending merge)
+
+- **`tests/security/`** — 4 test modules covering ATK-FS-01 (path containment on all
+  KB read paths), ATK-FS-02/CODE-08 (cache integrity: exact-key promotion, TTL,
+  metadata isolation), ATK-MEM-01 (prompt injection boundary), and trust-tier enforcement.
+
+- **`tests/gates/`** — 5 test modules covering CI gate baseline (Sub-Task 0), gate
+  configuration, savings gate binding, status gate hardening, and `validate-kb.sh`
+  exit-code regression.
+
+- **`tests/retrieval/`** — 2 test modules covering ranking normalization (CODE-05/06
+  scale-mismatch) and retrieval wiring (CODE-01/02 index+graph injection into
+  production paths).
+
+- **`tests/performance/test_dos_hardening.py`** — 3 tests: PageRank 2,000 dangling
+  nodes <1s (ATK-DOS-01 already-fixed verification), semantic edge cap (ATK-DOS-02),
+  L2 BLAS scan p95 <200ms (ATK-DOS-03).
+
+- **`tests/optimizer/test_optimizer_integrity.py`** — 2 tests: `optimize()` never
+  returns empty string for any non-empty input (CODE-03 regression).
+
+### Planning Artefacts
+- **`adversarial-remediation-plan.md`** — Detailed technical specification (v2) for
+  closing all Critical and High audit findings. 14 sub-tasks (0, R, 1–12) covering:
+  baseline freeze, integrity repair sprint, path containment, cache integrity, retrieval
+  wiring, optimizer structure-preservation, ranking normalization, sanitization,
+  provenance/trust-tier, honesty-gate hardening, status/grade gate, gate independence,
+  DoS hardening, supply-chain hygiene, and an adversarial regression suite.
+  Adversarially audited before implementation (10 v1 errors corrected in v2).
 
 ## [1.1.0] - 2026-07-18
 
@@ -219,6 +214,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - P1-1: KB query hybrid embedding scorer (ADR-014, `EmbeddingGenerator` injection)
 - P1-3: Opt-in context compression in `knowledge-manager` mode
+
+## [1.0.0] - 2026-07-12
+
+### Added
+- Initial release of Bob Shell Knowledge Manager
+- Custom knowledge-manager mode for Bob Shell
+- Four document templates (concept, guide, reference, research)
+- Knowledge base structure (concepts, guides, references, research)
+- Automation scripts:
+  - `install.sh` - Install mode to Bob Shell
+  - `init-project.sh` - Initialize KB structure in projects
+  - `validate-kb.sh` - Validate KB structure and integrity
+  - `export-kb.sh` - Export KB to multiple formats (markdown, Obsidian, HTML, PDF)
+- Comprehensive documentation:
+  - Quick Start Guide (5-minute setup)
+  - Installation Guide
+  - Usage Guide
+  - Customization Guide
+  - Workflows Guide
+  - Architecture Documentation
+  - Comparison with LLM-Wiki
+- Three complete example knowledge bases:
+  - Software project (e-commerce platform, 7 documents)
+  - Research project (consensus algorithms, 6 documents)
+  - Personal wiki (knowledge management, 6 documents)
+- Comprehensive test suite:
+  - 45 automated tests (100% passing)
+  - Mode configuration validation (10 tests)
+  - Template structure verification (16 tests)
+  - Script functionality and syntax (19 tests)
+  - pytest configuration with unit/integration markers
+
+### Features
+- Structured knowledge organization with four document types
+- Full-text search across all documents using Bob Shell's native tools
+- Persistent memory integration with save_memory tool
+- Automatic cross-referencing between documents
+- Template-driven document creation
+- Zero external dependencies (uses only Bob Shell native features)
+- Export to multiple formats (markdown, Obsidian, HTML, PDF)
+- File restrictions to protect knowledge base integrity
+- Naming conventions enforcement
+- INDEX.md automatic maintenance
+
+### Documentation
+- README with badges, quick start, and comprehensive overview
+- Quick Start Guide for 5-minute setup
+- Detailed installation instructions
+- Usage patterns and workflows
+- Customization options
+- Architecture documentation
+- Feature comparison with LLM-Wiki
+- Three working examples with best practices
+
+### Testing
+- pytest configuration with markers
+- 10 mode configuration tests
+- 16 template structure tests
+- 19 workflow and integration tests
+- Bash syntax validation for all scripts
+- Example knowledge base integrity checks
 
 ## [1.0.0-tos] - 2026-07-16
 
