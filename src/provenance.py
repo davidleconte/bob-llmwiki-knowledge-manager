@@ -107,6 +107,46 @@ def attach_signature(markdown: str, key: bytes) -> str:
     return markdown.replace("\n---\n", f"\n{SIG_FIELD}: {sig}\n---\n", 1)
 
 
+_PROMOTED_BY_FIELD = "promoted_by"
+
+
+def promote_document(markdown: str, to_tier: str, promoter: str, key: bytes) -> str:
+    """Promote *markdown* to ``trust_tier: to_tier``, record the promoter, re-sign.
+
+    The ``generated → verified`` path (D2/MEM): flips the tier, records
+    ``promoted_by: <promoter>``, strips the now-stale ``provenance_sig``, and
+    re-signs so :func:`verify_document` passes for the promoted tier. A forged
+    promotion (editing the tier by hand) fails verification because it lacks a
+    signature over the new signed fields.
+
+    Raises:
+        ValueError: If the document has no frontmatter to promote.
+    """
+    fields, _ = _split(markdown)
+    if not fields:
+        raise ValueError("document has no frontmatter to promote")
+
+    md = re.sub(r"^%s:.*\n" % SIG_FIELD, "", markdown, count=1, flags=re.MULTILINE)
+
+    if re.search(r"^trust_tier:.*$", md, flags=re.MULTILINE):
+        md = re.sub(r"^trust_tier:.*$", f"trust_tier: {to_tier}", md, count=1, flags=re.MULTILINE)
+    else:
+        md = md.replace("\n---\n", f"\ntrust_tier: {to_tier}\n---\n", 1)
+
+    if re.search(r"^%s:.*$" % _PROMOTED_BY_FIELD, md, flags=re.MULTILINE):
+        md = re.sub(
+            r"^%s:.*$" % _PROMOTED_BY_FIELD,
+            f"{_PROMOTED_BY_FIELD}: {promoter}",
+            md,
+            count=1,
+            flags=re.MULTILINE,
+        )
+    else:
+        md = md.replace("\n---\n", f"\n{_PROMOTED_BY_FIELD}: {promoter}\n---\n", 1)
+
+    return attach_signature(md, key)
+
+
 def verify_document(markdown: str, key: bytes) -> bool:
     """True iff *markdown* carries a ``provenance_sig`` that matches its content."""
     fields, body = _split(markdown)

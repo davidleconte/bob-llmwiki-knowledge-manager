@@ -209,6 +209,23 @@ def build_parser() -> argparse.ArgumentParser:
         help="Re-sync the embedding index from the KB before searching (W2-2b)",
     )
 
+    # --- KB promote command (D2/MEM: generated → verified) ---
+    p_promote = sub.add_parser(
+        "kb-promote", help="Promote a KB doc's trust tier (e.g. generated → verified) and re-sign"
+    )
+    p_promote.add_argument("doc", help="Path to the KB document to promote")
+    p_promote.add_argument(
+        "--to",
+        default="verified",
+        choices=["verified", "generated", "quarantined", "archived"],
+        help="Target trust tier (default: verified)",
+    )
+    p_promote.add_argument(
+        "--by",
+        default=None,
+        help="Promoter identity recorded in provenance (default: $USER)",
+    )
+
     return parser
 
 
@@ -572,6 +589,35 @@ def main(argv: Optional[List[str]] = None) -> int:
                 print(
                     "⚠️  Partial stack — run: bob-optimize graph-build --kb-path docs/knowledge-base --with-semantic"
                 )
+
+    elif args.command == "kb-promote":
+        import os
+        from pathlib import Path
+
+        from src.provenance import load_or_create_key, promote_document, verify_document
+
+        doc_path = Path(args.doc)
+        if not doc_path.is_file():
+            _emit({"error": f"document not found: {args.doc}"}, as_json)
+            return 1
+        promoter = args.by or os.environ.get("USER") or "unknown"
+        try:
+            markdown = doc_path.read_text(encoding="utf-8")
+            key = load_or_create_key(doc_path)
+            promoted = promote_document(markdown, args.to, promoter, key)
+            doc_path.write_text(promoted, encoding="utf-8")
+        except Exception as exc:
+            _emit({"error": str(exc)}, as_json)
+            return 1
+        _emit(
+            {
+                "promoted": str(doc_path),
+                "trust_tier": args.to,
+                "promoted_by": promoter,
+                "signature_valid": verify_document(promoted, key),
+            },
+            as_json,
+        )
 
     elif args.command == "analyze":
         from src.delegation.pipeline import analyze_and_ingest
