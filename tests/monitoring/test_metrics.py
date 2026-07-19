@@ -66,14 +66,62 @@ class TestLatencyStats:
         assert stats.get_average() == 0.0
 
     def test_percentiles(self):
-        """Test percentile calculations."""
+        """Percentiles are computed on read (ATK-DOS-05: record() no longer sorts)."""
         stats = LatencyStats()
         for i in range(100):
             stats.record(float(i))
 
-        assert stats.p50 == pytest.approx(49.5, rel=0.1)
-        assert stats.p95 >= 90
-        assert stats.p99 >= 95
+        # Percentiles are refreshed lazily by to_dict()/_recompute_percentiles().
+        data = stats.to_dict()
+        assert data["p50_ms"] == pytest.approx(49.5, rel=0.1)
+        assert data["p95_ms"] >= 90
+        assert data["p99_ms"] >= 95
+
+    def test_record_does_not_sort_the_window(self):
+        """ATK-DOS-05/06 (RED->GREEN): record() must be O(1), not O(k log k).
+
+        The old code sorted the whole recent window (<=1000) on every record — and
+        record() runs under the collector's shared lock, so each recorded op
+        serialised a 1000-element sort across all threads. Recording 50k samples
+        under the old code took ~2.2 s; O(1) record does it in ~0.02 s. The 0.5 s
+        budget sits ~40x below the old cost and ~20x above the new, so it is not
+        flaky.
+        """
+        stats = LatencyStats()
+        n = 50_000
+        start = time.perf_counter()
+        for i in range(n):
+            stats.record((i * 37) % 1000 + 0.5)
+        elapsed = time.perf_counter() - start
+        assert elapsed < 0.5, (
+            f"recording {n} latencies took {elapsed:.2f}s (limit 0.5s) — record() is "
+            "sorting the window again (ATK-DOS-05/06 has regressed)."
+        )
+
+    def test_lazy_percentiles_match_eager_formula(self):
+        """The read-path percentiles equal the old sort-on-every-record formula.
+
+        Guards that moving the computation off the write path did not change the
+        reported values, using the exact indexing the old code used.
+        """
+        stats = LatencyStats()
+        values = [float((i * 13) % 500) for i in range(1000)]
+        for v in values:
+            stats.record(v)
+
+        window = list(stats.recent)
+        sorted_window = sorted(window)
+        k = len(sorted_window)
+        import statistics as _stats
+
+        expected_p50 = _stats.median(sorted_window)
+        expected_p95 = sorted_window[int(k * 0.95)]
+        expected_p99 = sorted_window[int(k * 0.99)]
+
+        data = stats.to_dict()
+        assert data["p50_ms"] == pytest.approx(round(expected_p50, 2))
+        assert data["p95_ms"] == pytest.approx(round(expected_p95, 2))
+        assert data["p99_ms"] == pytest.approx(round(expected_p99, 2))
 
     def test_to_dict(self):
         """Test conversion to dictionary."""
