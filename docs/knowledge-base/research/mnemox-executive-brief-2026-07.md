@@ -55,7 +55,7 @@ Three opt-in shared layers progressively improve retrieval quality:
 
 | Layer | What it adds | Key result |
 |---|---|---|
-| Semantic embedding index | MiniLM dense-vector KB search | Retrieval precision: **44% → 88%** correct in top 3 results |
+| Semantic embedding index | MiniLM dense-vector KB search | Retrieval precision p@3 = **0.84** (21/25), matched by keyword-only — no net lift (report.json: evaluation/results/retrieval-2026-07-19/report.json) |
 | Knowledge graph | Orphan detection, dead-link surfacing, authority hubs | 26/39 orphan documents rescued; 19 broken cross-references surfaced |
 | Parallel analysis pipeline | 6 agents analyse a repo simultaneously, compress output, file into KB | Full repo analysis in one command: `bob-optimize analyze` |
 
@@ -68,14 +68,16 @@ Three opt-in shared layers progressively improve retrieval quality:
 
 | Scenario | Expected saving | Confidence | Condition |
 |---|---|---|---|
-| Stable codebase, recurring architecture queries, 6 months | **50–65%** Bobcoin reduction | Medium | KB maintained; structured Markdown prompts |
+| Stable codebase, recurring architecture queries, 6 months | **50–65%** Bobcoin reduction (modelled; manifest-backed basis) | Medium | KB maintained; structured Markdown prompts |
 | Medium, active codebase, mixed queries | **35–50%** | Medium | KB updated weekly |
 | Small, fast-changing codebase | **15–25%** | Low | Some recurring queries |
 | One-off engagement, no repetition | ~0% | High | KB creation cost not recovered |
 
 **Pilot cost and risk:** 400–700 Bobcoins total (~30 min human time). Breakeven: 1–3 sessions.
 
-> **Conservative budget-planning figure: 40–60% Bobcoin reduction** for teams with
+> **Conservative budget-planning figure: 40–60% Bobcoin reduction** (projection;
+> modelled from the manifest-backed ~20% compression,
+> `evaluation/results/validation-2026-07-14/manifest.json`) for teams with
 > stable, recurring query patterns on structured codebases.
 
 ---

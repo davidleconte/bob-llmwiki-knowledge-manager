@@ -151,6 +151,50 @@ def has_banner(text: str) -> bool:
     return any(marker in head for marker in BANNER_MARKERS)
 
 
+# C1 (ATK-GATE-04 residual): a head banner annotates a *frozen* audit-trail doc,
+# but it must NOT mute an outward-facing *live* claim surface. A stale marketing
+# projection shipped unscanned precisely because a submission doc — frontmatter
+# `status: active`, `audience: [challenge-judges, …]` — carried a "HISTORICAL
+# SNAPSHOT" banner that short-circuited the whole-file scan. So a doc that is both
+# outward-facing (declares an external `audience:`) AND live (`status: active`/…) is
+# scanned per line regardless of any banner. The banner exception is reserved for
+# genuinely frozen records: internal notes, or an archived doc (`status:
+# superseded/archived/complete`). To exempt an outward-facing draft you must
+# honestly mark it frozen — which also stops presenting it as the live pitch.
+_FRONTMATTER_BLOCK_RE = re.compile(r"^---\n(.*?)\n---\n", re.DOTALL)
+_STATUS_RE = re.compile(r"^status:\s*[\"']?([A-Za-z0-9_-]+)", re.MULTILINE)
+# Any non-empty `audience:` field signals a doc written to persuade an external
+# reader (judges, leadership, customers) — an outward-facing claim surface.
+_AUDIENCE_RE = re.compile(r"^audience:\s*\S", re.MULTILINE)
+_LIVE_STATUSES = frozenset(
+    {"active", "in-progress", "in_progress", "ready-to-start", "proposed", "draft"}
+)
+
+
+def _frontmatter_status(text: str) -> str | None:
+    """Return the frontmatter ``status:`` value (lower-cased), or None if absent."""
+    block = _FRONTMATTER_BLOCK_RE.match(text)
+    if not block:
+        return None
+    m = _STATUS_RE.search(block.group(1))
+    return m.group(1).lower() if m else None
+
+
+def _is_outward_facing(text: str) -> bool:
+    """True if the doc's frontmatter declares an ``audience:`` of external readers."""
+    block = _FRONTMATTER_BLOCK_RE.match(text)
+    return bool(block and _AUDIENCE_RE.search(block.group(1)))
+
+
+def _scan_despite_banner(text: str) -> bool:
+    """True if a banner must NOT exempt this doc (C1): outward-facing AND live.
+
+    Only outward-facing live claim surfaces override the banner exception. Internal
+    notes and honestly-frozen docs (non-live status) keep it.
+    """
+    return _is_outward_facing(text) and _frontmatter_status(text) in _LIVE_STATUSES
+
+
 def _manifest_value_ok(manifest_path: Path, pct_in_line: float) -> bool:
     """True if manifest exists and its mean_savings is within ±5 pp of pct_in_line."""
     if not manifest_path.exists():
@@ -221,9 +265,13 @@ def scan_text(text: str) -> list[tuple[int, str]]:
     citations" where the manifest path wraps onto the continuation line, without
     grouping unrelated lines into the same evaluation context.
 
-    A file-head retraction/deprecation banner annotates the whole file.
+    A file-head retraction/deprecation banner annotates the whole file — but only
+    for a genuinely frozen record. An outward-facing live claim surface (declares an
+    external ``audience:`` AND ``status: active``/…) is scanned per line regardless
+    of any banner (C1), so a submission can no longer hide unbacked figures behind a
+    "HISTORICAL SNAPSHOT" head.
     """
-    if has_banner(text):
+    if has_banner(text) and not _scan_despite_banner(text):
         return []
     violations: list[tuple[int, str]] = []
     lines = text.splitlines()

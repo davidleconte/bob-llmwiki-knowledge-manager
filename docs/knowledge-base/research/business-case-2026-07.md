@@ -151,9 +151,9 @@ exists.
 - Operates as a transparent layer: the same request costs fewer Bobcoins,
   the same answer comes back.
 
-**Measured:** ~20% mean token reduction on structured prose (95% CI
-[18.9%, 21.2%], N=183 real documents, reproducible manifest at
-`evaluation/results/validation-2026-07-14/`).
+**Measured (manifest-backed):** ~20% mean token reduction on structured prose
+(95% CI [18.9%, 21.2%], N=183 real documents, reproducible manifest at
+`evaluation/results/validation-2026-07-14/manifest.json`).
 
 ### The three shared layers (infrastructure)
 
@@ -162,7 +162,7 @@ progressively improve retrieval quality as they are activated:
 
 | Layer | What it adds | How it is activated |
 |---|---|---|
-| **Semantic embedding index** | KB search uses MiniLM dense vectors instead of keyword matching. Retrieval precision: 44% → 88% correct in top 3 results. | `bob-optimize index-kb` |
+| **Semantic embedding index** | KB search uses MiniLM dense vectors instead of keyword matching. Retrieval precision p@3 = 0.84 (21/25), matched by keyword-only — no net lift on the shipped backend (report.json: evaluation/results/retrieval-2026-07-19/report.json). | `bob-optimize index-kb` |
 | **Knowledge graph** | Surfaces orphaned documents, dead cross-references, and authority hubs. Turns a flat file collection into a navigable graph. | `bob-optimize graph-build` |
 | **Parallel analysis pipeline** | Runs 6 analysis agents simultaneously on your repository, compresses their output, and files the findings into the KB in a single command. | `bob-optimize analyze` |
 
@@ -263,8 +263,9 @@ design.
 **What is saved:** Redundant tokens in every prompt — before the prompt
 is sent, regardless of whether a KB exists.
 
-**Measured:** ~20% mean reduction (95% CI [18.9%, 21.2%], N=183 structured
-Markdown documents, tiktoken BPE, null test passed).
+**Measured (manifest-backed):** ~20% mean reduction (95% CI [18.9%, 21.2%],
+N=183 structured Markdown documents, tiktoken BPE, null test passed; manifest at
+`evaluation/results/validation-2026-07-14/manifest.json`).
 
 - **Corpus scope:** Structured Markdown prose from this repository. Savings
   on conversational text, code-heavy inputs, or API responses are not yet
@@ -283,10 +284,12 @@ Scenario: Engineer using both systems on a stable codebase for 6 months
   Session 1 (KB creation):   net cost (investment)
   Sessions 2–10:             ~30–50% saving (KB immature + optimizer)
   Sessions 11+:              ~50–70% saving (mature KB + optimizer)
-  Amortised over 6 months:   50–65% average Bobcoin reduction
+  Amortised over 6 months:   50–65% Bobcoin reduction (projection, manifest-backed basis)
 
-Conservative single figure for budget planning: 40–60% reduction
-Optimistic figure (ideal conditions): 60–75%
+Conservative budget-planning figure: 40–60% reduction (projection). Optimistic
+(ideal): 60–75%. All are MODELLED from the manifest-backed ~20% compression
+(evaluation/results/validation-2026-07-14/manifest.json) + N=10 re-derivation
+(manifest: tests/validation/test_km_savings.py) — estimates, not measurements.
 ```
 
 **What we are not claiming:** Guaranteed percentages. Additive savings.
@@ -316,7 +319,7 @@ the freed budget makes possible.
 
 The ceiling on what Bob can attempt is set by Bobcoin budget divided by
 session cost. Every percentage point of saving is a percentage point of
-additional ambition. A team that reduces its per-session cost by 50% can
+additional ambition. A team that cuts its per-session cost in half can
 attempt twice as many sessions, or sessions twice as broad, for the same
 budget. **The real return on Mnemox is not fewer Bobcoins spent — it is
 more research conducted.**
@@ -452,7 +455,8 @@ does not meet the applicability conditions will not achieve them:
   that uses Bob primarily for one-off exploratory tasks will not recover
   the KB creation cost.
 - **Compression saving requires structured prose.** Codebases that are
-  primarily raw code or JSON will see lower savings than the measured 20%.
+  primarily raw code or JSON will see lower savings than the manifest-backed ~20%
+  (evaluation/results/validation-2026-07-14/manifest.json) measured on structured prose.
 - **Both savings require adoption discipline.** A KB that is created once
   and never updated degrades toward zero value within weeks of the source
   changing.
@@ -466,8 +470,8 @@ does not meet the applicability conditions will not achieve them:
 | Decision | Options | Recommended | Success metric |
 |---|---|---|---|
 | **Adopt Mnemox KB Manager?** | (A) Full adoption; (B) Pilot one project; (C) No adoption | B — 4–8 week pilot on a stable, recurring-query project | Per-session BC cost falls ≥20% on recurring architecture queries by week 4 |
-| **Adopt Token Optimizer?** | (A) Integrate into workflow; (B) CLI use only; (C) Skip | B — CLI use for prompt compression during development; defer library integration until TOS reaches v1.0 | `bob-optimize validate` on your prompt sample shows ≥15% compression |
-| **Activate semantic embedding index?** | (A) Yes; (B) No | A — low-cost, high-impact; requires only `pip install sentence-transformers` | P@3 on your KB queries ≥ 80% (vs. ~44% keyword baseline) |
+| **Adopt Token Optimizer?** | (A) Integrate into workflow; (B) CLI use only; (C) Skip | B — CLI use for prompt compression during development; defer library integration until TOS reaches v1.0 | `bob-optimize validate` on your prompt sample shows ≥15% compression (vs the manifest-backed ~20% corpus mean, evaluation/results/validation-2026-07-14/manifest.json) |
+| **Activate semantic embedding index?** | (A) Yes; (B) No | A — low-cost; re-ranks results but showed no measured p@3 lift over keyword on this repo's 25-query set | Compare P@3 vs your keyword baseline (this repo: both 0.84; report.json: evaluation/results/retrieval-2026-07-19/report.json) |
 | **Activate knowledge graph?** | (A) Yes; (B) Health-check only; (C) No | B — run `graph-health` monthly to find orphans and dead links; defer score-blending (`graph_weight > 0`) until corpus diversifies | Zero broken cross-references in monthly health report |
 
 ### Pilot design (recommended entry point)

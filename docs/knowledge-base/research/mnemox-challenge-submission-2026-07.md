@@ -99,7 +99,8 @@ prompt before it is sent — independently of whether a KB exists.
 
 **What it does:**
 - Removes whitespace, redundant phrases, and verbal hedges from prompts
-  automatically, without changing meaning (~20% mean reduction)
+  automatically, without changing meaning (~20% mean reduction, manifest-backed:
+  `evaluation/results/validation-2026-07-14/manifest.json`)
 - Caches results so repeated or similar prompts return instantly at zero
   token cost
 - Operates as a transparent layer: same request, fewer Bobcoins, same answer
@@ -146,7 +147,7 @@ one of them, permanently, for every team member.
 | **Compression trap** | Templates preserve meaning — rationale, real names, cross-references — while reducing token volume |
 | **Short threads** | Knowledge persists in Git-backed KB files across any number of threads and sessions. A fresh thread always retrieves from the KB |
 | **Cache coherence** | Fixed mode definition + `AGENTS.md` + KB layout = a cacheable prefix that repeats across every session |
-| **Bobcoin economy** | Re-derivation saving: 51% on well-formed KB summaries (N=10, breakeven in 1 session). Compression: ~20% on every novel prompt. |
+| **Bobcoin economy** | Re-derivation saving: 51% (N=10; manifest: tests/validation/test_km_savings.py). Compression: ~20% (manifest-backed: evaluation/results/validation-2026-07-14/manifest.json) on every novel prompt. |
 
 ---
 
@@ -164,7 +165,9 @@ All figures are manifest-backed and independently reproducible. No blended total
 
 **Combined scenario** (stable codebase, 6-month horizon, both systems active):
 conservative estimate **40–60% Bobcoin reduction**; optimistic (ideal conditions)
-**60–75%**. These are not additive — they are scenario projections with explicit
+**60–75%** — scenario projections (not additive), modelled from the manifest-backed
+~20% compression (evaluation/results/validation-2026-07-14/manifest.json) plus N=10
+re-derivation, with explicit
 applicability conditions.
 
 ---

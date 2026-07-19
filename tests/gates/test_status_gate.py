@@ -17,6 +17,7 @@ from scripts.check_status_consistency import (
     REPO_ROOT,
     _doc_problems,
     _validate_grade,
+    _validate_grade_provenance,
     measured_coverage_snapshots,
     read_delegation_floor,
     read_fail_under,
@@ -49,6 +50,54 @@ def test_grade_mismatch_fails():
 def test_no_grade_no_problems():
     """Text without a grade pattern must produce no problems."""
     assert not _validate_grade("Coverage is 89.82% (fail_under=80).")
+
+
+# ---------------------------------------------------------------------------
+# Unit tests: _validate_grade_provenance (C5 / CLM-02) — a live grade must be
+# independently sourced or honestly self-labeled; the arithmetic gate cannot tell
+# a self-conferred A+ from an independent one.
+# ---------------------------------------------------------------------------
+
+
+def test_unprovenanced_grade_flagged():
+    """A bare live grade with no provenance must be flagged (C5)."""
+    problems = _validate_grade_provenance("Final grade **A+ (4.30/4.30)** achieved.")
+    assert problems and any("unprovenanced" in p for p in problems), problems
+
+
+def test_self_labeled_grade_passes():
+    """A self-assessed / withdrawn grade is honestly labeled and passes."""
+    assert not _validate_grade_provenance(
+        "The self-assessed **A+ (4.30/4.30)** has since been withdrawn."
+    )
+
+
+def test_independent_grade_passes():
+    """A grade citing an independent re-grade (grader: + evaluation/regrade/…) passes."""
+    text = (
+        "Grade **A (3.80/4.30)**\n"
+        "grader: external-panel; method: dual-rubric\n"
+        "see evaluation/regrade/verdict-2026-08.md"
+    )
+    assert not _validate_grade_provenance(text)
+
+
+def test_grade_provenance_window_is_bounded():
+    """Provenance more than 2 lines from the grade does not launder it."""
+    text = (
+        "Grade **A+ (4.30/4.30)** is our final verdict.\n"
+        "filler\nfiller\nfiller\n"
+        "grader: external; evaluation/regrade/v.md"
+    )
+    assert _validate_grade_provenance(text), "provenance 4 lines away must not count"
+
+
+def test_arithmetic_valid_but_unprovenanced_grade_still_fails():
+    """A syntactically valid A+ that is self-conferred (no provenance) is still rejected."""
+    # _validate_grade (arithmetic) passes it; _validate_grade_provenance must not.
+    line = "Grade: **A+ (4.30/4.30)**"
+    assert not _validate_grade(line), "arithmetic must accept the max grade"
+    assert _validate_grade_provenance(line), "provenance must reject the bare self-grade"
 
 
 # ---------------------------------------------------------------------------
