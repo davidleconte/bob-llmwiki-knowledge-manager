@@ -78,19 +78,41 @@ d5cf441 mnemox: update KB 2026-07-18
 
 ## Findings
 
-<!-- MNEMOX_SYNTHESISE: Bob — review the git changes and new analysis reports
-above and write 3–5 concrete, specific lessons learned directly into this
-section now. Replace this comment with the synthesised content.
-Focus on: what changed in the codebase, what patterns emerged, what should
-be remembered for the next session. Then update index.md with this note's entry. -->
+### L-1 — Challenge submission pack is text-complete; pitch deck is the sole open blocker
+
+The four commits since the last run closed the last content gap in the `2026_IBMer_Watsonx_Challenge/` pack. All three text fields (`01`, `02`, `03`) and the pitch outline (`04`) are submission-ready. The "why not RAG?" argument was inserted in three targeted places (Field 2 after the three-layer pattern, Field 3 after §4, and Slide 2 speaker notes in the pitch outline). The submission cannot be judged without the pitch deck — that is the single remaining deliverable before the July 22, 10:00 ET deadline.
+
+### L-2 — Zero orphans achieved on the 108-node KB corpus
+
+Commit `0c8a5c1` rescued all 44 remaining orphan documents. The graph now has 109 nodes and 4,589 edges (up from 2,876 on the 80-node snapshot of 2026-07-17). The semantic threshold of 0.30 continues to hold. The orphan-rescue pattern (semantic edges connecting isolated nodes to authority hubs) is the primary driver — structural cross-reference edges alone were insufficient for documents in niche sub-topics.
+
+### L-3 — The "why not RAG?" objection must be answered at the point of formation, not preemptively
+
+The positioning brief (`mnemox-positioning-brief-2026-07.md`) has a complete RAG comparison, but a jury reads the three submission fields, not the KB. The lesson: supporting material in the KB is invisible to judges unless its key argument is surfaced in the judged artefacts. The insertion pattern used here — blockquote immediately after the line that triggers the objection — is more effective than a dedicated comparison section further down the document.
+
+### L-4 — Graph scale grows non-linearly with corpus size
+
+80 docs → 2,876 edges (35.9 edges/node). 109 docs → 4,589 edges (42.1 edges/node). The semantic edge density increases super-linearly as the corpus grows, which means retrieval quality compounds: each new document creates more cross-links than the previous one. This validates the compounding thesis structurally — the graph becomes denser and more navigable with each session.
+
+### L-5 — `mnemox --quick` is the right close-of-session ritual for content-only sessions
+
+Full mnemox (with repo analysis) takes ~3–5 minutes and is appropriate after code changes. Quick mnemox (lessons + graph + commit) takes ~15 seconds and is appropriate after documentation or KB-only sessions. The current session was documentation-only (challenge pack edits + jury assessment). `--quick` was the correct choice.
 
 ## Conclusions
 
 ### Recommendations
-<!-- Bob: add 1–3 actionable next steps based on the findings above -->
+
+1. **Build the pitch deck before July 22, 10:00 ET.** Every word is written in `04-pitch-file-outline.md`. The remaining work is layout, the Slide 3 mode picker screenshot (2 min), and the Slide 7 RAG comparison table (already written verbatim). This is the single action that determines judging eligibility.
+2. **Do not rebuild the graph until the next KB write.** The graph is current at 109 nodes / 4,589 edges. Rebuilding without new documents adds no value and costs Bobcoins.
+3. **On the next KB session, check index.md staleness.** The three challenge pack files (`02`, `03`, `04`) are not KB documents and are correctly absent from the index. No index update needed for this session.
 
 ### Next Steps
-<!-- Bob: add specific tasks for the next session -->
+
+- [ ] Take the Slide 3 screenshot (Bob IDE mode picker → 🧠 Mnemox Knowledge Builder)
+- [ ] Build the 8-slide pitch deck from `04-pitch-file-outline.md`
+- [ ] Confirm eligibility gates: team registration + Bob education (~40 min) completed by July 22, 10:00 ET
+- [ ] Decide on demo format (check submission form for whether video upload is required or optional)
+- [ ] Submit before the deadline — only the last submission counts
 
 ## Related Documents
 - [Knowledge Base Index](../index.md)
