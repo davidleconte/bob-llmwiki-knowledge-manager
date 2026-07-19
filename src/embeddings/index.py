@@ -304,6 +304,31 @@ class PersistentEmbeddingIndex:
 
         return existing.get("mtime") != mtime or existing.get("hash") != chash
 
+    def stale_files(self, kb_path: Path) -> Dict[str, List[str]]:
+        """Report KB files that are new/changed or deleted vs the index.
+
+        Read-only — does not modify the index. Used by the retrieval entrypoints
+        to warn (non-silently) that results may be stale, and to decide whether
+        an explicit refresh is worthwhile (W2-2b). ``changed`` includes files not
+        yet indexed; ``deleted`` are indexed files no longer on disk.
+
+        Returns ``{"changed": [file_doc_id, ...], "deleted": [file_doc_id, ...]}``.
+        """
+        self._ensure_loaded()
+        on_disk: set[str] = set()
+        changed: List[str] = []
+        for cat in ("concepts", "guides", "references", "research"):
+            cat_path = kb_path / cat
+            if not cat_path.exists():
+                continue
+            for md_file in sorted(cat_path.glob("*.md")):
+                file_doc_id = str(md_file.relative_to(kb_path))
+                on_disk.add(file_doc_id)
+                if self.is_stale(md_file, kb_path=kb_path):
+                    changed.append(file_doc_id)
+        deleted = sorted(set(self._file_manifest.keys()) - on_disk)
+        return {"changed": changed, "deleted": deleted}
+
     def flush(self) -> None:
         """Atomically persist the in-memory index to disk.
 

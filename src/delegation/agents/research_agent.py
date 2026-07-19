@@ -37,6 +37,7 @@ class ResearchAgent(SubAgent):
             from src.cache.embeddings import EmbeddingGenerator
             from src.embeddings.index import PersistentEmbeddingIndex
             from src.graph.store import GraphStore
+            from src.kb_paths import resolve_graph_path, resolve_index_path
 
             _ra_kb_path = Path(kb_path)
             _ra_index = None
@@ -44,7 +45,7 @@ class ResearchAgent(SubAgent):
             _ra_embedding_weight = 0.0
             _ra_graph_weight = 0.0
             try:
-                _ra_index_path = _ra_kb_path.parent / ".bob" / "kb-index"
+                _ra_index_path = resolve_index_path(_ra_kb_path)
                 if _ra_index_path.exists():
                     _ra_index = PersistentEmbeddingIndex(
                         EmbeddingGenerator(), index_path=_ra_index_path
@@ -54,7 +55,7 @@ class ResearchAgent(SubAgent):
             except Exception:
                 _ra_index = None
             try:
-                _ra_graph_path = _ra_kb_path.parent / ".bob" / "kb-graph.json"
+                _ra_graph_path = resolve_graph_path(_ra_kb_path)
                 if _ra_graph_path.exists():
                     _ra_graph = GraphStore().load(_ra_graph_path)
                     if _ra_graph is not None and _ra_graph.node_count > 0:

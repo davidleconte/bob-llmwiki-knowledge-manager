@@ -80,7 +80,11 @@ def build_parser() -> argparse.ArgumentParser:
     # --- KB graph commands (ADR-017) ---
     p_gbuild = sub.add_parser("graph-build", help="Build KB knowledge graph and save to disk")
     p_gbuild.add_argument("--kb-path", default="docs/knowledge-base", help="KB root directory")
-    p_gbuild.add_argument("--graph-path", default=".bob/kb-graph.json", help="Output graph file")
+    p_gbuild.add_argument(
+        "--graph-path",
+        default=None,
+        help="Output graph file (default: <repo-root>/.bob/kb-graph.json)",
+    )
     p_gbuild.add_argument(
         "--semantic-threshold",
         type=float,
@@ -128,13 +132,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_kbstatus.add_argument(
         "--index-path",
-        default=".bob/kb-index",
-        help="Embedding index directory (default: .bob/kb-index)",
+        default=None,
+        help="Embedding index directory (default: <repo-root>/.bob/kb-index)",
     )
     p_kbstatus.add_argument(
         "--graph-path",
-        default=".bob/kb-graph.json",
-        help="Graph file (default: .bob/kb-graph.json)",
+        default=None,
+        help="Graph file (default: <repo-root>/.bob/kb-graph.json)",
     )
 
     # --- Delegation analysis pipeline command ---
@@ -199,6 +203,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Categories to search: concepts guides references research (default: all)",
     )
+    p_kbsearch.add_argument(
+        "--refresh",
+        action="store_true",
+        help="Re-sync the embedding index from the KB before searching (W2-2b)",
+    )
 
     return parser
 
@@ -236,9 +245,10 @@ def main(argv: Optional[List[str]] = None) -> int:
 
         from src.graph.builder import KnowledgeGraphBuilder, build_graph_metadata
         from src.graph.store import GraphStore
+        from src.kb_paths import resolve_graph_path, resolve_index_path
 
         kb_path = Path(args.kb_path)
-        graph_path = Path(args.graph_path)
+        graph_path = Path(args.graph_path) if args.graph_path else resolve_graph_path(kb_path)
         threshold = args.semantic_threshold
 
         index = None
@@ -249,7 +259,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                 from src.embeddings.indexer import KBIndexer
 
                 embedder = EmbeddingGenerator()
-                idx = PersistentEmbeddingIndex(embedder)
+                idx = PersistentEmbeddingIndex(embedder, index_path=resolve_index_path(kb_path))
                 KBIndexer(kb_path, idx).sync()
                 index = idx
             except Exception as exc:
@@ -347,6 +357,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         from src.cache.embeddings import EmbeddingGenerator
         from src.embeddings.index import PersistentEmbeddingIndex
         from src.graph.store import GraphStore
+        from src.kb_paths import resolve_graph_path, resolve_index_path
         from src.tools.kb_query import KnowledgeBaseQuery
 
         # CODE-02: wire the canonical index and graph into kb-search so the
@@ -357,11 +368,28 @@ def main(argv: Optional[List[str]] = None) -> int:
         _ks_embedding_weight = 0.0
         _ks_graph_weight = 0.0
         try:
-            _ks_index_path = _ks_kb_path.parent / ".bob" / "kb-index"
+            _ks_index_path = resolve_index_path(_ks_kb_path)
             if _ks_index_path.exists():
                 _ks_index = PersistentEmbeddingIndex(
                     EmbeddingGenerator(), index_path=_ks_index_path
                 )
+                # W2-2b: freshen on explicit --refresh (single-writer entrypoint),
+                # otherwise warn — non-silently — when the index is stale instead
+                # of serving stale vectors with no signal.
+                if getattr(args, "refresh", False):
+                    from src.embeddings.indexer import KBIndexer
+
+                    KBIndexer(_ks_kb_path, _ks_index).sync()
+                elif _ks_index.doc_count > 0:
+                    _stale = _ks_index.stale_files(_ks_kb_path)
+                    _n = len(_stale["changed"]) + len(_stale["deleted"])
+                    if _n:
+                        print(
+                            f"⚠️  embedding index is stale ({len(_stale['changed'])} changed/new, "
+                            f"{len(_stale['deleted'])} deleted); results may be out of date — "
+                            f"re-run with --refresh to rebuild.",
+                            file=sys.stderr,
+                        )
                 if _ks_index.doc_count > 0:
                     _ks_embedding_weight = 0.7  # A/B-validated weight (ADR-017)
         except Exception as exc:
@@ -372,7 +400,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                 file=sys.stderr,
             )
         try:
-            _ks_graph_path = _ks_kb_path.parent / ".bob" / "kb-graph.json"
+            _ks_graph_path = resolve_graph_path(_ks_kb_path)
             if _ks_graph_path.exists():
                 _ks_graph = GraphStore().load(_ks_graph_path)
                 if _ks_graph is not None and _ks_graph.node_count > 0:
@@ -413,10 +441,11 @@ def main(argv: Optional[List[str]] = None) -> int:
         from src.cache.embeddings import EmbeddingGenerator
         from src.embeddings.index import PersistentEmbeddingIndex
         from src.graph.store import GraphStore
+        from src.kb_paths import resolve_graph_path, resolve_index_path
 
         kb_path = Path(args.kb_path)
-        index_path = Path(args.index_path)
-        graph_path = Path(args.graph_path)
+        index_path = Path(args.index_path) if args.index_path else resolve_index_path(kb_path)
+        graph_path = Path(args.graph_path) if args.graph_path else resolve_graph_path(kb_path)
 
         # --- KB document count ---
         kb_exists = kb_path.exists()
