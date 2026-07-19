@@ -117,8 +117,16 @@ def _resolve_granite(model: str) -> Optional[Tokenizer]:
     # local_files_only: NEVER download on the hot path — only use a tokenizer the
     # deployment has already cached. Not cached -> degrade to the loud
     # approximation rather than blocking on a multi-hundred-MB fetch.
+    #
+    # nosec B615: bandit flags from_pretrained() without a pinned `revision=`
+    # (CWE-494, unpinned-revision download). The threat is not reachable here —
+    # local_files_only=True performs no Hub download, so there is nothing to
+    # tamper with in transit. Pinning a commit sha would be strictly worse: it
+    # would break the "use whatever revision the deployment already cached"
+    # contract above and silently degrade exact -> approximate tokenization
+    # whenever the cached revision differs from the pin.
     try:
-        tok = AutoTokenizer.from_pretrained(
+        tok = AutoTokenizer.from_pretrained(  # nosec B615
             "ibm-granite/granite-3.0-8b-instruct", local_files_only=True
         )
     except Exception:
