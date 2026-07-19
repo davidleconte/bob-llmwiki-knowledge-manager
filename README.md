@@ -632,7 +632,7 @@ Trajectory: D− (0.9) → B+/A− (3.46) → A− (3.70) → A (3.89) → A (4.
 | Product Integrity & Claims | A+ | 3.5/5 | Honesty machinery best-in-class; honesty gates have guard rot; A+ grade self-conferred |
 | Architecture & Design | A+ | 2.0/5 | Validated retrieval engine (p@3=0.88) unwired from every production path |
 | Code Correctness | A+ | 2.5/5 | Cache, truncation trustworthy; optimizer can return empty string; L2→L1 promotion mislabels |
-| Testing & Verification | A+ | 4.0/5 | **~1 200+ tests** · ≥80% coverage gate (89.82%) · 3 CI gates currently failing (working tree) |
+| Testing & Verification | A+ | 4.0/5 | **~1 200+ tests** · ≥80% coverage gate (measured snapshot in STATUS.md) · 3 CI gates currently failing (working tree) |
 | Build, Release & Supply-Chain | A+ | 4.0/5 | `uv sync --frozen` · `pip-audit --strict` · 0 CVEs · CycloneDX SBOM · 3.11+3.12 matrix |
 | Documentation | A+ | — | Two arc42 docs · 19 ADRs · STRIDE threat model · formal SLA; ~35–40 broken cross-references |
 | Governance & Compliance | A+ | — | CODEOWNERS complete; validate-kb.sh subshell bug always passes link check |

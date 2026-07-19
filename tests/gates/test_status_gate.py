@@ -17,6 +17,7 @@ from scripts.check_status_consistency import (
     REPO_ROOT,
     _doc_problems,
     _validate_grade,
+    measured_coverage_snapshots,
     read_delegation_floor,
     read_fail_under,
 )
@@ -80,6 +81,28 @@ def test_grade_in_doc_problems():
     assert any("5.00" in p or "exceed" in p for p in problems), (
         f"Fabricated grade must be caught by _doc_problems: {problems}"
     )
+
+
+# ---------------------------------------------------------------------------
+# Unit tests: CLM-03 measured-coverage snapshot single-home
+# ---------------------------------------------------------------------------
+
+def test_measured_snapshot_detected_off_home():
+    """A decimal coverage % outside STATUS.md must be flagged (CLM-03)."""
+    text = "Testing: ~1200 tests, >=80% coverage gate (89.82%)."
+    snaps = measured_coverage_snapshots(text)
+    assert snaps, "measured 89.82% snapshot on a coverage line must be detected"
+    fail_under = read_fail_under()
+    floor = read_delegation_floor()
+    assert _doc_problems(text, fail_under, floor, is_status_home=False)
+    assert not _doc_problems(text, fail_under, floor, is_status_home=True)
+
+
+def test_gate_token_not_a_measured_snapshot():
+    """A pure gate token (>=80%) must not be mistaken for a measured snapshot."""
+    assert not measured_coverage_snapshots("Coverage gate is >= 80% enforced.")
+    # A decimal gate token (>=80.0%) is still a gate, not a measured snapshot.
+    assert not measured_coverage_snapshots("Coverage gate >= 80.0% enforced.")
 
 
 # ---------------------------------------------------------------------------
