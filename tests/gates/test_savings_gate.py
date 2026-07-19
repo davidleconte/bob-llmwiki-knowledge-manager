@@ -9,15 +9,11 @@ Tests:
   6. Value > 5 pp above a real manifest → not cross-checked when path doesn't exist.
 """
 
-import json
-import pytest
-from pathlib import Path
 
 from scripts.check_savings_claims import (
     line_is_unbacked_claim,
     scan_text,
 )
-
 
 # ---------------------------------------------------------------------------
 # ATK-GATE-03: bare "manifest" no longer backs a claim

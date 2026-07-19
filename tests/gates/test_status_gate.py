@@ -11,20 +11,15 @@ Tests:
 import subprocess
 import sys
 import textwrap
-from pathlib import Path
-
-import pytest
 
 from scripts.check_status_consistency import (
     CANONICAL_STATUS,
-    LIVE_DOCS,
     REPO_ROOT,
     _doc_problems,
     _validate_grade,
-    read_fail_under,
     read_delegation_floor,
+    read_fail_under,
 )
-
 
 # ---------------------------------------------------------------------------
 # Unit tests: _validate_grade

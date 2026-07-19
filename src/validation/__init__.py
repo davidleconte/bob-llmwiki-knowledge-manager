@@ -54,6 +54,7 @@ __all__ = [
     "write_report",
     "run_validation",
     "validation_ok",
+    "composition_ok",
     "default_out_dir",
     "DEFAULT_CACHE_REPEAT_RATE",
     "DEFAULT_TRUNCATION_BUDGET",
@@ -143,12 +144,52 @@ def run_validation(
     return report
 
 
+# ── Corpus-composition guard (ATK-GATE-01) ──────────────────────────────────
+# Single home for the composition thresholds. We guard *composition, not
+# magnitude*: the savings value stays ungated (gating it re-incentivises
+# fabrication), but the corpus must be representative enough to publish a number.
+MIN_CORPUS_N = 30
+MAX_TOP_DOC_TOKEN_SHARE = 0.5
+MAX_MEAN_MEDIAN_DIVERGENCE_PP = 15.0
+
+
+def composition_ok(report: Dict[str, Any]) -> Tuple[bool, List[str]]:
+    """Gate corpus *composition* (not magnitude): expose cherry-picking.
+
+    Fails when the corpus is too small, a single document dominates the token
+    weight, or the mean is pulled far from the median by outliers -- the three
+    signatures by which a favourable headline could be manufactured without ever
+    gating (and thus pressuring) the measured savings value itself.
+    """
+    reasons: List[str] = []
+    comp = report.get("optimizer_compression", {}).get("corpus_composition", {})
+    n = int(comp.get("n_docs", 0))
+    if n < MIN_CORPUS_N:
+        reasons.append(f"corpus too small: {n} docs < {MIN_CORPUS_N} minimum")
+    share = float(comp.get("top_doc_token_share", 0.0))
+    if share > MAX_TOP_DOC_TOKEN_SHARE:
+        reasons.append(
+            f"one document dominates the corpus: top-doc token share "
+            f"{share:.0%} > {MAX_TOP_DOC_TOKEN_SHARE:.0%}"
+        )
+    div = float(comp.get("mean_median_divergence_pp", 0.0))
+    if div > MAX_MEAN_MEDIAN_DIVERGENCE_PP:
+        reasons.append(
+            f"mean pulled from median by outliers: divergence "
+            f"{div:.1f}pp > {MAX_MEAN_MEDIAN_DIVERGENCE_PP:.1f}pp"
+        )
+    return (not reasons, reasons)
+
+
 def validation_ok(report: Dict[str, Any]) -> Tuple[bool, List[str]]:
-    """Gate a report: null passed, manifest complete, tiktoken active.
+    """Gate a report: null passed, manifest complete, tiktoken active, corpus sound.
 
     Returns ``(ok, reasons)`` where ``reasons`` lists every failed check.
-    Deliberately does **not** gate on savings magnitude -- gating a measurement
-    re-incentivises fabrication; these three are the honest regression guards.
+    Deliberately does **not** gate on savings *magnitude* -- gating a measurement
+    re-incentivises fabrication. It DOES gate corpus *composition* (ATK-GATE-01,
+    :func:`composition_ok`): a number is only publishable if its corpus is
+    representative, so the denominator cannot be cherry-picked while the measured
+    value stays ungated.
     """
     reasons: List[str] = []
     if not report["null_test"]["passed"]:
@@ -161,4 +202,6 @@ def validation_ok(report: Dict[str, Any]) -> Tuple[bool, List[str]]:
         reasons.append(f"manifest incomplete: missing/empty {missing}")
     if not report["manifest"].get("tiktoken_active"):
         reasons.append("tiktoken not active: token counts would be a chars/4 approximation")
+    _comp_ok, comp_reasons = composition_ok(report)
+    reasons.extend(comp_reasons)
     return (not reasons, reasons)

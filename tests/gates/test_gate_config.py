@@ -6,8 +6,6 @@ Tests:
   3. The live_docs list in gate-config.yaml must match LIVE_DOCS in the gate script.
 """
 
-import subprocess
-import sys
 from pathlib import Path
 
 import pytest

@@ -9,8 +9,6 @@ These tests do NOT require any Python dependencies beyond the standard library;
 they spin up a minimal temp KB directory and invoke the shell script directly.
 """
 
-import os
-import shutil
 import subprocess
 import tempfile
 import textwrap
