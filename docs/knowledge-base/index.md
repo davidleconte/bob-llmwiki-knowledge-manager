@@ -11,6 +11,7 @@ Last Updated: 2026-07-18
 - [Research](./research/) - Research notes and findings
 
 ## Recent Additions
+- 2026-07-19: [Mnemox Update — 2026-07-19](./research/mnemox-update-2026-07-19.md) - Research — automated KB update: git log, doc counts, lessons learned scaffold
 - 2026-07-18: [Mnemox Challenge Submission](./research/mnemox-challenge-submission-2026-07.md) - Research ⭐ NEW — 2026 IBMer watsonx Challenge submission narrative (Team BobjectifLune)
 - 2026-07-18: [Mnemox Executive Brief](./research/mnemox-executive-brief-2026-07.md) - Research ⭐ NEW — 4-minute CTO/challenge-judge decision summary; ROI table; quality gates; pilot design
 - 2026-07-18: [Mnemox Competitive Positioning Brief](./research/mnemox-positioning-brief-2026-07.md) - Research ⭐ NEW — Mnemox vs. RAG / vector DB / LangChain / fine-tuning; positioning matrix; data residency
