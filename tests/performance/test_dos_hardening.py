@@ -243,6 +243,46 @@ def test_build_semantic_scales_subquadratic(tmp_path):
 
 
 # ---------------------------------------------------------------------------
+# A3(ii): index cold rebuild appends in one batch, not per-chunk vstack
+# ---------------------------------------------------------------------------
+
+
+def _rebuild_time(tmp_path: Path, n_docs: int) -> float:
+    """Write n_docs single-section docs and return rebuild() wall-time (seconds)."""
+    kb = tmp_path / f"kb_{n_docs}"
+    for cat in ("concepts", "guides", "references", "research"):
+        (kb / cat).mkdir(parents=True, exist_ok=True)
+    for i in range(n_docs):
+        (kb / "concepts" / f"doc_{i}.md").write_text(
+            f"# Doc {i}\n\nalpha topic{i % 4} unique{i} content vocabulary token corpus\n",
+            encoding="utf-8",
+        )
+    idx = PersistentEmbeddingIndex(EmbeddingGenerator(), tmp_path / f".bob/idx_{n_docs}")
+    t0 = time.perf_counter()
+    rows = idx.rebuild(kb)
+    elapsed = time.perf_counter() - t0
+    assert rows >= n_docs
+    return elapsed
+
+
+def test_cold_build_subquadratic(tmp_path):
+    """Cold rebuild must grow ~linearly, not O(N²·dim) from per-chunk vstack.
+
+    Times rebuild at 500 vs 2000 chunks (4× the corpus). The old per-chunk
+    ``np.vstack`` made this quadratic (~16× slower); the single batched append
+    keeps growth well under that.
+    """
+    t_small = _rebuild_time(tmp_path, 500)
+    t_large = _rebuild_time(tmp_path, 2000)
+    ratio = t_large / max(t_small, 1e-6)
+    assert ratio < 8.0, (
+        f"cold rebuild 500→2000 chunks grew {ratio:.1f}× (quadratic ≈16×): "
+        f"small={t_small:.3f}s large={t_large:.3f}s — per-chunk vstack may have regressed"
+    )
+    assert t_large < 5.0, f"rebuild of 2000 chunks took {t_large:.2f}s (budget 5s)"
+
+
+# ---------------------------------------------------------------------------
 # ATK-DOS-03: L2 BLAS matmul latency
 # ---------------------------------------------------------------------------
 

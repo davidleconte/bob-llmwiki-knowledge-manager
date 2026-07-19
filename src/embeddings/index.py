@@ -245,6 +245,11 @@ class PersistentEmbeddingIndex:
         chunker = MarkdownChunker()
         updated = 0
         seen_files: set[str] = set()
+        # A3(ii): collect every changed file's chunks and append them in ONE
+        # batched embed + one np.vstack after the walk. The old per-chunk
+        # index_document call re-allocated the whole matrix on every chunk —
+        # O(N²·dim) on a cold/full rebuild.
+        pending: List[Tuple[str, str]] = []
 
         for cat in categories:
             cat_path = kb_path / cat
@@ -272,10 +277,10 @@ class PersistentEmbeddingIndex:
                 # behind (index_document only appends/updates, never deletes).
                 self._drop_chunks(self._chunks_for_file(file_doc_id))
 
-                # Re-embed all chunks for this file.
+                # Collect this file's chunks; they are appended in one batch below
+                # (all are new rows — _drop_chunks removed any prior ones).
                 for slug, chunk_text in chunker.chunk(file_doc_id, content):
-                    chunk_doc_id = f"{file_doc_id}#{slug}"
-                    self.index_document(chunk_doc_id, chunk_text)
+                    pending.append((f"{file_doc_id}#{slug}", chunk_text))
 
                 # Record file-level staleness metadata in _file_manifest
                 # (never written to manifest.json — kept in staleness.json).
@@ -290,6 +295,9 @@ class PersistentEmbeddingIndex:
         # above, so its chunk rows would persist forever ("index grows forever").
         # Drop chunk rows + staleness sentinels for files no longer present.
         removed = self._reconcile_deletions(seen_files)
+
+        # A3(ii): single batched embed + append for all changed files' chunks.
+        self._batch_append(pending)
 
         if updated > 0 or removed > 0:
             if self._doc_ids:
@@ -306,6 +314,44 @@ class PersistentEmbeddingIndex:
             )
 
         return len(self._doc_ids)
+
+    def _batch_append(self, pending: List[Tuple[str, str]]) -> None:
+        """Embed and append many ``(doc_id, content)`` rows in one pass.
+
+        A3(ii): the per-chunk :meth:`index_document` re-allocated the entire matrix
+        with ``np.vstack`` on every chunk, making a cold rebuild O(N²·dim). This
+        embeds all pending chunks with a single ``generate_batch`` and appends them
+        with a single ``np.vstack`` — one allocation regardless of chunk count.
+
+        Every pending id is guaranteed new (``rebuild`` drops a file's prior chunks
+        before collecting its fresh ones), so this is pure append. Duplicate ids
+        within one batch — two sections sharing a heading slug — collapse to the
+        last occurrence, matching the in-place overwrite the old per-chunk loop did.
+
+        The stored rows are byte-identical to the old path: ``generate_batch`` uses
+        the same stateless backend row-for-row, and each vector is cast to float32
+        just as :meth:`index_document` does.
+        """
+        if not pending:
+            return
+
+        # Collapse duplicate ids, keeping the last content (last-writer-wins) while
+        # preserving first-seen row order — exactly the old loop's net effect.
+        deduped: Dict[str, str] = {}
+        for cid, text in pending:
+            deduped[cid] = text
+
+        vecs = self._embedder.generate_batch([text[:6000] for text in deduped.values()])
+        new_rows = np.asarray(vecs, dtype=np.float32)
+        if new_rows.ndim == 1:  # single row -> [1 × dim]
+            new_rows = new_rows.reshape(1, -1)
+
+        for cid in deduped:
+            self._doc_ids.append(cid)
+            self._manifest[cid] = {"path": cid, "mtime": 0.0, "hash": ""}
+
+        self._matrix = new_rows if self._matrix is None else np.vstack([self._matrix, new_rows])
+        self._invalidate_norms()
 
     def _chunks_for_file(self, file_doc_id: str) -> set[str]:
         """All chunk doc_ids (``file.md#slug``) currently indexed for *file_doc_id*."""
