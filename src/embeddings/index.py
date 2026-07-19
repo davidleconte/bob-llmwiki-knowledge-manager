@@ -74,8 +74,23 @@ class PersistentEmbeddingIndex:
         # Stored in staleness.json, never included in manifest.json.
         self._file_manifest: Dict[str, Any] = {}
         self._matrix: Optional[np.ndarray] = None  # [N × dim] float32
+        # Cached per-row L2 norms (ATK-DOS-04 residual). Matrix-invariant, so
+        # recomputed once after any _matrix mutation rather than on every query.
+        # MUST be reset to None wherever _matrix is mutated (see _invalidate_norms).
+        self._row_norms: Optional[np.ndarray] = None
 
         self._loaded = False
+
+    def _invalidate_norms(self) -> None:
+        """Drop the cached row-norms. Call after any mutation of ``self._matrix``."""
+        self._row_norms = None
+
+    def _get_row_norms(self) -> np.ndarray:
+        """Per-row L2 norms of ``self._matrix``, recomputed only after a mutation."""
+        if self._row_norms is None:
+            assert self._matrix is not None  # callers guard on an empty matrix
+            self._row_norms = np.linalg.norm(self._matrix, axis=1) + 1e-9
+        return self._row_norms
 
     # ---------------------------------------------------------------------- #
     # Public interface (ADR-015)
@@ -105,8 +120,12 @@ class PersistentEmbeddingIndex:
         # Avoids O(N) Python loop; scales to thousands of KB documents without
         # degrading latency (ADR-015 performance requirement).
         q_norm = q_vec / (np.linalg.norm(q_vec) + 1e-9)
-        m_norms = np.linalg.norm(self._matrix, axis=1, keepdims=True) + 1e-9
-        sims = (self._matrix / m_norms) @ q_norm  # shape [N]
+        # cosine_i = (row_i . q_norm) / ||row_i||. The per-row norms are matrix-
+        # invariant, so use the cache (recomputed only after a mutation) instead of
+        # renormalising the whole matrix — and its full O(N*dim) copy — on every
+        # query (ATK-DOS-04 residual: search is the hot retrieval path).
+        row_norms = self._get_row_norms()
+        sims = (self._matrix @ q_norm) / row_norms  # shape [N]
         scores: List[Tuple[str, float]] = list(zip(self._doc_ids, sims.tolist()))
 
         scores.sort(key=lambda x: x[1], reverse=True)
@@ -131,6 +150,7 @@ class PersistentEmbeddingIndex:
             idx = self._doc_ids.index(doc_id)
             if self._matrix is not None:
                 self._matrix[idx] = vec.astype(np.float32)
+                self._invalidate_norms()
         else:
             # Append new row and add a manifest entry (path/mtime/hash are unknown
             # at index_document time — set to sentinel values; rebuild() will
@@ -138,6 +158,7 @@ class PersistentEmbeddingIndex:
             self._doc_ids.append(doc_id)
             new_row = vec.astype(np.float32).reshape(1, -1)
             self._matrix = new_row if self._matrix is None else np.vstack([self._matrix, new_row])
+            self._invalidate_norms()
             if doc_id not in self._manifest:
                 self._manifest[doc_id] = {"path": doc_id, "mtime": 0.0, "hash": ""}
 
@@ -243,6 +264,7 @@ class PersistentEmbeddingIndex:
         self._doc_ids = [self._doc_ids[i] for i in keep]
         if self._matrix is not None:
             self._matrix = self._matrix[keep] if keep else None
+            self._invalidate_norms()
         for cid in chunk_ids:
             self._manifest.pop(cid, None)
         return removed
@@ -395,6 +417,7 @@ class PersistentEmbeddingIndex:
             )
             return
         self._matrix = matrix.astype(np.float32)
+        self._invalidate_norms()
         self._manifest = manifest  # chunk-level entries only
         self._file_manifest = staleness  # file-level staleness sentinels
         self._doc_ids = list(manifest.keys())
