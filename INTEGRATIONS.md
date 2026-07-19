@@ -187,6 +187,10 @@ results = kb.query("caching strategy", max_results=10)
 > ⚠️ **`graph_weight=0.0` is the validated default.** On an 80-document corpus
 > with MiniLM embeddings, graph re-ranking at any tested weight (0.1–0.5) produced
 > identical p@3/p@5/p@10 to embedding-only (p@3=0.88, no uplift, no regression).
+> That p@3=0.88 is a MiniLM (`w=1.0`) lab number not reproducible in CI (MiniLM needs
+> the optional `mlx-embeddings`/`sentence-transformers`); on the shipped default backend
+> (`HashingVectorizer`, `w=0.7`, current 116-doc golden set) the reproducible manifest-backed
+> result is p@3=0.84 with no net lift over keyword-only (`evaluation/results/retrieval-2026-07-19/`).
 > The safe default is `0.0` — do not raise it without re-running the golden-set
 > validation after any embedding model or corpus change. See ADR-017 and
 > [`docs/knowledge-base/research/graph-validation-2026-07-17.md`](docs/knowledge-base/research/graph-validation-2026-07-17.md).
@@ -241,7 +245,11 @@ print(" → ".join(path) if path else "no path")
 3. **`"hashing"` fallback** (no deps, always available)
 
 MiniLM (384-dim dense) delivers p@3=0.88 vs hashing (1000-dim bag-of-ngrams)
-p@3=0.60 on the KB golden set. Use MiniLM for best retrieval quality.
+p@3=0.60 on the KB golden set — but that 0.88 is a MiniLM (`w=1.0`) lab number not
+reproducible in CI (MiniLM needs the optional `mlx-embeddings`/`sentence-transformers`).
+On the shipped default backend (`HashingVectorizer`, `w=0.7`, current 116-doc golden set)
+the reproducible manifest-backed result is p@3=0.84 with no net lift over keyword-only
+(`evaluation/results/retrieval-2026-07-19/`). Use MiniLM for best retrieval quality.
 
 ---
 

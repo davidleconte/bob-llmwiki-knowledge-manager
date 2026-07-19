@@ -7,6 +7,14 @@
 
 ---
 
+> **Update (2026-07-19, CLM-06):** The reproducible default-backend measurement
+> (`HashingVectorizer`, `w=0.7`, current 116-doc golden set) is **p@3=0.84 with no net
+> lift over keyword-only** (`evaluation/results/retrieval-2026-07-19/`). The p@3=0.88 figures
+> in this ADR are MiniLM (`w=1.0`) lab results, not reproducible without `mlx-embeddings` /
+> `sentence-transformers` installed (both optional, absent in CI/default environments).
+
+---
+
 ## Context
 
 P3 validation (`docs/knowledge-base/research/graph-validation-2026-07-17.md`) identified

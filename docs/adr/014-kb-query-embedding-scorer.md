@@ -11,6 +11,12 @@
 > `KBIndexer` (P2-2) will use `w=0.7`. Full results in
 > `docs/knowledge-base/research/kb-query-ab-validation-2026-07.md`.
 
+> **Update (2026-07-19, CLM-06):** The reproducible default-backend measurement
+> (`HashingVectorizer`, `w=0.7`, current 116-doc golden set) is **p@3=0.84 with no net
+> lift over keyword-only** (`evaluation/results/retrieval-2026-07-19/`). The p@3=0.88 cited
+> above is a MiniLM (`w=1.0`) lab result, not reproducible without `mlx-embeddings` /
+> `sentence-transformers` installed (both optional, absent in CI/default environments).
+
 ---
 
 ## Context
