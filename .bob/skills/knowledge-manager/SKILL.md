@@ -341,6 +341,24 @@ After creating or updating any document, add or refresh its entry in
 
 ---
 
+## Correction Verification (mandatory after any pointer rewrite)
+
+Whenever you rewrite a cross-reference or an `index.md` pointer — relinking a moved or
+renamed doc, or repairing a broken link — run the validator immediately after, before
+the correction is considered done:
+
+```bash
+bash scripts/validate-kb.sh
+```
+
+It exits non-zero if any link now dangles, so a correction that introduces (or only
+partially repairs) a broken pointer is **blocked, not silently shipped** — the MEM-11
+root cause (a documented pointer fix that quietly added two new broken pointers).
+Fix every reported break before moving on. Enforced by
+`tests/scripts/test_correction_loop_verifies.py`.
+
+---
+
 ## Knowledge Graph Rebuild (mandatory after every KB write)
 
 After updating INDEX.md, always rebuild the knowledge graph so the new document
