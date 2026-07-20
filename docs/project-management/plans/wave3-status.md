@@ -119,7 +119,7 @@ against the re-audit's own GO condition (its §6).
 Recommendation crosswalk: **R1** (provenance-at-read) = ATK-MEM-02 `0e97f6e`; **R2**
 (unify L2 cache semantics) = ATK-FS-02/04/05 `443ad77`; **R3** (fold budget into the
 optimizer key) = NEW-1 `443ad77`; **R7** (vulnerable-layer discipline) institutionalized
-in [`adversarial-remediation-plan.md`](../../../adversarial-remediation-plan.md)
+in [`adversarial-remediation-plan.md`](adversarial-remediation-plan.md)
 (Status-discipline section); **R4–R6** (NEW-2..4) tracked-open above. The re-audit's
 ≈3.8/5 is a candidate *input* to R14, not the verdict — §5.
 

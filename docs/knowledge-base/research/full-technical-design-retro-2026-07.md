@@ -3,7 +3,7 @@ title: "Mnemox Knowledge Builder — Full Technical Design Retro-Engineering"
 category: research
 tags: [architecture, retro-engineering, knowledge-graph, token-optimizer, embeddings, use-cases, mece]
 created: 2026-07-18
-updated: 2026-07-18
+updated: 2026-07-20
 status: active
 related:
   - ../research/business-case-2026-07.md
@@ -31,7 +31,13 @@ related:
   - ../guides/p0-critical-fixes-implementation.md
 ---
 
-> **HISTORICAL SNAPSHOT (2026-07).** Point-in-time research/analysis retained for the audit trail. Figures below reflect what was measured or projected at the time of writing; the canonical current numbers live in `STATUS.md` and the validation manifest (`evaluation/results/validation-2026-07-14/manifest.json`).
+> **RECONCILED 2026-07-20.** Re-checked against the current codebase and measurements.
+> **Material correction since the 2026-07-18 draft:** the retrieval figures were updated from
+> the early golden-set numbers (keyword 0.44 → MiniLM 0.88, `graph-validation-2026-07-17`) to
+> the **reconciled Wave-2 evaluation** — **p@3 ≈ 0.84 for both the shipped backend and keyword-only,
+> i.e. no net retrieval lift on this corpus** (`evaluation/results/retrieval-2026-07-19/report.json`).
+> The old golden-set lift did **not** reproduce under held-out evaluation and is no longer claimed.
+> Test/coverage counts were also refreshed. Canonical homes remain `STATUS.md` and the manifests.
 
 
 # Mnemox Knowledge Builder — Full Technical Design Retro-Engineering
@@ -109,7 +115,7 @@ exhaustive**: every pain point has at least one owning capability. Each capabili
 | Capability | Pain Point(s) | Goal | Measured outcome |
 |---|---|---|---|
 | **UC-1** Persistent Knowledge Capture | P-1 | Never re-derive the same answer twice | Structural (0 tokens for KB-indexed answers) |
-| **UC-2** Intelligent KB Query | P-4 | Retrieve the most semantically relevant docs | P@3: 0.44 (keyword) → 0.88 (MiniLM); P@10=0.96 |
+| **UC-2** Intelligent KB Query | P-4 | Retrieve the most relevant docs | p@3 = 0.84 (21/25) — **at parity with a keyword baseline (0.84); no net lift** on this corpus |
 | **UC-3** Prompt Chain Compression | P-2 | Remove redundancy without meaning loss | ~20% mean token reduction (95% CI [18.9%, 21.2%], N=183) |
 | **UC-4** Recompute Avoidance | P-2 | Return a cached result for 0 tokens | 0 tokens per cache hit (rate: workload-dependent) |
 | **UC-5** KB-Aware Parallel Analysis | P-1, P-2 | Analyse a repo in parallel; compress output; write as KB docs | 6 agents, ~20% report compression before KB write |
@@ -135,32 +141,41 @@ query → keyword scorer (always on)
       → graph re-ranker (PageRank blend, graph_weight=0.0 by default)
 ```
 
-**Why `graph_weight=0.0` by default (plain English):** On a tight-topic corpus
-(all documents about the same project), MiniLM embeddings are so good that nearly
-every document pair scores above the 0.30 semantic threshold. PageRank becomes
-nearly uniform (max 1.6× min) — so blending it in changes nothing. The graph's
-value here is **structural health** (finding orphans, hubs, dead links), not score
-blending. When the corpus grows and diversifies, PageRank will discriminate — that
-is when `graph_weight > 0.0` should be tested and enabled.
+**Reconciled retrieval result (the honest headline):** on the shipped backend
+(hashing embedding, `embedding_weight=0.7`, `graph_weight=0.0`), **p@3 = 0.84 (21/25
+queries)** — and a **keyword-only baseline scores the same 0.84**. There is **no net
+retrieval lift** from the embedding/graph blend on this corpus and query set
+(`evaluation/results/retrieval-2026-07-19/report.json`, N=25). **p@3 = 0.84 means** the
+correct document was in the top-3 for 84% of queries; the 4 misses are *ranking*
+failures (document present, not top-3), not *recall* failures.
 
-**P@3 = 0.88 means:** the correct document appeared in the top-3 results for 88%
-of test queries. **P@10 = 0.96 means:** the system almost never misses entirely —
-the right answer is almost always in the first 10 results. The 12% P@3 failure rate
-is a *ranking* problem (document present but not ranked top-3), not a *recall* failure.
+> **What happened to "0.44 → 0.88"?** An earlier hand-built golden set
+> (`graph-validation-2026-07-17`) measured keyword 0.44 → MiniLM 0.88 *in-distribution*.
+> That lift **did not reproduce** under the reconciled Wave-2 evaluation, where a keyword
+> baseline already reaches 0.84. The honest conclusion: on a tight-topic corpus, keyword
+> matching alone resolves most queries, so the dense-embedding blend neither helps nor
+> hurts at the top-3 cut. The earlier lift is **retracted** and no longer claimed.
 
-| Configuration | P@3 | P@5 | P@10 | Driver |
-|---|---|---|---|---|
-| Keyword-only | 0.44 | 0.60 | 0.84 | Exact-term matching only |
-| Hashing embedding | 0.60 | 0.80 | 0.92 | Bag-of-ngrams; fails on vocabulary mismatch |
-| **MiniLM-L6-v2** | **0.88** | **0.92** | **0.96** | Dense semantic vectors; understands concepts |
-| MiniLM + graph (any weight) | 0.88 | 0.92 | 0.96 | Graph neutral on this corpus (see above) |
+**Why `graph_weight=0.0` by default (plain English):** On a tight-topic corpus (all
+documents about the same project), nearly every document pair scores above the 0.30
+semantic threshold, so PageRank becomes nearly uniform (max ≈1.6× min) — blending it in
+changes nothing. The value of the graph layer here is **structural health** (finding
+orphans, hubs, dead links), not score blending. If the corpus grows and diversifies,
+both the embedding blend and PageRank may begin to discriminate — that is when a lift
+should be **re-measured on a held-out set** before `graph_weight > 0.0` (or a dense
+backend) is enabled by default.
 
-> ⚠️ **Validation scope:** Golden set (N=25) built on the same 80-doc corpus —
-> no held-out test set. P@3=0.88 is in-distribution. 3 of 25 queries are
-> architecturally unresolvable: date-based queries require `date_filter`; short
-> docs are outranked by longer ones with more term occurrences; duplicate-date
-> ties cannot be broken by similarity alone. The practical ceiling on this corpus
-> is 0.88 (see §7 G-5).
+| Configuration | p@3 | Notes |
+|---|---|---|
+| Keyword-only baseline | **0.84** | Exact-term matching; strong on a tight-topic corpus |
+| **Shipped: keyword + hashing-embedding blend** (`embedding_weight=0.7`) | **0.84** | No net lift over keyword on this corpus (reconciled, N=25) |
+| + graph re-ranker (`graph_weight=0.0`, shipped) | 0.84 | Graph neutral on this corpus; used for structural health, not ranking |
+
+> ⚠️ **Validation scope:** N=25 queries, no separate held-out topic domain — the corpus is
+> tight-topic. The 4 misses are architecturally hard: date-based queries need `date_filter`;
+> short concept docs are outranked by longer docs with more term occurrences; duplicate-date
+> ties can't be broken by similarity alone (see §7 G-5). The honest current claim is
+> **retrieval parity with keyword (~0.84), not a semantic-search win.**
 
 ### UC-3: Prompt Chain Compression
 
@@ -476,9 +491,13 @@ exhaustive over the system's critical invariants.
 | **Null test** | Optimizer on shuffled/high-entropy text → < 5% compression | A real optimizer finds no redundancy in random text; failure = artefact | `src/validation/` |
 | **Coverage** | ≥ 80% global; per-package floors enforced per subsystem | Detects dead code and untested paths | `check_coverage_by_package.py` |
 | **Ruff + mypy** | Style and type correctness | Prevents latent type errors | CI matrix (Python 3.11 + 3.12) |
+| **Bandit SAST** | No high-severity insecure patterns | Catches injection/deserialization/path risks | `bandit` scan in CI |
+| **Adversarial security suite** | Path containment, prompt-injection boundary, cache integrity, graph-poisoning, provenance attestation, input bounds | Regression-guards the fixed exploit classes | `tests/security/` (9 files) + STRIDE `docs/security/threat-model.md` |
+| **DoS / scale hardening** | Bounded latency + input caps; scale-ratio regression gate | Prevents pathological-input blowups | `tests/performance/`, `tests/load/` |
 
-**Current status (2026-07-18):** 1,112 tests / 0 failures · 89.82% global coverage ·
-all 5 per-package floors met · ruff + mypy clean.
+**Current status (2026-07-20):** ~1,500 tests (1,498 collected; suite CI-green on `main`) ·
+**≥80% global coverage floor** enforced with per-package floors (last full-suite measurement
+89.82% on 2026-07-18) · ruff + mypy + bandit clean on the 3.11/3.12 matrix.
 
 ---
 
@@ -509,9 +528,11 @@ P-2 Token inflation
               └─► CONDITION: request stream has repeated or near-duplicate prompts
 
 P-4 Context dislocation
-  └─► UC-2 EmbeddingGenerator (MiniLM) ranks by semantic relevance
-        └─► SAVING: P@3 improves 0.44 → 0.88 (in-distribution; N=80 docs, N=25 queries)
-              └─► CONDITION: MiniLM installed; KB indexed with PersistentEmbeddingIndex
+  └─► UC-2 blended keyword + embedding retrieval ranks by relevance
+        └─► RESULT: p@3 = 0.84 — AT PARITY with a keyword baseline (0.84); NO net lift
+              on this tight-topic corpus (reconciled, N=25). Not a savings lever.
+              └─► CONDITION: value is graceful semantic fallback + possible lift on a
+                  larger/diverse corpus (untested) — re-measure on a held-out set first
 
 P-3 Context pollution
   └─► UC-6 KnowledgeGraph rescues orphans, surfaces dead links, identifies hubs
@@ -526,14 +547,15 @@ P-3 Context pollution
 | Re-derivation avoidance | KB Manager | 0 tokens for KB-indexed answers | Any previously captured question | Prior answer exists in KB |
 | Optimizer compression | `PromptOptimizer` | ~20% mean (N=183, manifest-backed) | Repo Markdown prose (`docs/**/*.md`) | Every novel prompt |
 | Cache recompute-avoidance | `MultiLevelCache` | 0 tokens per hit | N/A (workload property) | Request stream has repeats |
-| Embedding model upgrade | `EmbeddingGenerator` (MiniLM) | P@3: 0.44→0.88 (+100%, in-distribution) | 80-doc KB, golden set N=25 | MiniLM installed + KB indexed |
+| Retrieval quality (not a saving) | blended keyword + embedding | p@3 = 0.84 — **parity with keyword (0.84), no net lift** | Reconciled eval, N=25 (`retrieval-2026-07-19`) | Always on; quality lever, not a token saving |
 | Graph structural health | `KnowledgeGraph` | 26/39 orphans rescued; 19 broken links | 80-doc snapshot (2026-07-17; stale) | `graph-build` run on KB |
 
-> **Why the embedding and graph levers are listed separately:** The P@3 gain from
-> 0.44 → 0.88 is produced entirely by switching from hashing to MiniLM embeddings.
-> The graph layer contributes 0 P@3 uplift on this corpus (validated; see §2 UC-2).
-> They are different mechanisms with different activation conditions — conflating
-> them would misattribute the retrieval gain.
+> **Retrieval and graph are quality/structural levers, not token savings.** The
+> reconciled evaluation shows the embedding blend at **parity with keyword (p@3 = 0.84
+> both ways) — no net lift** on this corpus; the graph layer contributes **0 p@3 uplift**
+> and earns its place through structural health (orphans, hubs, dead links), not ranking.
+> Neither reduces token spend, so neither belongs in a savings total. Only the first three
+> rows (re-derivation, optimizer compression, cache) are token-saving levers.
 
 **Honesty constraint:** No blended totals. Each lever is measured separately.
 `check_savings_claims.py` enforces this in CI — every published percentage must
@@ -549,11 +571,11 @@ condition**. They are **mutually exclusive** (each is a distinct unresolved issu
 
 | ID | Severity | Issue | Action | Blocker | Target condition |
 |---|---|---|---|---|---|
-| **G-1** | Medium | `graph_weight=0.0` produces no P@3 uplift — PageRank is nearly uniform on the current tight-topic corpus. The compounding retrieval precision effect (§2 UC-2) is **hypothetical** until the corpus grows and diversifies. | Grow corpus diversity; re-run the 25-query golden set; raise `graph_weight` only when uplift is confirmed | Corpus diversity | Corpus ≥ 300 docs across ≥ 3 topic domains; P@3 re-run confirms uplift |
-| **G-2** | Low | `EmbeddingGenerator.embeddings_cache` eviction is coupled to `self.corpus` LRU FIFO. Risk: unbounded dict growth for corpora > `max_corpus_size=1000` docs. **Not a risk at current corpus size (117 docs).** | Set `use_cache=False` in `KBIndexer.index_document()` for document embeddings; cache only query embeddings | Not urgent at 117 docs | Corpus > 500 docs |
+| **G-1** | Medium | **The embedding + graph blend produces no net retrieval lift** on the current tight-topic corpus: reconciled p@3 = 0.84 equals the keyword baseline (0.84); PageRank is near-uniform so `graph_weight=0.0`. Any "semantic search win" is **hypothetical** until the corpus grows and diversifies. | Grow corpus diversity; re-measure on a **held-out** set (not the in-distribution golden set); raise `embedding_weight`/`graph_weight` only when a lift is confirmed out-of-sample | Corpus diversity | Corpus ≥ 300 docs across ≥ 3 topic domains; held-out p@3 shows lift over keyword |
+| **G-2** | Low | `EmbeddingGenerator.embeddings_cache` eviction is coupled to `self.corpus` LRU FIFO. Risk: unbounded dict growth for corpora > `max_corpus_size=1000` docs. **Not a risk at current corpus size (118 docs).** | Set `use_cache=False` in `KBIndexer.index_document()` for document embeddings; cache only query embeddings | Not urgent at 118 docs | Corpus > 500 docs |
 | **G-3** | Low (cosmetic) | ~~`sentence-transformers` not wired as second MiniLM path~~ **CLOSED**. Residual: when `backend="minilm"` is requested but *neither* package is available, the warning says `"mlx-embeddings is not installed or failed to load"`, omitting `sentence-transformers`. Display-only; fallback to `"hashing"` is correct. | Fix one line: [`src/cache/embeddings.py:167-170`](../../../src/cache/embeddings.py) | None — one-line fix | Next patch release |
-| **G-4** | Low | 13 structural orphans measured on the **80-doc snapshot (2026-07-17 — stale)**. Current corpus is 117 nodes. Orphan count is unknown without a fresh graph-health run. | Run `bob-optimize graph-health --kb-path docs/knowledge-base`; add `related:` cross-references to identified orphans | Needs fresh run | Zero orphans on post-cleanup run |
-| **G-5** | Medium | 3 query classes architecturally unresolvable by the current retrieval stack: (a) date-based queries (`"external audit july 2026"`) require `date_filter`; (b) short concept docs outranked by longer docs with more term occurrences; (c) duplicate-date tie cannot be broken by similarity alone. These 3 misses constitute the known P@3 ceiling at 0.88. | (a) Add `date_filter` to date-based query patterns; (b) expand short concept docs; (c) add recency weight or doc-length normalisation | Design decision required | P@3 ≥ 0.92 after fixes applied |
+| **G-4** | Low | 13 structural orphans measured on the **80-doc snapshot (2026-07-17 — stale)**. Current corpus is **118 docs**. Orphan count is unknown without a fresh graph-health run. | Run `bob-optimize graph-health --kb-path docs/knowledge-base`; add `related:` cross-references to identified orphans | Needs fresh run | Zero orphans on post-cleanup run |
+| **G-5** | Medium | Query classes architecturally hard for the current stack: (a) date-based queries (`"external audit july 2026"`) require `date_filter`; (b) short concept docs outranked by longer docs with more term occurrences; (c) duplicate-date tie cannot be broken by similarity alone. These misses (4 of 25) set the reconciled p@3 ≈ 0.84. | (a) Add `date_filter` to date-based query patterns; (b) expand short concept docs; (c) add recency weight or doc-length normalisation | Design decision required | p@3 improves over the keyword baseline (0.84) after fixes |
 | **G-6** | **High** | The KB Manager → TOS subprocess bridge (P1-3 in the integration roadmap) requires TOS to reach v1.0 stability. **Currently blocked** — STATUS.md: `Beta — Not Production Ready`. The §3 diagram shows the target architecture; the subprocess bridge is not yet live. | Tag TOS as stable; implement explicit fallback contract (subprocess failure must **never** block KB retrieval) | **TOS stability milestone** | `STATUS.md` updated to `Stable`; fallback contract in CI |
 
 ---
@@ -592,7 +614,7 @@ Terms that are domain-specific to this project. External contributors cannot be 
 | **manifest-backed** | A savings or cost figure is "manifest-backed" when it is accompanied by a `manifest.json` recording data hash, code SHA, config, seed, library versions, and `tiktoken_active`. Makes the measurement reproducible and auditable. |
 | **MECE** | Mutually Exclusive, Collectively Exhaustive. A McKinsey structuring framework: categories neither overlap nor have gaps. Applied in this document to pain points, capabilities, components, and gaps. |
 | **null test** | A validation run of the optimizer over shuffled, high-entropy text. A legitimate optimizer finds ≈ 0% compression in random input. Failure indicates the measurement is an artefact of the test fixture. |
-| **P@k** | Precision at k. Fraction of test queries for which the correct document appeared in the top-k results. P@3=0.88 means the correct doc was in the top-3 for 88% of queries. |
+| **P@k** | Precision at k. Fraction of test queries for which the correct document appeared in the top-k results. p@3 = 0.84 means the correct doc was in the top-3 for 84% of queries. |
 | **P1-3 / P2 / P3** | Integration phases from `guides/kb-tos-integration-roadmap.md`. P2 = shared embedding layer; P3 = knowledge graph. Not the same as the delegation pipeline (which is ADR-019). |
 | **target_reduction** | `OptimizerConfig` field. The optimizer's compression target ratio (default 0.30 = 30%). A soft target, not a hard cap. |
 | **tiktoken_active** | Boolean flag in the validation manifest. `True` = tiktoken BPE encoder used for exact token counting. `False` = chars/4 fallback (approximate). A `False` value means token counts are estimates. |
@@ -629,5 +651,6 @@ Terms that are domain-specific to this project. External contributors cannot be 
 | Round 1 adversarial audit | 2026-07-18 | 8 structural attacks pre-empted in-text; G-3 closed; G-2/G-4/G-5/G-6 scoped |
 | Round 2 adversarial audit | 2026-07-18 | F-1 L2 capacity (500→10,000); F-2 CLI count (13→14); S-1 optimizer mislabel; S-2 P4/ADR-019 diagram; S-3 §4.1 staleness; S-4 §7 P@3 attribution; S-5 L2 backend; P-1 SLA CI; P-2 G-3 consolidated; P-3 compact-summary tag removed; P-4 p@5/p@10 added; P-5 SLA figure |
 | Round 3 MECE restructure | 2026-07-18 | Full document restructured as MECE issue tree: §1 (Why) → §2 (What, 6 capabilities) → §3 (How built, boundaries) → §4 (How each component works) → §5 (Performance) → §6 (Economics with causal chain) → §7 (Gaps). Pain→mechanism→saving causal chain added to §6. Section overlap eliminated. Explainability gaps closed: `graph_weight=0.0` plain-English explanation; P@3/P@10 narrative; "three layers never blended" rationale; L2-not-on-optimize-path explanation. Deployment context (§8) and Glossary (§9) added as reference sections. |
+| Round 4 reconciliation | 2026-07-20 | **Retrieval headline corrected: retracted the golden-set "0.44 → 0.88" lift** (in-distribution, did not reproduce) and replaced it with the reconciled Wave-2 result — **p@3 = 0.84 at parity with keyword (0.84), no net lift** (`retrieval-2026-07-19`). UC-2, §6 causal chain + summary table + attribution note, and G-1/G-5 rewritten accordingly; retrieval reclassified from a "savings lever" to a quality lever. Refreshed counts (tests 1,112 → ~1,500; coverage → enforced ≥80% floor; corpus 117 → 118). Added Bandit/security-suite/DoS gates to §5. |
 
 *Category: Research*

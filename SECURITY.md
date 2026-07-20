@@ -109,8 +109,8 @@ to demonstrate the red→green transition that closes a finding.
 
 Source audits:
 - Red-team adversarial audit: `docs/knowledge-base/research/adversarial-audit-2026-07-19.md`
-- Counter-audit (MECE, scored 2.9/5): `counter-audit-2026-07-19-independent.md`
-- Remediation plan: `adversarial-remediation-plan.md`
+- Counter-audit (MECE, scored 2.9/5): `docs/knowledge-base/research/counter-audit-2026-07-19-independent.md`
+- Remediation plan: `docs/project-management/plans/adversarial-remediation-plan.md`
 
 ## Gate Independence
 

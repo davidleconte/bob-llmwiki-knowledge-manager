@@ -3,7 +3,7 @@ title: "Mnemox Knowledge Builder — Executive Brief"
 category: research
 tags: [executive-brief, cto, challenge-submission, roi, one-pager]
 created: 2026-07-18
-updated: 2026-07-18
+updated: 2026-07-20
 status: active
 audience: [cto, vp-engineering, challenge-judges, executive-sponsor]
 related:
@@ -14,7 +14,11 @@ related:
   - ./bobcoin-savings-analysis-2026-07-14.md
 ---
 
-> **HISTORICAL SNAPSHOT (2026-07).** Point-in-time research/analysis retained for the audit trail. Figures below reflect what was measured or projected at the time of writing; the canonical current numbers live in `STATUS.md` and the validation manifest (`evaluation/results/validation-2026-07-14/manifest.json`).
+> **RECONCILED 2026-07-20.** Re-checked against current state. Corrections since the 2026-07-18
+> draft: the **withdrawn A+ self-grade was removed** (see *Engineering quality*), and stale
+> test/coverage/ADR counts were refreshed. Retrieval already reflects the reconciled **p@3 = 0.84
+> (no net lift over keyword)**. Canonical homes: `STATUS.md` and the validation manifest
+> (`evaluation/results/validation-2026-07-14/manifest.json`).
 
 
 # Mnemox — Executive Brief
@@ -104,15 +108,18 @@ This is not a prototype. It is an implementation with institutional-grade qualit
 
 | Gate | Status |
 |---|---|
-| Tests | **1,112 passing / 0 failures** |
-| Code coverage | **89.82% global** (≥80% gate); all 5 per-package floors met |
-| Static analysis | **ruff + mypy clean** (Python 3.11 + 3.12 matrix) |
+| Tests | **~1,500 passing** (1,498 collected); suite CI-green on `main` |
+| Code coverage | **≥80% enforced floor** + per-package floors (last full-suite run 89.82%) |
+| Static analysis | **ruff + mypy + bandit clean** (Python 3.11 + 3.12 matrix) |
 | Concurrency | **14 race conditions fixed** across 5 adversarial audit rounds |
 | Savings claims | **Manifest-backed** — every published % cites a reproducible run |
 | Architecture decisions | **19 ADRs** on record |
-| Threat model | STRIDE-based; security reviewed |
+| Threat model | STRIDE-based (`docs/security/threat-model.md`); 9-file adversarial security suite |
 
-**Grade: A+ (4.30/4.30)** against Tier-1 institutional standard.
+**Grade: no current independent grade.** The prior self-assessed **A+ (4.30/4.30) has been withdrawn** —
+self-grading is not a substitute for independent verification. On-file independent verdicts: counter-audit
+**2.9/5** (2026-07-19), moved to **≈3.8/5** by the post-remediation re-audit (2026-07-20); last formally-graded
+review **NO-GO 3.46/4.3** (2026-07-14). An independent re-grade is pending; `STATUS.md` is canonical.
 
 ---
 

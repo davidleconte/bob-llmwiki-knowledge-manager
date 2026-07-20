@@ -3,7 +3,7 @@ title: "Mnemox — 2026 IBMer watsonx Challenge Submission"
 category: research
 tags: [challenge-submission, watsonx-challenge, ibmer, team-bobjectiflune, executive-summary]
 created: 2026-07-18
-updated: 2026-07-18
+updated: 2026-07-20
 status: active
 audience: [challenge-judges, ibm-leadership, watsonx-program-team]
 related:
@@ -14,7 +14,11 @@ related:
   - ../../../README.md
 ---
 
-> **HISTORICAL SNAPSHOT (2026-07).** Point-in-time research/analysis retained for the audit trail. Figures below reflect what was measured or projected at the time of writing; the canonical current numbers live in `STATUS.md` and the validation manifest (`evaluation/results/validation-2026-07-14/manifest.json`).
+> **RECONCILED 2026-07-20.** Re-checked against current state. Corrections since the 2026-07-18 draft:
+> the **withdrawn A+ self-grade was removed**, and stale test/coverage/ADR counts were refreshed.
+> Retrieval already reflects the reconciled **p@3 = 0.84 (no net lift over keyword)**. The canonical,
+> A+-free challenge pack now lives at [`2026_IBMer_Watsonx_Challenge/`](../../../2026_IBMer_Watsonx_Challenge/);
+> this KB doc is the earlier narrative draft. Canonical numbers: `STATUS.md` + the validation manifest.
 
 
 # Mnemox — 2026 IBMer watsonx Challenge Submission
@@ -109,7 +113,7 @@ prompt before it is sent — independently of whether a KB exists.
 documents, tiktoken BPE, null test passed, manifest-backed at
 `evaluation/results/validation-2026-07-14/`).
 
-**Technology:** Python 3.11+, ~3,500 lines, 1,124+ tests, self-assessed A+ engineering grade (D− → A+ across 8 remediation phases; independent counter-audit commissioned July 2026).
+**Technology:** Python 3.11+, ~3,500 lines, ~1,500 tests (1,498 collected). The self-assessed A+ engineering grade has since been **withdrawn** (self-grading ≠ verification); independent counter-audit **2.9/5 → ≈3.8/5** post-remediation; status Beta.
 
 ### Three shared infrastructure layers
 
@@ -178,16 +182,16 @@ This submission is engineered to institutional standard:
 
 | Gate | Result |
 |---|---|
-| Tests | **1,124+ passing / 1 pre-existing failure** (research template missing `## Methodology` section — unrelated to KB Manager) |
-| Code coverage | **89.82% global** (≥80% gate enforced by CI); all 5 per-package floors met |
-| Static analysis | **ruff + mypy clean** (Python 3.11 + 3.12 matrix) |
+| Tests | **~1,500 passing** (1,498 collected); suite CI-green on `main` |
+| Code coverage | **≥80% enforced floor** + per-package floors (last full-suite run 89.82%) |
+| Static analysis | **ruff + mypy + bandit clean** (Python 3.11 + 3.12 matrix) |
 | Concurrency | **14 race conditions fixed** across 5 adversarial audit rounds; all state protected by `RLock` |
 | Savings integrity | **Manifest-backed** — `check_savings_claims.py` CI gate rejects any published % without a manifest file |
 | Architecture decisions | **19 ADRs** on record; all decisions traceable |
-| Security | STRIDE threat model; bandit SAST; CycloneDX SBOM; `pip-audit` (0 CVEs) |
-| Grade | **D− (0.9) → self-assessed A+** across 8 remediation phases; independent counter-audit commissioned July 2026 (see `docs/knowledge-base/research/counter-audit-2026-07-19-independent.md`) |
+| Security | STRIDE threat model; bandit SAST; CycloneDX SBOM; `pip-audit` (0 CVEs); 9-file adversarial security suite |
+| Grade | Prior **self-assessed A+ withdrawn** (self-grading ≠ verification). On file: counter-audit **2.9/5** (2026-07-19) → **≈3.8/5** post-remediation re-audit (2026-07-20); last formally-graded review **NO-GO 3.46/4.3** (2026-07-14). No current independent production-readiness grade; re-grade pending (see `STATUS.md`) |
 
-**Trajectory:** D− (0.9) → self-assessed A+ across 8 adversarial remediation phases. An independent counter-audit (July 2026) confirmed the honesty machinery and retraction discipline while identifying specific retrieval-wiring and KB-integrity items. Remediation is in progress.
+**Trajectory:** D− (0.9) at first sign-off → 8 adversarial remediation phases. The self-assessed A+ that followed has been **withdrawn** (self-grading isn't verification); independent audits then moved the counter-audit score **2.9/5 → ≈3.8/5** post-remediation, confirming the honesty machinery and retraction discipline while flagging retrieval-wiring and KB-integrity items (since largely closed). No current finalized independent grade; status is **Beta**.
 
 ---
 
@@ -217,7 +221,7 @@ external corpus validation and the v1.0 stability milestone.
 | **KB retrieval quality** | `bob-optimize kb-search "your query"` → shows P@k results |
 | **Knowledge graph health** | `bob-optimize graph-health` → orphan count, hub list, broken links |
 | **Parallel repo analysis** | `bob-optimize analyze` → 6 agents, compressed output, KB documents filed |
-| **Full test suite** | `uv run pytest tests/ --ignore=tests/load --ignore=tests/performance` → 1,124+ passing, 1 pre-existing failure |
+| **Full test suite** | `uv run pytest tests/ --ignore=tests/load --ignore=tests/performance` → ~1,500 passing (CI-green on `main`) |
 | **Engineering grade** | [`counter-audit-2026-07-19-independent.md`](./counter-audit-2026-07-19-independent.md) — independent assessment on file |
 
 ---
