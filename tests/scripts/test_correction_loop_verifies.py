@@ -37,9 +37,7 @@ def _make_kb(root: Path) -> Path:
 
 
 def _run_validate(cwd: Path) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        ["bash", str(VALIDATE)], cwd=cwd, capture_output=True, text=True
-    )
+    return subprocess.run(["bash", str(VALIDATE)], cwd=cwd, capture_output=True, text=True)
 
 
 def test_intact_pointers_pass(tmp_path):
@@ -56,9 +54,7 @@ def test_correction_loop_verifies(tmp_path):
     """A pointer rewrite that breaks a link is caught by post-rewrite validate-kb.sh."""
     kb = _make_kb(tmp_path)
     index = kb / "index.md"
-    index.write_text(
-        "# Index\n\n## Concepts\n- [Target](concepts/target.md)\n", encoding="utf-8"
-    )
+    index.write_text("# Index\n\n## Concepts\n- [Target](concepts/target.md)\n", encoding="utf-8")
     assert _run_validate(tmp_path).returncode == 0, "baseline KB must be clean"
 
     # Simulate a bad correction: rewrite the pointer to a doc that does not exist.
