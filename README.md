@@ -481,7 +481,8 @@ decision now **verifies the HMAC signature, not the plaintext `trust_tier:` fiel
 honoured only when `verify_document` validates an authentic signature over its signed fields; a hand-forged,
 bogus-signature, or tamper-after-sign `trust_tier: verified` document is **withheld** at read on both the scan and
 index paths (re-verified by re-running the forgery exploit). This is what converts the git-native substrate from a
-liability into a genuine security control.
+liability into a genuine security control. The KB's trust posture is auditable in one command — `bob-optimize attest`
+lists every document that claims `verified` without a valid signature (and `--strict` fails CI on any).
 
 The posture is now *load-bearing*, not *hardened*: the provenance key is a **local integrity secret** — it proves a
 document was produced by something holding this repo's key and detects tampering, but it is not a public-key identity
@@ -510,10 +511,11 @@ Organized into six opportunity spaces and three horizons (full detail in the inn
 - **○ Reach & ecosystem** *(proposed)* — an optional **MCP server** surface (native core preserved), plus first-class
   **watsonx** integration (Docling ingestion, Milvus / OpenSearch+JVector scale-out backends, KB analytics in
   watsonx.data).
-- **○ Impact benchmark** *(proposed — protocol defined)* — an end-to-end, paired, pre-registered A/B measuring
-  cost-per-resolved-task with vs. without memory; the protocol is committed
-  ([`AB-velocity-measurement-protocol.md`](2026_IBMer_Watsonx_Challenge/AB-velocity-measurement-protocol.md)) and
-  running it is the open work. Until it produces a number, roadmap items are ranked by *hypothesized* impact.
+- **◐ Impact benchmark** *(partial — instrument built)* — an end-to-end, paired, pre-registered A/B measuring
+  cost-per-resolved-task with vs. without memory. The harness (`src/velocity.py`, honesty guards enforced in code)
+  and the protocol ([`AB-velocity-measurement-protocol.md`](2026_IBMer_Watsonx_Challenge/AB-velocity-measurement-protocol.md))
+  are committed; running it on real sessions to produce the number is the open work. Until then, roadmap items are
+  ranked by *hypothesized* impact.
 
 ## 15. Development
 
