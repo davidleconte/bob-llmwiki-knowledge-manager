@@ -100,9 +100,12 @@ class TestQuery:
     def test_include_content_returns_full_body(self, tmp_path):
         _make_kb(tmp_path)
         body_text = "# Deep Learning\n\nContent about deep learning goes here.\n"
-        # Trust tier must be "verified" for real content to be returned (ATK-MEM-02).
+        # Trust tier must be "verified" AND signed for real content to be returned
+        # (ATK-MEM-02: the read path verifies the provenance signature).
+        from tests.security.conftest import sign_verified
+
         doc_text = "---\ntitle: Deep Learning\ntrust_tier: verified\n---\n\n" + body_text
-        (tmp_path / "concepts" / "dl.md").write_text(doc_text)
+        (tmp_path / "concepts" / "dl.md").write_text(sign_verified(tmp_path, doc_text))
         kb = KnowledgeBaseQuery(str(tmp_path))
         result = kb.query("deep learning", include_content=True)
         top = result["results"][0]

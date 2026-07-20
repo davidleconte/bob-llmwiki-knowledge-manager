@@ -34,8 +34,13 @@ Usage::
 
 from __future__ import annotations
 
+import logging
 import re
 from typing import Generator, Tuple
+
+from src.limits import MAX_CHUNKS_PER_DOC
+
+logger = logging.getLogger(__name__)
 
 # Minimum body length in characters for a chunk to be indexed.
 MIN_CHUNK_CHARS = 50
@@ -79,8 +84,13 @@ class MarkdownChunker:
        as an extra ``"<section-slug>-table"`` chunk alongside the parent section.
     """
 
-    def __init__(self, min_chunk_chars: int = MIN_CHUNK_CHARS) -> None:
+    def __init__(
+        self,
+        min_chunk_chars: int = MIN_CHUNK_CHARS,
+        max_chunks_per_doc: int = MAX_CHUNKS_PER_DOC,
+    ) -> None:
         self._min_chars = min_chunk_chars
+        self._max_chunks = max_chunks_per_doc
 
     # ------------------------------------------------------------------
     # Public API
@@ -100,6 +110,7 @@ class MarkdownChunker:
         """
         sections = self._split_sections(content)
         seen_slugs: dict[str, int] = {}
+        emitted = 0
 
         for heading, body in sections:
             slug = _slugify(heading) if heading else "preamble"
@@ -117,11 +128,26 @@ class MarkdownChunker:
             else:
                 section_text = body.strip()
 
+            # This section's chunk (if it clears the floor) followed by any GFM
+            # tables extracted from its body.
+            candidates: list[Tuple[str, str]] = []
             if len(section_text) >= self._min_chars:
-                yield slug, section_text
+                candidates.append((slug, section_text))
+            candidates.extend(self._extract_tables(slug, body))
 
-            # Extract GFM tables as standalone sub-chunks
-            yield from self._extract_tables(slug, body)
+            # A7: cap the chunks one document can emit. A doc with tens of
+            # thousands of ``##`` headings would otherwise inject one embedding
+            # row (and O(N) similarity work) per heading.
+            for chunk_slug, chunk_text in candidates:
+                if emitted >= self._max_chunks:
+                    logger.warning(
+                        "chunker_max_chunks_exceeded file=%s cap=%d",
+                        _file_path,
+                        self._max_chunks,
+                    )
+                    return
+                yield chunk_slug, chunk_text
+                emitted += 1
 
     # ------------------------------------------------------------------
     # Private helpers

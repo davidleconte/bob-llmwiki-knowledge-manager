@@ -32,6 +32,7 @@ import numpy as np
 from src.cache.embeddings import EmbeddingGenerator
 from src.embeddings.chunker import MarkdownChunker
 from src.embeddings.store import FileBackedVectorStore
+from src.limits import MAX_FILE_BYTES
 
 logger = logging.getLogger(__name__)
 
@@ -259,11 +260,23 @@ class PersistentEmbeddingIndex:
                 file_doc_id = str(md_file.relative_to(kb_path))
                 seen_files.add(file_doc_id)
                 try:
+                    st = md_file.stat()
+                    # A7: skip a file larger than MAX_FILE_BYTES before reading it
+                    # — one crafted large doc would otherwise be read into memory
+                    # and drive O(N) downstream embedding work.
+                    if st.st_size > MAX_FILE_BYTES:
+                        logger.warning(
+                            "kb_index_file_too_large doc=%s bytes=%d cap=%d",
+                            file_doc_id,
+                            st.st_size,
+                            MAX_FILE_BYTES,
+                        )
+                        continue
                     content = md_file.read_text(encoding="utf-8")
                 except Exception:
                     continue
 
-                mtime = md_file.stat().st_mtime
+                mtime = st.st_mtime
                 chash = _content_hash(content)
 
                 # Staleness is checked at the *file* level via _file_manifest

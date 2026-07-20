@@ -24,13 +24,18 @@ design decisions.
 """
 
 import json
+import logging
 import re
 import sys
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
+from src.limits import MAX_QUERY_CHARS
+from src.provenance import load_or_create_key, verify_document
 from src.tools.safe_paths import resolve_within
+
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # ATK-MEM-01: KB content boundary markers
@@ -164,6 +169,25 @@ class KnowledgeBaseQuery:
         self._graph = graph  # KnowledgeGraph | None (P3)
         self._graph_weight = graph_weight
         self._recency_weight = recency_weight
+        # ATK-MEM-02: provenance key for read-path signature verification,
+        # resolved lazily from the KB's repo root and cached for reuse.
+        self._provenance_key: Optional[bytes] = None
+
+    def _tier_grants_trust(self, tier: str, content: str) -> bool:
+        """Whether *tier* confers trusted-content access for this document.
+
+        A trusted tier is necessary but not sufficient (ATK-MEM-02): a
+        ``trust_tier: verified`` claim is honoured only when the document carries
+        an authentic provenance signature over its signed fields (which include
+        the tier). A hand-forged or tampered ``verified`` doc — one that writes
+        the field without a valid HMAC — fails here and its content is withheld
+        exactly like an unverified one.
+        """
+        if tier not in TRUSTED_TIERS:
+            return False
+        if self._provenance_key is None:
+            self._provenance_key = load_or_create_key(self.kb_path)
+        return verify_document(content, self._provenance_key)
 
     def query(
         self,
@@ -200,6 +224,12 @@ class KnowledgeBaseQuery:
         Returns:
             Dictionary with search results
         """
+        # A7: truncate an over-long query at entry so a pathological string is
+        # never embedded / scanned whole.
+        if len(query) > MAX_QUERY_CHARS:
+            logger.warning("kb_query_truncated chars=%d cap=%d", len(query), MAX_QUERY_CHARS)
+            query = query[:MAX_QUERY_CHARS]
+
         if categories is None:
             categories = self.categories
 
@@ -292,7 +322,7 @@ class KnowledgeBaseQuery:
                         if include_content:
                             # ATK-MEM-01: wrap in trust-boundary delimiters; flag exfil patterns
                             flags = _flag_exfil_patterns(content)
-                            if include_unverified or tier in TRUSTED_TIERS:
+                            if include_unverified or self._tier_grants_trust(tier, content):
                                 result["content"] = _wrap_kb_content(content)
                             else:
                                 result["content"] = _TRUST_CONTENT_PLACEHOLDER
@@ -385,7 +415,7 @@ class KnowledgeBaseQuery:
             if include_content:
                 # ATK-MEM-01: wrap in trust-boundary delimiters; flag exfil patterns
                 flags = _flag_exfil_patterns(content)
-                if include_unverified or tier in TRUSTED_TIERS:
+                if include_unverified or self._tier_grants_trust(tier, content):
                     result["content"] = _wrap_kb_content(content)
                 else:
                     result["content"] = _TRUST_CONTENT_PLACEHOLDER

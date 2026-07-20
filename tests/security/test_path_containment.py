@@ -24,9 +24,14 @@ def kb_with_symlink(tmp_path):
     for cat in ("concepts", "guides", "references", "research"):
         (kb / cat).mkdir(parents=True)
 
-    # Legitimate document — must survive; trust_tier: verified so content is not withheld
+    # Legitimate document — must survive; signed so its verified tier is honoured
+    # on the read path (ATK-MEM-02) and content is not withheld.
+    from tests.security.conftest import sign_verified
+
     (kb / "concepts" / "legit.md").write_text(
-        "---\ntitle: Real Doc\ntrust_tier: verified\n---\n# Real Doc\nSafe content."
+        sign_verified(
+            kb, "---\ntitle: Real Doc\ntrust_tier: verified\n---\n# Real Doc\nSafe content."
+        )
     )
 
     # Determine a target outside the KB root

@@ -146,6 +146,36 @@ REGISTRY: tuple[ValueHome, ...] = (
             ),
         ),
     ),
+    # A7 input-bound caps. Home: src/limits.py (imported at every enforcement
+    # point). Mirror: config/gates/gate-config.yaml restates each for CODEOWNERS-
+    # visible review, so weakening a DoS ceiling shows up in the gate-config diff.
+    # extract-mode compares the YAML value to the code constant for equality.
+    ValueHome(
+        name="limit_max_file_bytes",
+        file="src/limits.py",
+        pattern=r"MAX_FILE_BYTES\s*=\s*(\d+)",
+        mirrors=(Mirror("config/gates/gate-config.yaml", "extract", r"max_file_bytes:\s*(\d+)"),),
+    ),
+    ValueHome(
+        name="limit_max_chunks_per_doc",
+        file="src/limits.py",
+        pattern=r"MAX_CHUNKS_PER_DOC\s*=\s*(\d+)",
+        mirrors=(
+            Mirror("config/gates/gate-config.yaml", "extract", r"max_chunks_per_doc:\s*(\d+)"),
+        ),
+    ),
+    ValueHome(
+        name="limit_max_query_chars",
+        file="src/limits.py",
+        pattern=r"MAX_QUERY_CHARS\s*=\s*(\d+)",
+        mirrors=(Mirror("config/gates/gate-config.yaml", "extract", r"max_query_chars:\s*(\d+)"),),
+    ),
+    ValueHome(
+        name="limit_max_graph_nodes",
+        file="src/limits.py",
+        pattern=r"MAX_GRAPH_NODES\s*=\s*(\d+)",
+        mirrors=(Mirror("config/gates/gate-config.yaml", "extract", r"max_graph_nodes:\s*(\d+)"),),
+    ),
 )
 
 
