@@ -6,8 +6,18 @@ frontmatter lacks a ``trust_tier:`` field, and inserts
 ``trust_tier: generated`` (conservative default) after the ``status:`` line
 (or at the end of the frontmatter block if no status line is present).
 
-This is a one-time migration to bring existing documents into the trust-tier
-model introduced in Sub-Task 7 (ATK-MEM-02 remediation).
+This migration is OPTIONAL and NOT run over the corpus by default. A document
+with no ``trust_tier`` is already fully retrievable — only ``quarantined`` and
+``archived`` are excluded — so the back-fill changes labels, not retrieval
+behaviour (locked by
+``tests/tools/test_d2_curation.py::test_missing_trust_tier_is_retrievable_not_excluded``).
+New generated docs are tagged at write time by the delegation pipeline.
+
+Because the benefit is purely cosmetic, this script REFUSES to touch the frozen
+C4 held-out corpus (``evaluation/holdout/holdout-manifest.json``): editing those
+files would perturb a frozen reproduction baseline "to move a number", which the
+hold-out discipline forbids. Run it only for cosmetic label coverage of the live
+(non-frozen) docs, never as a required step.
 
 Usage::
 
@@ -29,6 +39,26 @@ DEFAULT_KB = REPO_ROOT / "docs" / "knowledge-base"
 
 _FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*\n", re.DOTALL)
 _TRUST_TIER_RE = re.compile(r"^trust_tier:", re.MULTILINE)
+
+
+def _frozen_holdout_paths() -> set[str]:
+    """Repo-relative paths frozen as the C4 held-out corpus — never migrate these.
+
+    Editing a held-out file changes content the reproduction gate measures against;
+    the manifest declares the slice FROZEN ("do not add/remove paths to move a
+    number"). A missing/unreadable manifest yields an empty set (fail open — the
+    migration is optional anyway).
+    """
+    import json
+
+    manifest = REPO_ROOT / "evaluation" / "holdout" / "holdout-manifest.json"
+    if not manifest.exists():
+        return set()
+    try:
+        data = json.loads(manifest.read_text(encoding="utf-8"))
+    except Exception:
+        return set()
+    return {str(p) for p in data.get("paths", [])}
 
 
 def _insert_trust_tier(text: str) -> str | None:
@@ -73,12 +103,20 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ERROR: KB path not found: {kb_path}", file=sys.stderr)
         return 1
 
+    frozen = _frozen_holdout_paths()
+
     modified = 0
     skipped = 0
     total = 0
 
     for md_file in sorted(kb_path.rglob("*.md")):
         total += 1
+        rel = md_file.relative_to(REPO_ROOT)
+        if str(rel) in frozen:
+            print(f"  SKIP {rel}: frozen C4 held-out corpus — not migrated")
+            skipped += 1
+            continue
+
         try:
             original = md_file.read_text(encoding="utf-8")
         except Exception as e:
@@ -90,7 +128,6 @@ def main(argv: list[str] | None = None) -> int:
         if updated is None:
             continue  # already has trust_tier or no frontmatter
 
-        rel = md_file.relative_to(REPO_ROOT)
         if dry_run:
             print(f"  DRY-RUN: would add trust_tier: generated to {rel}")
         else:
