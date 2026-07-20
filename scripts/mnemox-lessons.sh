@@ -59,6 +59,16 @@ TOTAL_COUNT=$(find "$KB_DIR" -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' 
 # ── Ensure research dir exists ────────────────────────────────────────────────
 mkdir -p "$RESEARCH_DIR"
 
+# ── New/changed research docs since last run (MEM-10: content-hash, not mtime) ─
+# mtime is reset by git checkout/clone/cp/touch, so the old `find -newer` scan
+# re-listed unchanged files and missed real edits. Hash the bytes instead. The
+# manifest is local run-state (gitignored), like .mnemox-last-run. Computed here,
+# before this run's note is written, so the note does not list itself.
+DOC_DELTA_SCRIPT="$(dirname "${BASH_SOURCE[0]}")/mnemox_doc_delta.py"
+DOC_MANIFEST=".mnemox-doc-hashes"
+NEW_REPORTS=$(python3 "$DOC_DELTA_SCRIPT" "$RESEARCH_DIR" "$DOC_MANIFEST" 2>/dev/null \
+    || echo "(delta unavailable)")
+
 # ── Write dated research note ────────────────────────────────────────────────
 cat > "$NOTE_FILE" << NOTEEOF
 ---
@@ -99,7 +109,7 @@ $GIT_LOG
 
 ## New Analysis Reports Filed
 
-$(find "$RESEARCH_DIR" -name "*.md" -newer "$LAST_RUN_FILE" -type f 2>/dev/null | sort | while read -r f; do echo "- \`$f\`"; done || echo "(none newer than last run)")
+$NEW_REPORTS
 
 ## Findings
 
@@ -160,6 +170,11 @@ PYEOF
         fi
     fi
 fi
+
+# ── Persist the doc-hash manifest for the next run's delta (MEM-10) ───────────
+# After this run's note + index update, snapshot current hashes so the next run
+# compares against this state. Never blocks the update path.
+python3 "$DOC_DELTA_SCRIPT" "$RESEARCH_DIR" "$DOC_MANIFEST" --update >/dev/null 2>&1 || true
 
 # ── Emit parseable path for mnemox.sh ────────────────────────────────────────
 # This MUST be the last stdout line — mnemox.sh greps for it
