@@ -23,74 +23,6 @@ Last Updated: 2026-07-19 · **115 documents** (14 concepts · 27 guides · 4 ref
 - 2026-07-19: [Mnemox Update — 2026-07-19](./research/mnemox-update-2026-07-19.md) - Research — automated KB update: git log, doc counts, lessons learned scaffold
 - 2026-07-18: [Mnemox Challenge Submission](./research/mnemox-challenge-submission-2026-07.md) - Research ⭐ NEW — 2026 IBMer watsonx Challenge submission narrative (Team BobjectifLune)
 - 2026-07-18: [Mnemox Executive Brief](./research/mnemox-executive-brief-2026-07.md) - Research ⭐ NEW — 4-minute CTO/challenge-judge decision summary; ROI table; quality gates; pilot design
-- 2026-07-18: [Mnemox Competitive Positioning Brief](./research/mnemox-positioning-brief-2026-07.md) - Research ⭐ NEW — Mnemox vs. RAG / vector DB / LangChain / fine-tuning; positioning matrix; data residency
-- 2026-07-18: [Mnemox CLI Reference](./references/mnemox-cli-reference.md) - Reference ⭐ NEW — all flags, modes, env vars, auto-detection logic, exit codes, examples
-- 2026-07-18: [bob-optimize CLI Reference](./references/bob-optimize-cli-reference.md) - Reference ⭐ NEW — all 13 subcommands with options, defaults, and examples
-- 2026-07-18: [Mnemox Update — 2026-07-18](./research/mnemox-update-2026-07-18.md) - Research — automated KB update: git log, doc counts, lessons learned scaffold
-- 2026-07-18: [File Naming Conventions](./concepts/file-naming-conventions.md) - Concept ⭐ NEW — kebab-case rule, exclusion zones, `index.md` blast radius, emoji SSoT, drift detection
-- 2026-07-18: [Repo Hygiene Rules](./concepts/repo-hygiene-rules.md) - Concept ⭐ NEW — 5 hygiene classes (H-1–H-5), pre-push verification gate, `.gitignore` leading-`/` rule
-- 2026-07-18: [Cache Thread-Safety Patterns](./concepts/cache-thread-safety-patterns.md) - Concept ⭐ NEW — 4-tier audit, lock map, GIL limits, snapshot pattern, cross-class accessor pattern
-- 2026-07-18: [KB Document Types](./concepts/kb-document-types.md) - Concept ⭐ NEW — compact summary vs comprehensive document, re-derivation saving applicability, compact-summary tag
-- 2026-07-18: [Iterative Audit Methodology](./concepts/iterative-audit-methodology.md) - Concept ⭐ NEW — T1–T4 audit tiers, alternative-path anti-pattern, stats() canary, regression test discipline
-- 2026-07-18: [Thread-Safe Cost Tracking](./concepts/thread-safe-cost-tracking.md) - Concept ⭐ NEW — opt-in design, RLock pattern, three confidence levels, Bobcoin pricing constant
-- 2026-07-18: [Mnemox Update — 2026-07-18](./research/mnemox-update-2026-07-18.md) - Research — kebab rename lessons, emoji SSoT, index.md sweep, test brittleness
-- 2026-07-18: [Quality Gate Status — 2026-07-18](./research/quality-gate-status-2026-07-18.md) - Research ⭐ NEW — Status-only audit snapshot: 1112 tests / 0 failures, 89.82% global coverage, all 5 per-package floors met, ruff + mypy clean; script-output hygiene warning; merge checklist
-- 2026-07-18: [Repo Hygiene — Lessons Learned](./research/repo-hygiene-lessons-2026-07.md) - Research — 5 hygiene classes (unrelated dirs, root plan files, machine-specific paths, another user's paths, exposed API key); gitignore leading-`/` rule; hygiene audit protocol; portability verification commands
-- 2026-07-18: [Cache Thread-Safety Audit — Round 5 Lessons Learned](./research/cache-race-fix-round5-2026-07.md) - Research — 3 new bugs fixed (l3_hits missing from stats, contains() flag-gating, CacheStatsSnapshot); structural enforcement via frozen dataclass; new counter checklist; 1109→1112 tests
-- 2026-07-18: [Iterative Audit Methodology — Lessons Learned](./research/iterative-audit-lessons-2026-07.md) - Research — 6 findings on how to audit concurrency code across sessions; 4-tier audit checklist (T1 structural, T2 snapshot, T3 cross-class, T4 alternative paths); race taxonomy table; KB-first compounding; plan-file hygiene
-- 2026-07-18: [Cache Thread-Safety Audit — Rounds 1–4 Lessons Learned](./research/cache-race-fix-lessons-2026-07.md) - Research — 14 races total (R-1–R-6, N-1–N-4, O-1–O-2, S-1–S-2); cross-class threshold read; unique_entries stale snapshot; 1109 tests passing
-- 2026-07-18: [KB Leveraging Across Mode Switches — Lessons Learned](./research/kb-mode-switch-lessons-2026-07.md) - Research — session analysis: what was leveraged vs missed, 5 findings, AGENTS.md gap root cause, 19-pair corpus anti-pattern, two distinct KB doc roles, 5 recommendations
-- 2026-07-18: [KM Bobcoin Savings Measurement Guide](./guides/km-bobcoin-savings-measurement-guide.md) - Guide ⭐ NEW — 7-section practical protocol: baseline session logging, shadow comparison, direct token-diff (bob-optimize / tiktoken), amortised ROI formula, reporting standards, stale-KB diagnosis, automation scripts
-- 2026-07-18: [Knowledge Graph Layer](./concepts/knowledge-graph-layer.md) - Concept ⭐ NEW — property graph architecture, 4 modules, NodeProps model, edge types, benefits table (orphan detection, hubs, broken links, PageRank re-ranking)
-- 2026-07-18: [Delegation Analysis Pipeline](./concepts/delegation-analysis-pipeline.md) - Concept ⭐ NEW — 6 parallel agents, thin connector pattern, KB-aware execution, token-compressed output, CLI usage
-- 2026-07-18: [Knowledge Graph Usage Guide](./guides/knowledge-graph-usage-guide.md) - Guide ⭐ NEW — 5-step workflow: build index → build graph → health report → fix orphans → query; troubleshooting; best practices
-- 2026-07-17: [Delegation Pipeline Activation](../adr/019-delegation-pipeline-activation.md) - ADR-019 — delegation module activated as analysis pipeline; `bob-optimize analyze`; coverage floor 52% → 70%; 84% measured
-- 2026-07-17: [Knowledge Graph Layer — Live Validation](./research/graph-validation-2026-07-17.md) - Research — P3 graph live validation: 80 nodes, 2876 edges, threshold=0.30 confirmed, graph_weight=0.0 default confirmed, 27/40 orphans rescued by semantic edges
-- 2026-07-17: [Adversarial Audit — Embeddings Chunker Integration](./research/adversarial-audit-embeddings-chunker-2026-07-17.md) - Research ⭐ NEW — 2 Critical bugs found and fixed: AF-1 (flush/reload shape mismatch) + AF-2 (is_stale always True); 2 Medium, 2 Low
-- 2026-07-16: [KB Query Scorer A/B Validation](./research/kb-query-ab-validation-2026-07.md) - Research ⭐ NEW — embedding-only p@3=0.88 vs keyword p@3=0.64; recommends w=0.7 for KBIndexer
-- 2026-07-16: [Multi-Level Caching Architecture Patterns](./concepts/multi-level-caching-architecture-patterns.md) - Concept ⭐ NEW
-- 2026-07-14: [KB-TOS Integration Roadmap (P0/P1/P2)](./guides/kb-tos-integration-roadmap.md) - Guide ⭐ NEW
-- 2026-07-14: [KB Manager ↔ TOS Integration Feasibility Study](./research/kb-tos-integration-feasibility-2026-07-14.md) - Research ⭐ NEW
-- 2026-07-14: [KB-TOS Shared Embedding Layer](./concepts/kb-tos-embedding-layer.md) - Concept ⭐ NEW
-- 2026-07-14: [Post-Remediation Full Audit](./research/audit-2026-07-14-post-remediation.md) - Research ⭐ NEW
-- 2026-07-14: [Full Codebase & Documentation Review](./research/full-codebase-review-2026-07-14.md) - Research
-- 2026-07-14: [Dual System Use Case Example](./guides/dual-system-use-case-example.md) - Guide ⭐ NEW
-- 2026-07-14: [Using Both Systems Together](./guides/using-both-systems-together.md) - Guide ⭐ NEW
-- 2026-07-14: [Token Optimizer Quick Install](./guides/token-optimizer-quick-install.md) - Guide ⭐ NEW
-- 2026-07-14: [Bobcoin Savings Analysis](./research/bobcoin-savings-analysis-2026-07-14.md) - Research ⭐ NEW
-- 2026-07-14: [README Critical Analysis](./research/readme-critical-analysis-2026-07-14.md) - Research ⭐ NEW
-- 2026-07-14: [Senior Expert Institutional Audit](./research/senior-expert-institutional-audit-2026-07-14.md) - Research ⭐ NEW
-- 2026-07-14: [Comprehensive Codebase Analysis](./research/codebase-analysis-2026-07-14.md) - Research ⭐ NEW
-- 2026-07-13: [Institutional Software Vendor Evaluation](./research/institutional-vendor-evaluation.md) - Research
-- 2026-07-13: [Phase 3 Monitoring Lessons Learned](./research/phase3-monitoring-lessons-learned.md) - Research
-- 2026-07-13: [Phase 3 Real-Time Monitoring Implementation](./research/phase3-real-time-monitoring-implementation.md) - Research
-- 2026-07-13: [Phase 3 Day 3-4 Parallel Work](./research/phase3-day3-4-parallel-work.md) - Research
-- 2026-07-13: [Phase 3 Day 1-2 Validation Framework](./research/phase3-day1-2-validation-framework.md) - Research
-- 2026-07-13: [Phase 2 Vocabulary Drift Implementation](./research/phase2-vocabulary-drift-implementation.md) - Research
-- 2026-07-13: [Phase 2 Completion Summary](./research/phase2-completion-summary.md) - Research ⭐ NEW
-- 2026-07-13: [Phase 2 Health Checks Complete](./research/phase2-health-checks-complete.md) - Research ⭐ NEW
-- 2026-07-13: [Phase 2 Thread Safety Fixes Complete](./research/phase2-thread-safety-fixes-complete.md) - Research ⭐ NEW
-- 2026-07-13: [Phase 2 Concurrency Test Results](./research/phase2-concurrency-test-results.md) - Research ⭐ NEW
-- 2026-07-13: [Phase 2 Performance Baseline Results](./research/phase2-performance-baseline-results.md) - Research
-- 2026-07-13: [Phase 2 Performance Baseline Analysis](./research/phase2-performance-baseline-analysis.md) - Research
-- 2026-07-13: [Phase 2 Performance Optimization Plan](./guides/phase2-performance-optimization-plan.md) - Guide
-- 2026-07-13: [Phase 1 Lessons Learned](./research/phase1-lessons-learned-2026-07-13.md) - Research
-- 2026-07-13: [Phase 6 Real-World Validation Plan](./guides/phase6-real-world-validation-plan.md) - Guide ⭐ NEW
-- 2026-07-13: [Phase 5 Documentation Reconciliation Complete](./guides/phase5-documentation-reconciliation-complete.md) - Guide ⭐ NEW
-- 2026-07-13: [Audit Remediation Status](./guides/audit-remediation-status.md) - Guide ⭐ NEW
-- 2026-07-13: [Delegation Integration Analysis](./research/delegation-integration-analysis-2026-07-13.md) - Research ⭐ NEW
-- 2026-07-13: [Coverage Measurement 2026-07-13](./research/coverage-measurement-2026-07-13.md) - Research
-- 2026-07-13: [External Audit 2026-07-12](./research/external-audit-2026-07-12.md) - Research
-- 2026-07-13: [Cost Tracking Lessons Learned](./research/cost-tracking-lessons-learned.md) - Research
-- 2026-07-13: [Bob Shell UI Integration](./guides/bob-shell-ui-integration.md) - Guide
-- 2026-07-13: [Cost Tracking Guide](./guides/cost-tracking-guide.md) - Guide
-- 2026-07-13: [E2E Testing Setup Guide](./guides/e2e-testing-setup-guide.md) - Guide
-- 2026-07-13: [Repository Improvement Plan](./research/repository-improvement-plan.md) - Research
-- 2026-07-13: [Multi-Level Caching](./concepts/multi-level-caching.md) - Concept
-- 2026-07-13: [Token Optimization](./concepts/token-optimization.md) - Concept
-- 2026-07-13: [Setting Up Token Optimization System](./guides/setup-token-optimization.md) - Guide
-- 2026-07-13: [Cache API Reference](./references/cache-api.md) - Reference
-- 2026-07-13: [Performance Benchmarks](./research/performance-benchmarks.md) - Research
 
 ## All Documents
 
@@ -217,6 +149,23 @@ Last Updated: 2026-07-19 · **115 documents** (14 concepts · 27 guides · 4 ref
 - [P0 Critical Fixes Implementation Guide](./guides/p0-critical-fixes-implementation.md) - Implementation guide for P0 critical fixes
 
 ---
+
+
+### Reconciled from Recent Additions
+
+- 2026-07-18: [Mnemox Competitive Positioning Brief](./research/mnemox-positioning-brief-2026-07.md) - Research ⭐ NEW — Mnemox vs. RAG / vector DB / LangChain / fine-tuning; positioning matrix; data residency
+- 2026-07-18: [Mnemox Update — 2026-07-18](./research/mnemox-update-2026-07-18.md) - Research — automated KB update: git log, doc counts, lessons learned scaffold
+- 2026-07-18: [Mnemox Update — 2026-07-18](./research/mnemox-update-2026-07-18.md) - Research — kebab rename lessons, emoji SSoT, index.md sweep, test brittleness
+- 2026-07-17: [Delegation Pipeline Activation](../adr/019-delegation-pipeline-activation.md) - ADR-019 — delegation module activated as analysis pipeline; `bob-optimize analyze`; coverage floor 52% → 70%; 84% measured
+- 2026-07-17: [Adversarial Audit — Embeddings Chunker Integration](./research/adversarial-audit-embeddings-chunker-2026-07-17.md) - Research ⭐ NEW — 2 Critical bugs found and fixed: AF-1 (flush/reload shape mismatch) + AF-2 (is_stale always True); 2 Medium, 2 Low
+- 2026-07-16: [KB Query Scorer A/B Validation](./research/kb-query-ab-validation-2026-07.md) - Research ⭐ NEW — embedding-only p@3=0.88 vs keyword p@3=0.64; recommends w=0.7 for KBIndexer
+- 2026-07-14: [Post-Remediation Full Audit](./research/audit-2026-07-14-post-remediation.md) - Research ⭐ NEW
+- 2026-07-14: [Full Codebase & Documentation Review](./research/full-codebase-review-2026-07-14.md) - Research
+- 2026-07-13: [Institutional Software Vendor Evaluation](./research/institutional-vendor-evaluation.md) - Research
+- 2026-07-13: [Phase 3 Monitoring Lessons Learned](./research/phase3-monitoring-lessons-learned.md) - Research
+- 2026-07-13: [Phase 3 Real-Time Monitoring Implementation](./research/phase3-real-time-monitoring-implementation.md) - Research
+- 2026-07-13: [Phase 2 Performance Baseline Analysis](./research/phase2-performance-baseline-analysis.md) - Research
+- 2026-07-13: [Repository Improvement Plan](./research/repository-improvement-plan.md) - Research
 
 ## Usage
 
