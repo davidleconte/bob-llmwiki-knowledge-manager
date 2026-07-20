@@ -171,6 +171,16 @@ PYEOF
     fi
 fi
 
+# ── Bound "Recent Additions" to ≤10 entries (D1/MEM-08) ───────────────────────
+# The insert above prepends one entry and never prunes; keep the auto-loaded
+# cold-start map bounded by trimming to the 10 most recent. Orphan-safe: any doc
+# beyond the 10 that is referenced ONLY here is reconciled into the All Documents
+# catalog rather than dropped. Never blocks the update path.
+if [[ -f "$INDEX_FILE" ]]; then
+    COMPACT_SCRIPT="$(dirname "${BASH_SOURCE[0]}")/compact_index_recent_additions.py"
+    python3 "$COMPACT_SCRIPT" "$INDEX_FILE" --keep 10 >/dev/null 2>&1 || true
+fi
+
 # ── Persist the doc-hash manifest for the next run's delta (MEM-10) ───────────
 # After this run's note + index update, snapshot current hashes so the next run
 # compares against this state. Never blocks the update path.

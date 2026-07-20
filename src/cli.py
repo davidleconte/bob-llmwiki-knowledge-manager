@@ -472,11 +472,13 @@ def main(argv: Optional[List[str]] = None) -> int:
         from pathlib import Path
 
         from src.cache.embeddings import EmbeddingGenerator
+        from src.cold_start import COLD_START_BUDGET_TOKENS, cold_start_map_tokens
         from src.embeddings.index import PersistentEmbeddingIndex
         from src.graph.store import GraphStore
-        from src.kb_paths import resolve_graph_path, resolve_index_path
+        from src.kb_paths import repo_root_for, resolve_graph_path, resolve_index_path
 
         kb_path = Path(args.kb_path)
+        cold_start_tokens = cold_start_map_tokens(repo_root_for(kb_path))
         index_path = Path(args.index_path) if args.index_path else resolve_index_path(kb_path)
         graph_path = Path(args.graph_path) if args.graph_path else resolve_graph_path(kb_path)
 
@@ -545,6 +547,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             "graph_node_count": graph_node_count,
             "graph_edge_count": graph_edge_count,
             "compression_available": compression_available,
+            "cold_start_map_tokens": cold_start_tokens,
+            "cold_start_budget_tokens": COLD_START_BUDGET_TOKENS,
         }
 
         if as_json:
@@ -577,6 +581,11 @@ def main(argv: Optional[List[str]] = None) -> int:
             cmp_icon = tick if compression_available else cross
             print(
                 f"  {cmp_icon} Compression (TOS)   : {'available' if compression_available else 'unavailable'}"
+            )
+            cs_icon = tick if cold_start_tokens <= COLD_START_BUDGET_TOKENS else warn
+            print(
+                f"  {cs_icon} Cold-start map      : {cold_start_tokens} tokens "
+                f"(budget {COLD_START_BUDGET_TOKENS})"
             )
             print("=" * 44)
             if (

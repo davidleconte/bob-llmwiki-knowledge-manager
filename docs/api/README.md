@@ -67,6 +67,7 @@ Complete API reference for the Token Optimization System.
 
 - [__main__](root/__main__.md) - `__main__.py`
 - [cli](root/cli.md) - `cli.py`
+- [cold_start](root/cold_start.md) - `cold_start.py`
 - [facade](root/facade.md) - `facade.py`
 - [factory](root/factory.md) - `factory.py`
 - [kb_paths](root/kb_paths.md) - `kb_paths.py`
