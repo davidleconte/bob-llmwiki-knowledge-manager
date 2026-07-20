@@ -84,6 +84,7 @@ def analyze_and_ingest(
     depth: str = "shallow",
     *,
     compress: bool = True,
+    allow_external: str | None = None,
 ) -> AnalysisPipelineResult:
     """Run parallel delegation analysis and ingest results into the KB.
 
@@ -95,36 +96,61 @@ def analyze_and_ingest(
     4. Compressed (or raw) reports are written as KB research docs to *output_dir*.
 
     Args:
-        target_dir: Directory (or file) to analyse.  Must not escape cwd.
+        target_dir: Directory (or file) to analyse, resolved under the containment
+            base (cwd by default, or *allow_external* when set).  Must not escape it.
         kb_path: KB root for :class:`~src.delegation.agents.ResearchAgent` context lookup.
         output_dir: Directory to write generated research docs.
         max_workers: Maximum parallel agent workers.
         depth: Analysis depth — ``"shallow"`` or ``"deep"``.
         compress: Pass agent reports through :class:`~src.facade.TokenOptimizer`
             before writing.  Set ``False`` to write raw JSON.
+        allow_external: Absolute path to an existing directory *outside* cwd to
+            analyse (e.g. a checked-out foreign repo).  Containment is rebased onto
+            this directory rather than relaxed: *target_dir* is resolved under it and
+            a ``../``, absolute, or symlink-escaping target is still refused.  ``None``
+            (default) pins the base to cwd, preserving the prior behaviour.
 
     Returns:
         :class:`AnalysisPipelineResult` with per-agent status and compression metrics.
     """
     # ------------------------------------------------------------------
-    # Path containment: reject target_dir that escapes cwd.
+    # Path containment: resolve target_dir under an allowed base.
+    #
+    # Default base is cwd. --allow-external <dir> rebases containment onto <dir>
+    # (a checked-out foreign repo, say) WITHOUT relaxing it: the same
+    # resolve_within guard runs, only against <dir>, and `base_path` is threaded
+    # to every agent below so no read path silently falls back to cwd. A target
+    # escaping the base via '../', an absolute path, or a symlink pointing outside
+    # is still refused. This is the ATK-FS-01 mitigation
+    # (docs/security/THREAT_MODEL.md) and must not regress when the base is external.
     # ------------------------------------------------------------------
-    cwd = Path.cwd()
+    if allow_external is not None:
+        base = Path(allow_external).resolve()
+        if not base.is_dir():
+            raise ValueError(f"--allow-external must be an existing directory: {allow_external!r}")
+        base_label = f"allowed external base {base}"
+    else:
+        base = Path.cwd()
+        base_label = "working directory"
     try:
-        resolve_within(cwd, target_dir)
+        resolve_within(base, target_dir)
     except ValueError as exc:
-        raise ValueError(f"target_dir escapes working directory: {exc}") from exc
+        raise ValueError(f"target_dir escapes {base_label}: {exc}") from exc
+
+    base_path = str(base)
 
     # ------------------------------------------------------------------
-    # Build coordinator and register agents.
+    # Build coordinator and register agents. Every agent that reads the target
+    # tree is pinned to `base_path` so containment holds at the agent layer too
+    # (ResearchAgent reads the KB, not the target, so it is not rebased).
     # ------------------------------------------------------------------
     coordinator = DelegationCoordinator(max_workers=max_workers, timeout_seconds=600)
     coordinator.register_agent(ResearchAgent("research-1", kb_path=kb_path))
-    coordinator.register_agent(SecurityAgent("security-1"))
-    coordinator.register_agent(QualityAgent("quality-1"))
-    coordinator.register_agent(PerformanceAgent("perf-1"))
-    coordinator.register_agent(ArchitectureAgent("arch-1"))
-    coordinator.register_agent(DocumentationAgent("doc-1"))
+    coordinator.register_agent(SecurityAgent("security-1", base_path=base_path))
+    coordinator.register_agent(QualityAgent("quality-1", base_path=base_path))
+    coordinator.register_agent(PerformanceAgent("perf-1", base_path=base_path))
+    coordinator.register_agent(ArchitectureAgent("arch-1", base_path=base_path))
+    coordinator.register_agent(DocumentationAgent("doc-1", base_path=base_path))
 
     # ResearchAgent runs first (no deps); all others depend on its task_id so the
     # coordinator dispatches them in the second wave after research completes.
