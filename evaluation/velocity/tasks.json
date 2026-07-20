@@ -1,0 +1,69 @@
+{
+  "protocol": "paired-counterbalanced-prereg-AB",
+  "frozen": true,
+  "created": "2026-07-20",
+  "note": "Pre-registered task set. FREEZE = committed to git. Do NOT edit after timing begins — freezing the set is what stops post-hoc cherry-picking. Each task must be answerable BOTH from source (condition A, cold / no KB) and from the KB (condition B, Mnemox mode loaded). No-leakage guard: verify the KB digest B relies on was written by PRIOR/general sessions, not seeded with this task's answer for the test; if a task's specific answer was written into the KB *for* this test, that task is invalid.",
+  "conditions": {
+    "A": "cold / no KB — fresh Bob session, KB not loaded; Bob re-derives context from source",
+    "B": "with KB — Bob session with the Mnemox knowledge-manager mode loaded; Bob retrieves from the KB"
+  },
+  "order_note": "`order` is the pre-recorded A-first/B-first counterbalance (prevents the second run winning from learning effects). The alternating default below is a valid pre-registration; an operator may substitute their own coin-flip order as long as it is recorded here BEFORE timing.",
+  "tasks": [
+    {
+      "id": "T1",
+      "title": "Multi-level cache eviction policy",
+      "module": "src/cache/",
+      "done_criterion": "State L1 vs L2 eviction behaviour and why L2 eviction is O(1), citing the file and method that implement it.",
+      "order": "A-first"
+    },
+    {
+      "id": "T2",
+      "title": "Verify-at-read trust decision",
+      "module": "src/tools/kb_query.py",
+      "done_criterion": "Explain how a 'verified' trust_tier is honoured at read and name every read path that enforces the signature check.",
+      "order": "B-first"
+    },
+    {
+      "id": "T3",
+      "title": "Optimizer cache key and token budget",
+      "module": "src/optimizer/prompt_optimizer.py",
+      "done_criterion": "Explain what the optimizer cache key folds in and why a stricter per-call max_tokens must recompute rather than serve the looser cached result.",
+      "order": "A-first"
+    },
+    {
+      "id": "T4",
+      "title": "KB knowledge-graph build + PageRank",
+      "module": "src/graph/",
+      "done_criterion": "Describe how the graph is built (explicit/semantic/broken edges) and where PageRank is computed, to the point of citing the builder and store.",
+      "order": "B-first"
+    },
+    {
+      "id": "T5",
+      "title": "Validation harness null test",
+      "module": "src/validation/",
+      "done_criterion": "Explain what the null control measures, its pass threshold, and why a material saving on it would invalidate the compression number.",
+      "order": "A-first"
+    },
+    {
+      "id": "T6",
+      "title": "Truncation hard-budget enforcement",
+      "module": "src/optimizer/ (truncation subsystem)",
+      "done_criterion": "State how a hard token budget is enforced across truncation strategies and why the budget cannot be overshot.",
+      "order": "B-first"
+    },
+    {
+      "id": "T7",
+      "title": "Persistent embedding index",
+      "module": "src/embeddings/",
+      "done_criterion": "Explain how the embedding index persists (atomic, pickle-free) and how freshness against the KB is determined.",
+      "order": "A-first"
+    },
+    {
+      "id": "T8",
+      "title": "Provenance signing + promotion",
+      "module": "src/provenance.py",
+      "done_criterion": "Explain what fields the provenance signature covers and how kb-promote re-signs on a tier change so a hand-edited tier fails verification.",
+      "order": "B-first"
+    }
+  ]
+}

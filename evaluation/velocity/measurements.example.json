@@ -1,0 +1,23 @@
+{
+  "_status": "EXAMPLE — SYNTHETIC values, NOT a measurement. Do not cite. Replace every wall_clock_min / bobcoin / quality_pass with a real recorded Bob-session reading before running for real.",
+  "kb_commit": "EXAMPLE-not-a-real-sha",
+  "bob_version": "EXAMPLE-bob-version",
+  "measurements": [
+    {"task_id": "T1", "condition": "A", "wall_clock_min": 11.0, "bobcoin": 900, "quality_pass": true, "quality_note": "correct, from source"},
+    {"task_id": "T1", "condition": "B", "wall_clock_min": 6.0, "bobcoin": 480, "quality_pass": true, "quality_note": "correct, from KB"},
+    {"task_id": "T2", "condition": "A", "wall_clock_min": 9.5, "bobcoin": 820, "quality_pass": true, "quality_note": ""},
+    {"task_id": "T2", "condition": "B", "wall_clock_min": 5.5, "bobcoin": 500, "quality_pass": true, "quality_note": ""},
+    {"task_id": "T3", "condition": "A", "wall_clock_min": 13.0, "bobcoin": 1100, "quality_pass": true, "quality_note": ""},
+    {"task_id": "T3", "condition": "B", "wall_clock_min": 8.0, "bobcoin": 700, "quality_pass": true, "quality_note": ""},
+    {"task_id": "T4", "condition": "A", "wall_clock_min": 10.0, "bobcoin": 950, "quality_pass": true, "quality_note": ""},
+    {"task_id": "T4", "condition": "B", "wall_clock_min": 7.5, "bobcoin": 690, "quality_pass": true, "quality_note": ""},
+    {"task_id": "T5", "condition": "A", "wall_clock_min": 8.0, "bobcoin": 700, "quality_pass": true, "quality_note": ""},
+    {"task_id": "T5", "condition": "B", "wall_clock_min": 8.2, "bobcoin": 720, "quality_pass": true, "quality_note": "tie — KB did not help here; reported, not dropped"},
+    {"task_id": "T6", "condition": "A", "wall_clock_min": 12.0, "bobcoin": 1000, "quality_pass": true, "quality_note": ""},
+    {"task_id": "T6", "condition": "B", "wall_clock_min": 6.5, "bobcoin": 560, "quality_pass": false, "quality_note": "faster but INCOMPLETE — quality gate excludes it from the headline"},
+    {"task_id": "T7", "condition": "A", "wall_clock_min": 9.0, "bobcoin": 780, "quality_pass": true, "quality_note": ""},
+    {"task_id": "T7", "condition": "B", "wall_clock_min": 5.0, "bobcoin": 430, "quality_pass": true, "quality_note": ""},
+    {"task_id": "T8", "condition": "A", "wall_clock_min": 10.5, "bobcoin": 880, "quality_pass": true, "quality_note": ""},
+    {"task_id": "T8", "condition": "B", "wall_clock_min": 6.0, "bobcoin": 520, "quality_pass": true, "quality_note": ""}
+  ]
+}

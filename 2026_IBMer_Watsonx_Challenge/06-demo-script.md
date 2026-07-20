@@ -38,8 +38,9 @@ As Bob answers:
 
 **[1:10–1:25] The numbers, honestly (screen: the impact slide or report.json)**
 > "Measured: 20% mean token compression on 183 real documents — manifest-backed, null-tested. With cache
-> reuse it climbs with your repetition rate. And on my own hcd project — 94 demos — it cut Bobcoins per
-> iteration by about 60%. We publish the model, not a single flattering number."
+> reuse it climbs with your repetition rate. And the developer-velocity number — the controlled before/after —
+> we're measuring with a pre-registered A/B harness that refuses to report below five valid tasks. We publish
+> the model, not a single flattering number."
 
 **[1:25–1:30] The close (to camera)**
 > "It's Bob-native, one-click to adopt, and it refuses to overclaim its own savings. That last part is the
