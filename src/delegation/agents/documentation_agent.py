@@ -21,14 +21,15 @@ class DocumentationAgent(SubAgent):
     - Documentation generation
     """
 
-    def __init__(self, agent_id: str, cache_enabled: bool = True):
+    def __init__(self, agent_id: str, cache_enabled: bool = True, base_path: str = "."):
         super().__init__(
             agent_id=agent_id,
             agent_type="documentation",
             cache_enabled=cache_enabled,
             max_cache_size=500,
         )
-        self.reader = BatchFileReader()
+        self.base_path = base_path
+        self.reader = BatchFileReader(base_path=base_path)
 
     def get_capabilities(self) -> List[str]:
         return [
@@ -43,24 +44,26 @@ class DocumentationAgent(SubAgent):
     def analyze(self, task: SubAgentTask) -> SubAgentResult:
         target = task.target
 
-        # Contain the untrusted task.target within the working directory *before*
-        # any filesystem traversal: a '../' sequence or an absolute path must not
-        # let rglob() walk outside the project tree. This is the delegation-side
-        # enforcement the STRIDE threat model (docs/security/THREAT_MODEL.md)
-        # relies on; BatchFileReader re-checks each resolved file as well.
+        # Contain the untrusted task.target within the containment base *before*
+        # any filesystem traversal: a '../' sequence, an absolute path, or a
+        # symlink pointing outside must not let rglob() walk beyond the base. The
+        # base is cwd by default, or the --allow-external root when the pipeline
+        # rebases it (self.base_path). This is the delegation-side enforcement the
+        # STRIDE threat model (docs/security/THREAT_MODEL.md) relies on;
+        # BatchFileReader re-checks each resolved file against the same base.
         from pathlib import Path
 
         from src.tools.safe_paths import resolve_within
 
         try:
-            target_path = resolve_within(Path.cwd(), target)
+            target_path = resolve_within(Path(self.base_path), target)
         except ValueError:
             return SubAgentResult(
                 agent_id=self.agent_id,
                 agent_type=self.agent_type,
                 status=SubAgentStatus.FAILED,
                 data={},
-                errors=[f"Invalid target path (escapes working directory): {target}"],
+                errors=[f"Invalid target path (escapes containment base): {target}"],
             )
 
         try:

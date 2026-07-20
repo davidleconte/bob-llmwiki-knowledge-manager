@@ -18,7 +18,7 @@ Capabilities:
 
 #### Methods
 
-##### `__init__(agent_id: str, cache_enabled: bool)`
+##### `__init__(agent_id: str, cache_enabled: bool, base_path: str)`
 
 
 ##### `get_capabilities() -> List[str]`

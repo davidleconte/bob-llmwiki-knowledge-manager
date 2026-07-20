@@ -21,7 +21,7 @@ class SecurityAgent(SubAgent):
     - Input validation checks
     """
 
-    def __init__(self, agent_id: str, cache_enabled: bool = True):
+    def __init__(self, agent_id: str, cache_enabled: bool = True, base_path: str = "."):
         """Initialize security agent"""
         super().__init__(
             agent_id=agent_id,
@@ -29,7 +29,7 @@ class SecurityAgent(SubAgent):
             cache_enabled=cache_enabled,
             max_cache_size=500,
         )
-        self.analyzer = ComponentAnalyzer()
+        self.analyzer = ComponentAnalyzer(base_path=base_path)
 
     def get_capabilities(self) -> List[str]:
         """Get agent capabilities"""

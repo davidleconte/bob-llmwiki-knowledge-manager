@@ -174,6 +174,17 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Skip TokenOptimizer compression of agent reports before KB write",
     )
+    p_analyze.add_argument(
+        "--allow-external",
+        metavar="DIR",
+        default=None,
+        help=(
+            "Analyze an existing directory OUTSIDE the current working directory "
+            "(e.g. a checked-out foreign repo). Containment is rebased onto DIR, not "
+            "relaxed: a target escaping DIR via '../', an absolute path, or a symlink "
+            "is still refused."
+        ),
+    )
 
     # --- KB search command (P4) ---
     p_kbsearch = sub.add_parser("kb-search", help="Semantic search across the knowledge base")
@@ -630,6 +641,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                 max_workers=args.workers,
                 depth=args.depth,
                 compress=not args.no_compress,
+                allow_external=args.allow_external,
             )
             _emit(pipeline_result.__dict__, as_json)
         except Exception as exc:

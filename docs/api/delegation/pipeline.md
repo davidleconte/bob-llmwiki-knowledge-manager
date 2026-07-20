@@ -32,13 +32,19 @@ Sequences:
 4. Compressed (or raw) reports are written as KB research docs to *output_dir*.
 
 Args:
-    target_dir: Directory (or file) to analyse.  Must not escape cwd.
+    target_dir: Directory (or file) to analyse, resolved under the containment
+        base (cwd by default, or *allow_external* when set).  Must not escape it.
     kb_path: KB root for :class:`~src.delegation.agents.ResearchAgent` context lookup.
     output_dir: Directory to write generated research docs.
     max_workers: Maximum parallel agent workers.
     depth: Analysis depth — ``"shallow"`` or ``"deep"``.
     compress: Pass agent reports through :class:`~src.facade.TokenOptimizer`
         before writing.  Set ``False`` to write raw JSON.
+    allow_external: Absolute path to an existing directory *outside* cwd to
+        analyse (e.g. a checked-out foreign repo).  Containment is rebased onto
+        this directory rather than relaxed: *target_dir* is resolved under it and
+        a ``../``, absolute, or symlink-escaping target is still refused.  ``None``
+        (default) pins the base to cwd, preserving the prior behaviour.
 
 Returns:
     :class:`AnalysisPipelineResult` with per-agent status and compression metrics.
