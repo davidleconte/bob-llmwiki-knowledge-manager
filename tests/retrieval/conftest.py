@@ -14,15 +14,20 @@ def tmp_kb(tmp_path: Path) -> Path:
     kb = tmp_path / "knowledge-base"
     for cat in ("concepts", "guides", "references", "research"):
         (kb / cat).mkdir(parents=True)
+    from tests.security.conftest import sign_verified
+
     (kb / "concepts" / "example.md").write_text(
-        textwrap.dedent("""\
-            ---
-            title: Example Concept
-            trust_tier: verified
-            ---
-            # Example Concept
-            This is a test document about example concepts.
-        """),
+        sign_verified(
+            kb,
+            textwrap.dedent("""\
+                ---
+                title: Example Concept
+                trust_tier: verified
+                ---
+                # Example Concept
+                This is a test document about example concepts.
+            """),
+        ),
         encoding="utf-8",
     )
     return kb

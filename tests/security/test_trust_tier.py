@@ -120,3 +120,49 @@ def test_include_unverified_returns_real_content(tmp_kb):
             assert KB_CONTENT_OPEN in content, "Content must still be wrapped in delimiters"
             assert body in content, "Real content must be present when include_unverified=True"
             return
+
+
+# ---------------------------------------------------------------------------
+# ATK-MEM-02 read-path enforcement: `trust_tier: verified` needs a valid signature
+# ---------------------------------------------------------------------------
+
+
+def test_forged_verified_tier_is_not_trusted(tmp_kb):
+    """A hand-forged ``trust_tier: verified`` with no valid provenance signature
+    must NOT be served as trusted content — it is withheld like an unverified doc.
+
+    This is the ATK-MEM-02 residual the Cowork re-audit surfaced: the read path
+    used to honour the raw frontmatter tier without checking the HMAC signature.
+    """
+    # Write directly, bypassing the fixture's signing, to simulate a forgery.
+    (tmp_kb / "concepts" / "forged.md").write_text(
+        _make_doc("Forged Trusted Doc", "verified", "FORGED trusted content payload."),
+        encoding="utf-8",
+    )
+    kbq = KnowledgeBaseQuery(str(tmp_kb))
+    result = kbq.query("forged trusted content", include_content=True)
+    hits = [r for r in result.get("results", []) if "forged" in r.get("file", "")]
+    assert hits, "test setup: the forged doc should match the query"
+    assert hits[0].get("content") == _TRUST_CONTENT_PLACEHOLDER, (
+        "a forged (unsigned) verified doc must be withheld, not served as trusted"
+    )
+
+
+def test_signed_verified_tier_is_trusted(tmp_kb):
+    """A genuinely-signed ``trust_tier: verified`` doc IS served as trusted — the
+    enforcement must not over-block legitimately-provenanced content."""
+    from src.provenance import attach_signature, load_or_create_key
+
+    signed = attach_signature(
+        _make_doc("Signed Trusted Doc", "verified", "REAL provenanced trusted content."),
+        load_or_create_key(tmp_kb),
+    )
+    (tmp_kb / "concepts" / "signed.md").write_text(signed, encoding="utf-8")
+    kbq = KnowledgeBaseQuery(str(tmp_kb))
+    result = kbq.query("signed provenanced trusted", include_content=True)
+    hits = [r for r in result.get("results", []) if "signed" in r.get("file", "")]
+    assert hits, "test setup: the signed doc should match the query"
+    assert KB_CONTENT_OPEN in hits[0].get("content", ""), "wrapped content expected"
+    assert "REAL provenanced trusted content" in hits[0].get("content", ""), (
+        "a validly-signed verified doc must be served as trusted"
+    )
