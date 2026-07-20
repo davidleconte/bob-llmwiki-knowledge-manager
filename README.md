@@ -20,8 +20,8 @@ identically in **Bob IDE** and **Bob Shell CLI** — same modes, same KB, same c
 ![license](https://img.shields.io/badge/license-MIT-blue)
 ![python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue)
 ![version](https://img.shields.io/badge/version-1.1.0-informational)
-![tests](https://img.shields.io/badge/tests-1440%2B%20passing-success)
-![coverage](https://img.shields.io/badge/coverage-%E2%89%8890%25%20(gate%20%E2%89%A580%25)-success)
+![tests](https://img.shields.io/badge/tests-1386%20passing-success)
+![coverage](https://img.shields.io/badge/coverage-%E2%89%8889%25%20(gate%20%E2%89%A580%25)-success)
 
 `MIT licensed` · `Native Bob modes` · `No MCP servers required` · `No plugins` · `Pattern: LLM-Wiki (Karpathy)` · `Bob Shell CLI` · `Bob IDE`
 
@@ -30,9 +30,10 @@ identically in **Bob IDE** and **Bob Shell CLI** — same modes, same KB, same c
 > Bobcoins, and the budget is finite and shared. Spending it on *re-derivation* — re-reading files Bob already
 > processed, re-reasoning decisions it already made — is waste. Mnemox eliminates that waste structurally.
 
-> **Status in one line.** Mnemox is **Beta — Not Production Ready.** A large remediation landed on 2026-07-20
-> (retrieval wired into production, integrity gates green, optimizer hardened, path containment applied); the main
-> remaining work is making the trust layer *load-bearing at the read boundary* (see [§13](#13-security-posture)).
+> **Status in one line.** Mnemox is **Beta — Not Production Ready.** Two verified remediation waves landed through
+> 2026-07-20 (retrieval wired into production, integrity gates green, optimizer hardened, path containment applied,
+> and — the decisive change — trust now **verified at the read boundary**, see [§13](#13-security-posture)); the main
+> remaining work is the retrieval-quality upside and an end-to-end impact benchmark.
 > **[STATUS.md](STATUS.md) is the single source of truth for maturity** — any number here defers to it.
 
 ---
@@ -98,8 +99,9 @@ integration points; either works without the other (see [`INTEGRATIONS.md`](INTE
 **Mnemox is *not*** (deliberately not claimed): not production-hardened, and not covered by an SLA or a guaranteed
 savings percentage; not, on its default embedding backend, a *higher-quality-than-keyword* retrieval engine yet
 (retrieval is wired, but the default backend measures at parity with keyword search — use the optional MiniLM
-backend for a quality lift, see [§11](#11-what-is-actually-measured)); not yet a trust boundary (provenance is
-built but not yet enforced at the read boundary — see [§13](#13-security-posture)); not Windows-supported; and not
+backend for a quality lift, see [§11](#11-what-is-actually-measured)); not a hardened multi-tenant trust boundary
+(verify-at-read is now enforced for signed content, but the provenance key is a local integrity secret and the KB
+should still be reviewed like code — see [§13](#13-security-posture)); not Windows-supported; and not
 an automated multi-agent research system.
 
 ## 4. The innovative approach — why Mnemox is different
@@ -115,9 +117,10 @@ current tree.
   (review a memory change like a code change), **auditable** (`git log --follow` on any fact), **reversible**
   (`git revert` a bad memory), and **portable** (Markdown + frontmatter reads in any assistant). No opaque vector
   store, no lock-in, no unshareable per-user cache.
-- **The compounding loop** *(✔ shipped, measured).* Bob reads the repo once, files a digest, and every later session
+- **The compounding loop** *(✔ shipped).* Bob reads the repo once, files a digest, and every later session
   *retrieves* instead of *re-deriving*. This reframes token spend as an **investment** rather than a recurring tax —
-  and the effect is measured, not asserted ([§11](#11-what-is-actually-measured)).
+  the compression it enables is measured and manifest-backed; the larger re-derivation saving is a preliminary signal
+  being measured properly next ([§11](#11-what-is-actually-measured)).
 - **Three-layer discipline** *(✔ shipped).* Immutable raw sources, an LLM-owned wiki, and a stable schema keep the
   model a *disciplined maintainer* — consistent templates, bidirectional cross-references, a self-updating index —
   and make the loaded context **cache-stable** across a team.
@@ -238,10 +241,12 @@ core scripts (`install`, `init-project`, `validate-kb`, `export-kb` → Markdown
 analysis suite; and 3 worked-example knowledge bases (software project, research project, personal wiki).
 
 **Token Optimization System (the Python system `src/`, Beta):** the `TokenOptimizer` facade + `bob-optimize` CLI
-(15 subcommands); a multi-level cache (L1 exact `<1 ms`, L2 semantic `<100 ms`); the prompt optimizer (~20% mean
-compression, near-lossless, tiktoken-counted); truncation (lossy budget-fit, reported separately); structured
-monitoring (JSON logging, metrics, health, cost tracking); and the knowledge graph (`src/graph/` — orphan/hub
-detection, multi-hop BFS, PageRank re-ranking; `graph-build / graph-query / graph-health`).
+(16 subcommands); a multi-level cache (L1 exact `<1 ms`, L2 semantic `<100 ms`); the prompt optimizer (~20% mean
+compression, near-lossless, tiktoken-counted — manifest-backed, [§11](#11-what-is-actually-measured)); truncation (lossy budget-fit, reported separately); structured
+monitoring (JSON logging, metrics, health, cost tracking); the knowledge graph (`src/graph/` — orphan/hub
+detection, multi-hop BFS, PageRank re-ranking; `graph-build / graph-query / graph-health`); and a provenance layer
+(HMAC signing, quarantine, `kb-promote`, and `attest` — the governed-memory auditor that reports which `trust_tier`
+claims survive signature verification at read).
 
 ## 8. Who this is for
 
@@ -279,12 +284,13 @@ Each IBM token-economy principle has a concrete home in how the modes behave:
 ### The `bob-optimize` CLI
 
 ```bash
-python -m src --help            # or: bob-optimize --help   (15 subcommands)
+python -m src --help            # or: bob-optimize --help   (16 subcommands)
 
 bob-optimize kb-status                         # KB / index / graph health
 bob-optimize kb-search "cache thread safety"   # search the KB (index + graph wired)
 bob-optimize graph-build  --kb-path docs/knowledge-base   # build + persist the graph
 bob-optimize graph-health --kb-path docs/knowledge-base   # orphans, hubs, broken links
+bob-optimize attest       --kb-path docs/knowledge-base   # trust posture: which 'verified' claims are validly signed
 bob-optimize cost-report                        # Bobcoin / token accounting
 python -m src.validation --corpus repo          # reproduce the savings measurement
 ```
@@ -401,7 +407,8 @@ bob-llmwiki-knowledge-manager/
 
 The facade holds no business logic and the dependency graph is acyclic. Persistence is atomic (`os.replace`) and
 pickle-free (`allow_pickle=False`). Path containment (`resolve_within`) guards tool entry points (including the
-retrieval read path, as of the 2026-07-20 remediation). Embeddings are deterministic by default (a stateless hashing
+retrieval read path); trust is verified at the read boundary — the retrieval path checks the provenance signature
+before honouring a `verified` tier. Embeddings are deterministic by default (a stateless hashing
 backend, with an optional MiniLM backend). The Markdown-first store is the load-bearing choice: memory that is
 diffable, reviewable, and portable rather than trapped in a proprietary index.
 
@@ -413,13 +420,12 @@ detected and withdrawn ([§16](#16-provenance--honesty-policy)).
 
 | Metric | Value | Basis |
 |---|---|---|
-| **Optimizer compression** | **~20% mean** (95% CI ≈ [19%, 21%], N = 183 real in-repo docs; null test passing; token-weighted ~23%) | `evaluation/results/validation-2026-07-14/`; reproduce with `python -m src.validation` |
-| **KM re-derivation saving** | **51%** on matched compact-summary pairs (N = 10, 95% CI [38%, 64%]) | `tests/validation/test_km_savings.py` |
-| KM saving, *all* pairs | **~2%** (95% CI [−32%, +30%]) — reported for honesty | same |
+| **Optimizer compression** | **~20% mean** (95% CI [18.9%, 21.2%], N = 183 real in-repo docs; null test passing; token-weighted ~23%) | `evaluation/results/validation-2026-07-14/`; reproduce with `python -m src.validation` |
 | **Retrieval quality (default backend)** | **p@3 = 0.84**, at parity with the keyword baseline (0.84) — no net lift | `evaluation/results/retrieval-2026-07-19/` (116-doc golden set) |
 | Retrieval quality (MiniLM, lab) | **p@3 = 0.88** — *not* reproducible in CI (needs the optional MiniLM backend) | ADR-014 / ADR-017; graph-validation report |
-| Test suite | **1440+ passing** (5 environmental skips/failures without `.git`/MiniLM) | `pytest -m "not slow"` |
-| Coverage | **≈90%** global; gate **≥80%** with per-package floors | `coverage.json`; `pyproject.toml` (`fail_under = 80`) |
+| Read-boundary trust | a forged `trust_tier: verified` document is withheld; a validly-signed one is served | `tests/security/` (re-verified by re-running the forgery exploit) |
+| Test suite | **1,386 passing**, 23 skipped (CI-green, ex load/perf) | `docs/project-management/plans/wave3-status.md` |
+| Coverage | **≈89%** global; gate **≥80%** with per-package floors | `STATUS.md`; `pyproject.toml` (`fail_under = 80`) |
 
 > These figures are **not additive**; cache recompute-avoidance and lossy truncation are reported **separately** from
 > compression, never blended into a single headline. The honest retrieval story: the stack is *wired*, but on the
@@ -427,47 +433,61 @@ detected and withdrawn ([§16](#16-provenance--honesty-policy)).
 > ranking work (query-seeded PPR, RRF fusion, contextual chunking). The graph's present value is structural
 > (orphan/hub/broken-link analysis), not score-blending, at the current corpus size.
 
+> **The bigger prize — and why it is not a headline number yet.** Compression is only a proxy; the larger effect is
+> *not re-deriving at all* — retrieving a filed digest instead of re-reading source. A preliminary compact-summary
+> comparison on a handful of matched pairs is suggestive of a much larger effect, but with a sample that small and no
+> reproducibility manifest it stays a *signal*, not a published result — exactly what this project's provenance policy
+> ([§16](#16-provenance--honesty-policy)) demands of any number. Measuring it properly, with a paired, pre-registered
+> A/B on real developer tasks, is the open instrument work ([§14](#14-roadmap--where-it-is-going)).
+
 ## 12. Status & known limitations
 
-Mnemox is **Beta — Not Production Ready**. A large remediation landed 2026-07-20 and was independently re-verified
+Mnemox is **Beta — Not Production Ready**. Two remediation waves landed through 2026-07-20 and were independently
+re-verified by re-running the original exploits
 (see [`docs/knowledge-base/research/master-engagement-reaudit-2026-07-20.md`](docs/knowledge-base/research/master-engagement-reaudit-2026-07-20.md));
-the independent counter-audit score moved **2.9 → ≈3.8/5**. Honest current state:
+the independent audit score moved **2.9 → 3.8 → 4.2/5** (a formal independent re-grade is pending). Honest current state:
 
-**Fixed and verified (2026-07-20):** retrieval is wired into production (`kb-search`, `research_agent`); the
-optimizer is never-empty and structure-preserving; `validate-kb.sh` fails closed on broken links and the broken
-cross-references were repaired; ranking is normalized (retrieval-gaming ratio 18× → 1.48×); denial-of-service
-vectors (PageRank complexity, graph edge explosion) are bounded; and all CI honesty gates are green with
-planted-defect tests proving they can fail.
+**Fixed and verified (two waves, through 2026-07-20):** retrieval is wired into production (`kb-search`,
+`research_agent`); the optimizer is never-empty and structure-preserving; `validate-kb.sh` fails closed on broken
+links and the broken cross-references were repaired; ranking is normalized (retrieval-gaming ratio 18× → 1.48×);
+denial-of-service vectors (PageRank complexity, graph edge explosion) are bounded; **trust is now verified at the
+read boundary** (a forged `trust_tier: verified` document is withheld); the **L2 semantic-cache contract**
+(collision, TTL, metadata aliasing) and the **optimizer's budget-aware cache key** are closed; and all CI honesty
+gates are green with planted-defect tests proving they can fail.
 
 **Known residuals (tracked):**
 
 - **Retrieval quality is at keyword parity on the default backend** (p@3 = 0.84). Higher quality needs the optional
   MiniLM backend and the proposed PPR / RRF / contextual-chunking work ([§11](#11-what-is-actually-measured)).
-- **Trust is not yet enforced at the read boundary.** Provenance signing, quarantine, and `kb-promote` are shipped,
-  but retrieval still decides trust on the plaintext `trust_tier:` field rather than verifying the HMAC signature —
-  so a forged tier is served as trusted. This is the **top remaining item** ([§13](#13-security-posture)).
-- **L2 cache residuals:** the semantic cache can serve a colliding payload, its `contains()` ignores TTL, and it
-  aliases the caller's metadata dict (each fixed in L1, not yet in L2). The optimizer cache is keyed on the prompt
-  only, so a stricter `max_tokens` can return an earlier over-budget result.
 - **Cold-start context cost** is bounded and budget-gated but still ~11.3k tokens (the sub-3k target is proposed),
   and most tests use tiktoken rather than live LLM APIs.
+- **Minor, non-security:** a date filter is fail-open on the index read path (LOW); the per-node graph edge cap
+  counts only originated edges (the global cap still bounds total edges); a clean checkout can raise a spurious
+  "index stale" warning. Tracked, not dismissed.
 
 **Not claimed:** enterprise SLAs, production support, guaranteed savings percentages, automated multi-agent research,
 or Windows compatibility.
 
 ## 13. Security posture
 
-> **Improving, not yet a trust boundary. Treat KB content as untrusted input and review it like code.**
+> **A trust boundary for signed content — but still review the KB like code, and don't point it at secrets.**
 
 Because Mnemox loads Markdown from the knowledge base directly into the agent's context, the KB is, in effect, an
-**instruction channel** into the model. The 2026-07-20 remediation closed several exploits confirmed by the
-2026-07-19 adversarial audit: path containment is now applied on the retrieval read path (a symlinked KB entry can
-no longer disclose files outside the KB), retrieved content is delimited and exfiltration-flagged at the boundary,
-and a provenance/quarantine layer plus a poisoning red-team suite are in CI. **The remaining gap** is that the
-retrieval trust decision reads the plaintext `trust_tier:` frontmatter and does not yet verify the HMAC signature,
-so a hand-forged `trust_tier: verified` document is still served as trusted; closing this *verify-at-read* gap is
-what makes the git-native substrate a genuine security control. Until then, **do not run Mnemox against secrets or
-in a multi-tenant trust boundary**, and prefer a reviewed pull-request workflow for KB changes. Full analysis:
+**instruction channel** into the model. Two verified remediation waves closed the exploits the 2026-07-19 adversarial
+audit confirmed: path containment is applied on the retrieval read path (a symlinked KB entry can no longer disclose
+files outside the KB), retrieved content is delimited and exfiltration-flagged at the boundary, and a
+provenance/quarantine layer plus a poisoning red-team suite run in CI. **The decisive change:** the retrieval trust
+decision now **verifies the HMAC signature, not the plaintext `trust_tier:` field.** A document's `verified` claim is
+honoured only when `verify_document` validates an authentic signature over its signed fields; a hand-forged,
+bogus-signature, or tamper-after-sign `trust_tier: verified` document is **withheld** at read on both the scan and
+index paths (re-verified by re-running the forgery exploit). This is what converts the git-native substrate from a
+liability into a genuine security control.
+
+The posture is now *load-bearing*, not *hardened*: the provenance key is a **local integrity secret** — it proves a
+document was produced by something holding this repo's key and detects tampering, but it is not a public-key identity
+or a multi-tenant boundary. So **do not run Mnemox against secrets or as a multi-tenant trust boundary without
+review**, prefer a reviewed pull-request workflow for KB changes, and note one LOW residual (a date filter is
+fail-open on the index read path). Full analysis:
 [`adversarial-audit-2026-07-19.md`](docs/knowledge-base/research/adversarial-audit-2026-07-19.md) and the re-audit.
 Report vulnerabilities per [SECURITY.md](SECURITY.md); the STRIDE threat model is at
 [`docs/security/threat-model.md`](docs/security/threat-model.md).
@@ -482,22 +502,25 @@ Organized into six opportunity spaces and three horizons (full detail in the inn
   defect fixed; ranking normalized. **○ Reachable next:** query-seeded PPR, reciprocal-rank fusion, contextual
   chunking (the quality upside).
 - **◐ Compact cold-start index** *(partial)* — bounded and budget-gated; the sub-3k-token target is not yet met.
-- **◐ Trust & memory safety** *(partial — top item)* — signing, quarantine, and `kb-promote` shipped; the remaining
-  work is *verify-at-read* (see [§13](#13-security-posture)).
+- **✔ Trust & memory safety** *(shipped)* — signing, quarantine, `kb-promote`, **and verify-at-read at the read
+  boundary** (a forged `verified` tier is withheld); the L2 cache contract and the optimizer's budget-aware cache key
+  are closed. What remains here is hardening: one LOW date-filter residual, and a multi-key/identity model.
 - **○ Lifecycle intelligence** *(proposed)* — a between-sessions consolidation pass (dedup, episodic→semantic
   distillation, temporal supersession).
 - **○ Reach & ecosystem** *(proposed)* — an optional **MCP server** surface (native core preserved), plus first-class
   **watsonx** integration (Docling ingestion, Milvus / OpenSearch+JVector scale-out backends, KB analytics in
   watsonx.data).
-- **○ Impact benchmark** *(proposed — the measurement instrument)* — an end-to-end cost-per-resolved-task benchmark
-  with vs. without memory. Until it exists, roadmap items are ranked by *hypothesized* impact, not measured impact.
+- **○ Impact benchmark** *(proposed — protocol defined)* — an end-to-end, paired, pre-registered A/B measuring
+  cost-per-resolved-task with vs. without memory; the protocol is committed
+  ([`AB-velocity-measurement-protocol.md`](2026_IBMer_Watsonx_Challenge/AB-velocity-measurement-protocol.md)) and
+  running it is the open work. Until it produces a number, roadmap items are ranked by *hypothesized* impact.
 
 ## 15. Development
 
 ```bash
 uv sync --frozen                       # locked dev environment
-pytest -q                              # run the suite (1440+ passing)
-pytest --cov=src --cov-report=term     # coverage (gate ≥80%, ≈90% measured)
+pytest -q                              # run the suite (1,386 passing, ex load/perf)
+pytest --cov=src --cov-report=term     # coverage (gate ≥80%, ≈89% measured)
 ruff check . && ruff format --check .   # lint + format
 mypy src                               # type check
 python -m src.validation --corpus repo # reproduce the savings measurement
@@ -518,7 +541,8 @@ documented** — see [`evaluation/validation-disclaimer.md`](evaluation/validati
 harness includes a null test, refuses to gate on savings *magnitude* (which would re-incentivise inflation), and
 reports each mechanism separately. In the same spirit, the earlier self-assessed "A+" grade has been **withdrawn** —
 self-grading is not a substitute for independent verification; the on-file independent verdicts are the counter-audit
-(2.9/5) and the post-remediation re-audit (≈3.8/5). `STATUS.md` is the one home for the maturity status, enforced by
+(2.9/5) and the post-remediation re-audits (3.8 → 4.2/5 across two verified waves; a formal independent re-grade is
+pending). `STATUS.md` is the one home for the maturity status, enforced by
 `scripts/check_status_consistency.py`.
 
 ## 17. Project documents
