@@ -101,6 +101,28 @@ mutation-verified); the three LOW/cosmetic NEW-2..4 remain tracked.
 | NEW-3 | Low | per-node semantic edge cap counts one direction only (a node reached 59 vs cap 50; the global cap still bounds totals) | **Open — tracked** |
 | NEW-4 | Cosmetic | clean checkout flags every shipped doc stale (mtime-sentinel drift; retrieval unaffected) | **Open — tracked** |
 
+### 2026-07-20 re-audit — register disposition
+
+The independent re-audit
+(`docs/knowledge-base/research/master-engagement-reaudit-2026-07-20.md`) graded the
+**pre-fix** tree (`v1.0-136-g07ad245`, before `0e97f6e` / `37c1ebc` / `443ad77`), so
+both its ≈3.8/5 and its open-residual list predate the closures above. Its full
+register is dispositioned in the tables above; this is the crosswalk and the standing
+against the re-audit's own GO condition (its §6).
+
+| Re-audit GO condition (§6) | Current standing |
+|---|---|
+| Zero open Critical/High (ATK-MEM-02 closed) | **Met on main** — `0e97f6e` (see High table) |
+| L2 cache residuals closed **or** formally risk-accepted | **Met on #41 merge** — ATK-FS-02/04/05 closed (`443ad77`); NEW-2..4 risk-accepted (tracked above) |
+| Independent re-grade ≥ 4.0/5 on the post-W-B tree | **Open** — R14 (§5); must score the post-`443ad77` tree, not the pre-fix tree the re-audit itself graded |
+
+Recommendation crosswalk: **R1** (provenance-at-read) = ATK-MEM-02 `0e97f6e`; **R2**
+(unify L2 cache semantics) = ATK-FS-02/04/05 `443ad77`; **R3** (fold budget into the
+optimizer key) = NEW-1 `443ad77`; **R7** (vulnerable-layer discipline) institutionalized
+in [`adversarial-remediation-plan.md`](../../../adversarial-remediation-plan.md)
+(Status-discipline section); **R4–R6** (NEW-2..4) tracked-open above. The re-audit's
+≈3.8/5 is a candidate *input* to R14, not the verdict — §5.
+
 ## 3. Scale hardening (A7 + A8) — this exit PR (`37c1ebc`)
 
 - **A7** — `src/limits.py` is the single home for `MAX_FILE_BYTES` (1 MiB),

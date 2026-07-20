@@ -11,6 +11,27 @@ claims as ✓ **CONFIRMED**.
 **Status discipline:** A finding is not closed until its adversarial regression test goes
 **red on the unfixed tree** and **green on the fixed tree**.
 
+**Vulnerable-layer discipline (added 2026-07-20 — R7):** A *security* fix is additionally not
+closed until its regression test runs **at the layer the attack lands on**, not merely at the
+layer where the PoC was first written. The 2026-07-20 re-audit traced every post-verification
+residual (ATK-MEM-02, ATK-FS-02/04/05) to one root cause: the fix and its test were applied to
+the **demonstrated** layer (the L1 cache, the signing module) while the attack actually lands one
+layer away (the L2 semantic cache, the retrieval read path). A green test at the wrong layer
+*masks* an open exploit. Every security sub-task therefore carries a vulnerable-layer block:
+
+> **Vulnerable layer:** `<module/path where the attack lands>`
+> **Regression test at that layer:** `<test that is red on the unfixed vulnerable layer, green after>`
+> **Demonstrated layer (if different):** `<where the PoC was first written>` — a passing test here is necessary but **not** sufficient.
+
+If the vulnerable layer and the demonstrated layer are the same, state it explicitly
+(`vulnerable layer == demonstrated layer`) so a reviewer sees the check was made, not skipped.
+
+*Worked example (ATK-MEM-02, `0e97f6e`).* Vulnerable layer: `src/tools/kb_query.py` (the retrieval
+read path, which decided trust). Test at that layer: `tests/security/test_trust_tier.py` — a forged
+`trust_tier: verified` doc with no valid signature is withheld (red before, green after). Demonstrated
+layer: `src/provenance.py` (`verify_document` correctly rejected forgery *in isolation*) — that test
+passed the whole time and would have masked the exploit on its own.
+
 ---
 
 ## Adversarial Audit of the v1 Plan (Self-Critique Before Implementation)
