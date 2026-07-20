@@ -107,11 +107,11 @@ reconciled ~55 with 6 Critical / 12 High. The Critical + material High set:
 
 | ID | Finding | Disposition @ 6d0711d | Cite |
 |----|---------|----------------------|------|
-| ATK-DOS-01 | PageRank dangling-node O(n²) (~184s @10k) — was mis-marked "fixed" | **Closed (Wave-3 A1)** — O(N); mixed-dangling test | `src/graph/graph.py`; `tests/graph/test_graph.py` |
+| ATK-DOS-01 | PageRank dangling-node O(n²) (~184s @10k) — was mis-marked "fixed" | **Closed (Wave-3 A1)** — O(N); mixed-dangling test | `src/graph/graph.py`; `tests/performance/test_dos_hardening.py` |
 | CODE-04 / ATK-DOS-04 | Index rows never reclaimed; O(N²) `np.vstack` rebuild residual | **Closed (Wave-3 A3ii)** — batched rebuild | `src/**/index.py`; WS-A tests |
 | CODE-05 | Recency weighting numerically inert | **Closed (W1)** | `test_ranking_normalization.py` |
 | CODE-06 | PageRank blend scale-mismatch (×15 no-op) | **Closed (W1)** | `tests/retrieval/` |
-| CODE-08 / ATK-FS-02 | L2→L1 promotion caches fuzzy match as forged exact hit | **Closed (W1)** | `src/optimizer/multi_level_cache.py:180-189`; `test_cache_integrity.py` |
+| CODE-08 / ATK-FS-02 | L2→L1 promotion caches fuzzy match as forged exact hit | **Closed (W1)** | `src/cache/multi_level_cache.py:180-189`; `tests/security/test_cache_integrity.py` |
 | CODE-10 | watsonx tokenizer/pricing dishonesty (economics) | **Closed (Wave-3 B1–B4)** | `src/optimizer/token_counter.py`; WS-B tests |
 | MEM-04 | `validate-kb.sh` never exits non-zero (subshell counter loss) | **Closed (W1)** | `scripts/validate-kb.sh:161-164`; `test_validate_kb.py` |
 | ATK-FS-01 | Arbitrary file read via symlink escape (`/etc/passwd`) | **Closed (W1 + Wave-3 D3)** — path containment, rebased not relaxed | `tests/security/`; PR #33 |
