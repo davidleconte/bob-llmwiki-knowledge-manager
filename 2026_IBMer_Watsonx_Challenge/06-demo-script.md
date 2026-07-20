@@ -38,7 +38,8 @@ As Bob answers:
 
 **[1:10–1:25] The numbers, honestly (screen: the impact slide or report.json)**
 > "Measured: 20% mean token compression on 183 real documents — manifest-backed, null-tested. With cache
-> reuse it climbs with your repetition rate. We publish the model, not a single flattering number."
+> reuse it climbs with your repetition rate. And on my own hcd project — 94 demos — it cut Bobcoins per
+> iteration by about 60%. We publish the model, not a single flattering number."
 
 **[1:25–1:30] The close (to camera)**
 > "It's Bob-native, one-click to adopt, and it refuses to overclaim its own savings. That last part is the
@@ -54,5 +55,5 @@ The contrast *is* the value proposition — the audience sees re-derivation vs r
 - **Do** rehearse the exact prompt text; a fumbled live prompt reads as fragility.
 - **Do** keep Bob's answer on screen long enough to read — silence is fine.
 - **Don't** show `scripts/install.sh`, `.zshrc`, or the Python Beta path on camera.
-- **Don't** say any number that isn't in [`03_SOLUTION_IMPACT.md`](./03_SOLUTION_IMPACT.md).
-- **Don't** show STATUS.md on camera (self-awarded A+ grade undercuts the honesty brand — see risk register in [`README.md`](./README.md)).
+- **Don't** say any number that isn't in [`03-solution-impact.md`](./03-solution-impact.md).
+- **Don't** show STATUS.md on camera — it's an internal self-assessment (the prior A+ self-grade was **withdrawn**). Lead with measured numbers, not a grade. See risk register in [`README.md`](./README.md).

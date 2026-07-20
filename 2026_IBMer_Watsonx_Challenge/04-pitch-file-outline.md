@@ -6,6 +6,12 @@
 > Tone: outcome-first, honest, no inflated claims.
 > **Copyright:** use the *name* and an original moon/rocket motif — **no Tintin/Hergé artwork or text**.
 
+> **✅ The judged artifact is already built:** [`08-pitch-deck.pdf`](./08-pitch-deck.pdf) (3 pages, ≈0.46 MB)
+> condenses this outline into the required PDF. Upload that. Keep this 8-slide outline as the source for
+> (a) recording the optional ≤3-min **MP4** instead, or (b) expanding into a longer live-presented deck.
+> The PDF's 3 pages map to: **Page 1** = Slides 1–2 (problem + insight), **Page 2** = Slides 3–5 (how it
+> works + numbers), **Page 3** = Slides 6–8 (adopt + trust + frontier).
+
 ---
 
 ## Narrative through-line: *Objectif Lune*
@@ -107,7 +113,7 @@ The 6 token-economy taxes and how the **Bash KB Manager** removes them — no Py
 
 **Headline:** Any IBMer can adopt it in under 5 minutes — and the Tiger Team already has.
 
-The real Tiger-Team workflow you accelerated (see [`05_MEA_WATSONXDATA_CASE_STUDY.md`](./05_MEA_WATSONXDATA_CASE_STUDY.md)) — a lakehouse/real-time engagement pattern that now starts from accumulated KB expertise instead of zero. *Grounds the tool in real IBM revenue work.*
+The real Tiger-Team workflow you accelerated (see [`05-emea-watsonxdata-case-study.md`](./05-emea-watsonxdata-case-study.md)) — a lakehouse/real-time engagement pattern that now starts from accumulated KB expertise instead of zero. *Grounds the tool in real IBM revenue work.*
 
 - **Bob IDE:** mode picker → 🧠 Mnemox Knowledge Builder — zero installation, zero CLI, zero scripts
 - **Bob Shell CLI:** one alias, one command
@@ -145,7 +151,7 @@ STRIDE threat model · bandit SAST · null tests · manifest-backed validation �
 > impossible, made repeatable."
 
 - **BobjectifLune** — inspired by Tintin's *Objectif Lune*: what seems impossible becomes achievable through curiosity, a fail-fast mindset, and resilience. **Mnemox** is the craft.
-- This submission was drafted using the tool it describes. The knowledge base at `docs/knowledge-base/` — 90+ documents — was created and maintained by the Knowledge Manager mode. The GitHub repository is the proof of concept.
+- This submission was drafted using the tool it describes. The knowledge base at `docs/knowledge-base/` — 110+ documents — was created and maintained by the Knowledge Manager mode. The GitHub repository is the proof of concept.
 - Open-sourced under MIT license — any IBM team can clone, init, and start compounding immediately
 - **Next:** a domain-specific starter KB for watsonx.data Tiger Teams so every South EMEA engagement starts from accumulated expertise, not zero
 
@@ -176,4 +182,4 @@ STRIDE threat model · bandit SAST · null tests · manifest-backed validation �
 - Slides 1–8 are the main deck; Appendix A is backup for judge Q&A only
 - **Do not** show the Beta Python install path on camera; lead with the mode picker
 - **Do not** surface any non-Bob build tooling in the recording
-- **Do not** show STATUS.md on camera — if a judge asks about "A+", explain: it is an internal engineering-quality gate score, not a production-readiness claim
+- **Do not** show STATUS.md on camera, and do not cite any grade. The prior A+ self-grade was **withdrawn** (self-grading isn't verification — which is exactly our brand). If maturity comes up: "Bash KB Manager is stable v1.0; the Python layer is Beta; every number is measured and labelled."
