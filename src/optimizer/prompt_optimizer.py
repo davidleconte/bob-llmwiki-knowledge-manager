@@ -209,11 +209,18 @@ class PromptOptimizer:
         """
         start_time = time.time()
 
+        # Effective token budget: a per-call max_tokens overrides the instance
+        # default (self.max_tokens, from config). NEW-1: the budget is part of the
+        # cache key, so a stricter per-call cap cannot return an earlier uncapped
+        # result (nor an uncapped call an earlier capped one).
+        effective_max = max_tokens if max_tokens is not None else self.max_tokens
+        cache_key = self._cache_key(prompt, effective_max)
+
         # Check cache first
         if self.cache:
-            cached = self.cache.get(prompt)
+            cached = self.cache.get(cache_key)
             if cached is not None:
-                entry = self.cache.get_entry(prompt)
+                entry = self.cache.get_entry(cache_key)
                 self._logger.debug("optimization_cache_hit", prompt_length=len(prompt))
                 return self._parse_cached_result(cached, entry.metadata if entry else None)
 
@@ -229,9 +236,7 @@ class PromptOptimizer:
         if "remove_comments" in self.strategies or "shorten_names" in self.strategies:
             optimized = self._compress_content(optimized, preserve_structure)
 
-        # Apply token limit: a per-call max_tokens overrides the instance default
-        # (self.max_tokens, set from config); otherwise fall back to that default.
-        effective_max = max_tokens if max_tokens is not None else self.max_tokens
+        # Apply the effective token budget (computed above; part of the cache key).
         truncated = False
         if effective_max:
             before_trunc = optimized
@@ -308,7 +313,7 @@ class PromptOptimizer:
 
         # Cache result
         if self.cache:
-            self._cache_result(prompt, result)
+            self._cache_result(cache_key, result)
 
         return result
 
@@ -563,11 +568,19 @@ class PromptOptimizer:
 
         return quality
 
-    def _cache_result(self, prompt: str, result: Dict[str, Any]) -> None:
-        """Cache optimization result.
+    def _cache_key(self, prompt: str, effective_max: Optional[int]) -> str:
+        """Cache key folding in the effective token budget and the active strategy
+        set (NEW-1). Keying on the prompt alone let a later call with a stricter
+        ``max_tokens`` receive an earlier *uncapped* cached result (and the reverse).
+        """
+        strategies = ",".join(sorted(self.strategies))
+        return f"{prompt}\x00mt={effective_max}\x00s={strategies}"
+
+    def _cache_result(self, cache_key: str, result: Dict[str, Any]) -> None:
+        """Cache optimization result under *cache_key* (see :meth:`_cache_key`).
 
         Args:
-            prompt: Original prompt
+            cache_key: The budget-and-strategy-qualified cache key.
             result: Optimization result
         """
         if not self.cache:
@@ -583,7 +596,7 @@ class PromptOptimizer:
         # Pass metadata as a keyword arg: ExactCache.set()'s third positional
         # parameter is ``version`` -- passing metadata there corrupts the cache
         # key so set()/get() never agree (a write-only cache that never hits).
-        self.cache.set(prompt, result["optimized"], metadata=metadata)
+        self.cache.set(cache_key, result["optimized"], metadata=metadata)
 
     def _parse_cached_result(
         self, cached: str, metadata: Optional[Dict[str, Any]] = None

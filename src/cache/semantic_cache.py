@@ -45,6 +45,11 @@ class SemanticCache(CacheInterface):
 
     VERSION: str = "v1"  # Current cache version
 
+    # ATK-FS-02: a cosine at/above this to a *distinct* stored prompt is treated as
+    # a HashingVectorizer collision (distinct strings -> identical vector), not a
+    # genuine fuzzy match, and is refused rather than served.
+    _COLLISION_GUARD_SIMILARITY: float = 0.9999
+
     def __init__(
         self,
         similarity_threshold: float = 0.85,
@@ -235,8 +240,14 @@ class SemanticCache(CacheInterface):
                     best_match = None
                     best_similarity = 0.0
 
-            # Check if best match exceeds threshold
-            if best_match and best_similarity >= self.similarity_threshold:
+            # Check if best match exceeds threshold. ATK-FS-02: refuse a collision —
+            # a near-perfect cosine to a *distinct* stored prompt is a hashing
+            # collision, not a genuine match, so fall through to a miss.
+            if (
+                best_match
+                and best_similarity >= self.similarity_threshold
+                and not self._is_collision_serve(key, best_match, best_similarity)
+            ):
                 return self._finalize_hit(
                     best_match,
                     best_similarity,
@@ -265,6 +276,28 @@ class SemanticCache(CacheInterface):
 
             return None
 
+    def _is_expired(self, matched_key: str) -> bool:
+        """True if *matched_key*'s entry has outlived the TTL. Hold ``self._lock``."""
+        return (
+            self.ttl_seconds is not None
+            and matched_key in self.entries
+            and (self._clock() - self.entries[matched_key].timestamp) > self.ttl_seconds
+        )
+
+    def _is_collision_serve(self, query_key: str, matched_key: str, similarity: float) -> bool:
+        """Whether serving *matched_key* for *query_key* would be a hashing collision.
+
+        ATK-FS-02: the default HashingVectorizer maps distinct prompts (e.g. ones
+        differing only in stripped stopwords) to cosine 1.0. The exact-key
+        fast-path already served a genuinely-identical key, so a *near-perfect*
+        similarity to a *different* stored prompt is a collision — serving it would
+        hand one prompt's answer to another. Treat it as a miss (recompute) —
+        fail-safe. Genuine sub-perfect fuzzy matches are unaffected.
+        """
+        if similarity < self._COLLISION_GUARD_SIMILARITY:
+            return False
+        return self._extract_base_key(matched_key) != query_key
+
     def _finalize_hit(
         self,
         matched_key: str,
@@ -285,11 +318,7 @@ class SemanticCache(CacheInterface):
         latency_ms = (time.time() - start_time) * 1000
 
         # Enforce TTL: a stale match is expired -> evict and miss.
-        if (
-            self.ttl_seconds is not None
-            and matched_key in self.entries
-            and (self._clock() - self.entries[matched_key].timestamp) > self.ttl_seconds
-        ):
+        if self._is_expired(matched_key):
             self._remove_entry(matched_key)
             self._stats.record_miss()
             self._metrics.record_cache_miss("L2")
@@ -372,8 +401,10 @@ class SemanticCache(CacheInterface):
 
             # Store response and metadata
             self.responses[versioned_key] = value
-            if metadata is None:
-                metadata = {}
+            # ATK-FS-05: copy the caller's dict before mutating or storing it, so a
+            # later caller mutation cannot leak into the cache and set() never
+            # side-effects the caller's own dict (mirror ExactCache).
+            metadata = dict(metadata) if metadata else {}
 
             # Add version to metadata
             metadata["version"] = version or self.VERSION
@@ -640,6 +671,13 @@ class SemanticCache(CacheInterface):
                 best_match = version_keys[best_idx] if best_similarity > 0 else None
 
             if best_match and best_similarity >= self.similarity_threshold:
+                # ATK-FS-04: honor TTL (this path bypasses _finalize_hit).
+                if self._is_expired(best_match):
+                    self._remove_entry(best_match)
+                    return None
+                # ATK-FS-02: refuse a distinct-prompt collision.
+                if self._is_collision_serve(key, best_match, best_similarity):
+                    return None
                 return (self.responses[best_match], best_similarity)
 
             return None
