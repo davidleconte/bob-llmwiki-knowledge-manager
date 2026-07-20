@@ -160,7 +160,9 @@ REGISTRY: tuple[ValueHome, ...] = (
         name="limit_max_chunks_per_doc",
         file="src/limits.py",
         pattern=r"MAX_CHUNKS_PER_DOC\s*=\s*(\d+)",
-        mirrors=(Mirror("config/gates/gate-config.yaml", "extract", r"max_chunks_per_doc:\s*(\d+)"),),
+        mirrors=(
+            Mirror("config/gates/gate-config.yaml", "extract", r"max_chunks_per_doc:\s*(\d+)"),
+        ),
     ),
     ValueHome(
         name="limit_max_query_chars",
