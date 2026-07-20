@@ -61,6 +61,45 @@ def test_quarantined_still_excluded(tmp_path):
     assert all(r["file"] != "concepts/q.md" for r in result["results"])
 
 
+def test_missing_trust_tier_is_retrievable_not_excluded(tmp_path):
+    """A doc with NO trust_tier stays retrievable, surfaced as 'unset' — never silently
+    dropped.
+
+    This is the invariant that makes a *bulk* trust_tier back-fill unnecessary: only
+    ``quarantined``/``archived`` are excluded, so untagged legacy docs (including the
+    frozen C4 held-out corpus, which must not be edited to move a number) remain fully
+    visible. New generated docs are tagged at write time by the delegation pipeline; a
+    one-time migration over existing files would edit frozen contracts for no retrieval
+    benefit. Locking the default here is the robust substitute for that migration.
+    """
+    kb = _make_kb(tmp_path)
+    untagged = kb / "concepts" / "legacy.md"
+    # Frontmatter with no trust_tier line at all.
+    untagged.write_text(
+        "---\ntitle: Legacy\n---\n\n# Legacy\n\ncache eviction and ttl strategies\n",
+        encoding="utf-8",
+    )
+
+    result = KnowledgeBaseQuery(str(kb)).query("cache eviction", include_content=True)
+    hit = next((r for r in result["results"] if r["file"] == "concepts/legacy.md"), None)
+
+    assert hit is not None, "an untagged doc must remain retrievable (missing tier != excluded)"
+    assert hit["trust_tier"] == "unset", "a missing tier is surfaced as 'unset', not fabricated"
+
+
+def test_trust_tier_migration_skips_frozen_holdout_corpus():
+    """The (optional) trust_tier back-fill must never edit the frozen C4 held-out
+    corpus: changing those files would perturb a frozen reproduction baseline, which
+    the hold-out discipline forbids. ``add_trust_tier.py`` excludes them by manifest."""
+    from scripts.add_trust_tier import _frozen_holdout_paths
+
+    frozen = _frozen_holdout_paths()
+    assert frozen, "the held-out manifest should be present and non-empty"
+    assert any(p.startswith("docs/knowledge-base/") for p in frozen), (
+        "KB docs live in the frozen held-out corpus; the migration must skip them"
+    )
+
+
 # ---- generated → verified promotion ---- #
 
 
