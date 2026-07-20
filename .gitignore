@@ -71,6 +71,7 @@ Recipes/
 /minilm-docs-plan.md
 /cache-remediation-plan.md
 .mnemox-last-run
+.mnemox-doc-hashes
 
 # Bob IDE MCP config (may contain credentials — use .bob/mcp.json.example)
 .bob/mcp.json
