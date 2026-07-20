@@ -71,6 +71,14 @@ jobs:
         # Fails if a live status doc cites a coverage gate that disagrees with
         # pyproject fail_under, or reintroduces a retracted maturity claim.
         run: uv run python scripts/check_status_consistency.py
+      - name: Scale-regression gate (A8)
+        # The WS-A scale invariants live in tests/performance/ (excluded from the
+        # coverage run above) and use manual timing, so the benchmarks job's
+        # --benchmark-only deselects them — i.e. they run in NO other job. Run them
+        # here as a dedicated gate so a re-introduced quadratic in PageRank (A1),
+        # build_semantic (A2), the cold rebuild (A3ii) or L2 eviction (A4) fails the
+        # PR before it reaches main. Ratio ceilings: config/gates/gate-config.yaml.
+        run: uv run pytest tests/performance/test_scale_invariants.py -q
 
   kb-integrity:
     name: KB cross-reference integrity

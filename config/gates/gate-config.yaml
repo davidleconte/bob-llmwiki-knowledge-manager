@@ -50,3 +50,31 @@ coverage_gate:
   # The gate script reads pyproject.toml directly; this entry documents the
   # expected value and triggers a review whenever it changes here.
   fail_under: 80
+
+input_bounds:
+  # A7 global DoS-surface caps. HOME is src/limits.py (imported at every
+  # enforcement point — never re-declared as a literal). These entries restate the
+  # ceilings so that weakening one is conspicuous in this CODEOWNERS-reviewed file;
+  # scripts/check_value_homes.py fails CI if a value here diverges from src/limits.py.
+  max_file_bytes: 1048576      # embedding-index ingest: skip files larger than this
+  max_chunks_per_doc: 500      # chunker: cap chunks emitted per document
+  max_query_chars: 8192        # query entry: truncate queries longer than this
+  max_graph_nodes: 20000       # graph builder: stop admitting nodes past this
+
+perf_scale:
+  # A8 scale-regression ratio ceilings. HOME is this block (CODEOWNERS-reviewed so a
+  # weakening is conspicuous — the ATK-GATE-07 tie-in). tests/performance/
+  # test_scale_invariants.py reads these values; it never re-declares them. Ratios
+  # (not absolute times) survive shared-runner noise.
+  #
+  # Calibrated from measurement, not assumption: all four measure ~4x on a 4x size
+  # step (the ideal-linear factor). Each ceiling sits below the regression it must
+  # catch — a re-introduced quadratic grows ~16x on these steps; the pre-A4 L2 O(N)
+  # min()-scan measured ~46x. NOTE l2_evict is 8.0, not a near-1 "flat" value: the
+  # O(1) popitem still shows a ~4x memory-locality constant-factor from the larger
+  # cache footprint, so a near-1 ceiling would false-alarm. 8.0 passes O(1)+locality
+  # and fails the ~46x O(N) scan (proven by tests/gates/test_scale_gate_selftest.py).
+  pagerank_4k_over_1k: 6.0          # measured ~3.9; quadratic ~16
+  build_semantic_2k_over_500: 10.0  # measured ~4.0; quadratic ~16
+  cold_rebuild_2k_over_500: 8.0     # measured ~4.1; quadratic ~16
+  l2_evict_ratio: 8.0               # measured ~4.1 (O(1)+locality); O(N) min-scan ~46

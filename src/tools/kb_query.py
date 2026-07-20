@@ -24,13 +24,17 @@ design decisions.
 """
 
 import json
+import logging
 import re
 import sys
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
+from src.limits import MAX_QUERY_CHARS
 from src.tools.safe_paths import resolve_within
+
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # ATK-MEM-01: KB content boundary markers
@@ -200,6 +204,12 @@ class KnowledgeBaseQuery:
         Returns:
             Dictionary with search results
         """
+        # A7: truncate an over-long query at entry so a pathological string is
+        # never embedded / scanned whole.
+        if len(query) > MAX_QUERY_CHARS:
+            logger.warning("kb_query_truncated chars=%d cap=%d", len(query), MAX_QUERY_CHARS)
+            query = query[:MAX_QUERY_CHARS]
+
         if categories is None:
             categories = self.categories
 

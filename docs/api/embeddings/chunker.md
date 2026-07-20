@@ -76,7 +76,7 @@ Two special cases are handled beyond simple ``##``-splitting:
 
 #### Methods
 
-##### `__init__(min_chunk_chars: int) -> None`
+##### `__init__(min_chunk_chars: int, max_chunks_per_doc: int) -> None`
 
 
 ##### `chunk(_file_path: str, content: str) -> Generator[Tuple[str, str], None, None]`

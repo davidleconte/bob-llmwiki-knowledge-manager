@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from src.graph.graph import KnowledgeGraph
+from src.limits import MAX_GRAPH_NODES
 from src.tools.safe_paths import resolve_within  # ATK-FS-01: path containment
 
 if TYPE_CHECKING:
@@ -433,10 +434,20 @@ class KnowledgeGraphBuilder:
     def _add_nodes(self, graph: KnowledgeGraph) -> None:
         """Add all KB documents as nodes, populating props from frontmatter."""
         quarantined = self._quarantined_ids()
+        admitted = 0
         for md_file in self._walk_kb():
             doc_id = str(md_file.relative_to(self._kb_path))
             if doc_id in quarantined:
                 continue  # ATK-MEM-05: quarantined docs never enter the graph
+            # A7: bound the in-memory graph. Past MAX_GRAPH_NODES, stop admitting
+            # nodes so a runaway corpus cannot blow up PageRank / adjacency memory.
+            # Enforced here (the build boundary) to keep the graph layer pure.
+            if admitted >= MAX_GRAPH_NODES:
+                logger.warning(
+                    "kb_graph_nodes_capped cap=%d — remaining docs skipped",
+                    MAX_GRAPH_NODES,
+                )
+                break
             content = ""
             try:
                 content = md_file.read_text(encoding="utf-8")
@@ -463,6 +474,7 @@ class KnowledgeGraphBuilder:
                 description=_extract_description(content),
                 related_refs=fm.get("related", []),
             )
+            admitted += 1
 
     def _walk_kb(self):
         """Yield all ``*.md`` files across the four KB category directories.
