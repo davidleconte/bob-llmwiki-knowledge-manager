@@ -116,9 +116,9 @@ exhaustive**: every pain point has at least one owning capability. Each capabili
 |---|---|---|---|
 | **UC-1** Persistent Knowledge Capture | P-1 | Never re-derive the same answer twice | Structural (0 tokens for KB-indexed answers) |
 | **UC-2** Intelligent KB Query | P-4 | Retrieve the most relevant docs | p@3 = 0.84 (21/25) — **at parity with a keyword baseline (0.84); no net lift** on this corpus |
-| **UC-3** Prompt Chain Compression | P-2 | Remove redundancy without meaning loss | ~20% mean token reduction (95% CI [18.9%, 21.2%], N=183) |
+| **UC-3** Prompt Chain Compression | P-2 | Remove redundancy without meaning loss | ~20% mean token reduction (95% CI [18.9%, 21.2%], N=183; `evaluation/results/validation-2026-07-14/`) |
 | **UC-4** Recompute Avoidance | P-2 | Return a cached result for 0 tokens | 0 tokens per cache hit (rate: workload-dependent) |
-| **UC-5** KB-Aware Parallel Analysis | P-1, P-2 | Analyse a repo in parallel; compress output; write as KB docs | 6 agents, ~20% report compression before KB write |
+| **UC-5** KB-Aware Parallel Analysis | P-1, P-2 | Analyse a repo in parallel; compress output; write as KB docs | 6 agents, ~20% report compression before KB write (`evaluation/results/validation-2026-07-14/`) |
 | **UC-6** Knowledge Graph Structural Health | P-3 | Surface orphan docs, dead links, and authority hubs | 26/39 orphans rescued (80-doc snapshot, 2026-07-17; stale — re-run `graph-health`) |
 
 ### UC-1: Persistent Knowledge Capture
@@ -274,7 +274,7 @@ graph TD
     subgraph TOS["Token Optimization System (Python ~3,500 LOC)"]
         Facade["TokenOptimizer facade\nsrc/facade.py"]
         Cache["MultiLevelCache\nL1 + L2"]
-        Optimizer["PromptOptimizer\n~20% compression"]
+        Optimizer["PromptOptimizer\nnear-lossless compression"]
         Truncator["Truncator\n(lossy; excluded from savings)"]
     end
 
@@ -476,7 +476,7 @@ It has two parts: **SLA** (latency/throughput/quality targets) and **Quality Gat
 | L2 semantic hit (50 entries) | ≤ 4.5 ms | 1.5 ms | `pytest-benchmark`, warm process |
 | Prompt optimization (cold pipeline) | ≤ 3.5 ms | 695 µs | `pytest-benchmark`, L1+L2 miss |
 | Sustained single-threaded optimize | ≥ 50 req/s | ≥ 50 req/s (soak-tested) | `tests/load/test_load_soak.py` |
-| Near-lossless compression savings | ≥ 15% mean | 20.0% mean (95% CI [18.9%, 21.2%]) | `python -m src.validation` + manifest |
+| Near-lossless compression savings | ≥ 15% mean | 20.0% mean (95% CI [18.9%, 21.2%]) | `python -m src.validation`; `evaluation/results/validation-2026-07-14/` |
 
 ### Quality Gates (CI-Enforced)
 
@@ -488,7 +488,7 @@ exhaustive over the system's critical invariants.
 | **Layering** | `src/` never imports `scripts/` | Prevents build-time circular dependencies | `check_layering.py` (AST-based) |
 | **One value home** | Version, pricing constant, coverage floor each have one canonical source | Prevents drift between what CI checks and what docs claim | `check_value_homes.py` |
 | **Manifest-backed claims** | Every published savings % cites a reproducible manifest | Prevents fabricated metrics like the retracted "68.96%" | `check_savings_claims.py` |
-| **Null test** | Optimizer on shuffled/high-entropy text → < 5% compression | A real optimizer finds no redundancy in random text; failure = artefact | `src/validation/` |
+| **Null test** | Optimizer on shuffled/high-entropy text → < 5% compression | A real optimizer finds no redundancy in random text; failure = artefact | `src/validation/`; `evaluation/results/validation-2026-07-14/` |
 | **Coverage** | ≥ 80% global; per-package floors enforced per subsystem | Detects dead code and untested paths | `check_coverage_by_package.py` |
 | **Ruff + mypy** | Style and type correctness | Prevents latent type errors | CI matrix (Python 3.11 + 3.12) |
 | **Bandit SAST** | No high-severity insecure patterns | Catches injection/deserialization/path risks | `bandit` scan in CI |
@@ -613,10 +613,10 @@ Terms that are domain-specific to this project. External contributors cannot be 
 | **L3 cache** | `PersistentEmbeddingIndex` used as a cache layer. Optional; not activated by default config. |
 | **manifest-backed** | A savings or cost figure is "manifest-backed" when it is accompanied by a `manifest.json` recording data hash, code SHA, config, seed, library versions, and `tiktoken_active`. Makes the measurement reproducible and auditable. |
 | **MECE** | Mutually Exclusive, Collectively Exhaustive. A McKinsey structuring framework: categories neither overlap nor have gaps. Applied in this document to pain points, capabilities, components, and gaps. |
-| **null test** | A validation run of the optimizer over shuffled, high-entropy text. A legitimate optimizer finds ≈ 0% compression in random input. Failure indicates the measurement is an artefact of the test fixture. |
-| **P@k** | Precision at k. Fraction of test queries for which the correct document appeared in the top-k results. p@3 = 0.84 means the correct doc was in the top-3 for 84% of queries. |
+| **null test** | A validation run of the optimizer over shuffled, high-entropy text. A legitimate optimizer finds no compressible redundancy in random input. Failure indicates the measurement is an artefact of the test fixture. |
+| **P@k** | Precision at k. Fraction of test queries for which the correct document appeared in the top-k results. Our measured p@3 = 0.84 (`evaluation/results/retrieval-2026-07-19/report.json`) means the correct doc was in the top-3 for 84% of queries. |
 | **P1-3 / P2 / P3** | Integration phases from `guides/kb-tos-integration-roadmap.md`. P2 = shared embedding layer; P3 = knowledge graph. Not the same as the delegation pipeline (which is ADR-019). |
-| **target_reduction** | `OptimizerConfig` field. The optimizer's compression target ratio (default 0.30 = 30%). A soft target, not a hard cap. |
+| **target_reduction** | `OptimizerConfig` field. The optimizer's compression target ratio (default 0.30). A soft target, not a hard cap. |
 | **tiktoken_active** | Boolean flag in the validation manifest. `True` = tiktoken BPE encoder used for exact token counting. `False` = chars/4 fallback (approximate). A `False` value means token counts are estimates. |
 | **TOS** | Token Optimization System — the Python sub-system (`src/`). |
 

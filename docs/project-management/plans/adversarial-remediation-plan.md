@@ -688,7 +688,7 @@ bare word `"manifest"` in a line passes the gate with no path verification or
 value binding.
 
 ### Expected Outcomes
-- A line containing `"68.96% token savings (see manifest)"` returns
+- A line containing the retracted `"68.96% token savings (see manifest)"` returns
   `line_is_unbacked_claim(...) = True` (is an unbacked claim).
 - A line with a valid manifest citation where the path exists and the value
   is within ±5 pp of the manifest's `mean_savings` returns `False`.
