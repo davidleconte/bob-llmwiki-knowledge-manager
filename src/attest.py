@@ -141,5 +141,7 @@ def format_attestation(report: Dict[str, object]) -> str:
         lines.append("  withheld at read (forged / unsigned 'verified' claims):")
         lines.extend(f"    - {path}" for path in withheld)
     else:
-        lines.append("  OK  every 'verified' document is authentically signed — no forged trust claims")
+        lines.append(
+            "  OK  every 'verified' document is authentically signed — no forged trust claims"
+        )
     return "\n".join(lines)

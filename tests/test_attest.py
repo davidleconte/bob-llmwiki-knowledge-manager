@@ -43,7 +43,10 @@ def test_tampered_after_sign_is_withheld() -> None:
 
 def test_wrong_key_withholds() -> None:
     signed = attach_signature(_doc("verified"), KEY)
-    assert classify_document(signed, b"a-different-key-entirely-xxxxxxxxxxxxxxxx", "d.md").status == WITHHELD
+    assert (
+        classify_document(signed, b"a-different-key-entirely-xxxxxxxxxxxxxxxx", "d.md").status
+        == WITHHELD
+    )
 
 
 def test_generated_tier_is_untrusted_not_flagged() -> None:

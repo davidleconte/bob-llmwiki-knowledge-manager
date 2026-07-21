@@ -17,20 +17,44 @@ from src.velocity import MIN_VALID_TASKS, _bootstrap_ci, analyze, main, task_lis
 
 
 def _tasks(n: int) -> List[Dict[str, object]]:
-    return [{"id": f"T{i}", "done_criterion": f"crit {i}", "order": "A-first"} for i in range(1, n + 1)]
-
-
-def _pair(tid: str, a_time: float, b_time: float, *, a_ok: bool = True, b_ok: bool = True,
-          a_coin: float = 1000, b_coin: float = 500) -> List[Dict[str, object]]:
     return [
-        {"task_id": tid, "condition": "A", "wall_clock_min": a_time, "bobcoin": a_coin, "quality_pass": a_ok},
-        {"task_id": tid, "condition": "B", "wall_clock_min": b_time, "bobcoin": b_coin, "quality_pass": b_ok},
+        {"id": f"T{i}", "done_criterion": f"crit {i}", "order": "A-first"} for i in range(1, n + 1)
+    ]
+
+
+def _pair(
+    tid: str,
+    a_time: float,
+    b_time: float,
+    *,
+    a_ok: bool = True,
+    b_ok: bool = True,
+    a_coin: float = 1000,
+    b_coin: float = 500,
+) -> List[Dict[str, object]]:
+    return [
+        {
+            "task_id": tid,
+            "condition": "A",
+            "wall_clock_min": a_time,
+            "bobcoin": a_coin,
+            "quality_pass": a_ok,
+        },
+        {
+            "task_id": tid,
+            "condition": "B",
+            "wall_clock_min": b_time,
+            "bobcoin": b_coin,
+            "quality_pass": b_ok,
+        },
     ]
 
 
 def test_task_list_hash_is_stable_and_order_independent_of_extra_fields() -> None:
     a = [{"id": "T1", "done_criterion": "x", "order": "A-first"}]
-    b = [{"id": "T1", "done_criterion": "x", "order": "B-first"}]  # order not part of the freeze hash
+    b = [
+        {"id": "T1", "done_criterion": "x", "order": "B-first"}
+    ]  # order not part of the freeze hash
     assert task_list_hash(a) == task_list_hash(b)
     c = [{"id": "T1", "done_criterion": "CHANGED"}]
     assert task_list_hash(a) != task_list_hash(c)
@@ -102,7 +126,9 @@ def test_manifest_is_complete() -> None:
     measurements: List[Dict[str, object]] = []
     for i in range(1, 6):
         measurements += _pair(f"T{i}", 10.0, 5.0)
-    report = analyze(tasks, measurements, kb_commit="deadbeef", bob_version="bob-1.0", repo_root=Path.cwd())
+    report = analyze(
+        tasks, measurements, kb_commit="deadbeef", bob_version="bob-1.0", repo_root=Path.cwd()
+    )
     assert report["manifest_complete"] is True
     assert report["manifest"]["data_hash"] == report["task_list_hash"]  # type: ignore[index]
     assert report["manifest"]["extra"]["kb_commit"] == "deadbeef"  # type: ignore[index]
@@ -114,7 +140,11 @@ def test_bootstrap_degenerate_is_safe() -> None:
 
 
 def test_cli_main_writes_report_and_manifest(tmp_path: Path) -> None:
-    tasks = {"tasks": [{"id": f"T{i}", "done_criterion": f"c{i}", "order": "A-first"} for i in range(1, 6)]}
+    tasks = {
+        "tasks": [
+            {"id": f"T{i}", "done_criterion": f"c{i}", "order": "A-first"} for i in range(1, 6)
+        ]
+    }
     measurements: List[Dict[str, object]] = []
     for i in range(1, 6):
         measurements += _pair(f"T{i}", 10.0, 5.0, a_coin=1000, b_coin=400)

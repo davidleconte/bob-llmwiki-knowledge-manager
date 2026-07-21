@@ -171,20 +171,39 @@ def analyze(
         order = str(task.get("order", ""))
         if run_a is None or run_b is None:
             results.append(
-                TaskResult(tid, False, "incomplete: missing A or B run", order,
-                           None, None, None, None, None, None)
+                TaskResult(
+                    tid,
+                    False,
+                    "incomplete: missing A or B run",
+                    order,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                )
             )
             continue
         a_time, b_time = float(run_a["wall_clock_min"]), float(run_b["wall_clock_min"])
         a_coin, b_coin = float(run_a["bobcoin"]), float(run_b["bobcoin"])
         # Quality gate: B must be verified at least as correct as A to count.
         valid = bool(run_a.get("quality_pass", False)) and bool(run_b.get("quality_pass", False))
-        reason = "ok" if valid else "quality gate: B not verified at least as correct as A (excluded)"
+        reason = (
+            "ok" if valid else "quality gate: B not verified at least as correct as A (excluded)"
+        )
         results.append(
             TaskResult(
-                tid, valid, reason, order,
-                a_time, b_time, a_coin, b_coin,
-                _pct_reduction(a_time, b_time), _pct_reduction(a_coin, b_coin),
+                tid,
+                valid,
+                reason,
+                order,
+                a_time,
+                b_time,
+                a_coin,
+                b_coin,
+                _pct_reduction(a_time, b_time),
+                _pct_reduction(a_coin, b_coin),
             )
         )
 
