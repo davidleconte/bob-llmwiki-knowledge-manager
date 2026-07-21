@@ -63,6 +63,9 @@ identically in **Bob IDE** and **Bob Shell CLI** — same modes, same KB, same c
 
 https://github.com/user-attachments/assets/6dd05f89-226b-4cfe-9073-27bee59a5da8
 
+[Mnemox_arXiv_Leconte_2026.pdf](https://github.com/user-attachments/files/30224459/Mnemox_arXiv_Leconte_2026.pdf)
+
+
 ## 1. The problem: re-derivation consumes the budget
 
 IBM's own guidance is blunt about where a session's budget goes: every turn burns **input**, **output**, and
