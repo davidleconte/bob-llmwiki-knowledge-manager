@@ -8,7 +8,7 @@ fonttools==4.63.0
     # via matplotlib
 kiwisolver==1.5.0
     # via matplotlib
-matplotlib==3.11.0
+matplotlib==3.11.1
     # via
     #   -r evaluation/requirements.txt
     #   seaborn
