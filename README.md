@@ -1,3 +1,4 @@
+[Mnemox_arXiv_Leconte_2026.pdf](https://github.com/user-attachments/files/30224954/Mnemox_arXiv_Leconte_2026.pdf)
 # Mnemox
 
 ### *Give IBM Bob a memory. Make your knowledge compound.*
@@ -24,6 +25,12 @@ identically in **Bob IDE** and **Bob Shell CLI** — same modes, same KB, same c
 ![coverage](https://img.shields.io/badge/coverage-%E2%89%8889%25%20(gate%20%E2%89%A580%25)-success)
 
 `MIT licensed` · `Native Bob modes` · `No MCP servers required` · `No plugins` · `Pattern: LLM-Wiki (Karpathy)` · `Bob Shell CLI` · `Bob IDE`
+
+<div align="center">
+<a href="https://github.com/user-attachments/files/30224970/Mnemox_arXiv_Leconte_2026.pdf">
+<img width="715" height="364" alt="image" src="https://github.com/user-attachments/assets/6201c9f6-283c-4366-ab89-da800da98491" />
+</a>
+</div>
 
 > 💡 **What is a Bobcoin?** IBM Bob runs on a token-based budget called **Bobcoins** — the internal unit that
 > measures how much AI computation each session consumes. Every question, every file Bob reads, every answer costs
@@ -61,10 +68,7 @@ identically in **Bob IDE** and **Bob Shell CLI** — same modes, same KB, same c
 
 ---
 
-https://github.com/user-attachments/assets/6dd05f89-226b-4cfe-9073-27bee59a5da8
- 
-<img width="715" height="364" alt="image" src="https://github.com/user-attachments/assets/6201c9f6-283c-4366-ab89-da800da98491" />
-
+https://github.com/user-attachments/assets/bd79071d-3f2d-4261-a663-794845883327
 
 ## 1. The problem: re-derivation consumes the budget
 
