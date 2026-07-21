@@ -66,6 +66,7 @@ Complete API reference for the Token Optimization System.
 ## Root
 
 - [__main__](root/__main__.md) - `__main__.py`
+- [attest](root/attest.md) - `attest.py`
 - [cli](root/cli.md) - `cli.py`
 - [cold_start](root/cold_start.md) - `cold_start.py`
 - [facade](root/facade.md) - `facade.py`
@@ -74,6 +75,7 @@ Complete API reference for the Token Optimization System.
 - [limits](root/limits.md) - `limits.py`
 - [pricing](root/pricing.md) - `pricing.py`
 - [provenance](root/provenance.md) - `provenance.py`
+- [velocity](root/velocity.md) - `velocity.py`
 
 ## Tools
 

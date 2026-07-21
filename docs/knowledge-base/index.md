@@ -14,7 +14,7 @@ Last Updated: 2026-07-19 · **115 documents** (14 concepts · 27 guides · 4 ref
 
 ## Recent Additions
 - 2026-07-19: [Engineering-Soundness Audit (frozen evidence)](./research/engineering-soundness-audit-2026-07-19.md) - Research ⭐ NEW — McKinsey-method engineering-soundness review: reconciled scorecard (~2.9/5 → ~4.2/5), ~55-finding MECE register, value-driver tree; frozen evidence home for the consulting report
-- 2026-07-19: [Adversarial Remediation Plan (root)](../../adversarial-remediation-plan.md) - Planning ⭐ NEW — v2 detailed technical specification (14 sub-tasks) for closing all Critical/High audit findings; adversarially audited before implementation; gating independent re-grade
+- 2026-07-19: [Adversarial Remediation Plan](../project-management/plans/adversarial-remediation-plan.md) - Planning ⭐ NEW — v2 detailed technical specification (14 sub-tasks) for closing all Critical/High audit findings; adversarially audited before implementation; gating independent re-grade
 - 2026-07-19: [Obsidian Integration Guide](./guides/obsidian-integration-guide.md) - Guide ⭐ NEW — Semantic graph export to Obsidian Canvas + Dataview, and Obsidian MCP activation in Bob IDE
 - 2026-07-19: [Adversarial Audit 2026-07-19](./research/adversarial-audit-2026-07-19.md) - Research ⭐ NEW — Red-team audit: 19 CONFIRMED exploits across file-read, cache-poisoning, prompt-injection, and honesty-gate surfaces
 - 2026-07-19: [Independent Counter-Audit](./research/counter-audit-2026-07-19-independent.md) - Research ⭐ NEW — MECE independent counter-audit: 46 findings, scored 2.9/5; retrieval stack unwired, optimizer can return empty, 3 CI gates failing
@@ -34,7 +34,7 @@ Last Updated: 2026-07-19 · **115 documents** (14 concepts · 27 guides · 4 ref
 - [Adversarial Review Pattern](./concepts/adversarial-review-pattern.md) - Two-pass hostile + friendly review technique; pre-emption rule; label separation; fabrication ceiling ⭐ NEW
 
 ### Planning Artefacts (root-level, outside KB tree)
-- [Adversarial Remediation Plan](../../adversarial-remediation-plan.md) — v2 detailed technical specification for closing all Critical/High findings from the 2026-07-19 audits; 14 sub-tasks; adversarially audited before implementation. **The gate document for independent re-grade.** ⭐ NEW
+- [Adversarial Remediation Plan](../project-management/plans/adversarial-remediation-plan.md) — v2 detailed technical specification for closing all Critical/High findings from the 2026-07-19 audits; 14 sub-tasks; adversarially audited before implementation. **The gate document for independent re-grade.** ⭐ NEW
 
 ### Concepts
 - [File Naming Conventions](./concepts/file-naming-conventions.md) - Kebab-case rule for all `.md` files, exclusion zones, `index.md` blast radius, emoji single source of truth, drift detection command ⭐ NEW

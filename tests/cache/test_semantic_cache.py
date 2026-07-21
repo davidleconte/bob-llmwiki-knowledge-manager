@@ -200,7 +200,10 @@ class TestSemanticCache:
 
         entry = cache.get_entry("key1")
         assert entry is not None
-        assert entry.metadata == metadata
+        # The cache stores a copy with its own `version` bookkeeping added; the
+        # caller's items are preserved and the caller's dict is never mutated (ATK-FS-05).
+        assert metadata.items() <= entry.metadata.items()
+        assert "version" not in metadata
 
     def test_clear(self):
         """Test clearing the cache."""

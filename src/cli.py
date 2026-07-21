@@ -237,6 +237,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Promoter identity recorded in provenance (default: $USER)",
     )
 
+    p_attest = sub.add_parser(
+        "attest",
+        help="Attest KB trust posture: which trust_tier claims survive signature verification",
+    )
+    p_attest.add_argument("--kb-path", default="docs/knowledge-base", help="KB root directory")
+    p_attest.add_argument(
+        "--strict",
+        action="store_true",
+        help="Exit non-zero if any doc claims 'verified' but fails verification (CI gate mode)",
+    )
+
     return parser
 
 
@@ -655,6 +666,23 @@ def main(argv: Optional[List[str]] = None) -> int:
             _emit(pipeline_result.__dict__, as_json)
         except Exception as exc:
             _emit({"error": str(exc)}, as_json)
+            return 1
+
+    elif args.command == "attest":
+        from pathlib import Path
+
+        from src.attest import attest_kb, format_attestation
+
+        kb_dir = Path(args.kb_path)
+        if not kb_dir.is_dir():
+            _emit({"error": f"KB path not found: {args.kb_path}"}, as_json)
+            return 1
+        report = attest_kb(kb_dir, include_documents=as_json)
+        if as_json:
+            _emit(report, True)
+        else:
+            print(format_attestation(report))
+        if args.strict and int(report["withheld"]) > 0:  # type: ignore[call-overload]
             return 1
 
     return 0

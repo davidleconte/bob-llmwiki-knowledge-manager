@@ -4,22 +4,70 @@ type: research
 category: quality-assessment
 tags: [evaluation, quality, institutional-standards, production-readiness]
 created: 2026-07-13
-updated: 2026-07-13
+updated: 2026-07-20
 status: complete
 related:
   - ./full-technical-design-retro-2026-07.md
+  - ./business-case-2026-07.md
   - ./audit-2026-07-13-institutional.md
+  - ../../../STATUS.md
 ---
 
 # Institutional Software Vendor Evaluation
 
+> ## ⚠️ 2026-07-20 Reconciliation — Read This First
+>
+> This is a **2026-07-13 point-in-time evaluation of an early prototype**, retained as
+> audit trail. **The detailed body below is historical** — several of its inputs have since
+> been superseded. Two things must be corrected before the reader anchors on the old grade:
+>
+> **1 — Scope calibration.** This report grades the project against **enterprise-SaaS-vendor**
+> standards (Fortune 500, SOC 2, API gateway, Kubernetes, multi-tenancy, distributed cache).
+> The project is a **local, single-user, MIT-licensed developer tool + CLI** that **explicitly
+> does not target** those things (`STATUS.md` → "Not claimed": enterprise SLAs, production
+> support, multi-tenancy). Grading a local dev tool against multi-tenant SaaS infrastructure is
+> apples-to-oranges: many "❌ Critical Gaps" below (API gateway, load balancer, K8s, OAuth/SAML,
+> encryption-at-rest, SOC 2) are **out of scope by design, not deficiencies**.
+>
+> **2 — Stale facts.** The body's engineering-discipline claims were true for the 2026-07-13
+> prototype and are **now false**:
+>
+> | Body claim (2026-07-13) | Current reality (2026-07-20) | Source |
+> |---|---|---|
+> | Test coverage **49%** | **≥80%** global floor enforced + per-package floors (last full-suite measurement 89.82%) | `check_coverage_by_package.py` |
+> | **304** tests | **~1,500** tests (1,498 collected), suite CI-green on `main` | `pytest --collect-only` |
+> | **No** mypy/pylint/bandit in CI | **ruff + mypy + bandit** all CI-gated (3.11/3.12 matrix) | `.github/workflows/ci.yml` |
+> | **No** CI/CD pipeline | Full CI/CD: coverage, layering, value-homes, savings-claims, null-test, ruff, mypy, bandit gates + **SBOM + Dependabot** | `.github/` |
+> | **No** security tests / no pen testing | **9-file adversarial security suite** (path containment, prompt-injection boundary, cache integrity, graph-poisoning, provenance attestation, input bounds) + **STRIDE threat model** | `tests/security/`, `docs/security/threat-model.md` |
+> | **No** load/performance testing | `tests/performance/` (DoS hardening, scale-invariant gate) + `tests/load/` (soak) + `pytest-benchmark` SLA | `tests/performance/`, `tests/load/` |
+> | **No** E2E / integration tests | `tests/e2e/`, `tests/property/`, 20+ test packages | `tests/` |
+> | **12** ADRs | **19** ADRs | `docs/adr/` |
+> | **No** SLA docs | **SLA v1.0** | `docs/sla.md` |
+>
+> **Net effect:** on the engineering-discipline categories (Code Quality, Testing, Operations-CI,
+> Security-testing) the project is **materially stronger** than the C+ (72) below implies. On the
+> enterprise-SaaS-infrastructure categories it remains low **by design**, because it is not that
+> kind of product.
+>
+> **3 — Current canonical posture** (do not restate the old C+ as current): status is
+> **Beta — Not Production Ready** (`STATUS.md`). There is **no current independent
+> production-readiness grade**; the prior self-assessed **A+ was withdrawn** (self-grading ≠
+> verification). Independent verdicts on file: counter-audit **2.9/5** (2026-07-19); last graded
+> review **NO-GO 3.46/4.3** (2026-07-14); an independent re-grade is pending. For current
+> engineering facts see [`full-technical-design-retro-2026-07.md`](./full-technical-design-retro-2026-07.md)
+> and [`business-case-2026-07.md`](./business-case-2026-07.md).
+
+---
+
 ## Executive Summary
 
-**Overall Grade: C+ (72/100)**
+> *Historical (2026-07-13). See the Reconciliation above — grade and "gaps" are superseded/mis-scoped.*
+
+**Overall Grade: C+ (72/100)** *(2026-07-13 snapshot; several inputs now corrected above)*
 
 This project demonstrates strong research and prototyping capabilities but falls short of institutional software vendor standards for production deployment. While the core concepts are sound and documentation is extensive, critical gaps in testing, security, and operational readiness prevent enterprise adoption.
 
-**Recommendation:** Not ready for institutional deployment. Requires 3-6 months of hardening before enterprise consideration.
+**Recommendation:** Not ready for institutional deployment. Requires 3-6 months of hardening before enterprise consideration. *(As of 2026-07-20, the testing/CI/security-tooling gaps in this recommendation are closed; the remaining gaps are the enterprise-SaaS-infrastructure items the project does not target — see Reconciliation.)*
 
 ---
 
@@ -518,6 +566,13 @@ Required for Institutional:
 
 ## Overall Assessment
 
+> *Historical scoring (2026-07-13). The category scores below were computed from the
+> then-current facts and the enterprise-SaaS rubric. Per the Reconciliation at the top:
+> the engineering-discipline categories (Code Quality, Testing, Operations-CI, Security-testing)
+> are now materially higher; the infrastructure categories are low by design (not an
+> enterprise-SaaS product). The current canonical posture is **Beta**, with **no independent
+> production-readiness grade** — do not cite this 72/100 as current.*
+
 ### Score Summary
 
 | Category | Grade | Score | Weight | Weighted Score |
@@ -850,11 +905,13 @@ Technical Debt: ~40 hours (moderate)
 
 ### Test Metrics
 ```
-Total Tests: 304 passing, 35 skipped
-Coverage: 49%
-Test Execution Time: ~5 seconds
+# 2026-07-13 (historical):  304 passing, 35 skipped · 49% coverage
+# 2026-07-20 (current):
+Total Tests: ~1,500 (1,498 collected), suite CI-green on main
+Coverage: ≥80% global floor enforced + per-package floors (last full run 89.82%)
+Test Packages: 20+ (security, performance, load, e2e, property, concurrency, gates, …)
+Static Analysis: ruff + mypy + bandit (CI-gated, 3.11/3.12 matrix)
 Flaky Tests: 0
-Test-to-Code Ratio: 1.14:1
 ```
 
 ### Performance Metrics
@@ -868,9 +925,9 @@ CPU Usage: <1% (excellent)
 
 ### Documentation Metrics
 ```
-Documentation Files: 50+
+Documentation Files: 110+ KB docs (118 as of 2026-07-20)
 Total Pages: ~200 equivalent
-ADRs: 12
+ADRs: 20 (docs/adr/)
 API Docs: Auto-generated
 Examples: 15+
 Guides: 10+

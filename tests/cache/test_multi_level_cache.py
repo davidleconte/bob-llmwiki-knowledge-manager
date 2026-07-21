@@ -422,15 +422,18 @@ class TestMultiLevelCache:
         metadata = {"tokens": 100, "quality": 0.95}
         cache.set("key1", "response1", metadata=metadata)
 
+        # Both levels store a copy with `version` bookkeeping added; the caller's
+        # items are preserved and the caller's dict is never mutated (ATK-FS-05).
         # Check L1
         l1_entry = cache.l1_cache.get_entry("key1")
         assert l1_entry is not None
-        assert l1_entry.metadata == metadata
+        assert metadata.items() <= l1_entry.metadata.items()
 
         # Check L2
         l2_entry = cache.l2_cache.get_entry("key1")
         assert l2_entry is not None
-        assert l2_entry.metadata == metadata
+        assert metadata.items() <= l2_entry.metadata.items()
+        assert "version" not in metadata
 
     def test_l1_l2_consistency(self):
         """Test that L1 and L2 stay consistent."""

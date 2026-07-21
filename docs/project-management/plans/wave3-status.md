@@ -23,9 +23,9 @@ but never built (A7 input-bound caps, A8 scale-regression gate) plus the one ope
 HIGH an independent 2026-07-20 re-audit surfaced (ATK-MEM-02, unsigned trust tier
 honoured on read). **After ATK-MEM-02 there are zero open Critical/High.** Wave 3
 therefore exits **CONDITIONALLY**, blocked only on: (i) the independent R14 verdict
-(not dischargeable by this lineage), and (ii) a scoped *post-verification
-residuals* item (three L2-cache MEDIUMs + four minor NEW defects reported by the
-same re-audit, tracked below, not yet closed).
+(not dischargeable by this lineage), and (ii) the *post-verification residuals*
+(§2): the four MEDIUM items (three L2-cache defects + NEW-1) are now closed in
+`443ad77`; three LOW/cosmetic NEW defects remain tracked.
 
 ## 1. Exit-criteria checklist (spec §656)
 
@@ -62,7 +62,7 @@ at `6d0711d`), with the closing merge/commit resolved by archaeology. `W1` = the
 | CODE-04 / ATK-DOS-04 | Index rows never reclaimed; O(N²) `np.vstack` rebuild | Closed (Wave-3 A3ii) | #27 `fc53018` | WS-A rebuild tests |
 | CODE-05 | Recency weighting numerically inert | Closed (W1) | W1 | `test_ranking_normalization.py` |
 | CODE-06 | PageRank blend scale-mismatch | Closed (W1) | W1 | `tests/retrieval/` |
-| CODE-08 / ATK-FS-02 | L2→L1 promotion caches fuzzy match as forged exact hit | Closed — **promotion vector** (W1) | W1 | `tests/security/test_cache_integrity.py` — but see residual R-1 below |
+| CODE-08 / ATK-FS-02 | L2→L1 promotion caches fuzzy match as forged exact hit | Closed — **promotion vector** (W1); **L2 direct-serve collision** closed (`443ad77`) | W1 + `443ad77` | `tests/security/test_cache_integrity.py`; `test_l2_cache_residuals.py` (§2) |
 | CODE-10 | watsonx tokenizer/pricing dishonesty | Closed (Wave-3 B1–B4) | #27 `fc53018` | WS-B tests |
 | MEM-04 | `validate-kb.sh` never exits non-zero | Closed (W1) | W1 | `test_validate_kb.py` |
 | ATK-FS-01 | Arbitrary file read via symlink escape | Closed (W1 + Wave-3 D3) | #33 `9606fdc` | `tests/security/test_path_containment.py` |
@@ -83,19 +83,45 @@ at `6d0711d`), with the closing merge/commit resolved by archaeology. `W1` = the
 | MEM-02 / MEM-03 | Pointer case + broken kebab-case refs | Partial | 15 repaired W1; `validate-kb` green at `6d0711d`; remaining are non-blocking link hygiene |
 | ATK-SUP-09 / SEC-01 | Committed lab credential | Absent in code/config at `6d0711d` | grep-verified; docs-only mention at most |
 
-### Open residuals — post-verification (tracked, NOT closed)
+### Post-verification residuals
 
 Reported by the independent 2026-07-20 re-audit
-(`docs/knowledge-base/research/master-engagement-reaudit-2026-07-20.md`). **Not
-independently re-verified in this exit PR** (except ATK-MEM-02, now closed); carried
-here as the scope of a follow-on residuals wave, per the re-audit's own
-recommendation (i).
+(`docs/knowledge-base/research/master-engagement-reaudit-2026-07-20.md`), each
+independently re-verified against the code before action. **The four MEDIUM items
+(R-1's three L2-cache defects + NEW-1) are now closed** in `443ad77` (RED→GREEN +
+mutation-verified); the three LOW/cosmetic NEW-2..4 remain tracked.
 
 | ID | Sev | Finding | Status |
 |---|---|---|---|
-| R-1 (ATK-FS-02/04/05) | MEDIUM | L2 semantic cache: colliding attacker payload served; TTL ignored in `contains()`; caller metadata dict aliased — "fixed correctly in L1, not L2" | **Open — tracked** |
-| R-2 (NEW-1) | Minor | Optimizer cache ignores per-call `max_tokens` → caller can receive an over-budget result | **Open — tracked** |
-| R-3 (NEW-2..4) | Minor | Three further remediation-introduced minor defects | **Open — tracked** |
+| ATK-FS-05 | MEDIUM | `SemanticCache.set()` stored the caller's metadata dict by reference **and** mutated it | **Closed** (`443ad77`) — `tests/security/test_l2_cache_residuals.py::test_atkfs05_*` |
+| ATK-FS-04 | MEDIUM | `contains()`/`get_with_similarity()` ignored TTL (contains=True while get=None after expiry) | **Closed** (`443ad77`) — `_is_expired` on the similarity path; `test_atkfs04_contains_honors_ttl` |
+| ATK-FS-02 | MEDIUM | direct L2 serve returned a *distinct* colliding prompt's payload at cosine 1.0 (stopword-stripped hashing collision) | **Closed** (`443ad77`) — collision guard (fail-safe miss); `test_atkfs02_*` (exact + fuzzy paths preserved) |
+| NEW-1 | MEDIUM | optimizer cache keyed on the prompt only → a stricter `max_tokens` returned an earlier *uncapped* result (and the reverse) | **Closed** (`443ad77`) — budget folded into the key; `tests/optimizer/test_new1_cache_budget.py` |
+| NEW-2 | Low | `--date-filter` inert on the index path (`file` carries `#slug`, `_doc_date_matches` fails open) | **Open — tracked** |
+| NEW-3 | Low | per-node semantic edge cap counts one direction only (a node reached 59 vs cap 50; the global cap still bounds totals) | **Open — tracked** |
+| NEW-4 | Cosmetic | clean checkout flags every shipped doc stale (mtime-sentinel drift; retrieval unaffected) | **Open — tracked** |
+
+### 2026-07-20 re-audit — register disposition
+
+The independent re-audit
+(`docs/knowledge-base/research/master-engagement-reaudit-2026-07-20.md`) graded the
+**pre-fix** tree (`v1.0-136-g07ad245`, before `0e97f6e` / `37c1ebc` / `443ad77`), so
+both its ≈3.8/5 and its open-residual list predate the closures above. Its full
+register is dispositioned in the tables above; this is the crosswalk and the standing
+against the re-audit's own GO condition (its §6).
+
+| Re-audit GO condition (§6) | Current standing |
+|---|---|
+| Zero open Critical/High (ATK-MEM-02 closed) | **Met on main** — `0e97f6e` (see High table) |
+| L2 cache residuals closed **or** formally risk-accepted | **Met on #41 merge** — ATK-FS-02/04/05 closed (`443ad77`); NEW-2..4 risk-accepted (tracked above) |
+| Independent re-grade ≥ 4.0/5 on the post-W-B tree | **Open** — R14 (§5); must score the post-`443ad77` tree, not the pre-fix tree the re-audit itself graded |
+
+Recommendation crosswalk: **R1** (provenance-at-read) = ATK-MEM-02 `0e97f6e`; **R2**
+(unify L2 cache semantics) = ATK-FS-02/04/05 `443ad77`; **R3** (fold budget into the
+optimizer key) = NEW-1 `443ad77`; **R7** (vulnerable-layer discipline) institutionalized
+in [`adversarial-remediation-plan.md`](adversarial-remediation-plan.md)
+(Status-discipline section); **R4–R6** (NEW-2..4) tracked-open above. The re-audit's
+≈3.8/5 is a candidate *input* to R14, not the verdict — §5.
 
 ## 3. Scale hardening (A7 + A8) — this exit PR (`37c1ebc`)
 
@@ -146,6 +172,7 @@ above. Two gates remain before an unconditional close:
 
 1. **R14 independent verdict** filled into `evaluation/regrade/verdict-<date>.md` by
    a human or a genuinely distinct process (§5).
-2. **Post-verification residuals wave** closing or formally risk-accepting R-1..R-3.
+2. **Post-verification residuals** (§2): the four MEDIUM items closed (`443ad77`); the
+   three LOW/cosmetic NEW-2..4 closed or formally risk-accepted.
 
 No self-run grade is presented as independent.

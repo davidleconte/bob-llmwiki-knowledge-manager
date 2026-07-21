@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mnemox — BobjectifLune — 2026 IBMer watsonx Challenge</title>
+<style>
+  @page { size: A4; margin: 11mm 12mm 10mm 12mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { hyphens: none; }
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #16181d; font-size: 10pt; line-height: 1.4;
+  }
+  .page { break-after: page; page-break-after: always; height: 271mm;
+          display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; }
+  .page:last-child { break-after: auto; page-break-after: auto; }
+  .g > *:first-child { margin-top: 0 !important; }
+
+  h1,h2,h3 { line-height: 1.1; }
+  em { font-style: italic; } strong { font-weight: 700; }
+
+  /* Masthead */
+  .masthead { display: flex; align-items: center; gap: 12px; padding-bottom: 9px; border-bottom: 2px solid #0a1a3f; }
+  .patch { width: 62px; height: 62px; flex: 0 0 62px; }
+  .title-block .brand { font-size: 23pt; font-weight: 800; letter-spacing: -0.4px; color: #0a1a3f; }
+  .title-block .tag { font-size: 10.5pt; color: #0f62fe; font-weight: 600; margin-top: 2px; }
+  .title-block .meta { font-size: 7.8pt; color: #5a6472; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.7px; }
+
+  /* Bands & typography */
+  .band { padding: 12px 14px; border-radius: 6px; margin-top: 14px; }
+  .band.navy { background: #0a1a3f; color: #fff; }
+  .band.navy .k { color: #7fd1ff; font-weight: 700; }
+  .hook { font-size: 12pt; line-height: 1.38; font-weight: 500; }
+  .section-title { font-size: 13pt; font-weight: 800; color: #0a1a3f; margin: 14px 0 5px; }
+  .section-title .rule { display:block; width: 46px; height: 3px; background: #0f62fe; margin-top: 4px; border-radius:2px; }
+  .lead { font-size: 10pt; }
+  .kicker { font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #0f62fe; }
+  .note { font-size: 7.6pt; color: #5a6472; font-style: italic; margin-top: 5px; }
+
+  .cols { display: flex; gap: 12px; margin-top: 12px; }
+  .col { flex: 1; }
+
+  /* before/after */
+  .ba { display: flex; gap: 10px; margin-top: 12px; }
+  .ba .side { flex: 1; border: 1.4px solid #d6dbe4; border-radius: 6px; padding: 11px 12px; }
+  .ba .side.bad { border-color: #e3b7b7; background: #fdf5f5; }
+  .ba .side.good { border-color: #b7d8c2; background: #f3faf5; }
+  .ba .side h4 { font-size: 8.6pt; text-transform: uppercase; letter-spacing:.6px; margin-bottom: 5px; }
+  .ba .side.bad h4 { color: #b3261e; } .ba .side.good h4 { color: #1b7a43; }
+  .ba .side p { font-size: 9pt; }
+  .ba .big { font-size: 16pt; font-weight: 800; display:block; margin: 3px 0; color:#0a1a3f; }
+
+  /* value pills */
+  .pills { display: flex; gap: 8px; margin-top: 12px; }
+  .pill { flex: 1; background: #f4f6fa; border-radius: 6px; padding: 9px 10px; border-left: 3px solid #0f62fe; }
+  .pill b { display: block; font-size: 8.6pt; color: #0a1a3f; margin-bottom: 2px; }
+  .pill span { font-size: 8.2pt; color: #5a6472; }
+
+  /* stat cards */
+  .stats { display: flex; gap: 10px; margin-top: 14px; }
+  .stat { flex: 1; border: 1.4px solid #d6dbe4; border-radius: 8px; padding: 14px 10px; text-align: center; }
+  .stat .num { font-size: 24pt; font-weight: 800; color: #0a1a3f; line-height: 1; }
+  .stat .lbl { font-size: 8.6pt; font-weight: 700; margin-top: 5px; }
+  .stat .prov { font-size: 7.2pt; color: #5a6472; margin-top: 5px; line-height: 1.25; }
+
+  /* tables */
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 8.7pt; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #e2e6ee; vertical-align: top; }
+  th { background: #0a1a3f; color: #fff; font-size: 8pt; text-transform: uppercase; letter-spacing:.5px; }
+  td.yes { color: #1b7a43; font-weight: 700; } td.no { color: #b3261e; font-weight: 700; }
+  tr:nth-child(even) td { background: #f6f8fb; }
+  .win td { background: #eef4ff !important; } .win td:first-child { font-weight: 700; }
+
+  /* three-layer */
+  .layers { display: flex; align-items: stretch; gap: 7px; margin-top: 4px; }
+  .layer { flex: 1; border-radius: 6px; padding: 9px 9px; color: #fff; }
+  .layer small { display:block; font-size: 7pt; opacity: .85; text-transform: uppercase; letter-spacing:.5px; }
+  .layer b { font-size: 9.5pt; }
+  .arrow { align-self: center; font-size: 14pt; color: #0f62fe; font-weight: 800; }
+
+  ul.tight { margin: 6px 0 0 16px; }
+  ul.tight li { margin-bottom: 5px; font-size: 9.3pt; }
+
+  .callout { margin-top: 14px; border-left: 3px solid #b8860b; background: #fbf8ef; padding: 11px 13px; font-size: 9.4pt; }
+  .callout b { color: #0a1a3f; }
+
+  .footer { padding-top: 7px; border-top: 1px solid #d6dbe4; font-size: 7.4pt; color: #5a6472; display:flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+
+<!-- ============================= PAGE 1 ============================= -->
+<section class="page">
+  <div class="g">
+    <div class="masthead">
+      <svg class="patch" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="BobjectifLune mission patch">
+        <circle cx="50" cy="50" r="48" fill="#0a1a3f"/>
+        <circle cx="50" cy="50" r="48" fill="none" stroke="#b8860b" stroke-width="2.5"/>
+        <circle cx="50" cy="50" r="40" fill="none" stroke="#25406f" stroke-width="1"/>
+        <circle cx="24" cy="28" r="1.3" fill="#fff"/><circle cx="78" cy="24" r="1" fill="#fff"/>
+        <circle cx="82" cy="60" r="1.2" fill="#fff"/><circle cx="20" cy="66" r="1" fill="#fff"/>
+        <circle cx="70" cy="78" r="1" fill="#fff"/>
+        <circle cx="72" cy="40" r="13" fill="#efe4c4"/><circle cx="76" cy="37" r="13" fill="#0a1a3f"/>
+        <ellipse cx="50" cy="54" rx="30" ry="12" fill="none" stroke="#0f62fe" stroke-width="1.6" transform="rotate(-24 50 54)"/>
+        <g transform="rotate(38 46 58)">
+          <path d="M46 40 C52 46 52 60 46 70 C40 60 40 46 46 40 Z" fill="#f4f6fa"/>
+          <circle cx="46" cy="52" r="3.1" fill="#0f62fe"/>
+          <path d="M40 62 L36 70 L44 66 Z" fill="#b8860b"/><path d="M52 62 L56 70 L48 66 Z" fill="#b8860b"/>
+          <path d="M43 70 Q46 78 49 70 Z" fill="#ff8a3d"/>
+        </g>
+      </svg>
+      <div class="title-block">
+        <div class="brand">Mnemox</div>
+        <div class="tag">Give IBM Bob a memory. Make your knowledge compound.</div>
+        <div class="meta">Team BobjectifLune · Software · 2026 IBMer watsonx Challenge</div>
+      </div>
+    </div>
+    <div class="band navy">
+      <div class="hook"><span class="k">The problem.</span> Every IBM Bob session starts <strong>amnesiac</strong>. It re-reads your repo and re-answers last week's question — you pay Bobcoins <em>and</em> your own time to relearn what Bob already knew.</div>
+    </div>
+  </div>
+
+  <div class="g">
+    <div class="section-title">Knowledge should compound — not restart.<span class="rule"></span></div>
+    <p class="lead">The fix isn't a shorter prompt. It's a <strong>memory</strong>. Mnemox implements Andrej Karpathy's <strong>LLM-Wiki</strong> pattern — but <strong>native to IBM Bob</strong>, as two modes, no plugin, no MCP server, no external service. Knowledge is written once and <em>retrieved</em> thereafter, so every session launches from accumulated altitude instead of the ground.</p>
+    <div class="ba">
+      <div class="side bad"><h4>Without a memory</h4><span class="big">2,000 lines</span><p>Session 1 reads the repo. Session 10 reads the same 2,000 lines <em>again</em>. Bob re-derives the same decisions every time.</p></div>
+      <div class="side good"><h4>With Mnemox</h4><span class="big">~200 lines</span><p>Session 10 retrieves a curated digest from the knowledge base. Grounded answer, a fraction of the context, budget freed for real work.</p></div>
+    </div>
+  </div>
+
+  <div class="g">
+    <div class="section-title">BobjectifLune — aim at the impossible.<span class="rule"></span></div>
+    <p class="lead"><strong>BobjectifLune</strong> = <strong>Bob</strong> + <em>Objectif Lune</em> (Destination Moon): reach what looks impossible through curiosity, involvement, a fail-fast mindset, and resiliency — with Bob as the craft and the knowledge base as the <strong>flight log</strong>. Each value maps to something real in this project:</p>
+    <div class="pills">
+      <div class="pill"><b>Curiosity</b><span>Reframed cost as a <em>memory</em> problem: "why re-pay for what Bob already knew?"</span></div>
+      <div class="pill"><b>Fail-fast</b><span>Shipped a wrong 68.96% figure — caught it fast, retracted it publicly.</span></div>
+      <div class="pill"><b>Resiliency</b><span>Rebuilt a manifest-backed harness + CI that blocks any unprovenanced number.</span></div>
+      <div class="pill"><b>Involvement</b><span>Team-shared KB in Git — one member's knowledge becomes everyone's.</span></div>
+    </div>
+    <div class="callout"><b>The thesis in one line:</b> On the way to the impossible, you cannot afford to forget what you already learned. Mnemox is the memory IBM Bob was missing.</div>
+  </div>
+
+  <div class="footer"><span>Mnemox · BobjectifLune</span><span>Page 1 of 3 — The problem &amp; the insight</span></div>
+</section>
+
+<!-- ============================= PAGE 2 ============================= -->
+<section class="page">
+  <div class="g">
+    <div class="kicker">How it works · zero install · the numbers, honestly</div>
+    <div class="section-title">Two native Bob modes. Zero plugins.<span class="rule"></span></div>
+    <div class="cols">
+      <div class="col">
+        <ul class="tight">
+          <li><strong>🧠 Knowledge Builder</strong> — a living KB (concepts, guides, references, research) with templates, cross-references, and a self-updating index.</li>
+          <li><strong>🔍 Repo Analyzer</strong> — 7 Bash scripts produce dated ~200-line digests (scan, deps, metrics, security, coverage, git, docs) that Bob cites instead of raw source.</li>
+          <li>Works in <strong>Bob IDE</strong> (mode picker — zero install) and <strong>Bob Shell CLI</strong>. One command scaffolds a new workspace in &lt;30s.</li>
+        </ul>
+      </div>
+      <div class="col">
+        <div class="layers">
+          <div class="layer" style="background:#25406f;"><small>Layer 1</small><b>Raw sources</b></div>
+          <div class="arrow">→</div>
+          <div class="layer" style="background:#0f62fe;"><small>Layer 2</small><b>Wiki (KB)</b></div>
+          <div class="arrow">→</div>
+          <div class="layer" style="background:#0a1a3f;"><small>Layer 3</small><b>Schema</b></div>
+        </div>
+        <p class="note">Karpathy's three layers, native to Bob: raw sources → curated wiki → a stable <em>schema</em> (mode&nbsp;+&nbsp;<code>AGENTS.md</code>) that makes Bob disciplined <em>and</em> cacheable.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="g">
+    <div class="section-title">Six token-economy taxes — each has a Bash-KB fix (no Python required).<span class="rule"></span></div>
+    <table>
+      <tr><th>Waste</th><th>How the KB Manager removes it</th></tr>
+      <tr><td>Catalog tax — MCP re-sends its tool list every turn</td><td>Native Bob mode — no plugin, no MCP</td></tr>
+      <tr><td>Payload tax — a 2,000-line file for 20 relevant lines</td><td>Scripts summarise; the KB stores digests you <em>cite</em></td></tr>
+      <tr><td>Compression trap — stripping meaning raises effective cost</td><td>Templates preserve rationale, real names, cross-refs</td></tr>
+      <tr><td>Short-thread tax — turn 15 re-pays 14 turns of history</td><td>Knowledge persists in KB + <code>save_memory</code>; a fresh thread retrieves</td></tr>
+      <tr><td>Cache misses — reworded prefixes</td><td>Fixed mode + <code>AGENTS.md</code> + stable layout = cacheable prefix</td></tr>
+      <tr><td>Verbose output</td><td>Bounded artifacts — templates, <code>INDEX.md</code>, reports — not essays</td></tr>
+    </table>
+  </div>
+
+  <div class="g">
+    <div class="section-title">The numbers — separated, labelled, provenanced.<span class="rule"></span></div>
+    <div class="stats">
+      <div class="stat"><div class="num">20.0%</div><div class="lbl">mean token compression</div><div class="prov">N=183 real docs · 95% CI [18.9–21.2%] · null test 0.73% · manifest-backed</div></div>
+      <div class="stat"><div class="num">20→92%</div><div class="lbl">effective saving w/ cache</div><div class="prov">Scales with your repetition rate (0%→90% repeat). We publish the model, not one flattering number.</div></div>
+      <div class="stat"><div class="num">≈60%</div><div class="lbl">fewer Bobcoins / iteration</div><div class="prov">hcd-at-its-core: 94 demos, 15 masterclasses. Session-readout, single-project observation.</div></div>
+    </div>
+    <div class="callout"><b>The reinvestment story is the real result.</b> The ≈60% isn't the impact — it's the mechanism. Every Bobcoin recovered on <strong>hcd-at-its-core</strong> was reinvested into deeper failure modes, richer topologies, and more entropic scenarios across 94 demos that would otherwise have been unaffordable to build.</div>
+  </div>
+
+  <div class="footer"><span>Mnemox · BobjectifLune</span><span>Page 2 of 3 — Mechanism &amp; measured impact</span></div>
+</section>
+
+<!-- ============================= PAGE 3 ============================= -->
+<section class="page">
+  <div class="g">
+    <div class="kicker">Why it wins · adopt in one click · the frontier</div>
+    <div class="section-title">Not RAG. Not a plugin. A compounding memory that won't overclaim.<span class="rule"></span></div>
+    <table>
+      <tr><th>&nbsp;</th><th>RAG</th><th>MCP server</th><th>Mnemox (Bob-native KB)</th></tr>
+      <tr><td>Rediscovers from scratch every query</td><td class="no">Yes</td><td class="no">Yes</td><td class="yes">No — retrieves</td></tr>
+      <tr><td>Catalog tax every turn</td><td>No</td><td class="no">Yes</td><td class="yes">No</td></tr>
+      <tr class="win"><td>Knowledge accumulates &amp; compounds over time</td><td class="no">No</td><td class="no">No</td><td class="yes">Yes</td></tr>
+      <tr><td>Works natively in Bob IDE (zero install)</td><td>Depends</td><td>Depends</td><td class="yes">Yes</td></tr>
+      <tr><td>Infrastructure required</td><td>Vector DB + embeddings + pipeline</td><td>Server + catalog</td><td class="yes">Git only</td></tr>
+    </table>
+  </div>
+
+  <div class="g">
+    <div class="cols">
+      <div class="col">
+        <div class="section-title">Wins on trust.<span class="rule"></span></div>
+        <p class="lead">This project caught its <em>own</em> fabricated <strong>68.96% "VALIDATED"</strong> figure, formally retracted it, and built CI that blocks any unprovenanced number. In an era of confidently-wrong AI, <strong>a productivity tool that refuses to overclaim its own productivity</strong> is the differentiator.</p>
+        <p class="note">STRIDE threat model · bandit SAST · passing null test · manifest-backed validation · formal retraction on file · every claim labelled at its true confidence level.</p>
+      </div>
+      <div class="col">
+        <div class="section-title">Adopt in one click.<span class="rule"></span></div>
+        <ul class="tight">
+          <li><strong>Bob IDE:</strong> mode picker → 🧠 Mnemox Knowledge Builder. Zero install, zero CLI.</li>
+          <li><strong>Bob Shell CLI:</strong> one alias, one command.</li>
+          <li>Plain Markdown in Git — no proprietary format, no lock-in. <strong>MIT-licensed</strong>; any IBM team can clone, init, and start compounding.</li>
+          <li>Deploy to a new workspace in a single command; the whole team activates from the picker.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="g">
+    <div class="band navy">
+      <div class="hook"><span class="k">The frontier.</span> When re-derivation cost approaches zero, the budget freed from repetition funds depth, breadth, and deeper agent teams — it moves the frontier of what's affordable to attempt with Bob. Bob got us off the ground; the knowledge base is the flight log that keeps us climbing.</div>
+      <div style="font-size:13pt; font-weight:800; margin-top:8px; color:#7fd1ff;">The impossible, made repeatable.</div>
+    </div>
+    <div class="callout"><b>What's next.</b> A domain-specific starter KB for watsonx.data Tiger Teams, so every South EMEA engagement launches from accumulated expertise instead of zero — turning recurring re-derivation cost into a one-time, team-shared institutional asset.</div>
+  </div>
+
+  <div class="footer"><span>Mnemox · BobjectifLune · drafted in IBM Bob; the 110+ document KB was built &amp; maintained by the Knowledge Manager mode itself</span><span>Page 3 of 3</span></div>
+</section>
+
+</body>
+</html>

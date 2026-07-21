@@ -3,7 +3,7 @@ title: "Mnemox Knowledge Builder — Business Case"
 category: research
 tags: [business-case, roi, strategy, cto, enterprise-architect, business-owner]
 created: 2026-07-18
-updated: 2026-07-18
+updated: 2026-07-20
 status: active
 audience: [business-owner, cto, enterprise-architect]
 related:
@@ -16,7 +16,12 @@ related:
   - ../guides/kb-tos-integration-roadmap.md
 ---
 
-> **HISTORICAL SNAPSHOT (2026-07).** Point-in-time research/analysis retained for the audit trail. Figures below reflect what was measured or projected at the time of writing; the canonical current numbers live in `STATUS.md` and the validation manifest (`evaluation/results/validation-2026-07-14/manifest.json`).
+> **RECONCILED 2026-07-20.** This business case has been re-checked against the current
+> measured state. Where a figure could drift, it defers to its canonical home — `STATUS.md`
+> (maturity), the validation manifest (`evaluation/results/validation-2026-07-14/manifest.json`,
+> compression), and the retrieval report (`evaluation/results/retrieval-2026-07-19/report.json`,
+> p@3). Two corrections were applied since the 2026-07-18 draft: the withdrawn A+ self-grade
+> was removed (§7), and stale test/coverage counts were replaced with the CI-enforced gates.
 
 
 # Mnemox Knowledge Builder — Business Case
@@ -428,12 +433,16 @@ It reflects a specific, documented state:
 |---|---|
 | The Token Optimizer has not been validated on diverse external corpora — only on structured Markdown prose from this repository | The core implementation is buggy or unstable |
 | The KB Manager savings are workload-dependent and not benchmarked on external projects | The pattern does not work |
-| No enterprise SLAs, no on-call rotation, no Windows support | The quality gates (1,112 tests, 89.82% coverage, ruff + mypy clean) are not real |
+| No enterprise SLAs, no on-call rotation, no Windows support | The quality gates (~1,500 tests, ≥80% enforced coverage floor, ruff + mypy + bandit clean) are not real |
 
-**Engineering quality grade: A+ (4.30/4.30) against Tier-1 institutional
-standard** — all correctness bugs fixed, CI-enforced quality gates, STRIDE
-threat model, 19 ADRs. The "Beta" label reflects measurement scope, not
-implementation quality.
+**Engineering-quality evidence (not a self-grade).** The prior "A+ (4.30/4.30)"
+self-assessment has been **withdrawn** — self-grading is not independent verification.
+What stands are the CI-enforced gates: **~1,500 tests** (1,498 collected), a **≥80%
+coverage floor** with per-package floors, **ruff + mypy + bandit** clean on a 3.11/3.12
+matrix, a **STRIDE threat model** (`docs/security/threat-model.md`), a **9-file adversarial
+security suite** (`tests/security/`), an SBOM, Dependabot, and **19 ADRs** (`docs/adr/`).
+Independent audit verdicts are recorded in `STATUS.md`; an independent re-grade is pending.
+The **"Beta"** label reflects measurement scope + API stability — not code discipline.
 
 ### Known limitations for enterprise evaluation
 
