@@ -68,7 +68,7 @@ identically in **Bob IDE** and **Bob Shell CLI** — same modes, same KB, same c
 
 ---
 
-https://github.com/user-attachments/assets/bd79071d-3f2d-4261-a663-794845883327
+https://github.com/user-attachments/assets/2a544642-5001-4e09-9ab6-1b39388147f2
 
 ## 1. The problem: re-derivation consumes the budget
 
