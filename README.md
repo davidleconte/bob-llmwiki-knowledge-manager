@@ -63,9 +63,8 @@ identically in **Bob IDE** and **Bob Shell CLI** — same modes, same KB, same c
 
 https://github.com/user-attachments/assets/6dd05f89-226b-4cfe-9073-27bee59a5da8
  
-<img width="781" height="693" alt="image" src="https://github.com/user-attachments/assets/d48bf6a1-13e6-4204-bdc9-115ea3455735" />
+<img width="715" height="364" alt="image" src="https://github.com/user-attachments/assets/6201c9f6-283c-4366-ab89-da800da98491" />
 
-[Mnemox_arXiv_Leconte_2026.pdf](https://github.com/user-attachments/files/30224650/Mnemox_arXiv_Leconte_2026.pdf)
 
 ## 1. The problem: re-derivation consumes the budget
 
