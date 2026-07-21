@@ -39,7 +39,7 @@ jobs:
       - uses: astral-sh/setup-uv@v4
         with:
           version: "latest"
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install (locked from uv.lock — test matrix)
@@ -100,7 +100,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Forbid weakening a gate + planting a claim in one PR
@@ -116,7 +116,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
@@ -200,7 +200,7 @@ jobs:
       - uses: astral-sh/setup-uv@v4
         with:
           version: "latest"
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install (locked from uv.lock — typecheck)
@@ -217,7 +217,7 @@ jobs:
       - uses: astral-sh/setup-uv@v4
         with:
           version: "latest"
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install (locked from uv.lock — e2e)
@@ -239,7 +239,7 @@ jobs:
       - uses: astral-sh/setup-uv@v4
         with:
           version: "latest"
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install (locked from uv.lock — validation)
@@ -268,7 +268,7 @@ jobs:
       - uses: astral-sh/setup-uv@v4
         with:
           version: "latest"
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install (locked from uv.lock — benchmarks)
@@ -312,7 +312,7 @@ jobs:
       - uses: astral-sh/setup-uv@v4
         with:
           version: "latest"
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install (locked from uv.lock — load)
@@ -331,7 +331,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
@@ -378,7 +378,7 @@ jobs:
       - uses: astral-sh/setup-uv@v4
         with:
           version: "latest"
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install (locked from uv.lock)
