@@ -1,4 +1,4 @@
-[Mnemox_arXiv_Leconte_2026.pdf](https://github.com/user-attachments/files/30224954/Mnemox_arXiv_Leconte_2026.pdf)
+
 # Mnemox
 
 ### *Give IBM Bob a memory. Make your knowledge compound.*
