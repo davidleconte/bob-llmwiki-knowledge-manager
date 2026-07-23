@@ -17,6 +17,8 @@ economy**: a git-versioned Markdown knowledge base, a schema layer, and a Python
 compresses what a session spends. Built by **Team BobjectifLune** for the 2026 IBMer watsonx Challenge. Works
 identically in **Bob IDE** and **Bob Shell CLI** — same modes, same KB, same compounding benefit.
 
+<img width="2752" height="1536" alt="AI_Memory_and_Efficiency_Infographic" src="https://github.com/user-attachments/assets/0ef7ad46-fd10-42d5-9b6c-8002526cc9d4" />
+
 ![status](https://img.shields.io/badge/status-Beta%20%E2%80%94%20Not%20Production%20Ready-orange)
 ![license](https://img.shields.io/badge/license-MIT-blue)
 ![python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue)
