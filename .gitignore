@@ -76,3 +76,39 @@ Recipes/
 # Bob IDE MCP config (may contain credentials — use .bob/mcp.json.example)
 .bob/mcp.json
 docs/knowledge-base/**/*.docx
+
+# ── Derived, exported and scratch artefacts (audit 2026-07-25) ────────────────
+# All of the below were untracked AND un-gitignored, i.e. one `git add -A` away
+# from permanent history (~56 MB), and they made local gate runs differ from CI.
+#
+# Snapshot tarballs. A full-repo snapshot necessarily contains .bob/mcp.json —
+# the file this .gitignore excludes because it may hold credentials — so an
+# archive is a way to commit it past the rule that exists to stop that.
+_to_delete/
+*.tar.gz
+*.tgz
+
+# Obsidian/graph export output of scripts/export-kb.sh — a derived duplicate of
+# docs/knowledge-base/ and never a source of truth.
+kb-export/
+
+# Second generated embedding index. `.bob/kb-index/` is already ignored above as
+# generated; this sibling has the same shape and provenance (MEM-06 tracks the
+# divergence) and 1.7 MB of it was previously committed, vectors.npy included.
+.bob/kb-index-st/
+
+# arXiv paper working directory (LaTeX source, built PDF, figures). Declared
+# ignored rather than left undeclared; commit paper/mnemox.tex + paper/fig/*.png
+# deliberately if the source should be versioned.
+paper/
+
+# Vendored IBM Bob skill packs unrelated to this project. Only the two Mnemox
+# skills are tracked (knowledge-manager/, kb-optimizer-integration.md); the other
+# 28 packs — Confluent/Kafka/watsonx/pptx enablement, incl. 39 ISO/ECMA .xsd
+# schemas — are your local Bob environment, not this repository's content.
+.bob/skills/*
+!.bob/skills/knowledge-manager/
+!.bob/skills/kb-optimizer-integration.md
+
+# Editor/OS residue anywhere in the tree (a bare `.DS_Store` rule misses nested).
+**/.DS_Store

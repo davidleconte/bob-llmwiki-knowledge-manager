@@ -1,4 +1,0 @@
-# Data Processing Pipeline
-# Each line is: step_name: command
-
-process_data: python3 scenarios/data_issues/data_processor.py scenarios/data_issues/sample_data_broken.csv -o scenarios/data_issues/output.json
