@@ -31,7 +31,7 @@ not survive a tired week. So:
 
 ## 12.2 The gates
 
-Nine checks run in CI. Each is a script that a human can read.
+Ten checks run in CI. Each is a script that a human can read.
 
 | Gate | What it enforces |
 |---|---|
@@ -43,6 +43,7 @@ Nine checks run in CI. Each is a script that a human can read.
 | `check_md_links.py` | every relative link resolves against the **git index**, case-sensitively |
 | `check_architecture_freshness.py` | every `src/` module is named by ARCHITECTURE.md or an ADR |
 | `check_layering.py` | `src/` never imports from `scripts/` |
+| `check_doc_freshness.py` | a doc asserting a date is not older than its own newest commit |
 | `validate-kb.sh` | KB cross-references resolve |
 
 Two design choices are worth naming:
@@ -110,8 +111,9 @@ one:
   that the description is any good.
 - **Whether a manifest's numbers are right.** The gate checks a citation exists and is
   within tolerance of the cited file; it cannot tell you the run was well-designed.
-- **Doc-date freshness.** Nothing yet ties a "Last Updated" line to the commits it
-  describes; STATUS.md was six days and eighteen merged PRs stale when the audit ran.
+- **Prose currency beyond the date line.** `check_doc_freshness.py` now ties a declared
+  date to the file's newest commit — but a doc can be touched without its content being
+  re-checked, so a fresh date is evidence of an edit, not of accuracy.
 - **Human review.** Gate integrity is a substitute for a second reviewer. It is a good
   substitute. It is still a substitute.
 
