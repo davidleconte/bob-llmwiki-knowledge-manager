@@ -1,4 +1,22 @@
 # Field 3 — Solution Impact
+
+> ✅ **SUBMITTED — frozen 2026-07-25.** This pack was submitted to the 2026 IBMer
+> watsonx Challenge before the **22 July 2026, 10:00 ET** deadline, as a zip of the
+> repository at that release. It is preserved as the record of what was entered and is
+> **no longer a working document**: unchecked boxes below are the state at submission,
+> not outstanding work, and the deadline references are historical.
+>
+> Numbers here were correct against the evidence available on 22 July. Two have since
+> been superseded and are **not** retro-edited, because this is a submission record:
+>
+> * **Compression.** The pack cites ~20% mean. A 2026-07-25 re-measurement puts the
+>   current system at **6.8%** — the optimizer was made structure-preserving, trading
+>   ~12pp of compression for fidelity (0.798 → 0.995). See [`STATUS.md`](../STATUS.md).
+> * **The ≈60% Bobcoin figure.** A single-project practitioner observation with **no
+>   repo artifact**, as `09-compound-loop-demo.md` in this same pack says of it. It was
+>   labelled as an observation rather than a measurement, which was the right call, but
+>   it is not reproducible and should not be repeated as one.
+
 *This field is **structured**, not a 500-word essay. On the form you (1) select impact categories, (2) enter hours-before / hours-after, and (3) pick a frequency. Use the **FORM ENTRY** block below verbatim. The rest of this file is the evidence behind those numbers — keep it for the pitch and for judge Q&A.*
 
 ---
