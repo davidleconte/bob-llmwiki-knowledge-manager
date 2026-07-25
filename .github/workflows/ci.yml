@@ -71,14 +71,25 @@ jobs:
         # Fails if a live status doc cites a coverage gate that disagrees with
         # pyproject fail_under, or reintroduces a retracted maturity claim.
         run: uv run python scripts/check_status_consistency.py
-      - name: Scale-regression gate (A8)
-        # The WS-A scale invariants live in tests/performance/ (excluded from the
-        # coverage run above) and use manual timing, so the benchmarks job's
-        # --benchmark-only deselects them — i.e. they run in NO other job. Run them
-        # here as a dedicated gate so a re-introduced quadratic in PageRank (A1),
+      - name: Scale-regression + DoS-hardening gate (A8 / ATK-DOS)
+        # Both suites live in tests/performance/ (excluded from the coverage run
+        # above) and use manual timing, so the benchmarks job's --benchmark-only
+        # deselects them — i.e. they run in NO other job. Run them here as a
+        # dedicated gate so a re-introduced quadratic in PageRank (A1),
         # build_semantic (A2), the cold rebuild (A3ii) or L2 eviction (A4) fails the
         # PR before it reaches main. Ratio ceilings: config/gates/gate-config.yaml.
-        run: uv run pytest tests/performance/test_scale_invariants.py -q
+        #
+        # test_dos_hardening.py (ATK-DOS-01/05/06) was previously in this same
+        # "runs in NO other job" hole but was never added to this step, so its 9
+        # regression tests guarded nothing. Named explicitly rather than running the
+        # whole directory: test_prod_confidence.py has known p99 wall-clock flakes
+        # on shared runners, and test_{cache,optimizer}_performance.py are
+        # benchmark-driven and belong to the benchmarks job.
+        run: |
+          uv run pytest \
+            tests/performance/test_scale_invariants.py \
+            tests/performance/test_dos_hardening.py \
+            -q
 
   kb-integrity:
     name: KB cross-reference integrity
@@ -88,7 +99,53 @@ jobs:
       - name: Validate KB cross-references
         # Fails the build if any non-research Markdown link in docs/knowledge-base/
         # resolves to a missing file. Research snapshots emit warnings only.
+        #
+        # NOTE: this covers docs/knowledge-base/ ONLY (KB_DIR in the script) — roughly
+        # 4% of the repo's Markdown. Tree-wide link integrity is the separate
+        # link-integrity job below; do not mistake this job's green for that.
         run: bash scripts/validate-kb.sh
+
+  link-integrity:
+    name: Markdown link integrity (tree-wide, case-sensitive)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Prove the detector can fail
+        # A gate that cannot fail proves nothing: plant known-bad and known-good links
+        # and require the expected verdict for each before trusting the scan below.
+        run: python scripts/check_md_links.py --selftest
+      - name: Resolve every relative Markdown link against the git index
+        # Audit 2026-07-25, finding class 1: a partial UPPER_SNAKE -> kebab-case rename
+        # left ~103 broken references live, invisible because (a) the only link checker
+        # was scoped to docs/knowledge-base/ and (b) macOS core.ignorecase resolves
+        # wrong-case paths that GitHub and this Linux runner 404. The gate resolves
+        # against `git ls-files`, never the filesystem — checking the filesystem would
+        # reproduce the exact blindness it exists to remove.
+        run: python scripts/check_md_links.py
+      - name: Prove the doc-freshness date parser is correct
+        # This self-test earned its place immediately: the first pattern could not read
+        # STATUS.md's own `| **As of** | date |` row, so the live scan passed by silently
+        # skipping the very file the gate exists for. A green scan proved nothing until
+        # the parser was pinned.
+        run: python scripts/check_doc_freshness.py --selftest
+      - name: Documents asserting currency must be current
+        # Audit 2026-07-25 (V-6): STATUS.md — "the canonical maturity status", which every
+        # other doc defers to — read "As of 2026-07-19" through 18 merged PRs. Staleness
+        # has no syntax; only the commit log can catch it.
+        run: python scripts/check_doc_freshness.py
+      - name: Prove the architecture-freshness detector can fail
+        run: python scripts/check_architecture_freshness.py --selftest
+      - name: Pin the hand-written architecture layer to src/
+        # Audit 2026-07-25, finding A-11: docs/api/ was in perfect sync (55/55 modules)
+        # while ARCHITECTURE.md — "the single authoritative architecture document" —
+        # described none of six modules added after its last update, two of them security
+        # controls (provenance signing, the A7 input-bound caps). The difference between
+        # the two layers was not care: one had a freshness gate and the other did not.
+        # This applies the same pin to the layer that actually drifts.
+        run: python scripts/check_architecture_freshness.py
 
   gate-integrity:
     name: gate integrity (ATK-GATE-07)
@@ -121,7 +178,13 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
       - name: Install ruff
-        run: pip install "ruff>=0.6.0"
+        # PINNED (2026-07-25). `ruff>=0.6.0` was a floating lower bound, so this job
+        # silently upgraded on every run. When 0.16.0 added Python-block formatting
+        # *inside Markdown*, three files that had passed for months began failing —
+        # on `main`, with nobody having changed a line. A lint job whose result depends
+        # on the day it ran is not a gate; it is a coin flip that occasionally blocks
+        # merges. Bump this deliberately, and reformat in the same commit.
+        run: pip install "ruff==0.16.0"
       - name: Ruff lint (config in pyproject [tool.ruff.lint])
         run: ruff check src tests scripts
       - name: Ruff format check
@@ -159,15 +222,24 @@ jobs:
         # Exclusions: project-management plans, deprecated/, archive/, adr/
         # (historic prose), and knowledge-base/research/ (mnemox lesson notes
         # that discuss the renames as prose, not as live hrefs).
-        # Pattern rationale (mnemox lessons 2026-07-18 Finding 1):
+        # Pattern rationale (mnemox lessons 2026-07-18 Finding 1) — each entry is
+        # the WRONG spelling, verified against `git ls-files` (the Linux ground
+        # truth), not against the case-insensitive local filesystem:
         #   ](QUICK_START.md)   → on-disk name is quick-start.md
-        #   ](SLA.md)           → on-disk name is sla.md
+        #   ](sla.md)           → on-disk name is SLA.md
         #   ](architecture.md)  → on-disk name is ARCHITECTURE.md
+        #
+        # The SLA rule was INVERTED before 2026-07-25: it forbade `](SLA.md)` — the
+        # correct spelling — while permitting the broken `](sla.md)`, so the gate was
+        # driving docs toward the 404. `git ls-files | grep -i 'sla\.md'` returns
+        # exactly `docs/SLA.md`. This rule remains a 3-pattern stopgap; the general
+        # replacement is scripts/check_md_links.py (resolves every href against the
+        # git index, case-sensitively).
         run: |
           bad=$(grep -rn \
             --include="*.md" \
             -e "](QUICK_START\.md)" \
-            -e "](SLA\.md)" \
+            -e "](sla\.md)" \
             -e "](architecture\.md)" \
             README.md STATUS.md CHANGELOG.md docs/ \
             --exclude-dir=".git" \

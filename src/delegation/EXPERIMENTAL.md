@@ -47,7 +47,7 @@ coordinator.register_agent(PerformanceAgent("performance-1"))
 # Create tasks
 tasks = [
     SubAgentTask(task_type="security", target="src/cache"),
-    SubAgentTask(task_type="performance", target="src/cache")
+    SubAgentTask(task_type="performance", target="src/cache"),
 ]
 
 # Execute in parallel

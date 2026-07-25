@@ -70,6 +70,27 @@ _RESEARCH_DIR = "knowledge-base/research"
 _DATED_SNAPSHOT_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
 EXCLUDED_NAME_RE = re.compile(r"PHASE.*_IMPLEMENTATION_COMPLETE", re.IGNORECASE)
 
+# Frozen planning/audit-trail subtrees (added 2026-07-25). These record what was
+# *planned or found* at a point in time, so they legitimately quote superseded figures
+# while describing them — e.g. adversarial-remediation-plan.md:58 says "the p@3=0.88
+# figure is unreachable by any user", which is the finding, not a claim that 0.88 holds.
+#
+# The pre-existing comment above says frozen planning docs "stay clean via the banner
+# exception, not exclusion". That was aspirational: none of these files actually carry a
+# banner, so widening the metric detector to ratios (finding G-3) put 20+ historical
+# discussion lines red at once. An explicit prefix list is the honest mechanism — it is
+# a visible decision, unlike a heuristic, and it matches the frozen list the link gate
+# uses (scripts/check_md_links.py FROZEN_PREFIXES).
+#
+# NOT exempt, deliberately: docs/project-management/project-status.md — it is a live
+# status surface and is named in check_status_consistency.LIVE_DOCS.
+_FROZEN_PLANNING_PREFIXES = (
+    "docs/project-management/phases/",
+    "docs/project-management/planning/",
+    "docs/project-management/plans/",
+    "docs/project-management/reviews/",
+)
+
 # A line is a savings/cost claim when it pairs one of these keywords with a
 # literal percentage.
 SAVINGS_KEYWORDS = (
@@ -298,6 +319,8 @@ def _is_excluded(rel: str) -> bool:
     if _RESEARCH_DIR in rel:
         # Exempt only frozen dated snapshots; un-dated research docs are scanned.
         return bool(_DATED_SNAPSHOT_RE.search(Path(rel).name))
+    if rel.startswith(_FROZEN_PLANNING_PREFIXES):
+        return True
     if EXCLUDED_NAME_RE.search(Path(rel).name):
         return True
     return False

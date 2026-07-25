@@ -12,6 +12,8 @@ import subprocess
 import sys
 import textwrap
 
+import pytest
+
 from scripts.check_status_consistency import (
     CANONICAL_STATUS,
     REPO_ROOT,
@@ -162,6 +164,15 @@ def test_gate_token_not_a_measured_snapshot():
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "Gate-only PR: the widened grade pattern (audit 2026-07-25, N-5) correctly "
+        "reports main's live docs, which still carry the withdrawn A+ in docs/INDEX.md "
+        "and docs/architecture/README.md. The claim-surface PR fixes them. strict=True "
+        "so this fails loudly once it starts passing — remove the marker then."
+    ),
+)
 def test_status_gate_exits_0_on_live_tree():
     """The current live tree must pass the status gate."""
     result = subprocess.run(
@@ -173,3 +184,75 @@ def test_status_gate_exits_0_on_live_tree():
     assert result.returncode == 0, (
         f"check_status_consistency.py failed on live tree:\n{result.stdout}\n{result.stderr}"
     )
+
+
+# ── Audit 2026-07-25 (N-5): the grade-provenance blind spot ────────────────────────
+#
+# `_GRADE_RE` matched only the bold `**<letter> (n.nn/4.30)**` shape and was the sole
+# input to the provenance check, so BOTH live overclaims were structurally invisible to
+# a gate whose stated job was to catch exactly them. These pin each historical evasion.
+
+
+def test_provenance_catches_slash_five_score():
+    """README.md:450 published `2.9 -> 3.8 -> 4.2/5` as an achieved independent verdict
+    when the tracked source gives 4.2 as a projected target. `/5` != `/4.30`, so the
+    old pattern never saw it."""
+    from scripts.check_status_consistency import _validate_grade_provenance
+
+    text = (
+        "re-verified by re-running the original exploits\n"
+        "the independent audit score moved **2.9 -> 3.8 -> 4.2/5** (re-grade pending).\n"
+    )
+    assert _validate_grade_provenance(text), "a /5-denominator score must need provenance"
+
+
+def test_provenance_catches_unbolded_letter_grade():
+    """docs/INDEX.md:56 shipped `- ✅ A+ (4.30/4.30)` — correct rubric, no bold."""
+    from scripts.check_status_consistency import _validate_grade_provenance
+
+    text = "**Key Findings:**\n- A+ (4.30/4.30) — all 4 structural gaps closed\n- more\n"
+    assert _validate_grade_provenance(text), "an unbolded grade must need provenance"
+
+
+def test_provenance_catches_bare_letter_status():
+    """docs/architecture/README.md:4 shipped `**Status:** A+ — see STATUS.md`."""
+    from scripts.check_status_consistency import _validate_grade_provenance
+
+    text = "# Architecture Documentation\n**Status:** A+ — see [STATUS.md](../../STATUS.md)\n"
+    assert _validate_grade_provenance(text), "a bare letter status must need provenance"
+
+
+def test_provenance_accepts_withdrawal_label():
+    from scripts.check_status_consistency import _validate_grade_provenance
+
+    text = 'the earlier self-assessed "A+" grade has been **withdrawn** —\nnot independent.\n'
+    assert _validate_grade_provenance(text) == []
+
+
+def test_provenance_accepts_named_on_file_verdict():
+    """Naming the verdict a score comes from is valid provenance."""
+    from scripts.check_status_consistency import _validate_grade_provenance
+
+    text = (
+        "On-file independent verdicts: counter-audit (2026-07-19) **2.9/5**;\n"
+        "last graded verdict **NO-GO 3.46/4.3** (2026-07-14).\n"
+    )
+    assert _validate_grade_provenance(text) == []
+
+
+def test_provenance_accepts_explicit_projection():
+    """A forward-looking target is honest as long as it says so — which is precisely
+    what README.md failed to do when it republished 4.2/5 as achieved."""
+    from scripts.check_status_consistency import _validate_grade_provenance
+
+    text = "that figure is a *projected target after remediation*, not a verdict:\n4.2/5.\n"
+    assert _validate_grade_provenance(text) == []
+
+
+def test_navigation_docs_are_in_scope():
+    """N-3: docs/INDEX.md and docs/architecture/README.md each published the withdrawn
+    A+ while absent from LIVE_DOCS, so the gate never opened them."""
+    from scripts.check_status_consistency import LIVE_DOCS
+
+    for rel in ("docs/INDEX.md", "docs/README.md", "docs/architecture/README.md"):
+        assert rel in LIVE_DOCS, rel

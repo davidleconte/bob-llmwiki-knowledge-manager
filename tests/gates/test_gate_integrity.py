@@ -55,13 +55,57 @@ def test_claim_surfaces_classified(path):
         "src/optimizer/token_counter.py",
         "tests/gates/test_gate_integrity.py",
         ".github/CODEOWNERS",
-        "SECURITY.md",
         "docs/api/root/pricing.md",  # generated reference -> NOT a claim surface
+        # SECURITY.md moved OUT of this list on 2026-07-25 — see
+        # test_security_md_is_now_a_claim_surface below.
     ],
 )
 def test_neutral_files_are_neither(path):
     assert not is_gate_file(path)
     assert not is_claim_surface(path)
+
+
+# ── Audit 2026-07-25: scope corrections (G-1, G-2) ────────────────────────────────
+
+
+def test_ci_workflow_is_a_gate_definition():
+    """G-2: a gate is only a gate if CI invokes it, so the workflow IS a gate def.
+
+    Before this, one PR could delete a gate's CI step and plant a claim in README.md
+    and pass — the exact ATK-GATE-07 attack, through an unwatched path. Demonstrated
+    by the audit: tests/performance/test_dos_hardening.py ran in no CI job for weeks.
+    """
+    assert is_gate_file(".github/workflows/ci.yml")
+    assert check([".github/workflows/ci.yml", "README.md"]), (
+        "disabling a CI gate step alongside a claim edit must be blocked"
+    )
+
+
+def test_security_md_is_now_a_claim_surface():
+    """SECURITY.md documents the gate-independence posture itself — a gate change must
+    not ride alongside an edit to it."""
+    assert is_claim_surface("SECURITY.md")
+
+
+@pytest.mark.parametrize("path", ["AGENTS.md", "INTEGRATIONS.md"])
+def test_maturity_bearing_root_docs_are_claim_surfaces(path):
+    """AGENTS.md was found asserting a ~51% savings figure and a 4.8x-understated LOC
+    count; INTEGRATIONS.md carries the compression baseline."""
+    assert is_claim_surface(path)
+
+
+def test_submission_pack_is_a_claim_surface():
+    """G-1: 13 tracked files written for external judges, previously outside every
+    gate's scope."""
+    assert is_claim_surface("2026_IBMer_Watsonx_Challenge/03-solution-impact.md")
+    assert check(
+        ["scripts/check_savings_claims.py", "2026_IBMer_Watsonx_Challenge/03-solution-impact.md"]
+    )
+
+
+def test_ci_only_change_still_allowed():
+    """Tightening CI without touching a claim must remain a single clean PR."""
+    assert not check([".github/workflows/ci.yml", "scripts/check_md_links.py"])
 
 
 def test_gate_integrity_blocks_mixed_pr():
@@ -105,14 +149,18 @@ def test_security_md_has_gate_independence_section():
 
 
 def test_gate_integrity_cli_passes_on_gate_plus_nonclaim():
-    """The CLI exits 0 for a gate + non-claim (SECURITY.md/CODEOWNERS) diff."""
+    """The CLI exits 0 for a gate + genuinely-neutral diff.
+
+    SECURITY.md was dropped from this case on 2026-07-25: it became a claim surface,
+    because it is where the gate-independence posture is documented.
+    """
     result = subprocess.run(
         [
             sys.executable,
             "scripts/check_gate_integrity.py",
             "scripts/check_gate_integrity.py",
-            "SECURITY.md",
             ".github/CODEOWNERS",
+            "src/optimizer/token_counter.py",
         ],
         cwd=_REPO_ROOT,
         capture_output=True,

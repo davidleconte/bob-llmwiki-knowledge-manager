@@ -71,9 +71,33 @@ def test_bare_recall_verb_out_of_scope():
     assert not line_is_unbacked_metric("recall that 80% of teams adopt it.")
 
 
-def test_decimal_metric_not_a_percentage_claim():
-    """A decimal p@3 (no %) is a measured value, not a percentage overclaim."""
-    assert not line_is_unbacked_metric("p@3 = 0.84 (21/25), matched by keyword-only.")
+def test_decimal_metric_is_a_claim_and_needs_backing():
+    """Audit 2026-07-25 (G-3) — this test previously asserted the OPPOSITE, on the
+    premise that "a decimal p@3 is a measured value, not a percentage overclaim".
+
+    That premise did not survive the audit. Requiring a literal ``%`` made the gate
+    blind to *every* retrieval figure the repo actually publishes, because the
+    authoritative numbers are ratios (``p_at_3_wired = 0.84``) and every claim is
+    written that way. The concrete casualty: ``docs/architecture/ARCHITECTURE.md:255``
+    asserted a bare, unscoped ``p@3=0.88`` — an overclaim in decimal clothing — and no
+    gate could see it. The blind spot was not an oversight; it was pinned here by a
+    passing test.
+
+    A ratio next to a metric keyword is now a claim, and must cite a report.
+    """
+    assert line_is_unbacked_metric("p@3 = 0.84 (21/25), matched by keyword-only.")
+
+
+def test_decimal_metric_with_a_report_citation_passes():
+    """The honest form still passes — backing is what matters, not the notation."""
+    assert not line_is_unbacked_metric(
+        "p@3 = 0.84 (21/25) — manifest: evaluation/results/retrieval-2026-07-19/report.json"
+    )
+
+
+def test_ratio_without_a_metric_keyword_is_ignored():
+    """The keyword requirement is what keeps the ratio rule from firing on prose."""
+    assert not line_is_unbacked_metric("target_reduction defaults to 0.3 in the schema.")
 
 
 # ---------------------------------------------------------------------------

@@ -66,10 +66,10 @@ with self._stats_lock:
     l1 = self.l1_hits
     l2 = self.l2_hits
     l3 = self.l3_hits
-    m  = self.misses
+    m = self.misses
 
 total = l1 + l2 + l3 + m
-rate  = ((l1 + l2 + l3) / total * 100) if total else 0.0
+rate = ((l1 + l2 + l3) / total * 100) if total else 0.0
 ```
 
 ### Cross-class field reads
@@ -82,7 +82,7 @@ Reading a field owned by another class's lock requires going through a
 threshold = self.l2_cache.similarity_threshold
 
 # GOOD: lock-guarded accessor on the owner
-threshold = self.l2_cache.get_threshold()   # acquires SemanticCache._lock internally
+threshold = self.l2_cache.get_threshold()  # acquires SemanticCache._lock internally
 ```
 
 **Exception:** Fields that are assigned once in `__init__` and never mutated
