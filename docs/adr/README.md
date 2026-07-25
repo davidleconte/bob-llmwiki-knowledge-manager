@@ -37,6 +37,22 @@ Architecture Decision Records document important architectural decisions made du
 - Rationale: Truncation is lossy with no acceptance gate; misconfiguration risk exceeds benefit; callers control strategy at call-site
 - Status: ✅ Accepted
 
+**[014: KB Query Embedding Scorer](014-kb-query-embedding-scorer.md)**
+- Decision: Blend an embedding similarity score into `KnowledgeBaseQuery` at
+  `embedding_weight`, keeping a keyword tie-breaker rather than going embedding-only
+- Rationale: A/B validated 2026-07-16 on the MiniLM backend. **Note the provenance:**
+  no manifest was committed for that run; the committed retrieval result on the
+  shipped backend is p@3 = 0.84 at keyword parity
+  (`evaluation/results/retrieval-2026-07-19/report.json`)
+- Status: ✅ Accepted — A/B validation complete (2026-07-16)
+
+**[015: Persistent Embedding Index](015-persistent-embedding-index.md)**
+- Decision: Disk-backed `[N × dim]` float32 index under `.bob/kb-index/`, with a
+  chunk manifest and file-level staleness sentinels; optional L3 cache tier whose hits
+  are not promoted into L2 (separate namespaces)
+- Rationale: Survives process restarts and avoids re-embedding an unchanged corpus
+- Status: ✅ Accepted
+
 **[017: Knowledge Graph Layer](017-knowledge-graph-layer.md)**
 - Decision: Pure-Python property graph (`src/graph/`) with file-level nodes, two edge types (explicit + semantic), JSON persistence, optional injection into `KnowledgeBaseQuery`
 - Rationale: Multi-hop traversal, orphan detection, and PageRank re-ranking without external graph library dependencies
@@ -45,7 +61,7 @@ Architecture Decision Records document important architectural decisions made du
 **[018: P4 Query Quality](018-p4-query-quality.md)**
 - Decision: Recency tiebreaker (`recency_weight` blend), date-aware filter (`date_filter` prefix), length normalisation deferred
 - Rationale: Addresses 2 of 3 known golden-set misses; backward-compatible (all params default to off); Miss #1 handled adequately by MiniLM at p@3=0.88 (lab, unmanifested; superseded by report.json)
-- Status: ✅ Accepted
+- Status: ⚠️ Accepted (design) / **Deferred (implementation)** — `BatchProcessor` was never built
 
 **[006: Cache Strategy](006-cache-strategy.md)**
 - Decision: In-memory cache over distributed cache
@@ -112,7 +128,7 @@ Architecture Decision Records document important architectural decisions made du
 ## ADR Statistics
 
 - **Total ADRs:** 19 (ADR-001 through ADR-019; ADR-012 superseded)
-- **Status:** 18 accepted, 1 superseded (012)
+- **Status:** 17 accepted, 1 accepted-but-deferred (005 — never implemented), 1 superseded (012)
 - **Coverage:** Technology, Architecture, Algorithms, Quality, Composition patterns
 - **Lines:** ~5,000 total (estimated)
 
