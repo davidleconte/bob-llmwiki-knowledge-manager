@@ -65,7 +65,13 @@ jobs:
         # (89% total, all per-package floors green). Do NOT use `-m "not slow"`:
         # slow-marked tests also live in tests/cache/concurrency/delegation and
         # DO contribute coverage — only the two dirs above are the hang source.
-        run: uv run pytest --cov=src --ignore=tests/load --ignore=tests/performance --cov-report=json:coverage.json --cov-report=term-missing
+        #
+        # --durations=15 (2026-07-25): a runner has 2 cores, so a thread-stress test
+        # sized on a dev box can sit just under the 60s pytest-timeout ceiling here
+        # and nobody finds out until it crosses. This prints the real headroom every
+        # run, on the machine that actually matters, instead of leaving it to be
+        # discovered by a failure.
+        run: uv run pytest --cov=src --ignore=tests/load --ignore=tests/performance --cov-report=json:coverage.json --cov-report=term-missing --durations=15
       - name: Enforce per-package coverage floors
         run: uv run python scripts/check_coverage_by_package.py coverage.json
       - name: Enforce status/coverage "one home per value" consistency

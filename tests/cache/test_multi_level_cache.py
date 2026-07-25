@@ -13,6 +13,7 @@ import time
 import pytest
 
 from src.cache.multi_level_cache import MultiLevelCache
+from tests.support.stress import bounded_rounds
 
 
 class TestMultiLevelCache:
@@ -574,7 +575,7 @@ class TestMultiLevelCache:
 
             def stat_reader() -> None:
                 try:
-                    for _ in range(500):
+                    for _ in bounded_rounds(500):
                         s = cache.stats()
                         flag = s["promote_l2_hits"]
                         assert isinstance(flag, bool), (
@@ -625,7 +626,7 @@ class TestMultiLevelCache:
 
             def checker() -> None:
                 try:
-                    for _ in range(500):
+                    for _ in bounded_rounds(500):
                         s = cache.stats()
                         l1_size = s["l1_size"]
                         l1_max = s["l1_max_size"]
@@ -1011,7 +1012,7 @@ class TestStatsThresholdAndUniqueEntries:
 
             def stats_reader() -> None:
                 try:
-                    for _ in range(500):
+                    for _ in bounded_rounds(500):
                         s = cache.stats()
                         t = s["l2_similarity_threshold"]
                         assert isinstance(t, float) and 0.0 <= t <= 1.0, (

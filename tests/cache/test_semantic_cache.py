@@ -13,6 +13,7 @@ import time
 import pytest
 
 from src.cache.semantic_cache import SemanticCache
+from tests.support.stress import bounded_rounds
 
 
 class TestSemanticCache:
@@ -496,36 +497,13 @@ class TestSemanticCacheGetEntryLock:
                             cache.set(f"key_{j}", f"val_{j}")
                     i += 1
 
-            # Iteration budget scales with how slow execution is (2026-07-25).
-            # Under coverage every line in every thread is traced, so this loop ran
-            # ~3.5x slower and approached the 60s per-test ceiling; on a 2-core CI
-            # runner it crossed it, and the signal-based timeout could not kill the
-            # workers, so the job hung until GitHub's 6-hour limit. Fewer iterations
-            # under coverage keeps wall-clock roughly constant WITHOUT weakening the
-            # test: slower execution *widens* the interleaving window, so each
-            # iteration is a better race detector, not a worse one. Mutation-verified
-            # — reverting the lock in get_entry() still fails this test at 120.
-            # Iteration budget scales with how slow execution is (2026-07-25).
-            # Under coverage every line in every thread is traced, so this loop ran
-            # ~3.5x slower (48s vs 14s) and approached the 60s per-test ceiling; on a
-            # 2-core CI runner it crossed it, and the signal-based timeout could not
-            # kill the workers, so the job hung until GitHub's 6-hour default. Fewer
-            # rounds under coverage keeps wall-clock roughly constant (16s).
-            #
-            # Measured, not assumed: removing the lock from get_entry() and re-running
-            # 3x at 500 rounds AND 3x at 120 rounds, with and without coverage, this
-            # test passed every time. Detection power is identical at both budgets
-            # because it is near zero either way — a plain dict .get() is atomic under the
-            # GIL, so the guarded race almost never manifests. Reducing rounds
-            # therefore costs nothing. **That weakness is a separate, real finding:
-            # this test asserts a lock exists far more than it proves the lock is
-            # needed.** Strengthening it (e.g. a check-then-get window with an
-            # injected switch point) is tracked separately, not smuggled into a CI fix.
-            rounds = 120 if sys.gettrace() is not None else 500
-
+            # Wall-clock budget, not a fixed round count — this is the test whose
+            # hardcoded count blew the 60s ceiling on a 2-core runner. See
+            # tests/support/stress.py for why, and for what the budget does and does
+            # not buy.
             def reader() -> None:
                 try:
-                    for _ in range(rounds):
+                    for _ in bounded_rounds(500):
                         for k in range(20):
                             cache.get_entry(f"key_{k}")  # must not raise
                 except Exception as exc:  # noqa: BLE001
@@ -638,7 +616,7 @@ class TestSemanticCacheAverageSimilarityLock:
             def reader() -> None:
                 """Call average_similarity_score() and assert valid range."""
                 try:
-                    for _ in range(500):
+                    for _ in bounded_rounds(500):
                         score = cache.average_similarity_score()
                         assert 0.0 <= score <= 1.0, (
                             f"average_similarity_score() out of range: {score}"
@@ -702,7 +680,7 @@ class TestSemanticCacheUpdateThresholdLock:
 
             def stat_reader() -> None:
                 try:
-                    for _ in range(500):
+                    for _ in bounded_rounds(500):
                         t = cache.similarity_threshold
                         # Threshold must always be one of the two valid values.
                         assert t in (0.5, 0.9), f"threshold has unexpected value: {t}"
