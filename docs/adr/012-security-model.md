@@ -15,7 +15,7 @@
 > This file is **kept only as an audit-trail record** of what was once claimed.
 > It is **not** a description of the system's security posture. For the real,
 > code-grounded analysis, see the canonical
-> **[STRIDE Threat Model](../security/THREAT_MODEL.md)** and
+> **[STRIDE Threat Model](../security/threat-model.md)** and
 > **[SECURITY.md](../../SECURITY.md)**.
 
 **Status:** ⛔ Superseded (2026-07-14) — see retraction notice above

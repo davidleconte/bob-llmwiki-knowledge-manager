@@ -21,7 +21,7 @@ This is the **master architecture reference** (v3.0, 2026-07-14) that explains:
 **Read this first** to understand the complete picture.
 
 > ⚠️ `UNIFIED_ARCHITECTURE.md` and `ACTUAL_SYSTEM_ARCHITECTURE.md` are **deprecated**.
-> They have been moved to [deprecated/](deprecated/) and are retained for historical reference only.
+> They were removed from the tree on 2026-07-25 and remain recoverable from git history (see below).
 
 ---
 
@@ -43,29 +43,28 @@ This is the **master architecture reference** (v3.0, 2026-07-14) that explains:
 
 > **mypy note (post G-2 gap closure, 2026-07-17):** `src/delegation/` and `src/tools/` are now fully included in the mypy scope — the previous `exclude` directive has been removed. `src/` type-checks clean (0 errors; only `[annotation-unchecked]` advisory notes for untyped function bodies remain, which are acceptable and not counted as errors).
 
-3. **[docs/security/threat-model.md](../security/THREAT_MODEL.md)** — STRIDE threat model
+3. **[docs/security/threat-model.md](../security/threat-model.md)** — STRIDE threat model
    - Trust boundaries and data flows
    - Mitigations with path:line citations
    - Residual risks and non-risks
 
 ### Deprecated Documentation
 
-The following documents are in [deprecated/](deprecated/) and should **not** be used for understanding the current system:
+The original component specifications (13 documents, ~256 KB) described a planned
+system that was largely **not implemented** — batch processing, a formatter layer
+and an integration layer never existed, and cache/optimizer/truncation/monitoring
+were built differently. They were removed from the working tree on 2026-07-25
+rather than carried indefinitely as a parallel architecture no one maintained.
 
-| File | Reason deprecated |
-|------|-------------------|
-| `deprecated/UNIFIED_ARCHITECTURE.md` | Superseded by `ARCHITECTURE.md` (v3.0) |
-| `deprecated/ACTUAL_SYSTEM_ARCHITECTURE.md` | Superseded by `ARCHITECTURE.md` (v3.0) |
-| `deprecated/DOCUMENTATION_PLAN.md` | Planning doc for phases now complete |
-| `deprecated/QUALITY_ATTRIBUTES.md` | Metrics fabricated; retraction banner present |
-| `deprecated/MASTER.md` | Original 6-layer plan — not implemented |
-| `deprecated/BATCH.md` | Not implemented |
-| `deprecated/CACHE.md` | Implemented differently |
-| `deprecated/FORMATTER.md` | Not implemented |
-| `deprecated/INTEGRATION.md` | Not implemented |
-| `deprecated/MONITORING.md` | Implemented differently |
-| `deprecated/OPTIMIZER.md` | Implemented differently |
-| `deprecated/TRUNCATION.md` | Implemented differently |
+They remain in git history and are recoverable:
+
+```bash
+git log --diff-filter=D --name-only -- 'docs/architecture/deprecated/*'
+git show c84b33d:docs/architecture/deprecated/BATCH.md
+```
+
+What replaced them is [`ARCHITECTURE.md`](ARCHITECTURE.md) — see its §2 component
+overview and §5 per-component detail.
 
 ---
 
@@ -73,45 +72,23 @@ The following documents are in [deprecated/](deprecated/) and should **not** be 
 
 ```
 docs/architecture/
-├── README.md (this file)
-├── ARCHITECTURE.md                  ⭐ START HERE (authoritative, v3.0)
-├── components/
-│   └── README.md                    ↪️  Redirects to deprecated/
-└── deprecated/
-    ├── README.md                    ⚠️  Historical reference index
-    ├── UNIFIED_ARCHITECTURE.md      ❌ Superseded by ARCHITECTURE.md
-    ├── ACTUAL_SYSTEM_ARCHITECTURE.md ❌ Superseded by ARCHITECTURE.md
-    ├── DOCUMENTATION_PLAN.md        ❌ Planning doc (phases complete)
-    ├── QUALITY_ATTRIBUTES.md        ❌ Metrics retracted
-    ├── MASTER.md                    ❌ Original 6-layer plan
-    ├── BATCH.md                     ❌ Not implemented
-    ├── CACHE.md                     ❌ Implemented differently
-    ├── FORMATTER.md                 ❌ Not implemented
-    ├── INTEGRATION.md               ❌ Not implemented
-    ├── MONITORING.md                ❌ Implemented differently
-    ├── OPTIMIZER.md                 ❌ Implemented differently
-    └── TRUNCATION.md                ❌ Implemented differently
+├── README.md          (this file)
+├── ARCHITECTURE.md    ⭐ authoritative — components, dataflow, config→runtime
+└── components/
+    └── README.md      historical note on the superseded per-component specs
 ```
 
 ---
 
 ## ⚠️ Important Notes
 
-### Deprecated Documentation
+### Superseded component specifications
 
-**Location:** [deprecated/](deprecated/)
-
-Contains **5,534+ lines** of original architecture specifications and superseded documents that describe planned or earlier system designs **NOT currently in force**.
-
-**Why Deprecated:**
-- Original plan: 8 components, 6 layers
-- Actual implementation: 11 components, 3 layers + facade
-- Quality attributes doc: metrics were fabricated (retraction banner present)
-- UNIFIED / ACTUAL docs: superseded by `ARCHITECTURE.md` v3.0
-
-**Do NOT use these documents** for understanding the current system. They are kept for historical reference only.
-
-See [deprecated/README.md](deprecated/README.md) for details.
+The original plan described 8 components across 6 layers. What was built is a
+facade + factory over 10 packages — simpler, and different enough that the old
+specs were misleading rather than merely stale. They were removed on 2026-07-25
+and remain in git history; see the *Deprecated Documentation* section above for
+the recovery commands.
 
 ---
 
@@ -154,7 +131,7 @@ See [deprecated/README.md](deprecated/README.md) for details.
 
 **Purpose:** Lightweight documentation framework for Bob Shell  
 **Technology:** Bash scripts, YAML configuration, Markdown templates  
-**Complexity:** ~500 lines  
+**Complexity:** ~5,320 lines of Bash across 23 scripts  
 **Status:** Stable (v1.0)
 
 **Key Components:**
@@ -189,7 +166,7 @@ See [deprecated/README.md](deprecated/README.md) for details.
 **Status:** Integrated — analysis pipeline (84% coverage, 70% floor; ADR-019)
 
 **CLI:** `bob-optimize analyze <target> [--kb-path] [--output-dir] [--workers] [--depth] [--no-compress]`
-**Documentation:** [src/delegation/experimental.md](../../src/delegation/experimental.md) · [ADR-019](../adr/019-delegation-pipeline-activation.md)
+**Documentation:** [src/delegation/experimental.md](../../src/delegation/EXPERIMENTAL.md) · [ADR-019](../adr/019-delegation-pipeline-activation.md)
 
 ---
 
@@ -199,7 +176,7 @@ See [deprecated/README.md](deprecated/README.md) for details.
 
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** — Master reference (authoritative)
 - **[docs/adr/](../adr/)** — Architecture Decision Records (ADR-001–019)
-- **[docs/security/threat-model.md](../security/THREAT_MODEL.md)** — STRIDE threat model
+- **[docs/security/threat-model.md](../security/threat-model.md)** — STRIDE threat model
 
 ### Implementation
 
@@ -276,7 +253,7 @@ See [deprecated/README.md](deprecated/README.md) for details.
 1. **Architecture Questions:** See [ARCHITECTURE.md](ARCHITECTURE.md)
 2. **Implementation Questions:** Check source code in `src/` or tests in `tests/`
 3. **Design Decisions:** See [docs/adr/](../adr/)
-4. **Security:** See [docs/security/threat-model.md](../security/THREAT_MODEL.md)
+4. **Security:** See [docs/security/threat-model.md](../security/threat-model.md)
 5. **Status / Grade:** See [STATUS.md](../../STATUS.md)
 
 ### Contributing

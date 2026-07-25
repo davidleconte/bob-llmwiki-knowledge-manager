@@ -4,7 +4,7 @@
 **Assessment Type:** Critical, Evidence-Based Evaluation  
 **Assessor:** Independent Analysis
 
-> ⚠️ **RETRACTION NOTICE (2026-07-13).** The "68.96% savings / 95% CI / hypothesis VALIDATED / p<0.05" figures below are **fabricated** — produced by a simulation that never invokes the optimizer (see [VALIDATION_DISCLAIMER.md](./VALIDATION_DISCLAIMER.md) and [Institutional Audit 2026-07-13](../docs/knowledge-base/research/audit-2026-07-13-institutional.md)). They are retained only as an audit record; **do not cite them as validated results.** "Coverage" language here means unit-test **pass rate**, not code coverage. Current status: **Beta — Not Production Ready.**
+> ⚠️ **RETRACTION NOTICE (2026-07-13).** The "68.96% savings / 95% CI / hypothesis VALIDATED / p<0.05" figures below are **fabricated** — produced by a simulation that never invokes the optimizer (see [VALIDATION_DISCLAIMER.md](validation-disclaimer.md) and [Institutional Audit 2026-07-13](../docs/knowledge-base/research/audit-2026-07-13-institutional.md)). They are retained only as an audit record; **do not cite them as validated results.** "Coverage" language here means unit-test **pass rate**, not code coverage. Current status: **Beta — Not Production Ready.**
 
 ---
 

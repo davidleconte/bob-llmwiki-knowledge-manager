@@ -514,8 +514,8 @@ def test_optional_feature(self):
 
 - [pytest Documentation](https://docs.pytest.org/)
 - [Coverage.py](https://coverage.readthedocs.io/)
-- [Project Status](../docs/project-management/PROJECT_STATUS.md)
-- [Honest Assessment](../evaluation/HONEST_ASSESSMENT.md)
+- [Project Status](../docs/project-management/project-status.md)
+- [Honest Assessment](../evaluation/honest-assessment.md)
 
 ---
 

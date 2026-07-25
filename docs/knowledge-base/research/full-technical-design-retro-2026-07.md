@@ -467,7 +467,7 @@ It has two parts: **SLA** (latency/throughput/quality targets) and **Quality Gat
 ### SLA
 
 > Full SLA v1.0 with all latency, throughput, quality, and concurrency targets:
-> [`docs/sla.md`](../../../docs/sla.md). That document is the single source of truth
+> [`docs/sla.md`](../../SLA.md). That document is the single source of truth
 > and will not drift. The table below is a representative subset.
 
 | Operation | p99 Target | Measured (M3 Pro) | How measured |
@@ -630,8 +630,8 @@ Terms that are domain-specific to this project. External contributors cannot be 
 | [**Executive Brief**](../research/mnemox-executive-brief-2026-07.md) | One-page decision-quality summary — share with non-technical stakeholders |
 | [**Positioning Brief**](../research/mnemox-positioning-brief-2026-07.md) | Mnemox vs. RAG / vector DB — for Enterprise Architects evaluating alternatives |
 | [Business Case](../research/business-case-2026-07.md) | Investment, ROI, pilot design, and decision framework for CTO and business owners |
-| [Architecture](../../../docs/architecture/architecture.md) | Authoritative TOS architecture (Mermaid diagrams, config table, sequence diagrams) |
-| [SLA v1.0](../../../docs/sla.md) | Full latency, throughput, quality, and concurrency targets with measurement methodology |
+| [Architecture](../../architecture/ARCHITECTURE.md) | Authoritative TOS architecture (Mermaid diagrams, config table, sequence diagrams) |
+| [SLA v1.0](../../SLA.md) | Full latency, throughput, quality, and concurrency targets with measurement methodology |
 | [Knowledge Graph Layer](../concepts/knowledge-graph-layer.md) | Deep dive: graph modules, NodeProps, edge types, PageRank algorithm |
 | [KB-TOS Shared Embedding Layer](../concepts/kb-tos-embedding-layer.md) | Deep dive: `PersistentEmbeddingIndex`, `KBIndexer`, storage layout |
 | [Token Optimization](../concepts/token-optimization.md) | Compact summary of the TOS (compact-summary doc; replaces reading `src/optimizer/`) |

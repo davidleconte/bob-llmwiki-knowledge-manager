@@ -290,7 +290,7 @@ survives until the next audit.
 
 - [`src/cache/multi_level_cache.py`](../../../src/cache/multi_level_cache.py) — A, B, D fixes
 - [`src/cache/base.py`](../../../src/cache/base.py) — E: `CacheStatsSnapshot` definition
-- [`src/cache/concurrency.md`](../../../src/cache/concurrency.md) — C: in-tree reference
+- [`src/cache/concurrency.md`](../../../src/cache/CONCURRENCY.md) — C: in-tree reference
 - [`tests/cache/test_multi_level_cache.py`](../../../tests/cache/test_multi_level_cache.py) — new regression tests
 
 ## Related Documents

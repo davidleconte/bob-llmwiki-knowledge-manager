@@ -314,8 +314,8 @@ Start by analyzing the codebase and suggesting 5 initial documents to create"
 
 ## Related Documentation
 
-- [Test Results Final](TEST_RESULTS_FINAL.md) - Complete test validation
-- [Honest Assessment](HONEST_ASSESSMENT.md) - Production readiness analysis
+- [Test Results Final](test-results-final.md) - Complete test validation
+- [Honest Assessment](honest-assessment.md) - Production readiness analysis
 - [Token Savings Test Plan](../docs/token-savings-test-plan.md) - Validation methodology
 - [Repository Analysis Workflow](../docs/repository-analysis-workflow.md) - Analysis guide
 

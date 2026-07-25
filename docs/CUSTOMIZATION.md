@@ -690,4 +690,4 @@ echo "Exit code: $?"
 
 ---
 
-*This document conforms to arc42 Tier-1. For the system architecture, see [ARCHITECTURE.md](./ARCHITECTURE.md). For day-to-day usage, see [USAGE.md](./USAGE.md).*
+*This document conforms to arc42 Tier-1. For the system architecture, see [ARCHITECTURE.md](architecture/ARCHITECTURE.md). For day-to-day usage, see [USAGE.md](./USAGE.md).*

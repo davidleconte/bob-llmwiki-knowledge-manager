@@ -88,7 +88,7 @@ Based on E2E tests with real token counting:
 
 - [External Audit Findings](../docs/knowledge-base/research/external-audit-2026-07-12.md)
 - [Remediation Action Plan](../docs/knowledge-base/guides/audit-remediation-action-plan.md)
-- [Project Status](../docs/project-management/PROJECT_STATUS.md)
+- [Project Status](../docs/project-management/project-status.md)
 
 ---
 

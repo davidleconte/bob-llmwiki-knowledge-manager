@@ -15,7 +15,7 @@ It has no uptime SLA, no concurrent-user model, and no on-call rotation.
 The SLAs below are **latency and throughput targets** for a single-operator workstation
 running on developer-class hardware (Apple M3 Pro or equivalent x86 laptop, Python 3.11+).
 
-> Formal uptime / availability SLAs are explicitly **not claimed** here. See [`STATUS.md`](STATUS.md).
+> Formal uptime / availability SLAs are explicitly **not claimed** here. See [`STATUS.md`](../STATUS.md).
 
 ---
 

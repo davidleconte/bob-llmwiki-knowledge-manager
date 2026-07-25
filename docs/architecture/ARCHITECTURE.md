@@ -4,8 +4,9 @@
 
 This is the **single authoritative architecture document** for the Python
 token-optimization system in this repository. It supersedes
-[`ACTUAL_SYSTEM_ARCHITECTURE.md`](ACTUAL_SYSTEM_ARCHITECTURE.md) (v1.0, deprecated)
-and [`UNIFIED_ARCHITECTURE.md`](UNIFIED_ARCHITECTURE.md) (v2.0, superseded); both
+`ACTUAL_SYSTEM_ARCHITECTURE.md` (v1.0, deprecated)
+and `UNIFIED_ARCHITECTURE.md` (v2.0, superseded) — both removed from the tree on
+2026-07-25 and recoverable from git history; both
 predate the Phase-4 facade and no longer describe the running system. Decision
 records live in [`../adr/`](../adr/); the generated API reference in
 [`../api/`](../api/README.md).
@@ -77,7 +78,7 @@ Not shown, deliberately separate:
   `src/delegation/pipeline.py` is the integration surface: it runs 6 agents in
   parallel (`DelegationCoordinator`), compresses each report through `TokenOptimizer`,
   and writes KB research documents to `output_dir`. Accessed via `bob-optimize analyze`.
-  Coverage floor 70%; measured 84% (see [`../../src/delegation/experimental.md`](../../src/delegation/experimental.md)).
+  Coverage floor 70%; measured 84% (see [`../../src/delegation/experimental.md`](../../src/delegation/EXPERIMENTAL.md)).
 - **`src/embeddings/`** — the KB persistent embedding index subsystem
   (`MarkdownChunker`, `PersistentEmbeddingIndex`, `KBIndexer`). Opt-in, not on
   the `optimize()` request path; injected into `KnowledgeBaseQuery` when a
@@ -384,7 +385,7 @@ Verifiable acceptance criteria for the system's cross-cutting quality attributes
 - Knowledge graph design: [`../adr/017-knowledge-graph-layer.md`](../adr/017-knowledge-graph-layer.md) (ADR-017).
 - Delegation pipeline design: [`../adr/019-delegation-pipeline-activation.md`](../adr/019-delegation-pipeline-activation.md) (ADR-019).
 - Graph live validation results: [`../knowledge-base/research/graph-validation-2026-07-17.md`](../knowledge-base/research/graph-validation-2026-07-17.md).
-- SLA: [`../sla.md`](../sla.md) — latency/throughput targets, measurement methodology.
+- SLA: [`../sla.md`](../SLA.md) — latency/throughput targets, measurement methodology.
 
 ---
 
