@@ -252,7 +252,7 @@ core scripts (`install`, `init-project`, `validate-kb`, `export-kb` → Markdown
 analysis suite; and 3 worked-example knowledge bases (software project, research project, personal wiki).
 
 **Token Optimization System (the Python system `src/`, Beta):** the `TokenOptimizer` facade + `bob-optimize` CLI
-(16 subcommands); a multi-level cache (L1 exact `<1 ms`, L2 semantic `<100 ms`); the prompt optimizer (~20% mean
+(16 subcommands); a multi-level cache (L1 exact `<1 ms`, L2 semantic `<100 ms`); the prompt optimizer (6.8% mean
 compression, near-lossless, tiktoken-counted — manifest-backed, [§11](#11-what-is-actually-measured)); truncation (lossy budget-fit, reported separately); structured
 monitoring (JSON logging, metrics, health, cost tracking); the knowledge graph (`src/graph/` — orphan/hub
 detection, multi-hop BFS, PageRank re-ranking; `graph-build / graph-query / graph-health`); and a provenance layer
@@ -431,7 +431,7 @@ detected and withdrawn ([§16](#16-provenance--honesty-policy)).
 
 | Metric | Value | Basis |
 |---|---|---|
-| **Optimizer compression** | **~20% mean** (95% CI [18.9%, 21.2%], N = 183 real in-repo docs; null test passing; token-weighted ~23%) | `evaluation/results/validation-2026-07-14/`; reproduce with `python -m src.validation` |
+| **Optimizer compression** | **6.8% mean** (95% CI [6.2%, 7.4%], N = 265 real in-repo docs; null test 0.48% passing; hold-out reproduces at 6.0%, divergence 0.83pp) | `evaluation/results/validation-2026-07-25/`; reproduce with `python -m src.validation`. **Supersedes the 20.0% of 2026-07-14** — same 120 documents give 19.63% on that code vs 7.57% today, at quality 0.798 vs 0.995: the optimizer was made structure-preserving and the figure was never re-measured. See [`STATUS.md`](STATUS.md). |
 | **Retrieval quality (default backend)** | **p@3 = 0.84**, at parity with the keyword baseline (0.84) — no net lift | `evaluation/results/retrieval-2026-07-19/` (116-doc golden set) |
 | Retrieval quality (MiniLM, lab) | **p@3 = 0.88** — *not* reproducible in CI (needs the optional MiniLM backend), and **no manifest was ever committed for that run**; superseded as the published figure by p@3=0.84 | ADR-014 / ADR-017; the committed figure is `evaluation/results/retrieval-2026-07-19/report.json` |
 | Read-boundary trust | a forged `trust_tier: verified` document is withheld; a validly-signed one is served | `tests/security/` (re-verified by re-running the forgery exploit) |

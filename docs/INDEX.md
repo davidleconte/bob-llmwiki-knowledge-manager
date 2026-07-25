@@ -52,7 +52,7 @@
 
 **Key Findings:**
 - ✅ 1414 passed / 23 skipped in the gated coverage run (1518 collected tree-wide) — [STATUS.md](../STATUS.md) is the single home for this snapshot; the coverage gate lives in `pyproject.toml`
-- ✅ Token savings **measured**: 20.0% mean optimizer compression (95% CI [18.9%, 21.2%], N=183) — manifest-backed at `evaluation/results/validation-2026-07-14/`; the earlier 68.96% is retracted
+- ✅ Token savings **measured**: 6.8% mean optimizer compression (95% CI [6.2%, 7.4%], N=265) — manifest-backed at `evaluation/results/validation-2026-07-25/`; supersedes the 20.0% of 2026-07-14 (structure-preserving optimizer change, see STATUS.md); the earlier 68.96% is retracted
 - ✅ 4 structural gaps closed (SLA v1.0, sentence-transformers, full mypy scope, CODEOWNERS). **No grade is claimed here:** the previously stated "A+ (4.30/4.30)" was self-assessed and has been withdrawn — see [STATUS.md](../STATUS.md) for the on-file independent verdicts.
 - ✅ Delegation pipeline wired: `bob-optimize analyze` (ADR-019)
 - ⚠️ Mock-based testing (no real LLM API integration)
@@ -234,7 +234,7 @@ Auto-generated API documentation from source code (see [full API reference](api/
 ## Key Features
 
 ### Token Optimization
-- **Prompt compression** — ~20% mean on real prose (manifest-backed, null-test validated)
+- **Prompt compression** — 6.8% mean on real prose (manifest-backed, null-test validated)
 - **Multi-level cache** — L1 exact (SHA-256, O(1)) + L2 semantic (TF-IDF cosine)
 - **Intelligent truncation** — lossy budget-fit (4 strategies), reported separately
 

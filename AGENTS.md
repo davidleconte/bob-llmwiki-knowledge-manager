@@ -455,7 +455,7 @@ Summary (2026-07-25): **no current independent grade** — the earlier self-asse
 ### Token Optimization System
 - **Implementation:** `TokenOptimizer` facade → cache → optimizer → truncation; `bob-optimize` CLI
 - **Tests / Coverage:** see [`STATUS.md`](STATUS.md)
-- **Savings (measured):** 20.0% mean optimizer compression, 95% CI [18.9%, 21.2%] (N=183, manifest-backed at `evaluation/results/validation-2026-07-14/`). Separately, ≈51% re-derivation saving on N=10 *curated* well-formed KB/source pairs — note the accompanying test (`tests/validation/test_km_savings.py:327`) asserts only `50.0 <= savings_pct <= 99.0`, i.e. it **bounds** the claim rather than pinning it, and the pairs are hand-picked rather than sampled, so this is not an all-pairs expectation.
+- **Savings (measured):** 6.8% mean optimizer compression, 95% CI [6.2%, 7.4%] (N=265, manifest-backed at `evaluation/results/validation-2026-07-25/`; supersedes the 20.0% of 2026-07-14 — the optimizer was made structure-preserving, trading ~12pp of compression for fidelity 0.798 -> 0.995). Separately, ≈51% re-derivation saving on N=10 *curated* well-formed KB/source pairs — note the accompanying test (`tests/validation/test_km_savings.py:327`) asserts only `50.0 <= savings_pct <= 99.0`, i.e. it **bounds** the claim rather than pinning it, and the pairs are hand-picked rather than sampled, so this is not an all-pairs expectation.
 
 ### Delegation Module
 - **Status:** Functional and integrated (`bob-optimize analyze`); layering-clean

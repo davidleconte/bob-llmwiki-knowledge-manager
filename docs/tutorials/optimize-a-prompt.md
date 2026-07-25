@@ -1,6 +1,6 @@
 # Tutorial: optimize your first prompt
 
-> ⚠️ **Metrics correction (2026-07-14).** Earlier drafts of this document cited fabricated token-savings/quality figures — "68.96%", "89.3%", "91.80%" — produced by a simulation that never invoked the optimizer. **Those figures are retracted.** The honest, measured figure is **~20% mean optimizer compression** on real prose (manifest-backed: `evaluation/results/validation-2026-07-14/`; see `STATUS.md` and `CHANGELOG.md`). Inline numbers below have been corrected where they appeared.
+> ⚠️ **Metrics correction (2026-07-14).** Earlier drafts of this document cited fabricated token-savings/quality figures — "68.96%", "89.3%", "91.80%" — produced by a simulation that never invoked the optimizer. **Those figures are retracted.** The current measured figure is **6.8% mean optimizer compression** on real prose (manifest-backed: `evaluation/results/validation-2026-07-25/`; see `STATUS.md`). It supersedes the 20.0% measured on 2026-07-14, which described the optimizer before it was made structure-preserving. Inline numbers below have been corrected where they appeared.
 
 
 A hands-on, ~10-minute walk through the Python **token-optimization system** —
@@ -117,9 +117,9 @@ wiring works.
 Per-prompt `savings_percentage` varies with how compressible the input is. The
 project's **headline** figure is measured honestly, not asserted:
 
-- Optimizer compression averages **~20% on real in-repo prose** (95% CI ≈
-  [18.9%, 21.2%], N=183), manifest-backed at
-  [`evaluation/results/validation-2026-07-14/`](../../evaluation/results/validation-2026-07-14/).
+- Optimizer compression averages **6.8% on real in-repo prose** (95% CI
+  [6.2%, 7.4%], N=265), manifest-backed at
+  [`evaluation/results/validation-2026-07-25/`](../../evaluation/results/validation-2026-07-25/).
 - Caching and truncation save tokens too, but they are reported **separately**:
   cache savings depend on your workload's repeat rate, and truncation is lossy.
   They are never blended into one number.

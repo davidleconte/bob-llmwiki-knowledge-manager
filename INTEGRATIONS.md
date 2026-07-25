@@ -20,8 +20,9 @@ print(result["compression_ratio"])                # e.g. 0.80 → 20% smaller
 `TokenOptimizer` composes the full stack (L1 exact cache, L2 semantic cache,
 prompt optimizer, truncator, monitoring) from a single `ConfigSchema`.
 
-**Compression baseline:** ~20% mean on real in-repo prose (95% CI ≈ [18.9%, 21.2%],
-N=183; manifest-backed: `evaluation/results/validation-2026-07-14/`).
+**Compression baseline:** 6.8% mean on real in-repo prose (95% CI [6.2%, 7.4%],
+N=265; manifest-backed: `evaluation/results/validation-2026-07-25/`). Supersedes the
+20.0% of 2026-07-14 — see `STATUS.md` for the measured before/after.
 
 ---
 
@@ -94,7 +95,7 @@ compressed=$(echo "$KB_CONTEXT" | bob-optimize optimize - --json \
 # If bob-optimize unavailable, $compressed will be empty — use $KB_CONTEXT as fallback
 ```
 
-Expected benefit: ~20% token reduction on retrieved context (manifest-backed).
+Expected benefit: ~7% token reduction on retrieved context (manifest-backed).
 Subprocess failure **must never block** knowledge retrieval.
 
 ---

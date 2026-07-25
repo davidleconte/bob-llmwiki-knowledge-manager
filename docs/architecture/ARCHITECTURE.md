@@ -26,8 +26,10 @@ each measured **separately** (never blended — blending is how the retracted
 "68.96%" was manufactured):
 
 - **Optimizer compression** — near-lossless removal of redundancy. The only
-  "savings" headline: **~20% mean** on real in-repo prose (95% CI ≈ [18.9%, 21.2%],
-  N=183), manifest-backed at `evaluation/results/validation-2026-07-14/`.
+  "savings" headline: **6.8% mean** on real in-repo prose (95% CI [6.2%, 7.4%],
+  N=265), manifest-backed at `evaluation/results/validation-2026-07-25/`. Supersedes the
+  20.0% of 2026-07-14: the optimizer was made structure-preserving, trading ~12pp of
+  compression for measured fidelity (0.798 -> 0.995). See `STATUS.md`.
 - **Cache recompute-avoidance** — a hit returns a prior result for 0 tokens;
   workload-dependent (a property of the request stream's repeat rate).
 - **Truncation** — lossy budget-fit; reported, but excluded from savings.
@@ -458,7 +460,7 @@ Verifiable acceptance criteria for the system's cross-cutting quality attributes
 | QS-1 | Performance (L1 cache) | Single exact-match lookup with 1,000-entry cache | Mean latency < 1 ms | `pytest tests/cache/test_exact_cache.py -m slow -v` |
 | QS-2 | Performance (L2 cache) | Single semantic lookup with 50-entry cache | Mean latency < 100 ms | `pytest tests/cache/test_semantic_cache.py -m slow -v` |
 | QS-3 | Performance (optimizer) | `optimize()` call on a 1,000-token prompt | Latency < 50 ms (p95) | Benchmark suite: `pytest tests/ --benchmark-only` |
-| QS-4 | Accuracy (savings) | Optimizer compression over N=183 real in-repo docs | Mean ≥ 19% (95% CI lower bound); null test collapses to < 5% | `python -m src.validation` → `evaluation/results/validation-2026-07-14/manifest.json` |
+| QS-4 | Accuracy (savings) | Optimizer compression over N=265 real in-repo docs | Mean ≥ 6% (95% CI lower bound); null test collapses to < 5% | `python -m src.validation` → `evaluation/results/validation-2026-07-14/manifest.json` |
 | QS-5 | Correctness (C1–C8) | Revert any of the 8 known bug fixes | Dedicated regression test fails immediately | `uv run pytest tests/ -k "regression or c1 or c5 or c7 or c8 or rlock or deadlock" -v` |
 | QS-6 | Thread safety | Two concurrent `cache.get()` / `cache.set()` calls on the same key | No data corruption; no deadlock | `uv run pytest tests/cache/ -k "concurrent or thread" -v` |
 | QS-7 | Coverage | Full test suite including `src/tools/` and `src/monitoring/` | Global ≥ 80%; per-package floors enforced | `uv run pytest tests/ --cov=src --cov-report=term-missing` + `python scripts/check_coverage_by_package.py` |

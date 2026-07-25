@@ -1,0 +1,4103 @@
+{
+  "cache_recompute_avoidance": {
+    "actual_repeat_fraction": 0.3008,
+    "hit_rate_pct": 32.7177,
+    "hits": 124,
+    "note": "workload-dependent; NOT a system property; excluded from the savings headline",
+    "requested_repeat_rate": 0.3,
+    "requests": 379
+  },
+  "headline": {
+    "caveat": "lossless-ish prompt compression on real prose; cache recompute-avoidance and lossy truncation are reported separately and are NOT part of this headline",
+    "ci95": [
+      6.2285,
+      7.4327
+    ],
+    "metric": "optimizer_compression_mean_savings_pct",
+    "n": 265,
+    "tiktoken_active": true,
+    "value": 6.8136
+  },
+  "holdout": {
+    "aggregate_savings_pct": 8.0413,
+    "corpus_hash": "193f4126363d524261615fbbec846a34d8bcce0da30a04b06a468d023d57a387",
+    "divergence_pp": 0.8326,
+    "mean_savings_pct": 5.981,
+    "n": 39,
+    "note": "independent frozen corpus B; the headline must reproduce here (C4)",
+    "primary_mean_savings_pct": 6.8136
+  },
+  "manifest": {
+    "code_sha": "82d307a68d5a422daf5c1f813f68ab19155b07bd",
+    "config": {
+      "cache": {
+        "l1_enabled": true,
+        "l1_max_size": 1000,
+        "l1_ttl_seconds": 3600,
+        "l2_enabled": true,
+        "l2_max_size": 10000,
+        "l2_similarity_threshold": 0.85,
+        "l2_ttl_seconds": 86400,
+        "max_versions": 5,
+        "version_support_enabled": true
+      },
+      "monitoring": {
+        "enabled": true,
+        "health_check_interval": 60,
+        "log_level": "INFO",
+        "metrics_enabled": true
+      },
+      "optimizer": {
+        "max_tokens": 4096,
+        "min_quality_score": 0.8,
+        "strategies": [
+          "remove_whitespace",
+          "compress_repeated"
+        ],
+        "target_reduction": 0.3
+      }
+    },
+    "data_hash": "31e9fa606923ab327138faead1af415a53c764ae808988e04d025549a7681e7f",
+    "extra": {
+      "cache_repeat_rate": 0.3,
+      "corpus": "repo",
+      "environment": "dev",
+      "n_docs": 265,
+      "truncation_budget": 256
+    },
+    "git_dirty": true,
+    "library_versions": {
+      "numpy": "2.5.1",
+      "scikit-learn": "1.9.0",
+      "tiktoken": "0.13.0"
+    },
+    "model": "gpt-4",
+    "platform": "macOS-26.4.1-arm64-arm-64bit",
+    "python_version": "3.12.10",
+    "seed": 0,
+    "tiktoken_active": true,
+    "timestamp": "2026-07-25T16:38:58.943522+00:00"
+  },
+  "null_test": {
+    "aggregate_savings_pct": 0.573,
+    "mean_savings_pct": 0.4785,
+    "n": 265,
+    "passed": true,
+    "rationale": "shuffled/high-entropy input has no compressible redundancy; material 'savings' here would mean the measurement is an artefact",
+    "threshold_pct": 5.0
+  },
+  "optimizer_compression": {
+    "aggregate_savings_pct": 7.9679,
+    "ci95_savings_pct": [
+      6.2285,
+      7.4327
+    ],
+    "corpus_composition": {
+      "mean_median_divergence_pp": 0.5089,
+      "mean_savings_pct": 6.8136,
+      "median_savings_pct": 6.3046,
+      "n_docs": 265,
+      "top_doc_token_share": 0.048,
+      "trimmed_mean_savings_pct": 6.3339
+    },
+    "mean_latency_ms": 2.9662,
+    "mean_quality_score": 0.994,
+    "mean_savings_pct": 6.8136,
+    "median_savings_pct": 6.3046,
+    "n": 265,
+    "p95_latency_ms": 7.7229,
+    "per_document": [
+      {
+        "optimized_tokens": 2937,
+        "original_tokens": 3182,
+        "quality_score": 0.9985358711566619,
+        "savings_percentage": 7.6995600251414205,
+        "source": "docs/BOB-IDE-GUIDE.md"
+      },
+      {
+        "optimized_tokens": 3998,
+        "original_tokens": 4146,
+        "quality_score": 0.9921756324147888,
+        "savings_percentage": 3.5697057404727452,
+        "source": "docs/INDEX.md"
+      },
+      {
+        "optimized_tokens": 6626,
+        "original_tokens": 7210,
+        "quality_score": 0.9875565610859729,
+        "savings_percentage": 8.099861303744799,
+        "source": "docs/INSTALLATION.md"
+      },
+      {
+        "optimized_tokens": 5016,
+        "original_tokens": 5443,
+        "quality_score": 1.0,
+        "savings_percentage": 7.844938453058975,
+        "source": "docs/MONITORING.md"
+      },
+      {
+        "optimized_tokens": 1464,
+        "original_tokens": 1487,
+        "quality_score": 0.9852579852579852,
+        "savings_percentage": 1.546738399462004,
+        "source": "docs/README.md"
+      },
+      {
+        "optimized_tokens": 1224,
+        "original_tokens": 1355,
+        "quality_score": 0.9987437185929648,
+        "savings_percentage": 9.66789667896679,
+        "source": "docs/SLA.md"
+      },
+      {
+        "optimized_tokens": 9180,
+        "original_tokens": 9629,
+        "quality_score": 0.990506329113924,
+        "savings_percentage": 4.662997195970505,
+        "source": "docs/USAGE.md"
+      },
+      {
+        "optimized_tokens": 6433,
+        "original_tokens": 7302,
+        "quality_score": 0.9969594594594595,
+        "savings_percentage": 11.900849082443166,
+        "source": "docs/WORKFLOWS.md"
+      },
+      {
+        "optimized_tokens": 1946,
+        "original_tokens": 2080,
+        "quality_score": 1.0,
+        "savings_percentage": 6.442307692307692,
+        "source": "docs/adr/001-python-choice.md"
+      },
+      {
+        "optimized_tokens": 3013,
+        "original_tokens": 3275,
+        "quality_score": 0.9976691866875651,
+        "savings_percentage": 8.0,
+        "source": "docs/adr/002-caching-strategy.md"
+      },
+      {
+        "optimized_tokens": 3932,
+        "original_tokens": 4227,
+        "quality_score": 0.9986438679245283,
+        "savings_percentage": 6.9789448781641825,
+        "source": "docs/adr/003-tfidf-scoring.md"
+      },
+      {
+        "optimized_tokens": 4011,
+        "original_tokens": 4361,
+        "quality_score": 0.9996884735202493,
+        "savings_percentage": 8.025682182985554,
+        "source": "docs/adr/004-semantic-similarity.md"
+      },
+      {
+        "optimized_tokens": 3685,
+        "original_tokens": 4073,
+        "quality_score": 0.9991064919088581,
+        "savings_percentage": 9.526147802602503,
+        "source": "docs/adr/005-batch-processing.md"
+      },
+      {
+        "optimized_tokens": 3254,
+        "original_tokens": 3631,
+        "quality_score": 0.9996688741721855,
+        "savings_percentage": 10.382814651611126,
+        "source": "docs/adr/006-cache-strategy.md"
+      },
+      {
+        "optimized_tokens": 3391,
+        "original_tokens": 3738,
+        "quality_score": 0.9989650472428212,
+        "savings_percentage": 9.283039058319957,
+        "source": "docs/adr/008-token-counting.md"
+      },
+      {
+        "optimized_tokens": 3146,
+        "original_tokens": 3475,
+        "quality_score": 0.9979919678714859,
+        "savings_percentage": 9.467625899280575,
+        "source": "docs/adr/010-testing-strategy.md"
+      },
+      {
+        "optimized_tokens": 4180,
+        "original_tokens": 4697,
+        "quality_score": 0.9997506234413965,
+        "savings_percentage": 11.00702576112412,
+        "source": "docs/adr/011-monitoring-observability.md"
+      },
+      {
+        "optimized_tokens": 2289,
+        "original_tokens": 2395,
+        "quality_score": 0.9984756097560976,
+        "savings_percentage": 4.4258872651356995,
+        "source": "docs/adr/013-facade-factory-pattern.md"
+      },
+      {
+        "optimized_tokens": 1419,
+        "original_tokens": 1450,
+        "quality_score": 0.9977973568281937,
+        "savings_percentage": 2.1379310344827585,
+        "source": "docs/adr/015-persistent-embedding-index.md"
+      },
+      {
+        "optimized_tokens": 1155,
+        "original_tokens": 1203,
+        "quality_score": 0.998663101604278,
+        "savings_percentage": 3.99002493765586,
+        "source": "docs/adr/016-truncation-no-config.md"
+      },
+      {
+        "optimized_tokens": 3444,
+        "original_tokens": 3578,
+        "quality_score": 0.9989384288747345,
+        "savings_percentage": 3.7451089994410283,
+        "source": "docs/adr/017-knowledge-graph-layer.md"
+      },
+      {
+        "optimized_tokens": 1587,
+        "original_tokens": 1608,
+        "quality_score": 0.997920997920998,
+        "savings_percentage": 1.3059701492537312,
+        "source": "docs/adr/018-p4-query-quality.md"
+      },
+      {
+        "optimized_tokens": 1393,
+        "original_tokens": 1420,
+        "quality_score": 0.9966216216216215,
+        "savings_percentage": 1.9014084507042253,
+        "source": "docs/adr/019-delegation-pipeline-activation.md"
+      },
+      {
+        "optimized_tokens": 1819,
+        "original_tokens": 1931,
+        "quality_score": 0.9948275862068965,
+        "savings_percentage": 5.800103573278094,
+        "source": "docs/adr/README.md"
+      },
+      {
+        "optimized_tokens": 1115,
+        "original_tokens": 1115,
+        "quality_score": 1.0,
+        "savings_percentage": 0.0,
+        "source": "docs/api/README.md"
+      },
+      {
+        "optimized_tokens": 1413,
+        "original_tokens": 1617,
+        "quality_score": 0.9821782178217823,
+        "savings_percentage": 12.615955473098332,
+        "source": "docs/api/cache/base.md"
+      },
+      {
+        "optimized_tokens": 1263,
+        "original_tokens": 1345,
+        "quality_score": 0.9864583333333334,
+        "savings_percentage": 6.096654275092937,
+        "source": "docs/api/cache/embeddings.md"
+      },
+      {
+        "optimized_tokens": 1238,
+        "original_tokens": 1423,
+        "quality_score": 0.9805419486996794,
+        "savings_percentage": 13.000702740688686,
+        "source": "docs/api/cache/exact_cache.md"
+      },
+      {
+        "optimized_tokens": 1752,
+        "original_tokens": 2012,
+        "quality_score": 0.9820926385442516,
+        "savings_percentage": 12.922465208747516,
+        "source": "docs/api/cache/multi_level_cache.md"
+      },
+      {
+        "optimized_tokens": 1303,
+        "original_tokens": 1551,
+        "quality_score": 0.9852140077821012,
+        "savings_percentage": 15.989684074790459,
+        "source": "docs/api/cache/semantic_cache.md"
+      },
+      {
+        "optimized_tokens": 655,
+        "original_tokens": 759,
+        "quality_score": 0.981151832460733,
+        "savings_percentage": 13.70223978919631,
+        "source": "docs/api/config/manager.md"
+      },
+      {
+        "optimized_tokens": 273,
+        "original_tokens": 309,
+        "quality_score": 0.9859649122807018,
+        "savings_percentage": 11.650485436893204,
+        "source": "docs/api/config/schema.md"
+      },
+      {
+        "optimized_tokens": 178,
+        "original_tokens": 197,
+        "quality_score": 0.9824561403508772,
+        "savings_percentage": 9.644670050761421,
+        "source": "docs/api/config/validator.md"
+      },
+      {
+        "optimized_tokens": 106,
+        "original_tokens": 108,
+        "quality_score": 0.9724137931034483,
+        "savings_percentage": 1.8518518518518516,
+        "source": "docs/api/delegation/agents/architecture_agent.md"
+      },
+      {
+        "optimized_tokens": 109,
+        "original_tokens": 111,
+        "quality_score": 0.9724137931034483,
+        "savings_percentage": 1.8018018018018018,
+        "source": "docs/api/delegation/agents/performance_agent.md"
+      },
+      {
+        "optimized_tokens": 110,
+        "original_tokens": 112,
+        "quality_score": 0.9724137931034483,
+        "savings_percentage": 1.7857142857142856,
+        "source": "docs/api/delegation/agents/quality_agent.md"
+      },
+      {
+        "optimized_tokens": 139,
+        "original_tokens": 142,
+        "quality_score": 0.9804878048780489,
+        "savings_percentage": 2.112676056338028,
+        "source": "docs/api/delegation/agents/security_agent.md"
+      },
+      {
+        "optimized_tokens": 595,
+        "original_tokens": 630,
+        "quality_score": 0.9739130434782609,
+        "savings_percentage": 5.555555555555555,
+        "source": "docs/api/delegation/base.md"
+      },
+      {
+        "optimized_tokens": 245,
+        "original_tokens": 280,
+        "quality_score": 0.9692307692307693,
+        "savings_percentage": 12.5,
+        "source": "docs/api/delegation/coordinator.md"
+      },
+      {
+        "optimized_tokens": 667,
+        "original_tokens": 704,
+        "quality_score": 0.981157060675133,
+        "savings_percentage": 5.255681818181818,
+        "source": "docs/api/delegation/pipeline.md"
+      },
+      {
+        "optimized_tokens": 275,
+        "original_tokens": 291,
+        "quality_score": 0.9752808988764046,
+        "savings_percentage": 5.498281786941581,
+        "source": "docs/api/delegation/registry.md"
+      },
+      {
+        "optimized_tokens": 464,
+        "original_tokens": 485,
+        "quality_score": 0.9858768406961178,
+        "savings_percentage": 4.329896907216495,
+        "source": "docs/api/embeddings/indexer.md"
+      },
+      {
+        "optimized_tokens": 604,
+        "original_tokens": 662,
+        "quality_score": 0.9873961719032142,
+        "savings_percentage": 8.761329305135952,
+        "source": "docs/api/embeddings/store.md"
+      },
+      {
+        "optimized_tokens": 1008,
+        "original_tokens": 1087,
+        "quality_score": 0.9812216537456153,
+        "savings_percentage": 7.267709291628336,
+        "source": "docs/api/graph/builder.md"
+      },
+      {
+        "optimized_tokens": 1304,
+        "original_tokens": 1449,
+        "quality_score": 0.9778846153846155,
+        "savings_percentage": 10.006901311249138,
+        "source": "docs/api/graph/graph.md"
+      },
+      {
+        "optimized_tokens": 528,
+        "original_tokens": 556,
+        "quality_score": 0.9842807465758285,
+        "savings_percentage": 5.0359712230215825,
+        "source": "docs/api/graph/ranker.md"
+      },
+      {
+        "optimized_tokens": 398,
+        "original_tokens": 427,
+        "quality_score": 0.9718253968253968,
+        "savings_percentage": 6.791569086651054,
+        "source": "docs/api/graph/store.md"
+      },
+      {
+        "optimized_tokens": 997,
+        "original_tokens": 1183,
+        "quality_score": 0.9789855072463769,
+        "savings_percentage": 15.722738799661876,
+        "source": "docs/api/monitoring/cost_tracker.md"
+      },
+      {
+        "optimized_tokens": 688,
+        "original_tokens": 763,
+        "quality_score": 0.9759162303664922,
+        "savings_percentage": 9.82961992136304,
+        "source": "docs/api/monitoring/health.md"
+      },
+      {
+        "optimized_tokens": 727,
+        "original_tokens": 864,
+        "quality_score": 0.9767300250398361,
+        "savings_percentage": 15.856481481481483,
+        "source": "docs/api/monitoring/logger.md"
+      },
+      {
+        "optimized_tokens": 852,
+        "original_tokens": 1062,
+        "quality_score": 0.9723880597014926,
+        "savings_percentage": 19.774011299435028,
+        "source": "docs/api/monitoring/metrics.md"
+      },
+      {
+        "optimized_tokens": 1257,
+        "original_tokens": 1413,
+        "quality_score": 0.9772386891988556,
+        "savings_percentage": 11.040339702760086,
+        "source": "docs/api/optimizer/token_counter.md"
+      },
+      {
+        "optimized_tokens": 246,
+        "original_tokens": 250,
+        "quality_score": 0.9736111111111112,
+        "savings_percentage": 1.6,
+        "source": "docs/api/root/cli.md"
+      },
+      {
+        "optimized_tokens": 975,
+        "original_tokens": 1036,
+        "quality_score": 0.9823008849557523,
+        "savings_percentage": 5.8880308880308885,
+        "source": "docs/api/root/facade.md"
+      },
+      {
+        "optimized_tokens": 453,
+        "original_tokens": 453,
+        "quality_score": 0.9869565217391305,
+        "savings_percentage": 0.0,
+        "source": "docs/api/root/factory.md"
+      },
+      {
+        "optimized_tokens": 378,
+        "original_tokens": 395,
+        "quality_score": 0.986046511627907,
+        "savings_percentage": 4.30379746835443,
+        "source": "docs/api/root/kb_paths.md"
+      },
+      {
+        "optimized_tokens": 242,
+        "original_tokens": 242,
+        "quality_score": 1.0,
+        "savings_percentage": 0.0,
+        "source": "docs/api/root/limits.md"
+      },
+      {
+        "optimized_tokens": 570,
+        "original_tokens": 597,
+        "quality_score": 0.980327868852459,
+        "savings_percentage": 4.522613065326634,
+        "source": "docs/api/root/pricing.md"
+      },
+      {
+        "optimized_tokens": 793,
+        "original_tokens": 833,
+        "quality_score": 0.9808510638297873,
+        "savings_percentage": 4.8019207683073235,
+        "source": "docs/api/root/provenance.md"
+      },
+      {
+        "optimized_tokens": 715,
+        "original_tokens": 741,
+        "quality_score": 0.9748284772342511,
+        "savings_percentage": 3.508771929824561,
+        "source": "docs/api/root/velocity.md"
+      },
+      {
+        "optimized_tokens": 158,
+        "original_tokens": 176,
+        "quality_score": 0.9783783783783784,
+        "savings_percentage": 10.227272727272728,
+        "source": "docs/api/tools/batch_file_reader.md"
+      },
+      {
+        "optimized_tokens": 122,
+        "original_tokens": 135,
+        "quality_score": 0.9777777777777779,
+        "savings_percentage": 9.62962962962963,
+        "source": "docs/api/tools/component_analyzer.md"
+      },
+      {
+        "optimized_tokens": 1371,
+        "original_tokens": 1480,
+        "quality_score": 0.9854242366290559,
+        "savings_percentage": 7.364864864864865,
+        "source": "docs/api/tools/kb_query.md"
+      },
+      {
+        "optimized_tokens": 358,
+        "original_tokens": 364,
+        "quality_score": 0.9845327604726101,
+        "savings_percentage": 1.6483516483516485,
+        "source": "docs/api/tools/safe_paths.md"
+      },
+      {
+        "optimized_tokens": 543,
+        "original_tokens": 734,
+        "quality_score": 0.9785714285714286,
+        "savings_percentage": 26.021798365122617,
+        "source": "docs/api/truncation/strategies.md"
+      },
+      {
+        "optimized_tokens": 374,
+        "original_tokens": 434,
+        "quality_score": 0.9813084112149533,
+        "savings_percentage": 13.82488479262673,
+        "source": "docs/api/truncation/truncator.md"
+      },
+      {
+        "optimized_tokens": 638,
+        "original_tokens": 684,
+        "quality_score": 0.9785714285714286,
+        "savings_percentage": 6.725146198830409,
+        "source": "docs/api/validation/corpus.md"
+      },
+      {
+        "optimized_tokens": 522,
+        "original_tokens": 549,
+        "quality_score": 0.9768623251455726,
+        "savings_percentage": 4.918032786885246,
+        "source": "docs/api/validation/manifest.md"
+      },
+      {
+        "optimized_tokens": 854,
+        "original_tokens": 912,
+        "quality_score": 0.9820224719101124,
+        "savings_percentage": 6.359649122807018,
+        "source": "docs/api/validation/measure.md"
+      },
+      {
+        "optimized_tokens": 208,
+        "original_tokens": 220,
+        "quality_score": 0.9793103448275863,
+        "savings_percentage": 5.454545454545454,
+        "source": "docs/api/validation/report.md"
+      },
+      {
+        "optimized_tokens": 7519,
+        "original_tokens": 7988,
+        "quality_score": 0.9953653217011995,
+        "savings_percentage": 5.871306960440661,
+        "source": "docs/architecture/ARCHITECTURE.md"
+      },
+      {
+        "optimized_tokens": 2350,
+        "original_tokens": 2501,
+        "quality_score": 0.9849999999999999,
+        "savings_percentage": 6.037584966013595,
+        "source": "docs/architecture/README.md"
+      },
+      {
+        "optimized_tokens": 1034,
+        "original_tokens": 1168,
+        "quality_score": 0.9900332225913622,
+        "savings_percentage": 11.472602739726028,
+        "source": "docs/architecture/components/README.md"
+      },
+      {
+        "optimized_tokens": 556,
+        "original_tokens": 557,
+        "quality_score": 0.9813829787234043,
+        "savings_percentage": 0.17953321364452424,
+        "source": "docs/book/appendix-a.md"
+      },
+      {
+        "optimized_tokens": 2356,
+        "original_tokens": 2383,
+        "quality_score": 0.9888059701492538,
+        "savings_percentage": 1.1330255979857322,
+        "source": "docs/book/appendix-c.md"
+      },
+      {
+        "optimized_tokens": 673,
+        "original_tokens": 678,
+        "quality_score": 0.9974683544303798,
+        "savings_percentage": 0.7374631268436578,
+        "source": "docs/book/chapter-01.md"
+      },
+      {
+        "optimized_tokens": 1396,
+        "original_tokens": 1411,
+        "quality_score": 0.9987577639751554,
+        "savings_percentage": 1.0630758327427356,
+        "source": "docs/book/chapter-02.md"
+      },
+      {
+        "optimized_tokens": 1524,
+        "original_tokens": 1561,
+        "quality_score": 0.9989528795811519,
+        "savings_percentage": 2.370275464445868,
+        "source": "docs/book/chapter-03.md"
+      },
+      {
+        "optimized_tokens": 1493,
+        "original_tokens": 1580,
+        "quality_score": 0.9990990990990991,
+        "savings_percentage": 5.506329113924051,
+        "source": "docs/book/chapter-04.md"
+      },
+      {
+        "optimized_tokens": 2103,
+        "original_tokens": 2154,
+        "quality_score": 0.9953183520599251,
+        "savings_percentage": 2.3676880222841223,
+        "source": "docs/book/chapter-05.md"
+      },
+      {
+        "optimized_tokens": 1943,
+        "original_tokens": 2013,
+        "quality_score": 0.9994252873563219,
+        "savings_percentage": 3.4773969200198707,
+        "source": "docs/book/chapter-06.md"
+      },
+      {
+        "optimized_tokens": 2437,
+        "original_tokens": 2465,
+        "quality_score": 0.9970005490985632,
+        "savings_percentage": 1.1359026369168357,
+        "source": "docs/book/chapter-08.md"
+      },
+      {
+        "optimized_tokens": 2659,
+        "original_tokens": 2820,
+        "quality_score": 0.9995623632385121,
+        "savings_percentage": 5.709219858156028,
+        "source": "docs/book/chapter-09.md"
+      },
+      {
+        "optimized_tokens": 1425,
+        "original_tokens": 1450,
+        "quality_score": 0.998995983935743,
+        "savings_percentage": 1.7241379310344827,
+        "source": "docs/book/chapter-10.md"
+      },
+      {
+        "optimized_tokens": 1309,
+        "original_tokens": 1337,
+        "quality_score": 0.9978308026030369,
+        "savings_percentage": 2.094240837696335,
+        "source": "docs/book/chapter-11.md"
+      },
+      {
+        "optimized_tokens": 2293,
+        "original_tokens": 2559,
+        "quality_score": 0.9994505494505495,
+        "savings_percentage": 10.394685423993748,
+        "source": "docs/book/summary.md"
+      },
+      {
+        "optimized_tokens": 1114,
+        "original_tokens": 1119,
+        "quality_score": 1.0,
+        "savings_percentage": 0.44682752457551383,
+        "source": "docs/consulting/engineering-soundness-deck-outline-2026-07-19.md"
+      },
+      {
+        "optimized_tokens": 1013,
+        "original_tokens": 1050,
+        "quality_score": 0.9984472049689441,
+        "savings_percentage": 3.5238095238095237,
+        "source": "docs/consulting/engineering-soundness-one-pager-2026-07-19.md"
+      },
+      {
+        "optimized_tokens": 4413,
+        "original_tokens": 4562,
+        "quality_score": 0.9988085782366958,
+        "savings_percentage": 3.266111354669005,
+        "source": "docs/consulting/engineering-soundness-review-2026-07-19.md"
+      },
+      {
+        "optimized_tokens": 6811,
+        "original_tokens": 7270,
+        "quality_score": 0.9986513823331085,
+        "savings_percentage": 6.313617606602476,
+        "source": "docs/kb-manager/ARCHITECTURE.md"
+      },
+      {
+        "optimized_tokens": 1611,
+        "original_tokens": 1679,
+        "quality_score": 0.994131455399061,
+        "savings_percentage": 4.050029779630733,
+        "source": "docs/knowledge-base/concepts/cache-thread-safety-patterns.md"
+      },
+      {
+        "optimized_tokens": 1278,
+        "original_tokens": 1328,
+        "quality_score": 0.9922680412371134,
+        "savings_percentage": 3.7650602409638556,
+        "source": "docs/knowledge-base/concepts/delegation-analysis-pipeline.md"
+      },
+      {
+        "optimized_tokens": 215,
+        "original_tokens": 217,
+        "quality_score": 0.9871794871794872,
+        "savings_percentage": 0.9216589861751152,
+        "source": "docs/knowledge-base/concepts/dependency-analysis.md"
+      },
+      {
+        "optimized_tokens": 1072,
+        "original_tokens": 1091,
+        "quality_score": 0.9983552631578947,
+        "savings_percentage": 1.7415215398716772,
+        "source": "docs/knowledge-base/concepts/file-naming-conventions.md"
+      },
+      {
+        "optimized_tokens": 1665,
+        "original_tokens": 1714,
+        "quality_score": 0.9979919678714859,
+        "savings_percentage": 2.8588098016336057,
+        "source": "docs/knowledge-base/concepts/iterative-audit-methodology.md"
+      },
+      {
+        "optimized_tokens": 1096,
+        "original_tokens": 1125,
+        "quality_score": 0.9937106918238994,
+        "savings_percentage": 2.577777777777778,
+        "source": "docs/knowledge-base/concepts/kb-document-types.md"
+      },
+      {
+        "optimized_tokens": 2696,
+        "original_tokens": 2802,
+        "quality_score": 0.9958734525447042,
+        "savings_percentage": 3.7830121341898644,
+        "source": "docs/knowledge-base/concepts/kb-tos-embedding-layer.md"
+      },
+      {
+        "optimized_tokens": 1528,
+        "original_tokens": 1572,
+        "quality_score": 0.991860465116279,
+        "savings_percentage": 2.7989821882951653,
+        "source": "docs/knowledge-base/concepts/knowledge-graph-layer.md"
+      },
+      {
+        "optimized_tokens": 3268,
+        "original_tokens": 3599,
+        "quality_score": 0.9972260748959778,
+        "savings_percentage": 9.196999166435122,
+        "source": "docs/knowledge-base/concepts/multi-level-caching-architecture-patterns.md"
+      },
+      {
+        "optimized_tokens": 1200,
+        "original_tokens": 1229,
+        "quality_score": 0.9967845659163987,
+        "savings_percentage": 2.3596419853539463,
+        "source": "docs/knowledge-base/concepts/repo-hygiene-rules.md"
+      },
+      {
+        "optimized_tokens": 1162,
+        "original_tokens": 1185,
+        "quality_score": 0.9952830188679245,
+        "savings_percentage": 1.9409282700421944,
+        "source": "docs/knowledge-base/concepts/thread-safe-cost-tracking.md"
+      },
+      {
+        "optimized_tokens": 2582,
+        "original_tokens": 2663,
+        "quality_score": 0.992445054945055,
+        "savings_percentage": 3.0416823131806234,
+        "source": "docs/knowledge-base/concepts/token-optimization.md"
+      },
+      {
+        "optimized_tokens": 1609,
+        "original_tokens": 1659,
+        "quality_score": 0.9893364928909951,
+        "savings_percentage": 3.0138637733574445,
+        "source": "docs/knowledge-base/guides/activating-knowledge-manager-in-new-session.md"
+      },
+      {
+        "optimized_tokens": 3865,
+        "original_tokens": 4367,
+        "quality_score": 0.9973585844064004,
+        "savings_percentage": 11.49530570185482,
+        "source": "docs/knowledge-base/guides/audit-remediation-action-plan.md"
+      },
+      {
+        "optimized_tokens": 2196,
+        "original_tokens": 2508,
+        "quality_score": 0.9993527508090616,
+        "savings_percentage": 12.440191387559809,
+        "source": "docs/knowledge-base/guides/audit-remediation-status.md"
+      },
+      {
+        "optimized_tokens": 2390,
+        "original_tokens": 2681,
+        "quality_score": 0.9966066641133665,
+        "savings_percentage": 10.854158895934352,
+        "source": "docs/knowledge-base/guides/bob-shell-ui-integration.md"
+      },
+      {
+        "optimized_tokens": 4758,
+        "original_tokens": 5051,
+        "quality_score": 0.9937341137123746,
+        "savings_percentage": 5.8008315185111865,
+        "source": "docs/knowledge-base/guides/complete-repository-analysis.md"
+      },
+      {
+        "optimized_tokens": 4287,
+        "original_tokens": 4677,
+        "quality_score": 0.9995150339476235,
+        "savings_percentage": 8.338678640153944,
+        "source": "docs/knowledge-base/guides/dual-system-use-case-example.md"
+      },
+      {
+        "optimized_tokens": 1545,
+        "original_tokens": 1556,
+        "quality_score": 0.993969972378152,
+        "savings_percentage": 0.7069408740359897,
+        "source": "docs/knowledge-base/guides/e2e-testing-setup-guide.md"
+      },
+      {
+        "optimized_tokens": 5184,
+        "original_tokens": 5476,
+        "quality_score": 0.9938271604938271,
+        "savings_percentage": 5.33235938641344,
+        "source": "docs/knowledge-base/guides/kb-tos-integration-roadmap.md"
+      },
+      {
+        "optimized_tokens": 2656,
+        "original_tokens": 2739,
+        "quality_score": 0.9956395348837208,
+        "savings_percentage": 3.0303030303030303,
+        "source": "docs/knowledge-base/guides/km-bobcoin-savings-measurement-guide.md"
+      },
+      {
+        "optimized_tokens": 1972,
+        "original_tokens": 2058,
+        "quality_score": 0.9921568627450981,
+        "savings_percentage": 4.178814382896015,
+        "source": "docs/knowledge-base/guides/knowledge-graph-usage-guide.md"
+      },
+      {
+        "optimized_tokens": 1784,
+        "original_tokens": 1836,
+        "quality_score": 0.9968487394957983,
+        "savings_percentage": 2.832244008714597,
+        "source": "docs/knowledge-base/guides/obsidian-integration-guide.md"
+      },
+      {
+        "optimized_tokens": 3573,
+        "original_tokens": 3878,
+        "quality_score": 0.9948523345982511,
+        "savings_percentage": 7.864878803506962,
+        "source": "docs/knowledge-base/guides/p0-critical-fixes-implementation.md"
+      },
+      {
+        "optimized_tokens": 6579,
+        "original_tokens": 7680,
+        "quality_score": 0.9995798319327731,
+        "savings_percentage": 14.335937500000002,
+        "source": "docs/knowledge-base/guides/phase2-performance-optimization-plan.md"
+      },
+      {
+        "optimized_tokens": 3049,
+        "original_tokens": 3623,
+        "quality_score": 0.9981864259127267,
+        "savings_percentage": 15.843223847640079,
+        "source": "docs/knowledge-base/guides/phase3-day7-8-final-validation-template.md"
+      },
+      {
+        "optimized_tokens": 2483,
+        "original_tokens": 2754,
+        "quality_score": 0.9986038074273369,
+        "savings_percentage": 9.840232389251998,
+        "source": "docs/knowledge-base/guides/phase3-real-world-validation-plan.md"
+      },
+      {
+        "optimized_tokens": 4299,
+        "original_tokens": 4592,
+        "quality_score": 0.9964460232752523,
+        "savings_percentage": 6.380662020905923,
+        "source": "docs/knowledge-base/guides/phase3-validation-user-guide.md"
+      },
+      {
+        "optimized_tokens": 2472,
+        "original_tokens": 2704,
+        "quality_score": 0.9991482112436116,
+        "savings_percentage": 8.579881656804734,
+        "source": "docs/knowledge-base/guides/phase5-documentation-reconciliation-complete.md"
+      },
+      {
+        "optimized_tokens": 2541,
+        "original_tokens": 2805,
+        "quality_score": 0.9991856677524429,
+        "savings_percentage": 9.411764705882353,
+        "source": "docs/knowledge-base/guides/phase6-bob-shell-validation-approach.md"
+      },
+      {
+        "optimized_tokens": 2556,
+        "original_tokens": 2675,
+        "quality_score": 0.9995110024449878,
+        "savings_percentage": 4.4485981308411215,
+        "source": "docs/knowledge-base/guides/real-time-monitoring-guide.md"
+      },
+      {
+        "optimized_tokens": 3576,
+        "original_tokens": 3913,
+        "quality_score": 0.9996683250414594,
+        "savings_percentage": 8.612317914643496,
+        "source": "docs/knowledge-base/guides/real-time-savings-measurement-guide.md"
+      },
+      {
+        "optimized_tokens": 2743,
+        "original_tokens": 2856,
+        "quality_score": 0.9849767017201805,
+        "savings_percentage": 3.956582633053221,
+        "source": "docs/knowledge-base/guides/setup-token-optimization.md"
+      },
+      {
+        "optimized_tokens": 1284,
+        "original_tokens": 1280,
+        "quality_score": 0.9819444444444445,
+        "savings_percentage": -0.3125,
+        "source": "docs/knowledge-base/guides/token-optimizer-quick-install.md"
+      },
+      {
+        "optimized_tokens": 4055,
+        "original_tokens": 4412,
+        "quality_score": 0.9953596287703015,
+        "savings_percentage": 8.091568449682683,
+        "source": "docs/knowledge-base/guides/using-both-systems-together.md"
+      },
+      {
+        "optimized_tokens": 6438,
+        "original_tokens": 6984,
+        "quality_score": 0.9982145262145262,
+        "savings_percentage": 7.81786941580756,
+        "source": "docs/knowledge-base/index.md"
+      },
+      {
+        "optimized_tokens": 1871,
+        "original_tokens": 2069,
+        "quality_score": 0.993801652892562,
+        "savings_percentage": 9.56984050265829,
+        "source": "docs/knowledge-base/references/bob-optimize-cli-reference.md"
+      },
+      {
+        "optimized_tokens": 3633,
+        "original_tokens": 4033,
+        "quality_score": 0.993660855784469,
+        "savings_percentage": 9.918175055789735,
+        "source": "docs/knowledge-base/references/cache-api.md"
+      },
+      {
+        "optimized_tokens": 2033,
+        "original_tokens": 2235,
+        "quality_score": 1.0,
+        "savings_percentage": 9.038031319910514,
+        "source": "docs/knowledge-base/references/kb-savings-estimation-methodology.md"
+      },
+      {
+        "optimized_tokens": 8054,
+        "original_tokens": 8703,
+        "quality_score": 0.9995219885277247,
+        "savings_percentage": 7.457198667126279,
+        "source": "docs/knowledge-base/research/adversarial-audit-2026-07-19.md"
+      },
+      {
+        "optimized_tokens": 2487,
+        "original_tokens": 2627,
+        "quality_score": 0.9938931297709923,
+        "savings_percentage": 5.329272934906737,
+        "source": "docs/knowledge-base/research/adversarial-audit-embeddings-chunker-2026-07-17.md"
+      },
+      {
+        "optimized_tokens": 4099,
+        "original_tokens": 4539,
+        "quality_score": 0.9971461187214612,
+        "savings_percentage": 9.693765146508042,
+        "source": "docs/knowledge-base/research/adversarial-review-round1-2026-07-13.md"
+      },
+      {
+        "optimized_tokens": 5239,
+        "original_tokens": 6299,
+        "quality_score": 0.9982502187226596,
+        "savings_percentage": 16.82806794729322,
+        "source": "docs/knowledge-base/research/adversarial-review-round2-2026-07-13.md"
+      },
+      {
+        "optimized_tokens": 6845,
+        "original_tokens": 7737,
+        "quality_score": 0.9996770025839794,
+        "savings_percentage": 11.529016414630993,
+        "source": "docs/knowledge-base/research/architecture-audit-mece-2026-07-14.md"
+      },
+      {
+        "optimized_tokens": 5631,
+        "original_tokens": 5760,
+        "quality_score": 0.9990297542043984,
+        "savings_percentage": 2.2395833333333335,
+        "source": "docs/knowledge-base/research/audit-2026-07-13-institutional.md"
+      },
+      {
+        "optimized_tokens": 2802,
+        "original_tokens": 3095,
+        "quality_score": 1.0,
+        "savings_percentage": 9.466882067851373,
+        "source": "docs/knowledge-base/research/audit-2026-07-14-post-remediation.md"
+      },
+      {
+        "optimized_tokens": 4096,
+        "original_tokens": 4612,
+        "quality_score": 0.9990291262135922,
+        "savings_percentage": 11.188204683434519,
+        "source": "docs/knowledge-base/research/bobcoin-savings-analysis-2026-07-14.md"
+      },
+      {
+        "optimized_tokens": 3870,
+        "original_tokens": 4156,
+        "quality_score": 0.9939360529217198,
+        "savings_percentage": 6.881616939364774,
+        "source": "docs/knowledge-base/research/cache-race-fix-lessons-2026-07.md"
+      },
+      {
+        "optimized_tokens": 2947,
+        "original_tokens": 3063,
+        "quality_score": 0.9953208556149733,
+        "savings_percentage": 3.787136793992817,
+        "source": "docs/knowledge-base/research/cache-race-fix-round5-2026-07.md"
+      },
+      {
+        "optimized_tokens": 591,
+        "original_tokens": 613,
+        "quality_score": 1.0,
+        "savings_percentage": 3.588907014681892,
+        "source": "docs/knowledge-base/research/code-metrics-2026-07-12.md"
+      },
+      {
+        "optimized_tokens": 272,
+        "original_tokens": 279,
+        "quality_score": 1.0,
+        "savings_percentage": 2.5089605734767026,
+        "source": "docs/knowledge-base/research/code-metrics-2026-07-18.md"
+      },
+      {
+        "optimized_tokens": 6441,
+        "original_tokens": 7151,
+        "quality_score": 0.9992447129909365,
+        "savings_percentage": 9.928681303314221,
+        "source": "docs/knowledge-base/research/codebase-analysis-2026-07-14.md"
+      },
+      {
+        "optimized_tokens": 4944,
+        "original_tokens": 5599,
+        "quality_score": 0.998523622047244,
+        "savings_percentage": 11.69851759242722,
+        "source": "docs/knowledge-base/research/comprehensive-issue-list-2026-07-13.md"
+      },
+      {
+        "optimized_tokens": 2647,
+        "original_tokens": 2779,
+        "quality_score": 0.9947428694900606,
+        "savings_percentage": 4.749910039582584,
+        "source": "docs/knowledge-base/research/cost-tracking-lessons-learned.md"
+      },
+      {
+        "optimized_tokens": 10562,
+        "original_tokens": 11230,
+        "quality_score": 1.0,
+        "savings_percentage": 5.9483526268922535,
+        "source": "docs/knowledge-base/research/counter-audit-2026-07-19-independent.md"
+      },
+      {
+        "optimized_tokens": 1898,
+        "original_tokens": 2040,
+        "quality_score": 0.9965986394557822,
+        "savings_percentage": 6.96078431372549,
+        "source": "docs/knowledge-base/research/coverage-measurement-2026-07-13.md"
+      },
+      {
+        "optimized_tokens": 1487,
+        "original_tokens": 1533,
+        "quality_score": 0.9942396313364055,
+        "savings_percentage": 3.0006523157208087,
+        "source": "docs/knowledge-base/research/delegation-integration-analysis-2026-07-13.md"
+      },
+      {
+        "optimized_tokens": 1318,
+        "original_tokens": 1361,
+        "quality_score": 0.998069498069498,
+        "savings_percentage": 3.159441587068332,
+        "source": "docs/knowledge-base/research/doc-coverage-2026-07-12.md"
+      },
+      {
+        "optimized_tokens": 930,
+        "original_tokens": 954,
+        "quality_score": 1.0,
+        "savings_percentage": 2.515723270440252,
+        "source": "docs/knowledge-base/research/doc-coverage-2026-07-13.md"
+      },
+      {
+        "optimized_tokens": 5527,
+        "original_tokens": 5866,
+        "quality_score": 0.9992805755395684,
+        "savings_percentage": 5.779065802932151,
+        "source": "docs/knowledge-base/research/engineering-soundness-audit-2026-07-19.md"
+      },
+      {
+        "optimized_tokens": 3598,
+        "original_tokens": 3751,
+        "quality_score": 0.9990215264187867,
+        "savings_percentage": 4.078912290055985,
+        "source": "docs/knowledge-base/research/external-audit-2026-07-12.md"
+      },
+      {
+        "optimized_tokens": 4420,
+        "original_tokens": 4577,
+        "quality_score": 0.9983093829247676,
+        "savings_percentage": 3.4301944505134365,
+        "source": "docs/knowledge-base/research/full-codebase-review-2026-07-14.md"
+      },
+      {
+        "optimized_tokens": 10452,
+        "original_tokens": 11188,
+        "quality_score": 0.9886165541731566,
+        "savings_percentage": 6.5784769395781195,
+        "source": "docs/knowledge-base/research/full-technical-design-retro-2026-07.md"
+      },
+      {
+        "optimized_tokens": 1193,
+        "original_tokens": 1629,
+        "quality_score": 1.0,
+        "savings_percentage": 26.764886433394718,
+        "source": "docs/knowledge-base/research/git-analysis-2026-07-12.md"
+      },
+      {
+        "optimized_tokens": 1232,
+        "original_tokens": 1685,
+        "quality_score": 1.0,
+        "savings_percentage": 26.884272997032642,
+        "source": "docs/knowledge-base/research/git-analysis-2026-07-13.md"
+      },
+      {
+        "optimized_tokens": 3271,
+        "original_tokens": 3691,
+        "quality_score": 0.9953947368421052,
+        "savings_percentage": 11.379030073150908,
+        "source": "docs/knowledge-base/research/graph-validation-2026-07-17.md"
+      },
+      {
+        "optimized_tokens": 8272,
+        "original_tokens": 9132,
+        "quality_score": 1.0,
+        "savings_percentage": 9.417433201927288,
+        "source": "docs/knowledge-base/research/innovation-portfolio-2026-07-19.md"
+      },
+      {
+        "optimized_tokens": 3595,
+        "original_tokens": 3891,
+        "quality_score": 1.0,
+        "savings_percentage": 7.607298894885633,
+        "source": "docs/knowledge-base/research/innovation-portfolio-2026-07-20-rescored.md"
+      },
+      {
+        "optimized_tokens": 3028,
+        "original_tokens": 3142,
+        "quality_score": 0.9949685534591195,
+        "savings_percentage": 3.6282622533418207,
+        "source": "docs/knowledge-base/research/iterative-audit-lessons-2026-07.md"
+      },
+      {
+        "optimized_tokens": 2012,
+        "original_tokens": 2057,
+        "quality_score": 0.9950083194675541,
+        "savings_percentage": 2.1876519202722413,
+        "source": "docs/knowledge-base/research/kb-mode-switch-lessons-2026-07.md"
+      },
+      {
+        "optimized_tokens": 2010,
+        "original_tokens": 2312,
+        "quality_score": 0.9974226804123711,
+        "savings_percentage": 13.062283737024222,
+        "source": "docs/knowledge-base/research/kb-query-ab-validation-2026-07.md"
+      },
+      {
+        "optimized_tokens": 4170,
+        "original_tokens": 4344,
+        "quality_score": 0.9959928762243988,
+        "savings_percentage": 4.005524861878453,
+        "source": "docs/knowledge-base/research/kb-tos-integration-feasibility-2026-07-14.md"
+      },
+      {
+        "optimized_tokens": 5800,
+        "original_tokens": 6089,
+        "quality_score": 0.9996706192358367,
+        "savings_percentage": 4.746263754311053,
+        "source": "docs/knowledge-base/research/master-engagement-reaudit-2026-07-20.md"
+      },
+      {
+        "optimized_tokens": 2205,
+        "original_tokens": 2229,
+        "quality_score": 0.9974658654753665,
+        "savings_percentage": 1.0767160161507403,
+        "source": "docs/knowledge-base/research/mnemox-executive-brief-2026-07.md"
+      },
+      {
+        "optimized_tokens": 2525,
+        "original_tokens": 2701,
+        "quality_score": 0.9974226804123711,
+        "savings_percentage": 6.516105146242132,
+        "source": "docs/knowledge-base/research/mnemox-positioning-brief-2026-07.md"
+      },
+      {
+        "optimized_tokens": 1559,
+        "original_tokens": 1583,
+        "quality_score": 0.9990253411306043,
+        "savings_percentage": 1.5161086544535691,
+        "source": "docs/knowledge-base/research/mnemox-update-2026-07-18.md"
+      },
+      {
+        "optimized_tokens": 1403,
+        "original_tokens": 1431,
+        "quality_score": 0.9988505747126437,
+        "savings_percentage": 1.9566736547868624,
+        "source": "docs/knowledge-base/research/mnemox-update-2026-07-19.md"
+      },
+      {
+        "optimized_tokens": 1635,
+        "original_tokens": 1670,
+        "quality_score": 0.9977973568281937,
+        "savings_percentage": 2.095808383233533,
+        "source": "docs/knowledge-base/research/mnemox-update-2026-07-19b.md"
+      },
+      {
+        "optimized_tokens": 3573,
+        "original_tokens": 3939,
+        "quality_score": 0.9943300737690856,
+        "savings_percentage": 9.291698400609292,
+        "source": "docs/knowledge-base/research/performance-benchmarks.md"
+      },
+      {
+        "optimized_tokens": 2519,
+        "original_tokens": 2890,
+        "quality_score": 0.9995226730310263,
+        "savings_percentage": 12.837370242214533,
+        "source": "docs/knowledge-base/research/phase2-completion-summary.md"
+      },
+      {
+        "optimized_tokens": 1689,
+        "original_tokens": 1976,
+        "quality_score": 1.0,
+        "savings_percentage": 14.524291497975709,
+        "source": "docs/knowledge-base/research/phase2-concurrency-test-results.md"
+      },
+      {
+        "optimized_tokens": 1995,
+        "original_tokens": 2169,
+        "quality_score": 0.9977777777777777,
+        "savings_percentage": 8.022130013831259,
+        "source": "docs/knowledge-base/research/phase2-health-checks-complete.md"
+      },
+      {
+        "optimized_tokens": 2161,
+        "original_tokens": 2238,
+        "quality_score": 1.0,
+        "savings_percentage": 3.4405719392314564,
+        "source": "docs/knowledge-base/research/phase2-lessons-learned-2026-07-13.md"
+      },
+      {
+        "optimized_tokens": 3013,
+        "original_tokens": 3538,
+        "quality_score": 0.9981653980910958,
+        "savings_percentage": 14.83889202939514,
+        "source": "docs/knowledge-base/research/phase2-performance-baseline-analysis.md"
+      },
+      {
+        "optimized_tokens": 1840,
+        "original_tokens": 2076,
+        "quality_score": 1.0,
+        "savings_percentage": 11.368015414258188,
+        "source": "docs/knowledge-base/research/phase2-performance-baseline-results.md"
+      },
+      {
+        "optimized_tokens": 1608,
+        "original_tokens": 1808,
+        "quality_score": 1.0,
+        "savings_percentage": 11.061946902654867,
+        "source": "docs/knowledge-base/research/phase2-thread-safety-fixes-complete.md"
+      },
+      {
+        "optimized_tokens": 2400,
+        "original_tokens": 2601,
+        "quality_score": 0.9975649350649349,
+        "savings_percentage": 7.7277970011534025,
+        "source": "docs/knowledge-base/research/phase3-additional-work-lessons-learned.md"
+      },
+      {
+        "optimized_tokens": 2652,
+        "original_tokens": 2880,
+        "quality_score": 1.0,
+        "savings_percentage": 7.916666666666666,
+        "source": "docs/knowledge-base/research/phase3-day1-2-validation-framework.md"
+      },
+      {
+        "optimized_tokens": 3526,
+        "original_tokens": 3735,
+        "quality_score": 0.9990050563443592,
+        "savings_percentage": 5.595716198125836,
+        "source": "docs/knowledge-base/research/phase3-day3-4-parallel-work.md"
+      },
+      {
+        "optimized_tokens": 2699,
+        "original_tokens": 2901,
+        "quality_score": 0.9989428150528994,
+        "savings_percentage": 6.963116166839021,
+        "source": "docs/knowledge-base/research/phase3-monitoring-lessons-learned.md"
+      },
+      {
+        "optimized_tokens": 2900,
+        "original_tokens": 3115,
+        "quality_score": 0.9970845481049562,
+        "savings_percentage": 6.902086677367576,
+        "source": "docs/knowledge-base/research/phase3-real-time-monitoring-implementation.md"
+      },
+      {
+        "optimized_tokens": 2229,
+        "original_tokens": 2375,
+        "quality_score": 0.9966722129783694,
+        "savings_percentage": 6.147368421052631,
+        "source": "docs/knowledge-base/research/phase6-lessons-learned-2026-07-13.md"
+      },
+      {
+        "optimized_tokens": 1501,
+        "original_tokens": 1602,
+        "quality_score": 0.9987212276214834,
+        "savings_percentage": 6.30461922596754,
+        "source": "docs/knowledge-base/research/quality-gate-status-2026-07-18.md"
+      },
+      {
+        "optimized_tokens": 4184,
+        "original_tokens": 4614,
+        "quality_score": 0.9952198852772467,
+        "savings_percentage": 9.319462505418292,
+        "source": "docs/knowledge-base/research/readme-critical-analysis-2026-07-14.md"
+      },
+      {
+        "optimized_tokens": 2724,
+        "original_tokens": 2872,
+        "quality_score": 0.9959083469721768,
+        "savings_percentage": 5.153203342618385,
+        "source": "docs/knowledge-base/research/repo-hygiene-lessons-2026-07.md"
+      },
+      {
+        "optimized_tokens": 2483,
+        "original_tokens": 2592,
+        "quality_score": 0.9994169096209913,
+        "savings_percentage": 4.205246913580247,
+        "source": "docs/knowledge-base/research/repo-scan-2026-07-12.md"
+      },
+      {
+        "optimized_tokens": 2886,
+        "original_tokens": 2990,
+        "quality_score": 0.999475065616798,
+        "savings_percentage": 3.4782608695652173,
+        "source": "docs/knowledge-base/research/repo-scan-2026-07-13.md"
+      },
+      {
+        "optimized_tokens": 4615,
+        "original_tokens": 5503,
+        "quality_score": 0.9996932515337424,
+        "savings_percentage": 16.136652734871888,
+        "source": "docs/knowledge-base/research/repo-scan-2026-07-18.md"
+      },
+      {
+        "optimized_tokens": 3146,
+        "original_tokens": 3590,
+        "quality_score": 0.996261318331338,
+        "savings_percentage": 12.367688022284122,
+        "source": "docs/knowledge-base/research/repository-improvement-plan.md"
+      },
+      {
+        "optimized_tokens": 37097,
+        "original_tokens": 39097,
+        "quality_score": 0.9958508342401161,
+        "savings_percentage": 5.1154820062920425,
+        "source": "docs/knowledge-base/research/security-scan-2026-07-12.md"
+      },
+      {
+        "optimized_tokens": 36884,
+        "original_tokens": 38880,
+        "quality_score": 0.9958371211556138,
+        "savings_percentage": 5.133744855967079,
+        "source": "docs/knowledge-base/research/security-scan-2026-07-13.md"
+      },
+      {
+        "optimized_tokens": 6815,
+        "original_tokens": 7492,
+        "quality_score": 0.9991071428571427,
+        "savings_percentage": 9.03630539241858,
+        "source": "docs/knowledge-base/research/senior-expert-institutional-audit-2026-07-14.md"
+      },
+      {
+        "optimized_tokens": 317,
+        "original_tokens": 319,
+        "quality_score": 0.9954128440366972,
+        "savings_percentage": 0.6269592476489028,
+        "source": "docs/knowledge-base/research/test-coverage-2026-07-12.md"
+      },
+      {
+        "optimized_tokens": 317,
+        "original_tokens": 319,
+        "quality_score": 0.9954128440366972,
+        "savings_percentage": 0.6269592476489028,
+        "source": "docs/knowledge-base/research/test-coverage-2026-07-13.md"
+      },
+      {
+        "optimized_tokens": 4970,
+        "original_tokens": 5435,
+        "quality_score": 0.9990671641791045,
+        "savings_percentage": 8.555657773689052,
+        "source": "docs/obsidian-integration-plan.md"
+      },
+      {
+        "optimized_tokens": 1197,
+        "original_tokens": 1222,
+        "quality_score": 0.9898716078202509,
+        "savings_percentage": 2.0458265139116203,
+        "source": "docs/project-management/README.md"
+      },
+      {
+        "optimized_tokens": 2214,
+        "original_tokens": 2435,
+        "quality_score": 0.9994565217391305,
+        "savings_percentage": 9.075975359342916,
+        "source": "docs/project-management/phases/phase-1-implementation-summary.md"
+      },
+      {
+        "optimized_tokens": 2445,
+        "original_tokens": 2815,
+        "quality_score": 0.9994459833795014,
+        "savings_percentage": 13.143872113676732,
+        "source": "docs/project-management/phases/phase-3-executive-summary.md"
+      },
+      {
+        "optimized_tokens": 6079,
+        "original_tokens": 6816,
+        "quality_score": 0.9976495726495727,
+        "savings_percentage": 10.812793427230046,
+        "source": "docs/project-management/phases/phase-3-implementation-plan.md"
+      },
+      {
+        "optimized_tokens": 6148,
+        "original_tokens": 7009,
+        "quality_score": 0.9998037291462218,
+        "savings_percentage": 12.28420602083036,
+        "source": "docs/project-management/phases/phased-implementation-with-mock-testing.md"
+      },
+      {
+        "optimized_tokens": 3505,
+        "original_tokens": 3756,
+        "quality_score": 0.9982332155477032,
+        "savings_percentage": 6.682641107561235,
+        "source": "docs/project-management/planning/a-plus-remediation-plan.md"
+      },
+      {
+        "optimized_tokens": 3573,
+        "original_tokens": 3856,
+        "quality_score": 1.0,
+        "savings_percentage": 7.339211618257262,
+        "source": "docs/project-management/planning/arch-doc-remediation-plan.md"
+      },
+      {
+        "optimized_tokens": 3236,
+        "original_tokens": 3565,
+        "quality_score": 0.9995901639344262,
+        "savings_percentage": 9.228611500701263,
+        "source": "docs/project-management/planning/best-practices-implementation-plan.md"
+      },
+      {
+        "optimized_tokens": 3768,
+        "original_tokens": 4284,
+        "quality_score": 1.0,
+        "savings_percentage": 12.044817927170868,
+        "source": "docs/project-management/planning/docs-tier1-remediation-plan.md"
+      },
+      {
+        "optimized_tokens": 4476,
+        "original_tokens": 4984,
+        "quality_score": 0.9990498812351545,
+        "savings_percentage": 10.192616372391655,
+        "source": "docs/project-management/planning/docs-update-plan.md"
+      },
+      {
+        "optimized_tokens": 3797,
+        "original_tokens": 4138,
+        "quality_score": 0.999047435485598,
+        "savings_percentage": 8.240695988400192,
+        "source": "docs/project-management/planning/documentation-gap-analysis.md"
+      },
+      {
+        "optimized_tokens": 5016,
+        "original_tokens": 5267,
+        "quality_score": 0.9979564032697548,
+        "savings_percentage": 4.765521169546232,
+        "source": "docs/project-management/planning/documentation-reorganization-plan.md"
+      },
+      {
+        "optimized_tokens": 4378,
+        "original_tokens": 4708,
+        "quality_score": 0.9995059288537549,
+        "savings_percentage": 7.009345794392523,
+        "source": "docs/project-management/planning/documentation-update-plan.md"
+      },
+      {
+        "optimized_tokens": 2228,
+        "original_tokens": 2815,
+        "quality_score": 0.998069498069498,
+        "savings_percentage": 20.852575488454708,
+        "source": "docs/project-management/planning/fix-benchmarks-ci-plan.md"
+      },
+      {
+        "optimized_tokens": 2255,
+        "original_tokens": 2386,
+        "quality_score": 0.9991438356164384,
+        "savings_percentage": 5.490360435875942,
+        "source": "docs/project-management/planning/gap-closure-plan.md"
+      },
+      {
+        "optimized_tokens": 5311,
+        "original_tokens": 6343,
+        "quality_score": 0.9997607655502393,
+        "savings_percentage": 16.269903830994796,
+        "source": "docs/project-management/planning/llm-optimization-complete-summary.md"
+      },
+      {
+        "optimized_tokens": 1874,
+        "original_tokens": 1946,
+        "quality_score": 0.9949146110056926,
+        "savings_percentage": 3.6998972250770814,
+        "source": "docs/project-management/planning/mock-data-automation.md"
+      },
+      {
+        "optimized_tokens": 2535,
+        "original_tokens": 2806,
+        "quality_score": 0.9994301994301995,
+        "savings_percentage": 9.657875980042766,
+        "source": "docs/project-management/planning/mock-data-quality-analysis.md"
+      },
+      {
+        "optimized_tokens": 5417,
+        "original_tokens": 5819,
+        "quality_score": 0.9991319444444444,
+        "savings_percentage": 6.908403505757003,
+        "source": "docs/project-management/planning/p4-plan.md"
+      },
+      {
+        "optimized_tokens": 3119,
+        "original_tokens": 3408,
+        "quality_score": 1.0,
+        "savings_percentage": 8.480046948356808,
+        "source": "docs/project-management/planning/readme-improvements-plan.md"
+      },
+      {
+        "optimized_tokens": 2613,
+        "original_tokens": 2829,
+        "quality_score": 1.0,
+        "savings_percentage": 7.635206786850477,
+        "source": "docs/project-management/planning/remediation-plan.md"
+      },
+      {
+        "optimized_tokens": 7047,
+        "original_tokens": 7783,
+        "quality_score": 0.9990470139771284,
+        "savings_percentage": 9.456507773352179,
+        "source": "docs/project-management/planning/tier1-architecture-review-plan.md"
+      },
+      {
+        "optimized_tokens": 6442,
+        "original_tokens": 7779,
+        "quality_score": 0.9998025666337611,
+        "savings_percentage": 17.187299138706774,
+        "source": "docs/project-management/planning/token-optimization-implementation-plan.md"
+      },
+      {
+        "optimized_tokens": 2686,
+        "original_tokens": 2884,
+        "quality_score": 0.9994366197183099,
+        "savings_percentage": 6.865464632454923,
+        "source": "docs/project-management/planning/week-19-completion-summary.md"
+      },
+      {
+        "optimized_tokens": 2796,
+        "original_tokens": 3087,
+        "quality_score": 0.9996108949416342,
+        "savings_percentage": 9.426627793974733,
+        "source": "docs/project-management/planning/week-20-implementation-plan.md"
+      },
+      {
+        "optimized_tokens": 13619,
+        "original_tokens": 14681,
+        "quality_score": 0.9868821292775665,
+        "savings_percentage": 7.233839656699136,
+        "source": "docs/project-management/plans/adversarial-remediation-plan.md"
+      },
+      {
+        "optimized_tokens": 5604,
+        "original_tokens": 6464,
+        "quality_score": 0.9986888111888113,
+        "savings_percentage": 13.304455445544555,
+        "source": "docs/project-management/plans/cache-remediation-plan.md"
+      },
+      {
+        "optimized_tokens": 5707,
+        "original_tokens": 6212,
+        "quality_score": 0.9972089314194577,
+        "savings_percentage": 8.129426915647135,
+        "source": "docs/project-management/plans/gap-fix-plan.md"
+      },
+      {
+        "optimized_tokens": 2797,
+        "original_tokens": 2978,
+        "quality_score": 0.9949420608459509,
+        "savings_percentage": 6.077904633982539,
+        "source": "docs/project-management/plans/km-savings-test-plan.md"
+      },
+      {
+        "optimized_tokens": 3186,
+        "original_tokens": 3554,
+        "quality_score": 0.9980569948186528,
+        "savings_percentage": 10.354530106921779,
+        "source": "docs/project-management/plans/minilm-docs-plan.md"
+      },
+      {
+        "optimized_tokens": 3616,
+        "original_tokens": 3972,
+        "quality_score": 1.0,
+        "savings_percentage": 8.962739174219536,
+        "source": "docs/project-management/plans/mnemox-command-plan.md"
+      },
+      {
+        "optimized_tokens": 1087,
+        "original_tokens": 1163,
+        "quality_score": 1.0,
+        "savings_percentage": 6.534823731728288,
+        "source": "docs/project-management/plans/readme-challenge-framing-plan.md"
+      },
+      {
+        "optimized_tokens": 12247,
+        "original_tokens": 13402,
+        "quality_score": 0.9985428051001821,
+        "savings_percentage": 8.618116699000149,
+        "source": "docs/project-management/plans/wave3-technical-spec-2026-07-19.md"
+      },
+      {
+        "optimized_tokens": 321,
+        "original_tokens": 320,
+        "quality_score": 0.9813084112149533,
+        "savings_percentage": -0.3125,
+        "source": "docs/project-management/project-status.md"
+      },
+      {
+        "optimized_tokens": 1182,
+        "original_tokens": 1206,
+        "quality_score": 0.9985185185185186,
+        "savings_percentage": 1.9900497512437811,
+        "source": "docs/project-management/reviews/adversarial-review-next-steps.md"
+      },
+      {
+        "optimized_tokens": 4599,
+        "original_tokens": 5207,
+        "quality_score": 0.9997054491899853,
+        "savings_percentage": 11.67658920683695,
+        "source": "docs/project-management/reviews/architecture-audit-final.md"
+      },
+      {
+        "optimized_tokens": 6613,
+        "original_tokens": 7743,
+        "quality_score": 0.9998149861239594,
+        "savings_percentage": 14.593826682164535,
+        "source": "docs/project-management/reviews/architecture-audit-report-revised.md"
+      },
+      {
+        "optimized_tokens": 6032,
+        "original_tokens": 6655,
+        "quality_score": 0.9995697074010326,
+        "savings_percentage": 9.361382419233658,
+        "source": "docs/project-management/reviews/architecture-audit-report.md"
+      },
+      {
+        "optimized_tokens": 1551,
+        "original_tokens": 1623,
+        "quality_score": 0.9988839285714286,
+        "savings_percentage": 4.436229205175601,
+        "source": "docs/project-management/reviews/handoff-prompt.md"
+      },
+      {
+        "optimized_tokens": 3520,
+        "original_tokens": 3793,
+        "quality_score": 0.995374005434319,
+        "savings_percentage": 7.197469021882415,
+        "source": "docs/project-management/reviews/project-audit-report.md"
+      },
+      {
+        "optimized_tokens": 5199,
+        "original_tokens": 7659,
+        "quality_score": 0.9997835497835499,
+        "savings_percentage": 32.11907559733647,
+        "source": "docs/project-management/reviews/week18-final-validation-report.md"
+      },
+      {
+        "optimized_tokens": 2090,
+        "original_tokens": 2278,
+        "quality_score": 0.9989999999999999,
+        "savings_percentage": 8.252853380158033,
+        "source": "docs/project-management/reviews/week2-daily-checklist.md"
+      },
+      {
+        "optimized_tokens": 2086,
+        "original_tokens": 2149,
+        "quality_score": 1.0,
+        "savings_percentage": 2.9315960912052117,
+        "source": "docs/project-management/session-context-prompt.md"
+      },
+      {
+        "optimized_tokens": 3708,
+        "original_tokens": 4074,
+        "quality_score": 0.9915966386554622,
+        "savings_percentage": 8.98379970544919,
+        "source": "docs/quick-start.md"
+      },
+      {
+        "optimized_tokens": 3072,
+        "original_tokens": 3213,
+        "quality_score": 0.9971231300345225,
+        "savings_percentage": 4.3884220354808585,
+        "source": "docs/security/threat-model.md"
+      },
+      {
+        "optimized_tokens": 3602,
+        "original_tokens": 3941,
+        "quality_score": 0.9993702770780857,
+        "savings_percentage": 8.60187769601624,
+        "source": "docs/token-savings-test-plan.md"
+      },
+      {
+        "optimized_tokens": 1297,
+        "original_tokens": 1314,
+        "quality_score": 0.9823306696761746,
+        "savings_percentage": 1.2937595129375952,
+        "source": "docs/tutorials/optimize-a-prompt.md"
+      },
+      {
+        "optimized_tokens": 5233,
+        "original_tokens": 5463,
+        "quality_score": 0.9997737556561086,
+        "savings_percentage": 4.210140948196962,
+        "source": "docs/workflow-automation-plan.md"
+      },
+      {
+        "optimized_tokens": 270,
+        "original_tokens": 270,
+        "quality_score": 0.9954128440366972,
+        "savings_percentage": 0.0,
+        "source": "examples/personal-wiki/docs/knowledge-base/concepts/docker-containers.md"
+      },
+      {
+        "optimized_tokens": 348,
+        "original_tokens": 352,
+        "quality_score": 0.9960629921259843,
+        "savings_percentage": 1.1363636363636365,
+        "source": "examples/personal-wiki/docs/knowledge-base/concepts/functional-programming.md"
+      },
+      {
+        "optimized_tokens": 313,
+        "original_tokens": 313,
+        "quality_score": 0.9943181818181819,
+        "savings_percentage": 0.0,
+        "source": "examples/personal-wiki/docs/knowledge-base/guides/git-workflow-guide.md"
+      },
+      {
+        "optimized_tokens": 320,
+        "original_tokens": 331,
+        "quality_score": 0.9943181818181819,
+        "savings_percentage": 3.3232628398791544,
+        "source": "examples/personal-wiki/docs/knowledge-base/guides/vim-setup-guide.md"
+      },
+      {
+        "optimized_tokens": 221,
+        "original_tokens": 222,
+        "quality_score": 1.0,
+        "savings_percentage": 0.45045045045045046,
+        "source": "examples/personal-wiki/docs/knowledge-base/index.md"
+      },
+      {
+        "optimized_tokens": 284,
+        "original_tokens": 284,
+        "quality_score": 0.9883720930232558,
+        "savings_percentage": 0.0,
+        "source": "examples/personal-wiki/docs/knowledge-base/references/cli-commands.md"
+      },
+      {
+        "optimized_tokens": 398,
+        "original_tokens": 443,
+        "quality_score": 0.9965277777777777,
+        "savings_percentage": 10.15801354401806,
+        "source": "examples/personal-wiki/docs/knowledge-base/research/productivity-tools-2026-07.md"
+      },
+      {
+        "optimized_tokens": 310,
+        "original_tokens": 328,
+        "quality_score": 1.0,
+        "savings_percentage": 5.487804878048781,
+        "source": "examples/research-project/docs/knowledge-base/concepts/byzantine-fault-tolerance.md"
+      },
+      {
+        "optimized_tokens": 394,
+        "original_tokens": 410,
+        "quality_score": 0.993421052631579,
+        "savings_percentage": 3.902439024390244,
+        "source": "examples/research-project/docs/knowledge-base/concepts/consensus-algorithms.md"
+      },
+      {
+        "optimized_tokens": 266,
+        "original_tokens": 271,
+        "quality_score": 0.9907407407407407,
+        "savings_percentage": 1.8450184501845017,
+        "source": "examples/research-project/docs/knowledge-base/guides/literature-review-guide.md"
+      },
+      {
+        "optimized_tokens": 240,
+        "original_tokens": 241,
+        "quality_score": 1.0,
+        "savings_percentage": 0.4149377593360996,
+        "source": "examples/research-project/docs/knowledge-base/index.md"
+      },
+      {
+        "optimized_tokens": 338,
+        "original_tokens": 367,
+        "quality_score": 0.9904761904761905,
+        "savings_percentage": 7.901907356948229,
+        "source": "examples/research-project/docs/knowledge-base/references/paper-citations.md"
+      },
+      {
+        "optimized_tokens": 443,
+        "original_tokens": 443,
+        "quality_score": 0.9970059880239521,
+        "savings_percentage": 0.0,
+        "source": "examples/research-project/docs/knowledge-base/research/paxos-analysis-2026-06.md"
+      },
+      {
+        "optimized_tokens": 474,
+        "original_tokens": 477,
+        "quality_score": 0.9969325153374233,
+        "savings_percentage": 0.628930817610063,
+        "source": "examples/research-project/docs/knowledge-base/research/raft-comparison-2026-07.md"
+      },
+      {
+        "optimized_tokens": 312,
+        "original_tokens": 318,
+        "quality_score": 0.9957983193277311,
+        "savings_percentage": 1.8867924528301887,
+        "source": "examples/software-project/docs/knowledge-base/concepts/cqrs-pattern.md"
+      },
+      {
+        "optimized_tokens": 296,
+        "original_tokens": 304,
+        "quality_score": 1.0,
+        "savings_percentage": 2.631578947368421,
+        "source": "examples/software-project/docs/knowledge-base/concepts/event-driven.md"
+      },
+      {
+        "optimized_tokens": 297,
+        "original_tokens": 297,
+        "quality_score": 0.9958677685950412,
+        "savings_percentage": 0.0,
+        "source": "examples/software-project/docs/knowledge-base/concepts/microservices.md"
+      },
+      {
+        "optimized_tokens": 603,
+        "original_tokens": 615,
+        "quality_score": 0.9957983193277311,
+        "savings_percentage": 1.951219512195122,
+        "source": "examples/software-project/docs/knowledge-base/guides/deployment-guide.md"
+      },
+      {
+        "optimized_tokens": 564,
+        "original_tokens": 565,
+        "quality_score": 0.9940119760479043,
+        "savings_percentage": 0.17699115044247787,
+        "source": "examples/software-project/docs/knowledge-base/guides/setup-guide.md"
+      },
+      {
+        "optimized_tokens": 232,
+        "original_tokens": 233,
+        "quality_score": 1.0,
+        "savings_percentage": 0.4291845493562232,
+        "source": "examples/software-project/docs/knowledge-base/index.md"
+      },
+      {
+        "optimized_tokens": 872,
+        "original_tokens": 937,
+        "quality_score": 0.9900497512437811,
+        "savings_percentage": 6.937033084311634,
+        "source": "examples/software-project/docs/knowledge-base/references/api-reference.md"
+      },
+      {
+        "optimized_tokens": 687,
+        "original_tokens": 707,
+        "quality_score": 0.9956140350877192,
+        "savings_percentage": 2.828854314002829,
+        "source": "examples/software-project/docs/knowledge-base/research/caching-strategies-2026-07.md"
+      }
+    ],
+    "quality_note": "lexical heuristic (_estimate_quality), not semantic fidelity",
+    "std_savings_pct": 5.0119,
+    "tiktoken_active": true,
+    "total_optimized_tokens": 749965,
+    "total_original_tokens": 814895
+  },
+  "schema": "bob-validation/v1",
+  "truncation_budget_fit": {
+    "budget_tokens": 256,
+    "documents": 265,
+    "documents_truncated": 251,
+    "lossy": true,
+    "mean_removal_pct_when_truncated": 85.3365,
+    "note": "lossy deletion, no fidelity guarantee; NOT counted as savings",
+    "per_document": [
+      {
+        "original_tokens": 3182,
+        "removal_percentage": 92.52042740414834,
+        "source": "docs/BOB-IDE-GUIDE.md",
+        "tokens_removed": 2944,
+        "truncated_tokens": 238,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 4146,
+        "removal_percentage": 96.88856729377714,
+        "source": "docs/INDEX.md",
+        "tokens_removed": 4017,
+        "truncated_tokens": 129,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 7210,
+        "removal_percentage": 96.67128987517337,
+        "source": "docs/INSTALLATION.md",
+        "tokens_removed": 6970,
+        "truncated_tokens": 240,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 5443,
+        "removal_percentage": 95.79276134484658,
+        "source": "docs/MONITORING.md",
+        "tokens_removed": 5214,
+        "truncated_tokens": 229,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1487,
+        "removal_percentage": 88.50033624747815,
+        "source": "docs/README.md",
+        "tokens_removed": 1316,
+        "truncated_tokens": 171,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1355,
+        "removal_percentage": 81.69741697416974,
+        "source": "docs/SLA.md",
+        "tokens_removed": 1107,
+        "truncated_tokens": 248,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 9629,
+        "removal_percentage": 97.46598816076435,
+        "source": "docs/USAGE.md",
+        "tokens_removed": 9385,
+        "truncated_tokens": 244,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 7302,
+        "removal_percentage": 96.64475486168173,
+        "source": "docs/WORKFLOWS.md",
+        "tokens_removed": 7057,
+        "truncated_tokens": 245,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2080,
+        "removal_percentage": 92.9326923076923,
+        "source": "docs/adr/001-python-choice.md",
+        "tokens_removed": 1933,
+        "truncated_tokens": 147,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3275,
+        "removal_percentage": 92.42748091603053,
+        "source": "docs/adr/002-caching-strategy.md",
+        "tokens_removed": 3027,
+        "truncated_tokens": 248,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 4227,
+        "removal_percentage": 94.18026969481902,
+        "source": "docs/adr/003-tfidf-scoring.md",
+        "tokens_removed": 3981,
+        "truncated_tokens": 246,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 4361,
+        "removal_percentage": 94.51960559504701,
+        "source": "docs/adr/004-semantic-similarity.md",
+        "tokens_removed": 4122,
+        "truncated_tokens": 239,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 4073,
+        "removal_percentage": 94.9914068254358,
+        "source": "docs/adr/005-batch-processing.md",
+        "tokens_removed": 3869,
+        "truncated_tokens": 204,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3631,
+        "removal_percentage": 93.36270999724594,
+        "source": "docs/adr/006-cache-strategy.md",
+        "tokens_removed": 3390,
+        "truncated_tokens": 241,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3738,
+        "removal_percentage": 93.95398608881756,
+        "source": "docs/adr/008-token-counting.md",
+        "tokens_removed": 3512,
+        "truncated_tokens": 226,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3475,
+        "removal_percentage": 96.86330935251799,
+        "source": "docs/adr/010-testing-strategy.md",
+        "tokens_removed": 3366,
+        "truncated_tokens": 109,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 4697,
+        "removal_percentage": 94.95422610176708,
+        "source": "docs/adr/011-monitoring-observability.md",
+        "tokens_removed": 4460,
+        "truncated_tokens": 237,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2395,
+        "removal_percentage": 89.72860125260961,
+        "source": "docs/adr/013-facade-factory-pattern.md",
+        "tokens_removed": 2149,
+        "truncated_tokens": 246,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1450,
+        "removal_percentage": 84.9655172413793,
+        "source": "docs/adr/015-persistent-embedding-index.md",
+        "tokens_removed": 1232,
+        "truncated_tokens": 218,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1203,
+        "removal_percentage": 81.21363258520365,
+        "source": "docs/adr/016-truncation-no-config.md",
+        "tokens_removed": 977,
+        "truncated_tokens": 226,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3578,
+        "removal_percentage": 93.43208496366685,
+        "source": "docs/adr/017-knowledge-graph-layer.md",
+        "tokens_removed": 3343,
+        "truncated_tokens": 235,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1608,
+        "removal_percentage": 87.43781094527363,
+        "source": "docs/adr/018-p4-query-quality.md",
+        "tokens_removed": 1406,
+        "truncated_tokens": 202,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1420,
+        "removal_percentage": 87.74647887323944,
+        "source": "docs/adr/019-delegation-pipeline-activation.md",
+        "tokens_removed": 1246,
+        "truncated_tokens": 174,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1931,
+        "removal_percentage": 98.29104091144485,
+        "source": "docs/adr/README.md",
+        "tokens_removed": 1898,
+        "truncated_tokens": 33,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1115,
+        "removal_percentage": 93.81165919282512,
+        "source": "docs/api/README.md",
+        "tokens_removed": 1046,
+        "truncated_tokens": 69,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1617,
+        "removal_percentage": 85.71428571428571,
+        "source": "docs/api/cache/base.md",
+        "tokens_removed": 1386,
+        "truncated_tokens": 231,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1345,
+        "removal_percentage": 82.30483271375465,
+        "source": "docs/api/cache/embeddings.md",
+        "tokens_removed": 1107,
+        "truncated_tokens": 238,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1423,
+        "removal_percentage": 84.39915671117357,
+        "source": "docs/api/cache/exact_cache.md",
+        "tokens_removed": 1201,
+        "truncated_tokens": 222,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2012,
+        "removal_percentage": 87.82306163021869,
+        "source": "docs/api/cache/multi_level_cache.md",
+        "tokens_removed": 1767,
+        "truncated_tokens": 245,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1551,
+        "removal_percentage": 86.00902643455835,
+        "source": "docs/api/cache/semantic_cache.md",
+        "tokens_removed": 1334,
+        "truncated_tokens": 217,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 759,
+        "removal_percentage": 79.71014492753623,
+        "source": "docs/api/config/manager.md",
+        "tokens_removed": 605,
+        "truncated_tokens": 154,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 309,
+        "removal_percentage": 25.5663430420712,
+        "source": "docs/api/config/schema.md",
+        "tokens_removed": 79,
+        "truncated_tokens": 230,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 197,
+        "removal_percentage": 0.0,
+        "source": "docs/api/config/validator.md",
+        "tokens_removed": 0,
+        "truncated_tokens": 197,
+        "was_truncated": false
+      },
+      {
+        "original_tokens": 108,
+        "removal_percentage": 0.0,
+        "source": "docs/api/delegation/agents/architecture_agent.md",
+        "tokens_removed": 0,
+        "truncated_tokens": 108,
+        "was_truncated": false
+      },
+      {
+        "original_tokens": 111,
+        "removal_percentage": 0.0,
+        "source": "docs/api/delegation/agents/performance_agent.md",
+        "tokens_removed": 0,
+        "truncated_tokens": 111,
+        "was_truncated": false
+      },
+      {
+        "original_tokens": 112,
+        "removal_percentage": 0.0,
+        "source": "docs/api/delegation/agents/quality_agent.md",
+        "tokens_removed": 0,
+        "truncated_tokens": 112,
+        "was_truncated": false
+      },
+      {
+        "original_tokens": 142,
+        "removal_percentage": 0.0,
+        "source": "docs/api/delegation/agents/security_agent.md",
+        "tokens_removed": 0,
+        "truncated_tokens": 142,
+        "was_truncated": false
+      },
+      {
+        "original_tokens": 630,
+        "removal_percentage": 86.19047619047619,
+        "source": "docs/api/delegation/base.md",
+        "tokens_removed": 543,
+        "truncated_tokens": 87,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 280,
+        "removal_percentage": 8.571428571428571,
+        "source": "docs/api/delegation/coordinator.md",
+        "tokens_removed": 24,
+        "truncated_tokens": 256,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 704,
+        "removal_percentage": 65.76704545454545,
+        "source": "docs/api/delegation/pipeline.md",
+        "tokens_removed": 463,
+        "truncated_tokens": 241,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 291,
+        "removal_percentage": 12.027491408934708,
+        "source": "docs/api/delegation/registry.md",
+        "tokens_removed": 35,
+        "truncated_tokens": 256,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 485,
+        "removal_percentage": 50.92783505154639,
+        "source": "docs/api/embeddings/indexer.md",
+        "tokens_removed": 247,
+        "truncated_tokens": 238,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 662,
+        "removal_percentage": 64.35045317220543,
+        "source": "docs/api/embeddings/store.md",
+        "tokens_removed": 426,
+        "truncated_tokens": 236,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1087,
+        "removal_percentage": 77.36890524379025,
+        "source": "docs/api/graph/builder.md",
+        "tokens_removed": 841,
+        "truncated_tokens": 246,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1449,
+        "removal_percentage": 83.7129054520359,
+        "source": "docs/api/graph/graph.md",
+        "tokens_removed": 1213,
+        "truncated_tokens": 236,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 556,
+        "removal_percentage": 58.992805755395686,
+        "source": "docs/api/graph/ranker.md",
+        "tokens_removed": 328,
+        "truncated_tokens": 228,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 427,
+        "removal_percentage": 43.559718969555036,
+        "source": "docs/api/graph/store.md",
+        "tokens_removed": 186,
+        "truncated_tokens": 241,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1183,
+        "removal_percentage": 81.65680473372781,
+        "source": "docs/api/monitoring/cost_tracker.md",
+        "tokens_removed": 966,
+        "truncated_tokens": 217,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 763,
+        "removal_percentage": 68.93840104849279,
+        "source": "docs/api/monitoring/health.md",
+        "tokens_removed": 526,
+        "truncated_tokens": 237,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 864,
+        "removal_percentage": 81.01851851851852,
+        "source": "docs/api/monitoring/logger.md",
+        "tokens_removed": 700,
+        "truncated_tokens": 164,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1062,
+        "removal_percentage": 77.11864406779661,
+        "source": "docs/api/monitoring/metrics.md",
+        "tokens_removed": 819,
+        "truncated_tokens": 243,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1413,
+        "removal_percentage": 83.43949044585987,
+        "source": "docs/api/optimizer/token_counter.md",
+        "tokens_removed": 1179,
+        "truncated_tokens": 234,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 250,
+        "removal_percentage": 0.0,
+        "source": "docs/api/root/cli.md",
+        "tokens_removed": 0,
+        "truncated_tokens": 250,
+        "was_truncated": false
+      },
+      {
+        "original_tokens": 1036,
+        "removal_percentage": 80.98455598455598,
+        "source": "docs/api/root/facade.md",
+        "tokens_removed": 839,
+        "truncated_tokens": 197,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 453,
+        "removal_percentage": 49.22737306843267,
+        "source": "docs/api/root/factory.md",
+        "tokens_removed": 223,
+        "truncated_tokens": 230,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 395,
+        "removal_percentage": 41.77215189873418,
+        "source": "docs/api/root/kb_paths.md",
+        "tokens_removed": 165,
+        "truncated_tokens": 230,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 242,
+        "removal_percentage": 0.0,
+        "source": "docs/api/root/limits.md",
+        "tokens_removed": 0,
+        "truncated_tokens": 242,
+        "was_truncated": false
+      },
+      {
+        "original_tokens": 597,
+        "removal_percentage": 60.80402010050251,
+        "source": "docs/api/root/pricing.md",
+        "tokens_removed": 363,
+        "truncated_tokens": 234,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 833,
+        "removal_percentage": 71.42857142857143,
+        "source": "docs/api/root/provenance.md",
+        "tokens_removed": 595,
+        "truncated_tokens": 238,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 741,
+        "removal_percentage": 69.63562753036437,
+        "source": "docs/api/root/velocity.md",
+        "tokens_removed": 516,
+        "truncated_tokens": 225,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 176,
+        "removal_percentage": 0.0,
+        "source": "docs/api/tools/batch_file_reader.md",
+        "tokens_removed": 0,
+        "truncated_tokens": 176,
+        "was_truncated": false
+      },
+      {
+        "original_tokens": 135,
+        "removal_percentage": 0.0,
+        "source": "docs/api/tools/component_analyzer.md",
+        "tokens_removed": 0,
+        "truncated_tokens": 135,
+        "was_truncated": false
+      },
+      {
+        "original_tokens": 1480,
+        "removal_percentage": 86.14864864864865,
+        "source": "docs/api/tools/kb_query.md",
+        "tokens_removed": 1275,
+        "truncated_tokens": 205,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 364,
+        "removal_percentage": 40.65934065934066,
+        "source": "docs/api/tools/safe_paths.md",
+        "tokens_removed": 148,
+        "truncated_tokens": 216,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 734,
+        "removal_percentage": 69.34604904632153,
+        "source": "docs/api/truncation/strategies.md",
+        "tokens_removed": 509,
+        "truncated_tokens": 225,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 434,
+        "removal_percentage": 49.07834101382488,
+        "source": "docs/api/truncation/truncator.md",
+        "tokens_removed": 213,
+        "truncated_tokens": 221,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 684,
+        "removal_percentage": 66.81286549707602,
+        "source": "docs/api/validation/corpus.md",
+        "tokens_removed": 457,
+        "truncated_tokens": 227,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 549,
+        "removal_percentage": 58.46994535519126,
+        "source": "docs/api/validation/manifest.md",
+        "tokens_removed": 321,
+        "truncated_tokens": 228,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 912,
+        "removal_percentage": 74.3421052631579,
+        "source": "docs/api/validation/measure.md",
+        "tokens_removed": 678,
+        "truncated_tokens": 234,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 220,
+        "removal_percentage": 0.0,
+        "source": "docs/api/validation/report.md",
+        "tokens_removed": 0,
+        "truncated_tokens": 220,
+        "was_truncated": false
+      },
+      {
+        "original_tokens": 7988,
+        "removal_percentage": 96.95793690535804,
+        "source": "docs/architecture/ARCHITECTURE.md",
+        "tokens_removed": 7745,
+        "truncated_tokens": 243,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2501,
+        "removal_percentage": 90.20391843262695,
+        "source": "docs/architecture/README.md",
+        "tokens_removed": 2256,
+        "truncated_tokens": 245,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1168,
+        "removal_percentage": 92.5513698630137,
+        "source": "docs/architecture/components/README.md",
+        "tokens_removed": 1081,
+        "truncated_tokens": 87,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 557,
+        "removal_percentage": 55.65529622980251,
+        "source": "docs/book/appendix-a.md",
+        "tokens_removed": 310,
+        "truncated_tokens": 247,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2383,
+        "removal_percentage": 89.63491397398238,
+        "source": "docs/book/appendix-c.md",
+        "tokens_removed": 2136,
+        "truncated_tokens": 247,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 678,
+        "removal_percentage": 78.023598820059,
+        "source": "docs/book/chapter-01.md",
+        "tokens_removed": 529,
+        "truncated_tokens": 149,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1411,
+        "removal_percentage": 86.60524450744153,
+        "source": "docs/book/chapter-02.md",
+        "tokens_removed": 1222,
+        "truncated_tokens": 189,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1561,
+        "removal_percentage": 89.04548366431774,
+        "source": "docs/book/chapter-03.md",
+        "tokens_removed": 1390,
+        "truncated_tokens": 171,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1580,
+        "removal_percentage": 89.81012658227849,
+        "source": "docs/book/chapter-04.md",
+        "tokens_removed": 1419,
+        "truncated_tokens": 161,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2154,
+        "removal_percentage": 90.4363974001857,
+        "source": "docs/book/chapter-05.md",
+        "tokens_removed": 1948,
+        "truncated_tokens": 206,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2013,
+        "removal_percentage": 91.4555389965226,
+        "source": "docs/book/chapter-06.md",
+        "tokens_removed": 1841,
+        "truncated_tokens": 172,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2465,
+        "removal_percentage": 94.76673427991886,
+        "source": "docs/book/chapter-08.md",
+        "tokens_removed": 2336,
+        "truncated_tokens": 129,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2820,
+        "removal_percentage": 92.87234042553192,
+        "source": "docs/book/chapter-09.md",
+        "tokens_removed": 2619,
+        "truncated_tokens": 201,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1450,
+        "removal_percentage": 83.10344827586206,
+        "source": "docs/book/chapter-10.md",
+        "tokens_removed": 1205,
+        "truncated_tokens": 245,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1337,
+        "removal_percentage": 82.34854151084518,
+        "source": "docs/book/chapter-11.md",
+        "tokens_removed": 1101,
+        "truncated_tokens": 236,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2559,
+        "removal_percentage": 91.98905822586948,
+        "source": "docs/book/summary.md",
+        "tokens_removed": 2354,
+        "truncated_tokens": 205,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1119,
+        "removal_percentage": 81.41197497765862,
+        "source": "docs/consulting/engineering-soundness-deck-outline-2026-07-19.md",
+        "tokens_removed": 911,
+        "truncated_tokens": 208,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1050,
+        "removal_percentage": 76.85714285714286,
+        "source": "docs/consulting/engineering-soundness-one-pager-2026-07-19.md",
+        "tokens_removed": 807,
+        "truncated_tokens": 243,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 4562,
+        "removal_percentage": 94.71722928540115,
+        "source": "docs/consulting/engineering-soundness-review-2026-07-19.md",
+        "tokens_removed": 4321,
+        "truncated_tokens": 241,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 7270,
+        "removal_percentage": 96.58872077028886,
+        "source": "docs/kb-manager/ARCHITECTURE.md",
+        "tokens_removed": 7022,
+        "truncated_tokens": 248,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1679,
+        "removal_percentage": 93.44848123883264,
+        "source": "docs/knowledge-base/concepts/cache-thread-safety-patterns.md",
+        "tokens_removed": 1569,
+        "truncated_tokens": 110,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1328,
+        "removal_percentage": 88.85542168674698,
+        "source": "docs/knowledge-base/concepts/delegation-analysis-pipeline.md",
+        "tokens_removed": 1180,
+        "truncated_tokens": 148,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 217,
+        "removal_percentage": 0.0,
+        "source": "docs/knowledge-base/concepts/dependency-analysis.md",
+        "tokens_removed": 0,
+        "truncated_tokens": 217,
+        "was_truncated": false
+      },
+      {
+        "original_tokens": 1091,
+        "removal_percentage": 90.10082493125573,
+        "source": "docs/knowledge-base/concepts/file-naming-conventions.md",
+        "tokens_removed": 983,
+        "truncated_tokens": 108,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1714,
+        "removal_percentage": 93.75729288214703,
+        "source": "docs/knowledge-base/concepts/iterative-audit-methodology.md",
+        "tokens_removed": 1607,
+        "truncated_tokens": 107,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1125,
+        "removal_percentage": 89.95555555555555,
+        "source": "docs/knowledge-base/concepts/kb-document-types.md",
+        "tokens_removed": 1012,
+        "truncated_tokens": 113,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2802,
+        "removal_percentage": 91.1134903640257,
+        "source": "docs/knowledge-base/concepts/kb-tos-embedding-layer.md",
+        "tokens_removed": 2553,
+        "truncated_tokens": 249,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1572,
+        "removal_percentage": 90.5852417302799,
+        "source": "docs/knowledge-base/concepts/knowledge-graph-layer.md",
+        "tokens_removed": 1424,
+        "truncated_tokens": 148,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3599,
+        "removal_percentage": 96.24895804390108,
+        "source": "docs/knowledge-base/concepts/multi-level-caching-architecture-patterns.md",
+        "tokens_removed": 3464,
+        "truncated_tokens": 135,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1229,
+        "removal_percentage": 79.49552481692433,
+        "source": "docs/knowledge-base/concepts/repo-hygiene-rules.md",
+        "tokens_removed": 977,
+        "truncated_tokens": 252,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1185,
+        "removal_percentage": 86.66666666666667,
+        "source": "docs/knowledge-base/concepts/thread-safe-cost-tracking.md",
+        "tokens_removed": 1027,
+        "truncated_tokens": 158,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2663,
+        "removal_percentage": 93.65377393916636,
+        "source": "docs/knowledge-base/concepts/token-optimization.md",
+        "tokens_removed": 2494,
+        "truncated_tokens": 169,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1659,
+        "removal_percentage": 89.33092224231464,
+        "source": "docs/knowledge-base/guides/activating-knowledge-manager-in-new-session.md",
+        "tokens_removed": 1482,
+        "truncated_tokens": 177,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 4367,
+        "removal_percentage": 94.61873139455004,
+        "source": "docs/knowledge-base/guides/audit-remediation-action-plan.md",
+        "tokens_removed": 4132,
+        "truncated_tokens": 235,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2508,
+        "removal_percentage": 92.22488038277513,
+        "source": "docs/knowledge-base/guides/audit-remediation-status.md",
+        "tokens_removed": 2313,
+        "truncated_tokens": 195,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2681,
+        "removal_percentage": 91.86870570682582,
+        "source": "docs/knowledge-base/guides/bob-shell-ui-integration.md",
+        "tokens_removed": 2463,
+        "truncated_tokens": 218,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 5051,
+        "removal_percentage": 95.16927341120571,
+        "source": "docs/knowledge-base/guides/complete-repository-analysis.md",
+        "tokens_removed": 4807,
+        "truncated_tokens": 244,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 4677,
+        "removal_percentage": 94.95403036134275,
+        "source": "docs/knowledge-base/guides/dual-system-use-case-example.md",
+        "tokens_removed": 4441,
+        "truncated_tokens": 236,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1556,
+        "removal_percentage": 85.2827763496144,
+        "source": "docs/knowledge-base/guides/e2e-testing-setup-guide.md",
+        "tokens_removed": 1327,
+        "truncated_tokens": 229,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 5476,
+        "removal_percentage": 95.32505478451424,
+        "source": "docs/knowledge-base/guides/kb-tos-integration-roadmap.md",
+        "tokens_removed": 5220,
+        "truncated_tokens": 256,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2739,
+        "removal_percentage": 91.74881343556042,
+        "source": "docs/knowledge-base/guides/km-bobcoin-savings-measurement-guide.md",
+        "tokens_removed": 2513,
+        "truncated_tokens": 226,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2058,
+        "removal_percentage": 87.75510204081633,
+        "source": "docs/knowledge-base/guides/knowledge-graph-usage-guide.md",
+        "tokens_removed": 1806,
+        "truncated_tokens": 252,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1836,
+        "removal_percentage": 88.50762527233115,
+        "source": "docs/knowledge-base/guides/obsidian-integration-guide.md",
+        "tokens_removed": 1625,
+        "truncated_tokens": 211,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3878,
+        "removal_percentage": 93.73388344507478,
+        "source": "docs/knowledge-base/guides/p0-critical-fixes-implementation.md",
+        "tokens_removed": 3635,
+        "truncated_tokens": 243,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 7680,
+        "removal_percentage": 96.66666666666667,
+        "source": "docs/knowledge-base/guides/phase2-performance-optimization-plan.md",
+        "tokens_removed": 7424,
+        "truncated_tokens": 256,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3623,
+        "removal_percentage": 93.4860612751863,
+        "source": "docs/knowledge-base/guides/phase3-day7-8-final-validation-template.md",
+        "tokens_removed": 3387,
+        "truncated_tokens": 236,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2754,
+        "removal_percentage": 90.88598402323893,
+        "source": "docs/knowledge-base/guides/phase3-real-world-validation-plan.md",
+        "tokens_removed": 2503,
+        "truncated_tokens": 251,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 4592,
+        "removal_percentage": 94.8170731707317,
+        "source": "docs/knowledge-base/guides/phase3-validation-user-guide.md",
+        "tokens_removed": 4354,
+        "truncated_tokens": 238,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2704,
+        "removal_percentage": 93.4171597633136,
+        "source": "docs/knowledge-base/guides/phase5-documentation-reconciliation-complete.md",
+        "tokens_removed": 2526,
+        "truncated_tokens": 178,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2805,
+        "removal_percentage": 95.8645276292335,
+        "source": "docs/knowledge-base/guides/phase6-bob-shell-validation-approach.md",
+        "tokens_removed": 2689,
+        "truncated_tokens": 116,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2675,
+        "removal_percentage": 91.21495327102804,
+        "source": "docs/knowledge-base/guides/real-time-monitoring-guide.md",
+        "tokens_removed": 2440,
+        "truncated_tokens": 235,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3913,
+        "removal_percentage": 93.96882187579862,
+        "source": "docs/knowledge-base/guides/real-time-savings-measurement-guide.md",
+        "tokens_removed": 3677,
+        "truncated_tokens": 236,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2856,
+        "removal_percentage": 92.05182072829132,
+        "source": "docs/knowledge-base/guides/setup-token-optimization.md",
+        "tokens_removed": 2629,
+        "truncated_tokens": 227,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1280,
+        "removal_percentage": 84.140625,
+        "source": "docs/knowledge-base/guides/token-optimizer-quick-install.md",
+        "tokens_removed": 1077,
+        "truncated_tokens": 203,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 4412,
+        "removal_percentage": 94.56029011786038,
+        "source": "docs/knowledge-base/guides/using-both-systems-together.md",
+        "tokens_removed": 4172,
+        "truncated_tokens": 240,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 6984,
+        "removal_percentage": 97.33676975945016,
+        "source": "docs/knowledge-base/index.md",
+        "tokens_removed": 6798,
+        "truncated_tokens": 186,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2069,
+        "removal_percentage": 89.02851619139682,
+        "source": "docs/knowledge-base/references/bob-optimize-cli-reference.md",
+        "tokens_removed": 1842,
+        "truncated_tokens": 227,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 4033,
+        "removal_percentage": 93.94991321596827,
+        "source": "docs/knowledge-base/references/cache-api.md",
+        "tokens_removed": 3789,
+        "truncated_tokens": 244,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2235,
+        "removal_percentage": 92.3489932885906,
+        "source": "docs/knowledge-base/references/kb-savings-estimation-methodology.md",
+        "tokens_removed": 2064,
+        "truncated_tokens": 171,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 8703,
+        "removal_percentage": 97.05848557968515,
+        "source": "docs/knowledge-base/research/adversarial-audit-2026-07-19.md",
+        "tokens_removed": 8447,
+        "truncated_tokens": 256,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2627,
+        "removal_percentage": 90.25504377617054,
+        "source": "docs/knowledge-base/research/adversarial-audit-embeddings-chunker-2026-07-17.md",
+        "tokens_removed": 2371,
+        "truncated_tokens": 256,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 4539,
+        "removal_percentage": 95.13108614232209,
+        "source": "docs/knowledge-base/research/adversarial-review-round1-2026-07-13.md",
+        "tokens_removed": 4318,
+        "truncated_tokens": 221,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 6299,
+        "removal_percentage": 96.52325765994603,
+        "source": "docs/knowledge-base/research/adversarial-review-round2-2026-07-13.md",
+        "tokens_removed": 6080,
+        "truncated_tokens": 219,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 7737,
+        "removal_percentage": 97.1435957089311,
+        "source": "docs/knowledge-base/research/architecture-audit-mece-2026-07-14.md",
+        "tokens_removed": 7516,
+        "truncated_tokens": 221,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 5760,
+        "removal_percentage": 95.67708333333333,
+        "source": "docs/knowledge-base/research/audit-2026-07-13-institutional.md",
+        "tokens_removed": 5511,
+        "truncated_tokens": 249,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3095,
+        "removal_percentage": 93.18255250403877,
+        "source": "docs/knowledge-base/research/audit-2026-07-14-post-remediation.md",
+        "tokens_removed": 2884,
+        "truncated_tokens": 211,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 4612,
+        "removal_percentage": 94.44926279271466,
+        "source": "docs/knowledge-base/research/bobcoin-savings-analysis-2026-07-14.md",
+        "tokens_removed": 4356,
+        "truncated_tokens": 256,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 4156,
+        "removal_percentage": 95.18768046198267,
+        "source": "docs/knowledge-base/research/cache-race-fix-lessons-2026-07.md",
+        "tokens_removed": 3956,
+        "truncated_tokens": 200,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3063,
+        "removal_percentage": 93.04603330068561,
+        "source": "docs/knowledge-base/research/cache-race-fix-round5-2026-07.md",
+        "tokens_removed": 2850,
+        "truncated_tokens": 213,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 613,
+        "removal_percentage": 58.23817292006525,
+        "source": "docs/knowledge-base/research/code-metrics-2026-07-12.md",
+        "tokens_removed": 357,
+        "truncated_tokens": 256,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 279,
+        "removal_percentage": 8.24372759856631,
+        "source": "docs/knowledge-base/research/code-metrics-2026-07-18.md",
+        "tokens_removed": 23,
+        "truncated_tokens": 256,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 7151,
+        "removal_percentage": 96.9794434344847,
+        "source": "docs/knowledge-base/research/codebase-analysis-2026-07-14.md",
+        "tokens_removed": 6935,
+        "truncated_tokens": 216,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 5599,
+        "removal_percentage": 96.39221289515984,
+        "source": "docs/knowledge-base/research/comprehensive-issue-list-2026-07-13.md",
+        "tokens_removed": 5397,
+        "truncated_tokens": 202,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2779,
+        "removal_percentage": 91.43576826196474,
+        "source": "docs/knowledge-base/research/cost-tracking-lessons-learned.md",
+        "tokens_removed": 2541,
+        "truncated_tokens": 238,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 11230,
+        "removal_percentage": 97.72039180765806,
+        "source": "docs/knowledge-base/research/counter-audit-2026-07-19-independent.md",
+        "tokens_removed": 10974,
+        "truncated_tokens": 256,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2040,
+        "removal_percentage": 92.1078431372549,
+        "source": "docs/knowledge-base/research/coverage-measurement-2026-07-13.md",
+        "tokens_removed": 1879,
+        "truncated_tokens": 161,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1533,
+        "removal_percentage": 85.06196999347684,
+        "source": "docs/knowledge-base/research/delegation-integration-analysis-2026-07-13.md",
+        "tokens_removed": 1304,
+        "truncated_tokens": 229,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1361,
+        "removal_percentage": 81.19030124908156,
+        "source": "docs/knowledge-base/research/doc-coverage-2026-07-12.md",
+        "tokens_removed": 1105,
+        "truncated_tokens": 256,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 954,
+        "removal_percentage": 73.16561844863732,
+        "source": "docs/knowledge-base/research/doc-coverage-2026-07-13.md",
+        "tokens_removed": 698,
+        "truncated_tokens": 256,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 5866,
+        "removal_percentage": 95.89157858847597,
+        "source": "docs/knowledge-base/research/engineering-soundness-audit-2026-07-19.md",
+        "tokens_removed": 5625,
+        "truncated_tokens": 241,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3751,
+        "removal_percentage": 93.97494001599573,
+        "source": "docs/knowledge-base/research/external-audit-2026-07-12.md",
+        "tokens_removed": 3525,
+        "truncated_tokens": 226,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 4577,
+        "removal_percentage": 94.84378413808172,
+        "source": "docs/knowledge-base/research/full-codebase-review-2026-07-14.md",
+        "tokens_removed": 4341,
+        "truncated_tokens": 236,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 11188,
+        "removal_percentage": 97.71183410797283,
+        "source": "docs/knowledge-base/research/full-technical-design-retro-2026-07.md",
+        "tokens_removed": 10932,
+        "truncated_tokens": 256,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1629,
+        "removal_percentage": 84.34622467771639,
+        "source": "docs/knowledge-base/research/git-analysis-2026-07-12.md",
+        "tokens_removed": 1374,
+        "truncated_tokens": 255,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1685,
+        "removal_percentage": 84.86646884272997,
+        "source": "docs/knowledge-base/research/git-analysis-2026-07-13.md",
+        "tokens_removed": 1430,
+        "truncated_tokens": 255,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3691,
+        "removal_percentage": 93.63316174478462,
+        "source": "docs/knowledge-base/research/graph-validation-2026-07-17.md",
+        "tokens_removed": 3456,
+        "truncated_tokens": 235,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 9132,
+        "removal_percentage": 97.19667104686816,
+        "source": "docs/knowledge-base/research/innovation-portfolio-2026-07-19.md",
+        "tokens_removed": 8876,
+        "truncated_tokens": 256,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3891,
+        "removal_percentage": 93.52351580570547,
+        "source": "docs/knowledge-base/research/innovation-portfolio-2026-07-20-rescored.md",
+        "tokens_removed": 3639,
+        "truncated_tokens": 252,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3142,
+        "removal_percentage": 93.98472310630171,
+        "source": "docs/knowledge-base/research/iterative-audit-lessons-2026-07.md",
+        "tokens_removed": 2953,
+        "truncated_tokens": 189,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2057,
+        "removal_percentage": 87.99222168206126,
+        "source": "docs/knowledge-base/research/kb-mode-switch-lessons-2026-07.md",
+        "tokens_removed": 1810,
+        "truncated_tokens": 247,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2312,
+        "removal_percentage": 89.48961937716263,
+        "source": "docs/knowledge-base/research/kb-query-ab-validation-2026-07.md",
+        "tokens_removed": 2069,
+        "truncated_tokens": 243,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 4344,
+        "removal_percentage": 94.52117863720073,
+        "source": "docs/knowledge-base/research/kb-tos-integration-feasibility-2026-07-14.md",
+        "tokens_removed": 4106,
+        "truncated_tokens": 238,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 6089,
+        "removal_percentage": 95.9927738544917,
+        "source": "docs/knowledge-base/research/master-engagement-reaudit-2026-07-20.md",
+        "tokens_removed": 5845,
+        "truncated_tokens": 244,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2229,
+        "removal_percentage": 88.87393449977569,
+        "source": "docs/knowledge-base/research/mnemox-executive-brief-2026-07.md",
+        "tokens_removed": 1981,
+        "truncated_tokens": 248,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2701,
+        "removal_percentage": 90.59607552758237,
+        "source": "docs/knowledge-base/research/mnemox-positioning-brief-2026-07.md",
+        "tokens_removed": 2447,
+        "truncated_tokens": 254,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1583,
+        "removal_percentage": 90.3348073278585,
+        "source": "docs/knowledge-base/research/mnemox-update-2026-07-18.md",
+        "tokens_removed": 1430,
+        "truncated_tokens": 153,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1431,
+        "removal_percentage": 91.40461215932913,
+        "source": "docs/knowledge-base/research/mnemox-update-2026-07-19.md",
+        "tokens_removed": 1308,
+        "truncated_tokens": 123,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1670,
+        "removal_percentage": 92.09580838323353,
+        "source": "docs/knowledge-base/research/mnemox-update-2026-07-19b.md",
+        "tokens_removed": 1538,
+        "truncated_tokens": 132,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3939,
+        "removal_percentage": 95.8111195734958,
+        "source": "docs/knowledge-base/research/performance-benchmarks.md",
+        "tokens_removed": 3774,
+        "truncated_tokens": 165,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2890,
+        "removal_percentage": 91.45328719723183,
+        "source": "docs/knowledge-base/research/phase2-completion-summary.md",
+        "tokens_removed": 2643,
+        "truncated_tokens": 247,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1976,
+        "removal_percentage": 92.10526315789474,
+        "source": "docs/knowledge-base/research/phase2-concurrency-test-results.md",
+        "tokens_removed": 1820,
+        "truncated_tokens": 156,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2169,
+        "removal_percentage": 89.7187644075611,
+        "source": "docs/knowledge-base/research/phase2-health-checks-complete.md",
+        "tokens_removed": 1946,
+        "truncated_tokens": 223,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2238,
+        "removal_percentage": 88.96336014298481,
+        "source": "docs/knowledge-base/research/phase2-lessons-learned-2026-07-13.md",
+        "tokens_removed": 1991,
+        "truncated_tokens": 247,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3538,
+        "removal_percentage": 95.90163934426229,
+        "source": "docs/knowledge-base/research/phase2-performance-baseline-analysis.md",
+        "tokens_removed": 3393,
+        "truncated_tokens": 145,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2076,
+        "removal_percentage": 92.63005780346822,
+        "source": "docs/knowledge-base/research/phase2-performance-baseline-results.md",
+        "tokens_removed": 1923,
+        "truncated_tokens": 153,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1808,
+        "removal_percentage": 90.5420353982301,
+        "source": "docs/knowledge-base/research/phase2-thread-safety-fixes-complete.md",
+        "tokens_removed": 1637,
+        "truncated_tokens": 171,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2601,
+        "removal_percentage": 90.42675893886967,
+        "source": "docs/knowledge-base/research/phase3-additional-work-lessons-learned.md",
+        "tokens_removed": 2352,
+        "truncated_tokens": 249,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2880,
+        "removal_percentage": 93.05555555555556,
+        "source": "docs/knowledge-base/research/phase3-day1-2-validation-framework.md",
+        "tokens_removed": 2680,
+        "truncated_tokens": 200,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3735,
+        "removal_percentage": 94.35073627844713,
+        "source": "docs/knowledge-base/research/phase3-day3-4-parallel-work.md",
+        "tokens_removed": 3524,
+        "truncated_tokens": 211,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2901,
+        "removal_percentage": 91.38228197173387,
+        "source": "docs/knowledge-base/research/phase3-monitoring-lessons-learned.md",
+        "tokens_removed": 2651,
+        "truncated_tokens": 250,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3115,
+        "removal_percentage": 93.3868378812199,
+        "source": "docs/knowledge-base/research/phase3-real-time-monitoring-implementation.md",
+        "tokens_removed": 2909,
+        "truncated_tokens": 206,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2375,
+        "removal_percentage": 92.84210526315789,
+        "source": "docs/knowledge-base/research/phase6-lessons-learned-2026-07-13.md",
+        "tokens_removed": 2205,
+        "truncated_tokens": 170,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1602,
+        "removal_percentage": 88.13982521847691,
+        "source": "docs/knowledge-base/research/quality-gate-status-2026-07-18.md",
+        "tokens_removed": 1412,
+        "truncated_tokens": 190,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 4614,
+        "removal_percentage": 94.88513220632856,
+        "source": "docs/knowledge-base/research/readme-critical-analysis-2026-07-14.md",
+        "tokens_removed": 4378,
+        "truncated_tokens": 236,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2872,
+        "removal_percentage": 94.81197771587743,
+        "source": "docs/knowledge-base/research/repo-hygiene-lessons-2026-07.md",
+        "tokens_removed": 2723,
+        "truncated_tokens": 149,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2592,
+        "removal_percentage": 91.08796296296296,
+        "source": "docs/knowledge-base/research/repo-scan-2026-07-12.md",
+        "tokens_removed": 2361,
+        "truncated_tokens": 231,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2990,
+        "removal_percentage": 91.77257525083611,
+        "source": "docs/knowledge-base/research/repo-scan-2026-07-13.md",
+        "tokens_removed": 2744,
+        "truncated_tokens": 246,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 5503,
+        "removal_percentage": 95.34799200436126,
+        "source": "docs/knowledge-base/research/repo-scan-2026-07-18.md",
+        "tokens_removed": 5247,
+        "truncated_tokens": 256,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3590,
+        "removal_percentage": 94.93036211699165,
+        "source": "docs/knowledge-base/research/repository-improvement-plan.md",
+        "tokens_removed": 3408,
+        "truncated_tokens": 182,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 39097,
+        "removal_percentage": 99.34521830319461,
+        "source": "docs/knowledge-base/research/security-scan-2026-07-12.md",
+        "tokens_removed": 38841,
+        "truncated_tokens": 256,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 38880,
+        "removal_percentage": 99.34156378600824,
+        "source": "docs/knowledge-base/research/security-scan-2026-07-13.md",
+        "tokens_removed": 38624,
+        "truncated_tokens": 256,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 7492,
+        "removal_percentage": 96.58302189001601,
+        "source": "docs/knowledge-base/research/senior-expert-institutional-audit-2026-07-14.md",
+        "tokens_removed": 7236,
+        "truncated_tokens": 256,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 319,
+        "removal_percentage": 29.46708463949843,
+        "source": "docs/knowledge-base/research/test-coverage-2026-07-12.md",
+        "tokens_removed": 94,
+        "truncated_tokens": 225,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 319,
+        "removal_percentage": 29.46708463949843,
+        "source": "docs/knowledge-base/research/test-coverage-2026-07-13.md",
+        "tokens_removed": 94,
+        "truncated_tokens": 225,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 5435,
+        "removal_percentage": 96.48574057037719,
+        "source": "docs/obsidian-integration-plan.md",
+        "tokens_removed": 5244,
+        "truncated_tokens": 191,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1222,
+        "removal_percentage": 87.2340425531915,
+        "source": "docs/project-management/README.md",
+        "tokens_removed": 1066,
+        "truncated_tokens": 156,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2435,
+        "removal_percentage": 90.96509240246407,
+        "source": "docs/project-management/phases/phase-1-implementation-summary.md",
+        "tokens_removed": 2215,
+        "truncated_tokens": 220,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2815,
+        "removal_percentage": 92.64653641207815,
+        "source": "docs/project-management/phases/phase-3-executive-summary.md",
+        "tokens_removed": 2608,
+        "truncated_tokens": 207,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 6816,
+        "removal_percentage": 96.97769953051643,
+        "source": "docs/project-management/phases/phase-3-implementation-plan.md",
+        "tokens_removed": 6610,
+        "truncated_tokens": 206,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 7009,
+        "removal_percentage": 96.49022685119132,
+        "source": "docs/project-management/phases/phased-implementation-with-mock-testing.md",
+        "tokens_removed": 6763,
+        "truncated_tokens": 246,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3756,
+        "removal_percentage": 94.22257720979765,
+        "source": "docs/project-management/planning/a-plus-remediation-plan.md",
+        "tokens_removed": 3539,
+        "truncated_tokens": 217,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3856,
+        "removal_percentage": 93.69813278008299,
+        "source": "docs/project-management/planning/arch-doc-remediation-plan.md",
+        "tokens_removed": 3613,
+        "truncated_tokens": 243,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3565,
+        "removal_percentage": 93.18373071528751,
+        "source": "docs/project-management/planning/best-practices-implementation-plan.md",
+        "tokens_removed": 3322,
+        "truncated_tokens": 243,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 4284,
+        "removal_percentage": 95.07469654528478,
+        "source": "docs/project-management/planning/docs-tier1-remediation-plan.md",
+        "tokens_removed": 4073,
+        "truncated_tokens": 211,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 4984,
+        "removal_percentage": 95.34510433386838,
+        "source": "docs/project-management/planning/docs-update-plan.md",
+        "tokens_removed": 4752,
+        "truncated_tokens": 232,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 4138,
+        "removal_percentage": 94.78008699855003,
+        "source": "docs/project-management/planning/documentation-gap-analysis.md",
+        "tokens_removed": 3922,
+        "truncated_tokens": 216,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 5267,
+        "removal_percentage": 99.14562369470286,
+        "source": "docs/project-management/planning/documentation-reorganization-plan.md",
+        "tokens_removed": 5222,
+        "truncated_tokens": 45,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 4708,
+        "removal_percentage": 95.05097706032285,
+        "source": "docs/project-management/planning/documentation-update-plan.md",
+        "tokens_removed": 4475,
+        "truncated_tokens": 233,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2815,
+        "removal_percentage": 91.54529307282415,
+        "source": "docs/project-management/planning/fix-benchmarks-ci-plan.md",
+        "tokens_removed": 2577,
+        "truncated_tokens": 238,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2386,
+        "removal_percentage": 90.86336965632859,
+        "source": "docs/project-management/planning/gap-closure-plan.md",
+        "tokens_removed": 2168,
+        "truncated_tokens": 218,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 6343,
+        "removal_percentage": 96.70502916600977,
+        "source": "docs/project-management/planning/llm-optimization-complete-summary.md",
+        "tokens_removed": 6134,
+        "truncated_tokens": 209,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1946,
+        "removal_percentage": 87.97533401849948,
+        "source": "docs/project-management/planning/mock-data-automation.md",
+        "tokens_removed": 1712,
+        "truncated_tokens": 234,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2806,
+        "removal_percentage": 91.23307198859587,
+        "source": "docs/project-management/planning/mock-data-quality-analysis.md",
+        "tokens_removed": 2560,
+        "truncated_tokens": 246,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 5819,
+        "removal_percentage": 95.6865440797388,
+        "source": "docs/project-management/planning/p4-plan.md",
+        "tokens_removed": 5568,
+        "truncated_tokens": 251,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3408,
+        "removal_percentage": 92.78169014084507,
+        "source": "docs/project-management/planning/readme-improvements-plan.md",
+        "tokens_removed": 3162,
+        "truncated_tokens": 246,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2829,
+        "removal_percentage": 96.18239660657476,
+        "source": "docs/project-management/planning/remediation-plan.md",
+        "tokens_removed": 2721,
+        "truncated_tokens": 108,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 7783,
+        "removal_percentage": 96.7621739689066,
+        "source": "docs/project-management/planning/tier1-architecture-review-plan.md",
+        "tokens_removed": 7531,
+        "truncated_tokens": 252,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 7779,
+        "removal_percentage": 97.57038179714617,
+        "source": "docs/project-management/planning/token-optimization-implementation-plan.md",
+        "tokens_removed": 7590,
+        "truncated_tokens": 189,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2884,
+        "removal_percentage": 93.13453536754508,
+        "source": "docs/project-management/planning/week-19-completion-summary.md",
+        "tokens_removed": 2686,
+        "truncated_tokens": 198,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3087,
+        "removal_percentage": 93.45643019112407,
+        "source": "docs/project-management/planning/week-20-implementation-plan.md",
+        "tokens_removed": 2885,
+        "truncated_tokens": 202,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 14681,
+        "removal_percentage": 98.39929160138955,
+        "source": "docs/project-management/plans/adversarial-remediation-plan.md",
+        "tokens_removed": 14446,
+        "truncated_tokens": 235,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 6464,
+        "removal_percentage": 98.74690594059405,
+        "source": "docs/project-management/plans/cache-remediation-plan.md",
+        "tokens_removed": 6383,
+        "truncated_tokens": 81,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 6212,
+        "removal_percentage": 99.03412749517064,
+        "source": "docs/project-management/plans/gap-fix-plan.md",
+        "tokens_removed": 6152,
+        "truncated_tokens": 60,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2978,
+        "removal_percentage": 92.37743451981196,
+        "source": "docs/project-management/plans/km-savings-test-plan.md",
+        "tokens_removed": 2751,
+        "truncated_tokens": 227,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3554,
+        "removal_percentage": 94.54136184580754,
+        "source": "docs/project-management/plans/minilm-docs-plan.md",
+        "tokens_removed": 3360,
+        "truncated_tokens": 194,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3972,
+        "removal_percentage": 94.36052366565961,
+        "source": "docs/project-management/plans/mnemox-command-plan.md",
+        "tokens_removed": 3748,
+        "truncated_tokens": 224,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1163,
+        "removal_percentage": 82.3731728288908,
+        "source": "docs/project-management/plans/readme-challenge-framing-plan.md",
+        "tokens_removed": 958,
+        "truncated_tokens": 205,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 13402,
+        "removal_percentage": 98.47037755558871,
+        "source": "docs/project-management/plans/wave3-technical-spec-2026-07-19.md",
+        "tokens_removed": 13197,
+        "truncated_tokens": 205,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 320,
+        "removal_percentage": 45.3125,
+        "source": "docs/project-management/project-status.md",
+        "tokens_removed": 145,
+        "truncated_tokens": 175,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1206,
+        "removal_percentage": 83.41625207296849,
+        "source": "docs/project-management/reviews/adversarial-review-next-steps.md",
+        "tokens_removed": 1006,
+        "truncated_tokens": 200,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 5207,
+        "removal_percentage": 96.19742654119455,
+        "source": "docs/project-management/reviews/architecture-audit-final.md",
+        "tokens_removed": 5009,
+        "truncated_tokens": 198,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 7743,
+        "removal_percentage": 97.42993671703474,
+        "source": "docs/project-management/reviews/architecture-audit-report-revised.md",
+        "tokens_removed": 7544,
+        "truncated_tokens": 199,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 6655,
+        "removal_percentage": 97.64087152516905,
+        "source": "docs/project-management/reviews/architecture-audit-report.md",
+        "tokens_removed": 6498,
+        "truncated_tokens": 157,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1623,
+        "removal_percentage": 85.70548367221195,
+        "source": "docs/project-management/reviews/handoff-prompt.md",
+        "tokens_removed": 1391,
+        "truncated_tokens": 232,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3793,
+        "removal_percentage": 94.67440021091484,
+        "source": "docs/project-management/reviews/project-audit-report.md",
+        "tokens_removed": 3591,
+        "truncated_tokens": 202,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 7659,
+        "removal_percentage": 97.23201462331897,
+        "source": "docs/project-management/reviews/week18-final-validation-report.md",
+        "tokens_removed": 7447,
+        "truncated_tokens": 212,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2278,
+        "removal_percentage": 93.02019315188763,
+        "source": "docs/project-management/reviews/week2-daily-checklist.md",
+        "tokens_removed": 2119,
+        "truncated_tokens": 159,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 2149,
+        "removal_percentage": 89.80921358771522,
+        "source": "docs/project-management/session-context-prompt.md",
+        "tokens_removed": 1930,
+        "truncated_tokens": 219,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 4074,
+        "removal_percentage": 94.45262641138929,
+        "source": "docs/quick-start.md",
+        "tokens_removed": 3848,
+        "truncated_tokens": 226,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3213,
+        "removal_percentage": 92.49922191098662,
+        "source": "docs/security/threat-model.md",
+        "tokens_removed": 2972,
+        "truncated_tokens": 241,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 3941,
+        "removal_percentage": 94.24004059883279,
+        "source": "docs/token-savings-test-plan.md",
+        "tokens_removed": 3714,
+        "truncated_tokens": 227,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 1314,
+        "removal_percentage": 80.97412480974124,
+        "source": "docs/tutorials/optimize-a-prompt.md",
+        "tokens_removed": 1064,
+        "truncated_tokens": 250,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 5463,
+        "removal_percentage": 95.55189456342669,
+        "source": "docs/workflow-automation-plan.md",
+        "tokens_removed": 5220,
+        "truncated_tokens": 243,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 270,
+        "removal_percentage": 42.22222222222222,
+        "source": "examples/personal-wiki/docs/knowledge-base/concepts/docker-containers.md",
+        "tokens_removed": 114,
+        "truncated_tokens": 156,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 352,
+        "removal_percentage": 92.32954545454545,
+        "source": "examples/personal-wiki/docs/knowledge-base/concepts/functional-programming.md",
+        "tokens_removed": 325,
+        "truncated_tokens": 27,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 313,
+        "removal_percentage": 81.15015974440894,
+        "source": "examples/personal-wiki/docs/knowledge-base/guides/git-workflow-guide.md",
+        "tokens_removed": 254,
+        "truncated_tokens": 59,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 331,
+        "removal_percentage": 22.658610271903324,
+        "source": "examples/personal-wiki/docs/knowledge-base/guides/vim-setup-guide.md",
+        "tokens_removed": 75,
+        "truncated_tokens": 256,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 222,
+        "removal_percentage": 0.0,
+        "source": "examples/personal-wiki/docs/knowledge-base/index.md",
+        "tokens_removed": 0,
+        "truncated_tokens": 222,
+        "was_truncated": false
+      },
+      {
+        "original_tokens": 284,
+        "removal_percentage": 27.816901408450708,
+        "source": "examples/personal-wiki/docs/knowledge-base/references/cli-commands.md",
+        "tokens_removed": 79,
+        "truncated_tokens": 205,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 443,
+        "removal_percentage": 92.55079006772009,
+        "source": "examples/personal-wiki/docs/knowledge-base/research/productivity-tools-2026-07.md",
+        "tokens_removed": 410,
+        "truncated_tokens": 33,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 328,
+        "removal_percentage": 66.76829268292683,
+        "source": "examples/research-project/docs/knowledge-base/concepts/byzantine-fault-tolerance.md",
+        "tokens_removed": 219,
+        "truncated_tokens": 109,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 410,
+        "removal_percentage": 59.512195121951216,
+        "source": "examples/research-project/docs/knowledge-base/concepts/consensus-algorithms.md",
+        "tokens_removed": 244,
+        "truncated_tokens": 166,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 271,
+        "removal_percentage": 91.88191881918819,
+        "source": "examples/research-project/docs/knowledge-base/guides/literature-review-guide.md",
+        "tokens_removed": 249,
+        "truncated_tokens": 22,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 241,
+        "removal_percentage": 0.0,
+        "source": "examples/research-project/docs/knowledge-base/index.md",
+        "tokens_removed": 0,
+        "truncated_tokens": 241,
+        "was_truncated": false
+      },
+      {
+        "original_tokens": 367,
+        "removal_percentage": 37.87465940054496,
+        "source": "examples/research-project/docs/knowledge-base/references/paper-citations.md",
+        "tokens_removed": 139,
+        "truncated_tokens": 228,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 443,
+        "removal_percentage": 43.566591422121896,
+        "source": "examples/research-project/docs/knowledge-base/research/paxos-analysis-2026-06.md",
+        "tokens_removed": 193,
+        "truncated_tokens": 250,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 477,
+        "removal_percentage": 90.98532494758909,
+        "source": "examples/research-project/docs/knowledge-base/research/raft-comparison-2026-07.md",
+        "tokens_removed": 434,
+        "truncated_tokens": 43,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 318,
+        "removal_percentage": 89.30817610062893,
+        "source": "examples/software-project/docs/knowledge-base/concepts/cqrs-pattern.md",
+        "tokens_removed": 284,
+        "truncated_tokens": 34,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 304,
+        "removal_percentage": 38.48684210526316,
+        "source": "examples/software-project/docs/knowledge-base/concepts/event-driven.md",
+        "tokens_removed": 117,
+        "truncated_tokens": 187,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 297,
+        "removal_percentage": 88.21548821548821,
+        "source": "examples/software-project/docs/knowledge-base/concepts/microservices.md",
+        "tokens_removed": 262,
+        "truncated_tokens": 35,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 615,
+        "removal_percentage": 96.7479674796748,
+        "source": "examples/software-project/docs/knowledge-base/guides/deployment-guide.md",
+        "tokens_removed": 595,
+        "truncated_tokens": 20,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 565,
+        "removal_percentage": 54.690265486725664,
+        "source": "examples/software-project/docs/knowledge-base/guides/setup-guide.md",
+        "tokens_removed": 309,
+        "truncated_tokens": 256,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 233,
+        "removal_percentage": 0.0,
+        "source": "examples/software-project/docs/knowledge-base/index.md",
+        "tokens_removed": 0,
+        "truncated_tokens": 233,
+        "was_truncated": false
+      },
+      {
+        "original_tokens": 937,
+        "removal_percentage": 79.29562433297758,
+        "source": "examples/software-project/docs/knowledge-base/references/api-reference.md",
+        "tokens_removed": 743,
+        "truncated_tokens": 194,
+        "was_truncated": true
+      },
+      {
+        "original_tokens": 707,
+        "removal_percentage": 66.47807637906648,
+        "source": "examples/software-project/docs/knowledge-base/research/caching-strategies-2026-07.md",
+        "tokens_removed": 470,
+        "truncated_tokens": 237,
+        "was_truncated": true
+      }
+    ]
+  }
+}

@@ -89,7 +89,7 @@ python -m src "Your prompt text here"
 ## What You Get
 
 **Measured Savings:**
-- **~20% compression** (95% CI ≈ [18.9%, 21.2%], N=183 in-repo docs; provenance: `evaluation/results/validation-2026-07-14/manifest.json`)
+- **6.8% compression** (95% CI [6.2%, 7.4%], N=265 in-repo docs; provenance: `evaluation/results/validation-2026-07-25/manifest.json`)
 - **Near-lossless** (whitespace + redundant phrase removal)
 - **Manifest-backed** reproducibility
 
