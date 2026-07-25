@@ -12,8 +12,6 @@ import subprocess
 import sys
 import textwrap
 
-import pytest
-
 from scripts.check_status_consistency import (
     CANONICAL_STATUS,
     REPO_ROOT,
@@ -164,15 +162,6 @@ def test_gate_token_not_a_measured_snapshot():
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "Gate-only PR: the widened grade pattern (audit 2026-07-25, N-5) correctly "
-        "reports main's live docs, which still carry the withdrawn A+ in docs/INDEX.md "
-        "and docs/architecture/README.md. The claim-surface PR fixes them. strict=True "
-        "so this fails loudly once it starts passing — remove the marker then."
-    ),
-)
 def test_status_gate_exits_0_on_live_tree():
     """The current live tree must pass the status gate."""
     result = subprocess.run(

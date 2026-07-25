@@ -167,7 +167,7 @@ Auto-generated API documentation from source code (see [full API reference](api/
 - **[Repository Analysis Workflow](repository-analysis-workflow.md)** — Token-efficient repository audit workflow
 - **[Customization](CUSTOMIZATION.md)** — Configuration and customization
 - **[Bob IDE Guide](BOB-IDE-GUIDE.md)** — Bob IDE mode picker, skill activation, persistence
-- **[SLA](sla.md)** — Latency/throughput targets and measurement methodology
+- **[SLA](SLA.md)** — Latency/throughput targets and measurement methodology
 - **[Comparison](archive/COMPARISON.md)** — Comparison with alternatives (archived)
 
 ### 8. Configuration
@@ -275,7 +275,7 @@ See [API Reference](api/README.md) for details.
 1. Review [Monitoring Guide](MONITORING.md)
 2. Check [Installation](INSTALLATION.md)
 3. See [Health Checking](api/monitoring/health.md)
-4. Review [SLA](sla.md) for latency/throughput targets
+4. Review [SLA](SLA.md) for latency/throughput targets
 
 ### Architects
 1. Read the [Architecture](architecture/ARCHITECTURE.md)

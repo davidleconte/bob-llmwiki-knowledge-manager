@@ -12,7 +12,7 @@ from datetime import date
 
 import pytest
 
-from scripts.check_doc_freshness import WATCHED, declared_date
+from scripts.check_doc_freshness import WATCHED, declared_date, stale_documents
 
 
 @pytest.mark.parametrize(
@@ -75,5 +75,6 @@ def test_status_md_is_watched():
     assert "STATUS.md" in WATCHED
 
 
-# NOTE: assertions about the *live tree* satisfying this gate live in the
-# claim-surface PR that fixes the tree, not here. This file tests the detector.
+def test_live_tree_is_fresh():
+    stale = stale_documents()
+    assert stale == [], "stale: " + ", ".join(f"{r} ({d} < {c})" for r, d, c in stale)

@@ -59,7 +59,7 @@ Delegation analysis pipeline:
 - **[Architecture](architecture/ARCHITECTURE.md)** — the authoritative system architecture (also explanation).
 - **CLI** — [`src/cli.py`](../src/cli.py): `optimize`, `truncate`, `count`, `cache-stats`, `cost-report`, `metrics`, `health`, `config`, `kb-status`, `analyze`, `kb-search`, `kb-promote`, `attest`, `graph-build`, `graph-query`, `graph-health` (16 subcommands — verify with `bob-optimize --help`; `kb-index` appeared in earlier drafts of this list but is a directory name, `.bob/kb-index/`, not a command).
 - **Configuration** — [`src/config/schema.py`](../src/config/schema.py) (typed defaults).
-- **SLA** — [`docs/sla.md`](sla.md) — latency, throughput, quality, and concurrency targets.
+- **SLA** — [`docs/SLA.md`](SLA.md) — latency, throughput, quality, and concurrency targets.
 - **Validation harness** — [`src/validation/README.md`](../src/validation/README.md) (`python -m src.validation`).
 - **Cache API** — [cache-api.md](knowledge-base/references/cache-api.md).
 - **Security policy** — [`SECURITY.md`](../SECURITY.md) (vulnerability disclosure).
