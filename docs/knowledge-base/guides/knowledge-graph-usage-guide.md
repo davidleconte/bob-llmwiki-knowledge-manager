@@ -41,7 +41,7 @@ pip install sentence-transformers
 The graph builder queries the embedding index for semantic edges. Build it first:
 
 ```bash
-bob-optimize kb-index --kb-path docs/knowledge-base
+bob-optimize graph-build --kb-path docs/knowledge-base --with-semantic
 ```
 
 Or from Python:
@@ -226,7 +226,7 @@ the threshold — but expect noisier edges and re-run your golden-set evaluation
 ### T4 — `graph-build` fails with `"index not built"`
 
 **Cause:** `PersistentEmbeddingIndex` has not been synced yet.  
-**Fix:** Run `bob-optimize kb-index --kb-path docs/knowledge-base` first.
+**Fix:** Run `bob-optimize graph-build --kb-path docs/knowledge-base --with-semantic` first.
 
 ## Best Practices
 

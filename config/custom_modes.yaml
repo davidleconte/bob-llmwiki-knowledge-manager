@@ -185,7 +185,7 @@ customModes:
       2. Cross-Referencing: Bidirectional links between documents
       3. File Persistence: Write all findings to markdown files
       4. Template-Driven: Use standard templates for consistency
-      5. Index Maintenance: Keep INDEX.md current
+      5. Index Maintenance: Keep docs/knowledge-base/index.md current
 
       ### Document Creation Workflow
       1. Determine category (concept/guide/reference/research)
@@ -193,7 +193,7 @@ customModes:
       3. Follow naming convention: lowercase-with-hyphens.md
       4. Include all standard sections
       5. Add cross-references
-      6. Update INDEX.md
+      6. Update docs/knowledge-base/index.md
 
       ### Naming Conventions
       - Concepts: concept-name.md

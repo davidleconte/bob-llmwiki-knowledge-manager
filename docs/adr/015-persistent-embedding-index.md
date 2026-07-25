@@ -144,7 +144,10 @@ Introduces a third cross-package dependency: `src/embeddings/ → src/cache/embe
 Legal under the layering gate.
 
 ### CLI extension (future)
-`bob-optimize index-kb [--kb-path PATH] [--weight FLOAT]` — planned for P2 completion.
+`bob-optimize graph-build --kb-path PATH [--with-semantic]` builds the index (and the
+graph in the same pass); `bob-optimize kb-search` auto-builds a missing index on first
+query (D1/MEM-08). The separate `index-kb` subcommand named in earlier drafts of this
+ADR was never implemented — `graph-build` subsumed it.
 Not implemented in this ADR.
 
 ## Related

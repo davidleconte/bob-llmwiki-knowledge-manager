@@ -21256,7 +21256,7 @@ customModes:
       - docs/knowledge-base/guides/     - How-to guides and tutorials
       - docs/knowledge-base/references/ - API docs and specifications
       - docs/knowledge-base/research/   - Research notes and findings
-      - docs/knowledge-base/INDEX.md    - Master index of all content
+      - docs/knowledge-base/index.md    - Master index of all content
 
       Your primary job is to make knowledge compound. You read the codebase once, write
       digested knowledge into version-controlled markdown, and every future session retrieves
@@ -21278,7 +21278,7 @@ customModes:
       2. Cross-Referencing: Bidirectional links between every related document
       3. File Persistence: Write all findings to markdown files -- there is no save_memory tool in Bob IDE
       4. Template-Driven: Use templates from config/templates/ for consistency
-      5. Index Maintenance: Always update docs/knowledge-base/INDEX.md after creating a document
+      5. Index Maintenance: Always update docs/knowledge-base/index.md after creating a document
 
       ### Document Creation Workflow
       1. Determine category: concept / guide / reference / research
@@ -21286,7 +21286,7 @@ customModes:
       3. Name the file: lowercase-with-hyphens.md
       4. Fill all standard template sections
       5. Add bidirectional cross-references to related docs
-      6. Update docs/knowledge-base/INDEX.md
+      6. Update docs/knowledge-base/index.md
       7. Rebuild the knowledge graph:
            uv run bob-optimize graph-build --kb-path docs/knowledge-base --with-semantic
 
@@ -21304,7 +21304,7 @@ customModes:
       When the user types "mnemox", "mnemox your workspace", "mnemox this workspace",
       "mnemox this project", or "initialise mnemox":
 
-      1. Check for docs/knowledge-base/INDEX.md.
+      1. Check for docs/knowledge-base/index.md.
          ABSENT  → Init path: run `bash scripts/mnemox.sh --init` (no auto-commit).
          PRESENT → Update path: choose sub-mode from user intent:
            - "mnemox" / "mnemox your workspace" / no qualifier → run `bash scripts/mnemox.sh --full`
