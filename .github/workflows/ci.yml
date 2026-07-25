@@ -99,7 +99,32 @@ jobs:
       - name: Validate KB cross-references
         # Fails the build if any non-research Markdown link in docs/knowledge-base/
         # resolves to a missing file. Research snapshots emit warnings only.
+        #
+        # NOTE: this covers docs/knowledge-base/ ONLY (KB_DIR in the script) — roughly
+        # 4% of the repo's Markdown. Tree-wide link integrity is the separate
+        # link-integrity job below; do not mistake this job's green for that.
         run: bash scripts/validate-kb.sh
+
+  link-integrity:
+    name: Markdown link integrity (tree-wide, case-sensitive)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Prove the detector can fail
+        # A gate that cannot fail proves nothing: plant known-bad and known-good links
+        # and require the expected verdict for each before trusting the scan below.
+        run: python scripts/check_md_links.py --selftest
+      - name: Resolve every relative Markdown link against the git index
+        # Audit 2026-07-25, finding class 1: a partial UPPER_SNAKE -> kebab-case rename
+        # left ~103 broken references live, invisible because (a) the only link checker
+        # was scoped to docs/knowledge-base/ and (b) macOS core.ignorecase resolves
+        # wrong-case paths that GitHub and this Linux runner 404. The gate resolves
+        # against `git ls-files`, never the filesystem — checking the filesystem would
+        # reproduce the exact blindness it exists to remove.
+        run: python scripts/check_md_links.py
 
   gate-integrity:
     name: gate integrity (ATK-GATE-07)

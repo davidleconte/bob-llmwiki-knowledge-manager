@@ -42,6 +42,15 @@ status_gate:
     - AGENTS.md
     - tests/README.md
     - docs/project-management/project-status.md
+    # Added 2026-07-25 (audit finding N-3). docs/INDEX.md published the WITHDRAWN
+    # self-assessed A+ (4.30/4.30) in three places and docs/architecture/README.md in
+    # two — each while linking to the STATUS.md that withdrew it. Neither was in this
+    # list, so the grade gate never opened them. A curated list is still the right
+    # design; it just has to contain the navigation pages a reader actually lands on.
+    - docs/INDEX.md
+    - docs/README.md
+    - docs/architecture/README.md
+    - INTEGRATIONS.md
   # The canonical maturity string that STATUS.md must assert.
   canonical_status_string: "Not Production Ready"
 

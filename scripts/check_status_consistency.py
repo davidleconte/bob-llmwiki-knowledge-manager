@@ -49,6 +49,15 @@ LIVE_DOCS = (
     "AGENTS.md",
     "tests/README.md",
     "docs/project-management/project-status.md",
+    # Added 2026-07-25 (audit finding N-3). Both of these published the WITHDRAWN
+    # self-assessed A+ (4.30/4.30) — docs/INDEX.md in three places, architecture/README
+    # in two — each while linking to the STATUS.md that withdrew it. Neither was in this
+    # list, so the grade gate never opened them. A curated list is the right design, but
+    # it has to actually contain the navigation docs a reader lands on.
+    "docs/INDEX.md",
+    "docs/README.md",
+    "docs/architecture/README.md",
+    "INTEGRATIONS.md",
 )
 
 # A doc carrying one of these in its first lines has explicitly recused itself
@@ -71,7 +80,34 @@ CANONICAL_STATUS = "Not Production Ready"
 
 # ATK-GATE-06: Grade validation constants.
 # A fabricated grade like "A+ (5.00/4.30)" must be rejected.
+#
+# The arithmetic check below only applies to the letter+/4.30 rubric, so this pattern
+# stays narrow on purpose: the bold form is what a letter-grade claim looks like.
 _GRADE_RE = re.compile(r"\*\*([A-F][+-]?)\s+\((\d+\.\d+)/4\.30\)\*\*")
+
+# Audit 2026-07-25 (finding N-5): the pattern above was ALSO the only input to the
+# provenance check, and it has three evasions that live docs were exercising:
+#
+#   1. no bold      — `- ✅ A+ (4.30/4.30)` in docs/INDEX.md:56
+#   2. `/5` rubric  — `2.9 → 3.8 → 4.2/5` in README.md:450, published as an achieved
+#                     independent verdict when the source gives 4.2 as a *projection*
+#   3. bare letter  — `**Status:** A+ — see STATUS.md` in docs/architecture/README.md:4
+#
+# So a gate whose stated job is "no unprovenanced live grade" could not see either of
+# the two overclaims actually shipping. This second pattern feeds the *provenance*
+# check only (never the arithmetic one, which is rubric-specific): any score-shaped
+# token, bold or not, on any rubric denominator.
+_ANY_SCORE_RE = re.compile(
+    r"""(?<![\w.])            # not mid-number / mid-word
+    (?:
+        (?P<letter>[A-F][+-]?)\s*\(\s*(?P<lnum>\d+(?:\.\d+)?)\s*/\s*(?P<ldenom>\d+(?:\.\d+)?)\s*\)
+      | (?P<num>\d+(?:\.\d+)?)\s*/\s*(?P<denom>[45](?:\.\d+)?)\b
+    )
+    """,
+    re.VERBOSE,
+)
+# Bare letter grade asserted as a status, e.g. "**Status:** A+ — see STATUS.md".
+_BARE_LETTER_GRADE_RE = re.compile(r"\*\*Status:\*\*\s*([A-F][+-]?)\b(?!\w)")
 _MAX_NUMERIC_GRADE = 4.30
 # Minimum numeric threshold for each letter prefix (A+ = ≥4.0, A = ≥3.7, etc.)
 _GRADE_THRESHOLDS = {
@@ -206,17 +242,44 @@ def _validate_grade_provenance(text: str) -> list[str]:
     problems: list[str] = []
     lines = text.splitlines()
     for i, line in enumerate(lines):
-        for m in _GRADE_RE.finditer(line):
-            lo = max(0, i - _GRADE_PROVENANCE_WINDOW)
-            window = "\n".join(lines[lo : i + _GRADE_PROVENANCE_WINDOW + 1]).lower()
-            has_self_label = any(tok in window for tok in _SELF_LABEL_TOKENS)
-            has_independent = all(tok in window for tok in _INDEPENDENT_GRADE_MARKERS)
-            if not (has_self_label or has_independent):
-                problems.append(
-                    f"    unprovenanced live grade: {m.group(0)} — a live grade must cite an "
-                    "independent re-grade (grader: + evaluation/regrade/…) or be marked "
-                    "self-assessed/withdrawn (CLM-02)"
+        # Audit 2026-07-25 (N-5): scan the WIDE score patterns, not just the bold
+        # /4.30 rubric — that narrowness is what let `4.2/5` and an unbolded
+        # `A+ (4.30/4.30)` ship as live verdicts.
+        seen: set[str] = set()
+        for pattern in (_ANY_SCORE_RE, _BARE_LETTER_GRADE_RE):
+            for m in pattern.finditer(line):
+                token = m.group(0).strip()
+                if token in seen:
+                    continue
+                seen.add(token)
+                lo = max(0, i - _GRADE_PROVENANCE_WINDOW)
+                window = "\n".join(lines[lo : i + _GRADE_PROVENANCE_WINDOW + 1]).lower()
+                has_self_label = any(tok in window for tok in _SELF_LABEL_TOKENS)
+                has_independent = all(tok in window for tok in _INDEPENDENT_GRADE_MARKERS)
+                # A score is fine when it is attributed to a named on-file verdict, or
+                # explicitly framed as a projection/target rather than an award.
+                has_attribution = any(
+                    tok in window
+                    for tok in (
+                        "counter-audit",
+                        "no-go",
+                        "on-file",
+                        "no current independent grade",
+                        "projected",
+                        "projection",
+                        "target after",
+                        "retracted",
+                        "previously stated",
+                        "placeholder",
+                    )
                 )
+                if not (has_self_label or has_independent or has_attribution):
+                    problems.append(
+                        f"    unprovenanced live grade/score: {token} — a live score must "
+                        "cite an independent re-grade (grader: + evaluation/regrade/…), name "
+                        "the on-file verdict it comes from, be marked "
+                        "self-assessed/withdrawn, or be labelled a projection (CLM-02)"
+                    )
     return problems
 
 
