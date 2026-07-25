@@ -7,7 +7,7 @@ This directory contains project planning, tracking, and review documentation for
 
 ## Current Status
 
-**[PROJECT_STATUS.md](PROJECT_STATUS.md)** - Current project status, metrics, and progress tracking
+**[PROJECT_STATUS.md](project-status.md)** - Current project status, metrics, and progress tracking
 
 ## Directory Structure
 
@@ -17,11 +17,11 @@ This directory contains project planning, tracking, and review documentation for
 
 Phased implementation plans and summaries documenting the project's evolution:
 
-- **[PHASE_1_IMPLEMENTATION_SUMMARY.md](phases/PHASE_1_IMPLEMENTATION_SUMMARY.md)** - Phase 1 completion summary
-- **[PHASE_2_IMPLEMENTATION_PLAN.md](phases/PHASE_2_IMPLEMENTATION_PLAN.md)** - Phase 2 planning and objectives
-- **[PHASE_3_EXECUTIVE_SUMMARY.md](phases/PHASE_3_EXECUTIVE_SUMMARY.md)** - Phase 3 executive overview
-- **[PHASE_3_IMPLEMENTATION_PLAN.md](phases/PHASE_3_IMPLEMENTATION_PLAN.md)** - Phase 3 detailed plan
-- **[PHASED_IMPLEMENTATION_WITH_MOCK_TESTING.md](phases/PHASED_IMPLEMENTATION_WITH_MOCK_TESTING.md)** - Comprehensive phased approach with mock testing strategy
+- **[PHASE_1_IMPLEMENTATION_SUMMARY.md](phases/phase-1-implementation-summary.md)** - Phase 1 completion summary
+- **[PHASE_2_IMPLEMENTATION_PLAN.md](phases/phase-2-implementation-plan.md)** - Phase 2 planning and objectives
+- **[PHASE_3_EXECUTIVE_SUMMARY.md](phases/phase-3-executive-summary.md)** - Phase 3 executive overview
+- **[PHASE_3_IMPLEMENTATION_PLAN.md](phases/phase-3-implementation-plan.md)** - Phase 3 detailed plan
+- **[PHASED_IMPLEMENTATION_WITH_MOCK_TESTING.md](phases/phased-implementation-with-mock-testing.md)** - Comprehensive phased approach with mock testing strategy
 
 ### Planning Documents
 
@@ -29,10 +29,10 @@ Phased implementation plans and summaries documenting the project's evolution:
 
 Strategic planning and analysis documents:
 
-- **[BEST_PRACTICES_IMPLEMENTATION_PLAN.md](planning/BEST_PRACTICES_IMPLEMENTATION_PLAN.md)** - Best practices and implementation guidelines
-- **[LLM_OPTIMIZATION_COMPLETE_SUMMARY.md](planning/LLM_OPTIMIZATION_COMPLETE_SUMMARY.md)** - Complete optimization system summary
-- **[MOCK_DATA_AUTOMATION.md](planning/MOCK_DATA_AUTOMATION.md)** - Mock data generation and automation
-- **[MOCK_DATA_QUALITY_ANALYSIS.md](planning/MOCK_DATA_QUALITY_ANALYSIS.md)** - Mock data quality assessment
+- **[BEST_PRACTICES_IMPLEMENTATION_PLAN.md](planning/best-practices-implementation-plan.md)** - Best practices and implementation guidelines
+- **[LLM_OPTIMIZATION_COMPLETE_SUMMARY.md](planning/llm-optimization-complete-summary.md)** - Complete optimization system summary
+- **[MOCK_DATA_AUTOMATION.md](planning/mock-data-automation.md)** - Mock data generation and automation
+- **[MOCK_DATA_QUALITY_ANALYSIS.md](planning/mock-data-quality-analysis.md)** - Mock data quality assessment
 
 ### Reviews & Validation
 
@@ -40,10 +40,10 @@ Strategic planning and analysis documents:
 
 Review reports, validation documentation, and handoff materials:
 
-- **[WEEK2_DAILY_CHECKLIST.md](reviews/WEEK2_DAILY_CHECKLIST.md)** - Week 2 daily progress checklist
-- **[WEEK18_FINAL_VALIDATION_REPORT.md](reviews/WEEK18_FINAL_VALIDATION_REPORT.md)** - Comprehensive final validation (913 lines)
-- **[ADVERSARIAL_REVIEW_NEXT_STEPS.md](reviews/ADVERSARIAL_REVIEW_NEXT_STEPS.md)** - Adversarial testing review and next steps
-- **[HANDOFF_PROMPT.md](reviews/HANDOFF_PROMPT.md)** - Session handoff documentation
+- **[WEEK2_DAILY_CHECKLIST.md](reviews/week2-daily-checklist.md)** - Week 2 daily progress checklist
+- **[WEEK18_FINAL_VALIDATION_REPORT.md](reviews/week18-final-validation-report.md)** - Comprehensive final validation (913 lines)
+- **[ADVERSARIAL_REVIEW_NEXT_STEPS.md](reviews/adversarial-review-next-steps.md)** - Adversarial testing review and next steps
+- **[HANDOFF_PROMPT.md](reviews/handoff-prompt.md)** - Session handoff documentation
 
 ## Key Project Metrics
 
@@ -105,7 +105,7 @@ Review reports, validation documentation, and handoff materials:
 
 - [Architecture Documentation](../architecture/) - System architecture and components
 - [Architecture Decision Records](../adr/) - Design decisions and rationale
-- [Root Index](../../INDEX.md) - Complete documentation index
+- [Root Index](../INDEX.md) - Complete documentation index
 
 ## Questions & Feedback
 

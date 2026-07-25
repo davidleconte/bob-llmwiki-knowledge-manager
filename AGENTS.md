@@ -18,8 +18,10 @@ docs/knowledge-base/research/   ← audit findings, validation results, benchmar
 **Mode-switch protocol:** When you switch modes mid-session (knowledge-manager →
 plan, plan → agent, etc.) your context resets. On the first task in the new mode,
 check `docs/knowledge-base/index.md` for a KB doc covering the topic before
-reading raw source. A KB hit replaces a full source read and saves ~51% of tokens
-on well-formed pairs (measured; see README §10).
+reading raw source. On N=10 curated well-formed pairs a KB hit replaced a full
+source read for ≈51% fewer tokens; treat that as an illustrative upper band on
+hand-picked pairs, not an all-pairs expectation (see §"Token Optimization System"
+below for the exact assertion that backs it).
 
 **After every KB write (any mode):** rebuild the knowledge graph so the new
 document is immediately queryable:
@@ -59,7 +61,7 @@ A lightweight knowledge management framework for Bob Shell that provides structu
 
 **Purpose:** Organize and maintain knowledge bases using Bob Shell's native capabilities  
 **Technology:** Bash scripts, YAML configuration, Markdown templates  
-**Complexity:** ~500 lines of configuration and scripts  
+**Complexity:** ~5,320 lines of Bash across 23 scripts, plus YAML config and Markdown templates  
 
 **Key Components:**
 - Custom Bob Shell mode (`knowledge-manager`)
@@ -75,7 +77,7 @@ A Python-based framework that reduces token usage for LLM operations through cac
 
 **Purpose:** Reduce LLM token costs while preserving quality  
 **Technology:** Python 3.11+, tiktoken, scikit-learn, numpy, pytest  
-**Complexity:** ~3,500 lines of Python code (core system)  
+**Complexity:** ~12,850 non-blank/non-comment lines of Python across 67 modules (16,840 physical)  
 
 **Key Components:**
 - Multi-level caching (L1: exact, L2: semantic)
@@ -367,26 +369,26 @@ metrics.record_optimization(1000, 800, 10.0)
 
 - **[README.md](README.md)** - Project overview and quick start
 - **[docs/quick-start.md](docs/quick-start.md)** - 5-minute getting started guide
-- **[docs/installation.md](docs/installation.md)** - Detailed installation
-- **[docs/usage.md](docs/usage.md)** - Usage guide with examples
-- **[docs/customization.md](docs/customization.md)** - Customization options
-- **[docs/workflows.md](docs/workflows.md)** - Common workflows
+- **[docs/installation.md](docs/INSTALLATION.md)** - Detailed installation
+- **[docs/usage.md](docs/USAGE.md)** - Usage guide with examples
+- **[docs/customization.md](docs/CUSTOMIZATION.md)** - Customization options
+- **[docs/workflows.md](docs/WORKFLOWS.md)** - Common workflows
 - **[docs/archive/COMPARISON.md](docs/archive/COMPARISON.md)** — Comparison with LLM-Wiki (archived)
 
 ### Token Optimization System Documentation
 
-- **[docs/architecture/architecture.md](docs/architecture/architecture.md)** — Authoritative architecture (v3.0: facade, cache, KB subsystems, delegation, validation)
-- **[docs/kb-manager/architecture.md](docs/kb-manager/architecture.md)** — KB Manager architecture (arc42 v2.1)
-- **[docs/monitoring.md](docs/monitoring.md)** — Monitoring and observability
-- **[docs/sla.md](docs/sla.md)** — SLA v1.0: latency, throughput, quality, concurrency targets
+- **[docs/architecture/architecture.md](docs/architecture/ARCHITECTURE.md)** — Authoritative architecture (v3.0: facade, cache, KB subsystems, delegation, validation)
+- **[docs/kb-manager/architecture.md](docs/kb-manager/ARCHITECTURE.md)** — KB Manager architecture (arc42 v2.1)
+- **[docs/monitoring.md](docs/MONITORING.md)** — Monitoring and observability
+- **[docs/sla.md](docs/SLA.md)** — SLA v1.0: latency, throughput, quality, concurrency targets
 - **[docs/api/README.md](docs/api/README.md)** — Auto-generated API reference
 - **[docs/adr/](docs/adr/)** — Architecture Decision Records (ADR-001–019; ADR-012 superseded)
 - **[docs/knowledge-base/index.md](docs/knowledge-base/index.md)** — KB master index (pre-digested knowledge; check here before reading raw source)
-- **[docs/index.md](docs/index.md)** — TOS documentation index
+- **[docs/index.md](docs/INDEX.md)** — TOS documentation index
 
 ### Important Notes
 
-1. **Deprecated Docs:** Files in `docs/architecture/deprecated/` describe an earlier or planned system — use `docs/architecture/architecture.md` for the current system.
+1. **Deprecated Docs:** `docs/architecture/deprecated/` was removed on 2026-07-25 (an earlier, largely unimplemented design; recoverable from git history). Use `docs/architecture/ARCHITECTURE.md` for the current system.
 2. **Current Architecture:** `docs/architecture/architecture.md` for TOS; `docs/kb-manager/architecture.md` for KB Manager. The old `ACTUAL_SYSTEM_ARCHITECTURE.md` no longer exists.
 3. **Dual Nature:** This repository contains both the simple KB framework AND the Python optimization system.
 4. **Optional Dependencies:** psutil is optional for Token Optimization System; gracefully degrades without it.
@@ -444,16 +446,16 @@ metrics.record_optimization(1000, 800, 10.0)
 
 **Authoritative status: [`STATUS.md`](STATUS.md)** — single source of truth. Do not derive status from this file.
 
-Summary (2026-07-18): grade **A+ (4.30/4.30)** (self-assessed; since **withdrawn** — self-grading is not independent verification, see `STATUS.md`), 1 112 tests passing, the ≥80% coverage gate met (measured coverage lives in `STATUS.md`), all per-package floors met, SLA defined, load tests present. See `STATUS.md` for the full scorecard.
+Summary (2026-07-25): **no current independent grade** — the earlier self-assessed **A+ (4.30/4.30)** is **withdrawn** (self-grading is not independent verification); on-file verdicts are counter-audit **2.9/5** and **NO-GO 3.46/4.30**. The ≥80% coverage gate is met with all per-package floors green, SLA defined, load tests present. Test and coverage counts are **not** restated here — `STATUS.md` is their single home. See `STATUS.md` for the full scorecard.
 
 ### Bob Shell Knowledge Manager
-- **Status:** Functional. KB at `docs/knowledge-base/` (90+ documents).
+- **Status:** Functional. KB at `docs/knowledge-base/` (**116 tracked documents**: 14 concepts · 27 guides · 4 references · 70 research · 1 index).
 - **Entry point for any mode:** `docs/knowledge-base/index.md`
 
 ### Token Optimization System
 - **Implementation:** `TokenOptimizer` facade → cache → optimizer → truncation; `bob-optimize` CLI
 - **Tests / Coverage:** see [`STATUS.md`](STATUS.md)
-- **Savings (measured):** ~20% optimizer compression (N=183, manifest-backed); ~51% re-derivation saving on well-formed KB pairs (N=10, `tests/validation/test_km_savings.py`)
+- **Savings (measured):** 6.8% mean optimizer compression, 95% CI [6.2%, 7.4%] (N=265, manifest-backed at `evaluation/results/validation-2026-07-25/`; supersedes the 20.0% of 2026-07-14 — the optimizer was made structure-preserving, trading ~12pp of compression for fidelity 0.798 -> 0.995). Separately, ≈51% re-derivation saving on N=10 *curated* well-formed KB/source pairs — note the accompanying test (`tests/validation/test_km_savings.py:327`) asserts only `50.0 <= savings_pct <= 99.0`, i.e. it **bounds** the claim rather than pinning it, and the pairs are hand-picked rather than sampled, so this is not an all-pairs expectation.
 
 ### Delegation Module
 - **Status:** Functional and integrated (`bob-optimize analyze`); layering-clean

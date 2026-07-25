@@ -10,11 +10,11 @@ status: active
 # Token Optimization
 
 ## Overview
-Token optimization is a systematic approach to reducing LLM token consumption while preserving output quality. The Token Optimization System combines intelligent caching, prompt compression, and context-aware truncation in a three-layer architecture. Measured optimizer compression is ~20% mean savings on real in-repo prose (95% CI ≈ [19%, 21%], N=183; manifest: `evaluation/results/validation-2026-07-14/`); cache recompute-avoidance and lossy truncation are reported separately, not blended in.
+Token optimization is a systematic approach to reducing LLM token consumption while preserving output quality. The Token Optimization System combines intelligent caching, prompt compression, and context-aware truncation in a three-layer architecture. Measured optimizer compression is 6.8% mean savings on real in-repo prose (95% CI [6.2%, 7.4%], N=265; manifest: `evaluation/results/validation-2026-07-25/`); cache recompute-avoidance and lossy truncation are reported separately, not blended in.
 
 ## Key Points
 - **Three-Layer Architecture**: Cache → Optimizer → Truncator working in sequence
-- **Measured savings**: optimizer compression ~20% mean on real prose (manifest-backed, see Overview); the earlier "89.3% / 91.80%" figures were fabricated and are retracted
+- **Measured savings**: optimizer compression 6.8% mean on real prose (manifest-backed, see Overview); the earlier "89.3% / 91.80%" figures were fabricated and are retracted
 - **Multi-Strategy Approach**: Combines exact caching, semantic matching, prompt optimization, and smart truncation
 - **Performance First**: All operations complete in <200ms (typically <100ms)
 - **Quality Preservation**: Maintains semantic meaning and critical information
@@ -180,7 +180,7 @@ Output
 ```
 
 The three mechanisms are **not** blended into one "total savings" figure:
-optimizer compression is measured on its own (~20% mean, manifest-backed — see
+optimizer compression is measured on its own (6.8% mean, manifest-backed — see
 Overview), cache recompute-avoidance depends on the workload's repeat rate, and
 truncation is lossy and excluded from the savings figure. Blending them into a
 single total is exactly how the earlier fabricated headline was manufactured.
@@ -270,8 +270,8 @@ Monthly cost: ~$1,800 (GPT-4)
 ```
 Repeated requests → served from cache: 0 tokens (recompute avoided).
                     How many depends on the stream's repeat rate.
-Unique requests    → compressed by the optimizer (~20% mean, manifest-backed:
-                    evaluation/results/validation-2026-07-14/), then processed.
+Unique requests    → compressed by the optimizer (6.8% mean, manifest-backed:
+                    evaluation/results/validation-2026-07-25/), then processed.
 ```
 The dollar savings are therefore **workload-dependent**: they scale with the
 cache hit rate (a property of how repetitive the traffic is) and the measured

@@ -127,7 +127,7 @@ class KBIndexer:
 
     Usage:
         # From CLI (added to bob-optimize in P2):
-        bob-optimize index-kb --kb-path docs/knowledge-base
+        bob-optimize graph-build --kb-path docs/knowledge-base --with-semantic
 
         # Programmatic (called by KnowledgeBaseQuery on first use):
         indexer = KBIndexer(index_path, embedder)
@@ -206,7 +206,7 @@ L3 is strictly optional. `MultiLevelCache` gains an optional `l3_index: Optional
 
 | Attribute | Target | Verification |
 |-----------|--------|-------------|
-| **Latency (full rebuild)** | < 5s for 200 docs | Benchmark: `bob-optimize index-kb` |
+| **Latency (full rebuild)** | < 5s for 200 docs | Benchmark: `bob-optimize graph-build --with-semantic` |
 | **Latency (incremental)** | < 500ms for 1–5 changed docs | Unit test with mocked mtime |
 | **Search latency** | < 50ms for 200-doc index | `pytest tests/embeddings/ -m slow` |
 | **Corruption recovery** | Raises `CorruptIndexError`, triggers rebuild | Regression test |
@@ -228,7 +228,7 @@ to avoid accumulating all document text in memory during a full index rebuild.
 
 ```bash
 # Initial build (first use)
-bob-optimize index-kb --kb-path docs/knowledge-base
+bob-optimize graph-build --kb-path docs/knowledge-base --with-semantic
 
 # Output:
 # Indexed 47 documents in 1.3s
@@ -236,7 +236,7 @@ bob-optimize index-kb --kb-path docs/knowledge-base
 # Note: embedding dim is 1000 (EmbeddingGenerator default max_features=1000)
 
 # Incremental update (subsequent runs, only 2 docs changed)
-bob-optimize index-kb --kb-path docs/knowledge-base
+bob-optimize graph-build --kb-path docs/knowledge-base --with-semantic
 # Updated 2 documents in 0.08s (45 unchanged)
 ```
 

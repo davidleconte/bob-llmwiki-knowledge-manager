@@ -5,9 +5,9 @@
 **Deciders:** Architecture team
 **Context:** KB Manager ↔ Token Optimization System integration — P1-1
 
-> **A/B validation result (2026-07-16):** embedding-only (`w=1.0`) achieves p@3=0.88
-> vs keyword-only p@3=0.64 (+24pp). Recommended production default when embedder is
-> present: `w=0.7` (p@3=0.68, p@5=0.80, keyword tie-breaker preserved).
+> **A/B validation result (2026-07-16 — MiniLM lab run 2026-07-16, no committed manifest; superseded as the published figure by p@3=0.84 in evaluation/results/retrieval-2026-07-19/report.json):** embedding-only (`w=1.0`) achieves p@3=0.88
+> vs keyword-only p@3=0.64 (+24pp) (lab, unmanifested; superseded by report.json). Recommended production default when embedder is
+> present: `w=0.7` (p@3=0.68, p@5=0.80, keyword tie-breaker preserved — lab, unmanifested; superseded by report.json).
 > `KBIndexer` (P2-2) will use `w=0.7`. Full results in
 > `docs/knowledge-base/research/kb-query-ab-validation-2026-07.md`.
 
@@ -91,7 +91,7 @@ ensure this does not regress. The three new tests in `tests/tools/test_kb_query.
 
 ## Amendment — MiniLM backend (branch: fix-multilevel-cache-race, 2026-07)
 
-**Context:** Following the A/B validation gate passing (p@3 = 0.88 embedding-only), step 3 of
+**Context:** Following the A/B validation gate passing (p@3 = 0.88 embedding-only; lab, unmanifested; superseded by report.json), step 3 of
 the KB embedding pipeline improvement added an optional `backend="minilm"` to
 `EmbeddingGenerator` in `src/cache/embeddings.py`. This amendment records the resolution of
 the near-zero cosine similarity problem documented in the original ADR body.

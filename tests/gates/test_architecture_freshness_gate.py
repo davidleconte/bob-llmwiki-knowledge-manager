@@ -66,5 +66,28 @@ def test_source_modules_excludes_exempt_stems(tmp_path):
     assert source_modules(tmp_path) == ["src/real.py"]
 
 
-# NOTE: assertions about the *live tree* satisfying this gate live in the
-# claim-surface PR that fixes the tree, not here. This file tests the detector.
+# ── The live tree must stay green ────────────────────────────────────────────────
+
+
+def test_live_tree_has_no_undocumented_modules():
+    """The condition the audit found violated: every src/ module is written down."""
+    missing = undocumented()
+    assert missing == [], (
+        "these modules appear in neither ARCHITECTURE.md nor any ADR: " + ", ".join(missing)
+    )
+
+
+def test_the_six_audit_modules_are_documented():
+    """Explicit regression on the exact modules the audit found missing, so a future
+    rewrite of ARCHITECTURE.md cannot silently drop them again."""
+    corpus = (Path(ARCHITECTURE_DOC).read_text(encoding="utf-8")).lower()
+    for stem in ("attest", "cold_start", "kb_paths", "limits", "provenance", "velocity"):
+        assert stem in corpus, f"{stem} missing from the authoritative architecture doc"
+
+
+def test_security_controls_are_described_not_just_mentioned():
+    """provenance/limits are security controls; a bare name-drop is not enough."""
+    text = Path(ARCHITECTURE_DOC).read_text(encoding="utf-8")
+    assert "Trust and safety controls" in text
+    for token in ("verify_document", "MAX_FILE_BYTES", "resolve_within"):
+        assert token in text, f"{token} should appear where the control is described"

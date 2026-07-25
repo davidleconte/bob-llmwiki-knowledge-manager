@@ -14,7 +14,7 @@ KB at ~19ms/query that is acceptable, but it scales linearly with corpus size an
 re-embeds the same unchanged documents on every Bob Shell session.
 
 The A/B validation (2026-07-16) confirmed that the embedding scorer at `w=0.7`
-meaningfully outperforms the keyword scorer (p@3: 0.68 vs 0.64; p@5: 0.80 vs 0.72).
+meaningfully outperforms the keyword scorer (p@3: 0.68 vs 0.64; p@5: 0.80 vs 0.72 — lab, unmanifested; superseded by report.json).
 A persistent index eliminates per-session recompute entirely.
 
 Four design decisions must be made before implementation.
@@ -144,7 +144,10 @@ Introduces a third cross-package dependency: `src/embeddings/ → src/cache/embe
 Legal under the layering gate.
 
 ### CLI extension (future)
-`bob-optimize index-kb [--kb-path PATH] [--weight FLOAT]` — planned for P2 completion.
+`bob-optimize graph-build --kb-path PATH [--with-semantic]` builds the index (and the
+graph in the same pass); `bob-optimize kb-search` auto-builds a missing index on first
+query (D1/MEM-08). The separate `index-kb` subcommand named in earlier drafts of this
+ADR was never implemented — `graph-build` subsumed it.
 Not implemented in this ADR.
 
 ## Related

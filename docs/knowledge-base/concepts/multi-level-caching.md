@@ -9,7 +9,7 @@ status: active
 
 # Multi-Level Caching
 
-> ⚠️ **Metrics correction (2026-07-14).** Earlier drafts of this document cited fabricated token-savings/quality figures — "68.96%", "89.3%", "91.80%" — produced by a simulation that never invoked the optimizer. **Those figures are retracted.** The honest, measured figure is **~20% mean optimizer compression** on real prose (manifest-backed: `evaluation/results/validation-2026-07-14/`; see `STATUS.md` and `CHANGELOG.md`). Inline numbers below have been corrected where they appeared.
+> ⚠️ **Metrics correction (2026-07-14).** Earlier drafts of this document cited fabricated token-savings/quality figures — "68.96%", "89.3%", "91.80%" — produced by a simulation that never invoked the optimizer. **Those figures are retracted.** The honest, measured figure is **6.8% mean optimizer compression** on real prose (manifest-backed: `evaluation/results/validation-2026-07-25/`; see `STATUS.md` and `CHANGELOG.md`). Inline numbers below have been corrected where they appeared.
 
 
 ## Overview

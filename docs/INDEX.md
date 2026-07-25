@@ -6,8 +6,8 @@
 > always [`STATUS.md`](../STATUS.md).
 
 **Version:** 3.0
-**Last Updated:** 2026-07-18
-**Status:** Beta — Not Production Ready (A+; all structural gaps closed — see [`STATUS.md`](../STATUS.md))
+**Last Updated:** 2026-07-25
+**Status:** Beta — Not Production Ready — see [`STATUS.md`](../STATUS.md) for the canonical status and grade position. This page states no grade of its own.
 
 ---
 
@@ -19,7 +19,7 @@
 - [API Reference](api/README.md) - Complete API documentation
 - [Monitoring Guide](MONITORING.md) - Observability and metrics
 - [Security Policy](../SECURITY.md) - Vulnerability disclosure
-- [Threat Model](security/THREAT_MODEL.md) - STRIDE analysis (supersedes ADR-012)
+- [Threat Model](security/threat-model.md) - STRIDE analysis (supersedes ADR-012)
 
 ---
 
@@ -40,20 +40,20 @@
 - **[Usage Guide](USAGE.md)** — Comprehensive usage examples
 - **[Customization Guide](CUSTOMIZATION.md)** — Customization options
 - **[Workflows Guide](WORKFLOWS.md)** — Common workflows and patterns
-- **[Repository Analysis Workflow](REPOSITORY_ANALYSIS_WORKFLOW.md)** — Token-efficient repo analysis
+- **[Repository Analysis Workflow](repository-analysis-workflow.md)** — Token-efficient repo analysis
 
 ### 3. Testing & Validation
 
 **Location:** `evaluation/`
 
-- **[Honest Assessment](../evaluation/HONEST_ASSESSMENT.md)** - Critical analysis with real measurements
-- **[Token Savings Test Plan](TOKEN_SAVINGS_TEST_PLAN.md)** - Validation methodology
+- **[Honest Assessment](../evaluation/honest-assessment.md)** - Critical analysis with real measurements
+- **[Token Savings Test Plan](token-savings-test-plan.md)** - Validation methodology
 - **[Validation Report (Phase 5, measured)](../evaluation/results/validation-2026-07-14/report.json)** — manifest-backed run (`report.json` + `manifest.json`); the earlier `validation_report.json` (68.96%) is retracted/fabricated
 
 **Key Findings:**
-- ✅ 1112 tests passing — see [STATUS.md](../STATUS.md) for the current live snapshot; gate is `pyproject.toml`
-- ✅ Token savings **measured**: ~20% mean optimizer compression (95% CI [19%, 21%], N=183) — manifest-backed at `evaluation/results/validation-2026-07-14/`; the earlier 68.96% is retracted
-- ✅ A+ (4.30/4.30) — all 4 structural gaps closed (SLA v1.0, sentence-transformers, full mypy scope, CODEOWNERS)
+- ✅ 1414 passed / 23 skipped in the gated coverage run (1518 collected tree-wide) — [STATUS.md](../STATUS.md) is the single home for this snapshot; the coverage gate lives in `pyproject.toml`
+- ✅ Token savings **measured**: 6.8% mean optimizer compression (95% CI [6.2%, 7.4%], N=265) — manifest-backed at `evaluation/results/validation-2026-07-25/`; supersedes the 20.0% of 2026-07-14 (structure-preserving optimizer change, see STATUS.md); the earlier 68.96% is retracted
+- ✅ 4 structural gaps closed (SLA v1.0, sentence-transformers, full mypy scope, CODEOWNERS). **No grade is claimed here:** the previously stated "A+ (4.30/4.30)" was self-assessed and has been withdrawn — see [STATUS.md](../STATUS.md) for the on-file independent verdicts.
 - ✅ Delegation pipeline wired: `bob-optimize analyze` (ADR-019)
 - ⚠️ Mock-based testing (no real LLM API integration)
 
@@ -73,13 +73,11 @@
 
 #### Superseded / Deprecated
 
-- **[Actual System Architecture](architecture/deprecated/ACTUAL_SYSTEM_ARCHITECTURE.md)** — v1.0, superseded by ARCHITECTURE.md
-- **[Unified Architecture](architecture/deprecated/UNIFIED_ARCHITECTURE.md)** — v2.0, superseded (predates the Phase-4 facade)
-- **[Master Architecture](architecture/deprecated/MASTER.md)** — Original design (deprecated)
-- **[Quality Attributes](architecture/deprecated/QUALITY_ATTRIBUTES.md)** — Quality goals (deprecated; metrics retracted)
-- **[Documentation Plan](architecture/deprecated/DOCUMENTATION_PLAN.md)** — Planning doc (deprecated)
 
-**Note:** the deprecated documents describe an earlier or planned system. Refer to [ARCHITECTURE.md](architecture/ARCHITECTURE.md) for the current implementation.
+**Note:** the 13 deprecated component specifications described an earlier, largely unimplemented
+design. They were removed from the tree on 2026-07-25 and remain in git history
+(`git log --diff-filter=D --name-only -- 'docs/architecture/deprecated/*'`).
+Refer to [ARCHITECTURE.md](architecture/ARCHITECTURE.md) for the current implementation.
 
 ### 5. API Reference
 
@@ -166,10 +164,10 @@ Auto-generated API documentation from source code (see [full API reference](api/
 - **[Quick Start](quick-start.md)** — Getting started guide
 - **[Usage](USAGE.md)** — Detailed usage instructions
 - **[Workflows](WORKFLOWS.md)** — Common workflows
-- **[Repository Analysis Workflow](REPOSITORY_ANALYSIS_WORKFLOW.md)** — Token-efficient repository audit workflow
+- **[Repository Analysis Workflow](repository-analysis-workflow.md)** — Token-efficient repository audit workflow
 - **[Customization](CUSTOMIZATION.md)** — Configuration and customization
 - **[Bob IDE Guide](BOB-IDE-GUIDE.md)** — Bob IDE mode picker, skill activation, persistence
-- **[SLA](sla.md)** — Latency/throughput targets and measurement methodology
+- **[SLA](SLA.md)** — Latency/throughput targets and measurement methodology
 - **[Comparison](archive/COMPARISON.md)** — Comparison with alternatives (archived)
 
 ### 8. Configuration
@@ -222,7 +220,7 @@ Auto-generated API documentation from source code (see [full API reference](api/
 | **Cache System** | `src/cache/` | `bob-optimize cache-stats` | [API](api/cache/) |
 | **Config** | `src/config/` | `bob-optimize config` | [API](api/config/) |
 | **Monitoring** | `src/monitoring/` | `bob-optimize health`, `metrics`, `cost-report` | [Guide](MONITORING.md) |
-| **KB Embedding Index (P2)** | `src/embeddings/` | `bob-optimize kb-index` | [API](api/embeddings/) |
+| **KB Embedding Index (P2)** | `src/embeddings/` | `bob-optimize graph-build --with-semantic` | [API](api/embeddings/) |
 | **Knowledge Graph (P3)** | `src/graph/` | `bob-optimize graph-build/query/health` | [API](api/graph/) |
 | **KB Search (P4)** | `src/tools/kb_query.py` | `bob-optimize kb-search`, `kb-status` | [API](api/tools/kb_query.md) |
 | **Delegation Pipeline** | `src/delegation/` | `bob-optimize analyze` | [API](api/delegation/) · [ADR-019](adr/019-delegation-pipeline-activation.md) |
@@ -236,7 +234,7 @@ Auto-generated API documentation from source code (see [full API reference](api/
 ## Key Features
 
 ### Token Optimization
-- **Prompt compression** — ~20% mean on real prose (manifest-backed, null-test validated)
+- **Prompt compression** — 6.8% mean on real prose (manifest-backed, null-test validated)
 - **Multi-level cache** — L1 exact (SHA-256, O(1)) + L2 semantic (TF-IDF cosine)
 - **Intelligent truncation** — lossy budget-fit (4 strategies), reported separately
 
@@ -277,13 +275,13 @@ See [API Reference](api/README.md) for details.
 1. Review [Monitoring Guide](MONITORING.md)
 2. Check [Installation](INSTALLATION.md)
 3. See [Health Checking](api/monitoring/health.md)
-4. Review [SLA](sla.md) for latency/throughput targets
+4. Review [SLA](SLA.md) for latency/throughput targets
 
 ### Architects
 1. Read the [Architecture](architecture/ARCHITECTURE.md)
 2. Review [ADRs](adr/README.md)
-3. See [STRIDE Threat Model](security/THREAT_MODEL.md)
-4. Check the [SLA](sla.md) for quality scenarios
+3. See [STRIDE Threat Model](security/threat-model.md)
+4. Check the [SLA](SLA.md) for quality scenarios
 
 ### Contributors
 1. Read [CONTRIBUTING.md](../CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md)
@@ -354,5 +352,5 @@ See [Quick Start](quick-start.md) for the Bob Shell KB Manager onboarding.
 
 ---
 
-**Last Updated:** 2026-07-18
-**Status:** Beta — Not Production Ready; A+ (4.30/4.30) — see [`STATUS.md`](../STATUS.md)
+**Last Updated:** 2026-07-25
+**Status:** Beta — Not Production Ready — see [`STATUS.md`](../STATUS.md) for the canonical status and grade position

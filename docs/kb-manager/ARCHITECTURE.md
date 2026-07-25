@@ -477,7 +477,7 @@ finds the file.
 
 ### Context injection
 
-[`config/settings.json`](../config/settings.json) (copied to `.bob/settings.json` by
+[`config/settings.json`](../../config/settings.json) (copied to `.bob/settings.json` by
 `init-project.sh`) declares both `CONTEXT.md` and `INDEX.md` as context files. Bob Shell
 auto-loads both at session start: `CONTEXT.md` provides project orientation and the
 standard resume prompts; `INDEX.md` provides the current document registry.
@@ -487,7 +487,7 @@ standard resume prompts; `INDEX.md` provides the current document registry.
 `scripts/start-kb.sh` is the recommended daily-driver for starting a KB session. It
 verifies the KB is initialised, prints the document count, and then `exec`s
 `bob --chat-mode=knowledge-manager`. See
-[`docs/usage.md §0`](USAGE.md#0-starting-a-session) for all activation paths and the
+[`docs/usage.md §0`](../USAGE.md#0-starting-a-session) for all activation paths and the
 standard resume prompt.
 
 ### Version control compatibility

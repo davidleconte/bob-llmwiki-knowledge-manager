@@ -149,6 +149,6 @@ bob-optimize analyze src/cache --output-dir /tmp/delegation-test --kb-path docs/
 ## References
 
 - [`docs/knowledge-base/research/delegation-integration-analysis-2026-07-13.md`](../../docs/knowledge-base/research/delegation-integration-analysis-2026-07-13.md)
-- [`src/delegation/experimental.md`](../../src/delegation/experimental.md) (updated)
+- [`src/delegation/experimental.md`](../../src/delegation/EXPERIMENTAL.md) (updated)
 - [ADR-013: Facade and Factory Pattern](013-facade-factory-pattern.md)
 - [ADR-014: KB Query Embedding Scorer](014-kb-query-embedding-scorer.md)

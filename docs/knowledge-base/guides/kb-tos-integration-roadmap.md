@@ -392,7 +392,7 @@ L3 backed by `PersistentEmbeddingIndex` would survive process restarts.
 | Week | Deliverable |
 |------|-------------|
 | 1 | ADR + `PersistentEmbeddingIndex` design + implementation |
-| 2 | `KBIndexer`, `KnowledgeBaseQuery` integration, `bob-optimize index-kb` CLI command |
+| 2 | `KBIndexer`, `KnowledgeBaseQuery` integration, index build via `bob-optimize graph-build` |
 | 3 | Optional L3 cache, integration tests, documentation update |
 
 ---

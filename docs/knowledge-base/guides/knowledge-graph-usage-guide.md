@@ -41,7 +41,7 @@ pip install sentence-transformers
 The graph builder queries the embedding index for semantic edges. Build it first:
 
 ```bash
-bob-optimize kb-index --kb-path docs/knowledge-base
+bob-optimize graph-build --kb-path docs/knowledge-base --with-semantic
 ```
 
 Or from Python:
@@ -213,7 +213,7 @@ Expected indicators of a healthy graph:
 **Cause:** Most documents lack `related:` frontmatter, and the semantic threshold (0.30)
 is too high for the embedding backend in use.  
 **Fix (short-term):** Add `related:` frontmatter to key documents.  
-**Fix (long-term):** Switch to MiniLM — hashing p@3=0.60 vs MiniLM p@3=0.88 on
+**Fix (long-term):** Switch to MiniLM — hashing p@3=0.60 vs MiniLM p@3=0.88 (lab, unmanifested; superseded by report.json) on
 the same corpus; semantic edges are much more accurate with MiniLM.
 
 ### T3 — `semantic_threshold` produces too many or too few edges
@@ -226,7 +226,7 @@ the threshold — but expect noisier edges and re-run your golden-set evaluation
 ### T4 — `graph-build` fails with `"index not built"`
 
 **Cause:** `PersistentEmbeddingIndex` has not been synced yet.  
-**Fix:** Run `bob-optimize kb-index --kb-path docs/knowledge-base` first.
+**Fix:** Run `bob-optimize graph-build --kb-path docs/knowledge-base --with-semantic` first.
 
 ## Best Practices
 

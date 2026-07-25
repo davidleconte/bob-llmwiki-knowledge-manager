@@ -1,5 +1,25 @@
 # docs/ Tier-1 Remediation Plan
 
+> ✅ **EXECUTED — closed 2026-07-25.** All seven sub-tasks shipped. Verified
+> structurally: every target document now carries mermaid diagrams, a glossary, and
+> quality-scenario / risk sections (`docs/MONITORING.md` 5 diagrams,
+> `docs/USAGE.md` 6, `docs/WORKFLOWS.md` 5, `docs/INSTALLATION.md` 3,
+> `docs/CUSTOMIZATION.md` 2, `docs/quick-start.md` 1). Two caveats stated plainly:
+> four of the six lack a *dedicated* `## Constraints` heading (the material appears
+> inline), and `docs/quick-start.md` is intentionally lighter than the others because
+> it is a 5-minute tutorial, not a reference. Prose quality was **not** re-graded —
+> only the structural criteria this plan enumerates were checked.
+>
+> ⚠️ **This plan's own filename citations are stale** and were never corrected: it
+> targets `docs/monitoring.md`, `docs/installation.md`, `docs/usage.md`,
+> `docs/customization.md`, `docs/workflows.md` (lowercase) when the tracked files are
+> `MONITORING.md`, `INSTALLATION.md`, `USAGE.md`, `CUSTOMIZATION.md`, `WORKFLOWS.md`.
+> Its "Already Grade A" list cites `docs/ARCHITECTURE.md` and
+> `docs/architecture/architecture.md`, **neither of which exists** — the real file is
+> `docs/architecture/ARCHITECTURE.md`. Left as written: this is a frozen planning
+> record, and the case bug it exhibits is exactly the tree-wide defect the 2026-07-25
+> audit catalogued (~103 broken references), fixed at the source in Wave 2.
+
 **Goal:** Every document in `docs/` at the same Tier-1 institutional level as
 `docs/ARCHITECTURE.md` and `docs/architecture/architecture.md` (Grade A).
 
@@ -34,7 +54,7 @@ Each document must have:
 
 ## Sub-Task 1 — Rewrite `docs/monitoring.md` (B → A)
 
-**Status:** [ ] pending
+**Status:** [x] closed — verified 2026-07-25 (structural criteria met; see header)
 
 **Current state:** 305 lines. Excellent code examples grounded in `src/monitoring/`.
 Missing: system context diagram, component diagram of monitoring subsystem,
@@ -77,7 +97,7 @@ not just *how* to use it.
 
 ## Sub-Task 2 — Rewrite `docs/installation.md` (C → A)
 
-**Status:** [ ] pending
+**Status:** [x] closed — verified 2026-07-25 (structural criteria met; see header)
 
 **Current state:** 195 lines. Procedural steps only. No diagrams, no constraints,
 no grounding in script logic, no failure modes beyond 3 error messages.
@@ -118,7 +138,7 @@ pre/post states look like, what can go wrong at each step and why.
 
 ## Sub-Task 3 — Rewrite `docs/quick-start.md` (C → A)
 
-**Status:** [ ] pending
+**Status:** [x] closed — verified 2026-07-25 (structural criteria met; see header)
 
 **Current state:** 159 lines. Step-by-step recipe. No diagrams, stale reference to
 `PHASE3_IMPLEMENTATION_COMPLETE.md` (archived), no grounding in actual script paths.
@@ -157,7 +177,7 @@ provides verifiable success criteria at every stage.
 
 ## Sub-Task 4 — Rewrite `docs/usage.md` (C → A)
 
-**Status:** [ ] pending
+**Status:** [x] closed — verified 2026-07-25 (structural criteria met; see header)
 
 **Current state:** 485 lines. Most comprehensive operational guide currently. Good
 examples. Missing: all diagrams, system context, grounding in actual source, no
@@ -200,7 +220,7 @@ key workflows.
 
 ## Sub-Task 5 — Rewrite `docs/customization.md` (C → A)
 
-**Status:** [ ] pending
+**Status:** [x] closed — verified 2026-07-25 (structural criteria met; see header)
 
 **Current state:** 63 lines. Almost entirely bullet points. No diagrams, no examples,
 no grounding in actual YAML structure.
@@ -238,7 +258,7 @@ constraints exist, and what risks each customization introduces.
 
 ## Sub-Task 6 — Rewrite `docs/workflows.md` (D → A)
 
-**Status:** [ ] pending
+**Status:** [x] closed — verified 2026-07-25 (structural criteria met; see header)
 
 **Current state:** 65 lines of bullet points. No diagrams, no grounding, no
 decisions, no quality criteria. Effectively a stub.
@@ -280,7 +300,7 @@ when it goes wrong. With Mermaid flowcharts for each major workflow.
 
 ## Sub-Task 7 — Elevate `docs/monitoring.md` context section to cover both systems (B → A)
 
-**Status:** [ ] pending — depends on Sub-Task 1
+**Status:** [x] closed — verified 2026-07-25 (structural criteria met; see header) — depends on Sub-Task 1
 
 **Note:** Included in Sub-Task 1 above (combined).
 

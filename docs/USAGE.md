@@ -141,7 +141,7 @@ Edit `CONTEXT.md` directly to add project-specific guidance, constraints, or ter
 
 ## 1. System Context
 
-The knowledge manager is a custom mode defined in [`config/custom_modes.yaml`](../config/custom_modes.yaml:180). It wraps the LLM interaction layer with a fixed workflow and a set of tool bindings. All persistent output lands in `docs/knowledge-base/` and its four sub-directories.
+The knowledge manager is a custom mode defined in [`config/custom_modes.yaml`](../config/custom_modes.yaml#L180). It wraps the LLM interaction layer with a fixed workflow and a set of tool bindings. All persistent output lands in `docs/knowledge-base/` and its four sub-directories.
 
 **Tool bindings by target:**
 
@@ -200,13 +200,13 @@ Bob Shell will:
 - Create `docs/knowledge-base/concepts/gossip-protocol.md`
 - Follow the [`config/templates/concept.md`](../config/templates/concept.md) template
 - Save key facts with `save_memory` *(Bob Shell CLI only)*
-- Append an entry to [`docs/knowledge-base/index.md`](knowledge-base/INDEX.md)
+- Append an entry to [`docs/knowledge-base/index.md`](knowledge-base/index.md)
 
 ---
 
 ## 2. Document Type Decision Tree
 
-Every new document requires a category decision before a file name can be chosen. The decision is enforced by the mode's `customInstructions` ([`config/custom_modes.yaml:191`](../config/custom_modes.yaml:191)).
+Every new document requires a category decision before a file name can be chosen. The decision is enforced by the mode's `customInstructions` ([`config/custom_modes.yaml:191`](../config/custom_modes.yaml#L191)).
 
 ```mermaid
 flowchart TD
@@ -221,7 +221,7 @@ flowchart TD
     Q -- "Findings, analysis,\nor time-boxed research" --> RS["📕 research/\nTemplate: (findings structure)\nNaming: topic-YYYY-MM.md\nExample: performance-optimization-2026-07.md"]
 ```
 
-**Naming rules** (from [`config/custom_modes.yaml:199-203`](../config/custom_modes.yaml:199)):
+**Naming rules** (from [`config/custom_modes.yaml:199-203`](../config/custom_modes.yaml#L199)):
 
 | Category | Pattern | Live example from INDEX.md |
 |---|---|---|
@@ -238,7 +238,7 @@ All names use **lowercase-with-hyphens** only — no spaces, no uppercase, no un
 
 ### 3.1 The 7-Step Workflow
 
-Every document creation follows the seven-step workflow defined in [`config/custom_modes.yaml:191-197`](../config/custom_modes.yaml:191). The sequence diagram below shows the actors and messages:
+Every document creation follows the seven-step workflow defined in [`config/custom_modes.yaml:191-197`](../config/custom_modes.yaml#L191). The sequence diagram below shows the actors and messages:
 
 ```mermaid
 sequenceDiagram
@@ -499,13 +499,13 @@ Bob Shell will:
 - List all documents in the category
 - Check for missing cross-references
 - Add "Related Documents" sections where absent
-- Update [`docs/knowledge-base/index.md`](knowledge-base/INDEX.md)
+- Update [`docs/knowledge-base/index.md`](knowledge-base/index.md)
 
 ### 6.2 Architectural Context: What "Organize" Means
 
 Organizing the knowledge base has two concrete artifacts:
 
-**INDEX.md** is the canonical document registry at [`docs/knowledge-base/index.md`](knowledge-base/INDEX.md). It has three structural parts:
+**INDEX.md** is the canonical document registry at [`docs/knowledge-base/index.md`](knowledge-base/index.md). It has three structural parts:
 
 | Section | Purpose |
 |---|---|
@@ -519,7 +519,7 @@ During "organize", Bob Shell ensures:
 - The "Recent Additions" section is sorted by date descending
 - Each document's "Related Documents" section references at least one other document in the KB (where relationships exist)
 
-**Cross-references** are bidirectional relative Markdown links. The principle is stated in [`config/custom_modes.yaml:185`](../config/custom_modes.yaml:185): "Bidirectional links between documents." When Bob adds a link from document A to document B, it also checks whether document B should link back to document A.
+**Cross-references** are bidirectional relative Markdown links. The principle is stated in [`config/custom_modes.yaml:185`](../config/custom_modes.yaml#L185): "Bidirectional links between documents." When Bob adds a link from document A to document B, it also checks whether document B should link back to document A.
 
 Example of a correct bidirectional cross-reference (live in KB):
 - [`concepts/token-optimization.md`](knowledge-base/concepts/token-optimization.md) links to [`concepts/multi-level-caching.md`](knowledge-base/concepts/multi-level-caching.md)
@@ -660,7 +660,7 @@ The script checks:
 3. That all four required subdirectories (`concepts/`, `guides/`, `references/`, `research/`) exist
 4. That every relative Markdown link in every `.md` file resolves to an existing file
 
-For broken-link detection, it uses a `grep -oP` regex to extract link targets and then checks `[ -f "$target" ]` for each non-HTTP link (see [`scripts/validate-kb.sh:33-47`](../scripts/validate-kb.sh:33)).
+For broken-link detection, it uses a `grep -oP` regex to extract link targets and then checks `[ -f "$target" ]` for each non-HTTP link (see [`scripts/validate-kb.sh:33-47`](../scripts/validate-kb.sh#L33)).
 
 After the structural check, the script emits a document count summary.
 
@@ -734,7 +734,7 @@ flowchart TD
 
 ### 8.3 Export Output
 
-All formats write to `kb-export/` in the project root (created automatically by [`scripts/export-kb.sh:15`](../scripts/export-kb.sh:15)).
+All formats write to `kb-export/` in the project root (created automatically by [`scripts/export-kb.sh:15`](../scripts/export-kb.sh#L15)).
 
 After export, the script prints:
 
@@ -761,7 +761,7 @@ apt-get install pandoc
 
 **Issue**: PDF conversion fails silently
 
-**Cause**: `pdflatex` engine not present. The script falls back to `pandoc`'s default engine (see [`scripts/export-kb.sh:105-107`](../scripts/export-kb.sh:105)); if that also fails, it prints a warning and continues.
+**Cause**: `pdflatex` engine not present. The script falls back to `pandoc`'s default engine (see [`scripts/export-kb.sh:105-107`](../scripts/export-kb.sh#L105)); if that also fails, it prints a warning and continues.
 
 ---
 
@@ -805,7 +805,7 @@ On failure, the script exits with code `1` and prints one of:
 ❌ Broken link in docs/knowledge-base/concepts/foo.md: ../guides/missing.md
 ```
 
-The broken-link check is performed by the loop at [`scripts/validate-kb.sh:33-47`](../scripts/validate-kb.sh:33). It extracts all `[text](target)` link targets, skips `https?://` URLs, and tests each relative path with `-f`.
+The broken-link check is performed by the loop at [`scripts/validate-kb.sh:33-47`](../scripts/validate-kb.sh#L33). It extracts all `[text](target)` link targets, skips `https?://` URLs, and tests each relative path with `-f`.
 
 ### 9.3 Validation Checks Summary
 
@@ -855,7 +855,7 @@ ls -la docs/knowledge-base/
 
 ### 10.1 Naming Conventions
 
-Enforced by the mode's `customInstructions` at [`config/custom_modes.yaml:199-203`](../config/custom_modes.yaml:199). Bob Shell will refuse or correct names that don't match.
+Enforced by the mode's `customInstructions` at [`config/custom_modes.yaml:199-203`](../config/custom_modes.yaml#L199). Bob Shell will refuse or correct names that don't match.
 
 - **Concepts**: `concept-name.md` (e.g., `cap-theorem.md`)
 - **Guides**: `task-name-guide.md` (e.g., `setup-guide.md`)
@@ -866,7 +866,7 @@ All names: lowercase, hyphens only, no spaces, no uppercase.
 
 ### 10.2 Cross-Referencing
 
-Enabled by the mode's "Cross-Referencing" core principle at [`config/custom_modes.yaml:185`](../config/custom_modes.yaml:185). Always include "Related Documents" sections:
+Enabled by the mode's "Cross-Referencing" core principle at [`config/custom_modes.yaml:185`](../config/custom_modes.yaml#L185). Always include "Related Documents" sections:
 
 ```markdown
 ## Related Documents
@@ -874,11 +874,11 @@ Enabled by the mode's "Cross-Referencing" core principle at [`config/custom_mode
 - [Related Guide](../guides/related-guide.md)
 ```
 
-Links must be relative to the file's own directory. The validator ([`scripts/validate-kb.sh:33-47`](../scripts/validate-kb.sh:33)) will flag any broken relative link.
+Links must be relative to the file's own directory. The validator ([`scripts/validate-kb.sh:33-47`](../scripts/validate-kb.sh#L33)) will flag any broken relative link.
 
 ### 10.3 Memory Management
 
-Enabled by the `save_memory` tool binding in the mode at [`config/custom_modes.yaml:186`](../config/custom_modes.yaml:186). Bob Shell CLI automatically persists key facts *(Bob Shell CLI only — not available in Bob IDE)*:
+Enabled by the `save_memory` tool binding in the mode at [`config/custom_modes.yaml:186`](../config/custom_modes.yaml#L186). Bob Shell CLI automatically persists key facts *(Bob Shell CLI only — not available in Bob IDE)*:
 
 - Include context in facts (not just values)
 - Be specific and concise
@@ -886,7 +886,7 @@ Enabled by the `save_memory` tool binding in the mode at [`config/custom_modes.y
 
 ### 10.4 Regular Maintenance
 
-Aligned with the "Index Maintenance" principle at [`config/custom_modes.yaml:188`](../config/custom_modes.yaml:188):
+Aligned with the "Index Maintenance" principle at [`config/custom_modes.yaml:188`](../config/custom_modes.yaml#L188):
 
 - **Daily**: Save new facts, update INDEX.md
 - **Weekly**: Review recent documents, check links (use `validate-kb.sh`)
@@ -904,7 +904,7 @@ git push
 
 ### 10.6 Template Adherence
 
-Enabled by the "Template-Driven" principle at [`config/custom_modes.yaml:187`](../config/custom_modes.yaml:187). Using the standard templates in [`config/templates/`](../config/templates/) ensures:
+Enabled by the "Template-Driven" principle at [`config/custom_modes.yaml:187`](../config/custom_modes.yaml#L187). Using the standard templates in [`config/templates/`](../config/templates/) ensures:
 - Every concept has a "Key Points" section that `search_file_content` can find
 - Every guide has a "Verification" section with expected output
 - Every document has a `Last Updated` footer date for temporal reasoning
@@ -932,9 +932,9 @@ The following six scenarios define verifiable success criteria for each major op
 |---|---|---|---|---|
 | R-1 | **INDEX.md staleness** — A document is created directly (e.g., by copying a file) without going through Bob Shell, so INDEX.md is never updated. The document exists on disk but is invisible to navigation and cross-reference checks. | Medium | High | Run `validate-kb.sh` weekly (§9); use "Organize" command (§6.1) to audit and repair INDEX.md; commit INDEX.md in every git commit that touches `docs/knowledge-base/`. |
 | R-2 | **Search false-negatives** — A document exists on disk but was never indexed in memory (`save_memory` not called) and is not found by `search_file_content` because the search pattern doesn't match its content. | Low | Medium | Path 2 of the query architecture (§4.1) scans all `.md` files regardless of memory state; ensure document titles and key terms appear in the first paragraph so pattern matches succeed. |
-| R-3 | **Naming convention drift** — Documents accumulate with inconsistent names (`CAPTheorem.md`, `cap_theorem.md`) over time, breaking relative cross-references and making `validate-kb.sh` broken-link checks unreliable. | Medium | Medium | The mode enforces `lowercase-with-hyphens` at creation time ([`config/custom_modes.yaml:193`](../config/custom_modes.yaml:193)); run a monthly audit prompt (§7.4) to catch any files created outside the mode; use `validate-kb.sh` to surface broken links from misnamed targets. |
+| R-3 | **Naming convention drift** — Documents accumulate with inconsistent names (`CAPTheorem.md`, `cap_theorem.md`) over time, breaking relative cross-references and making `validate-kb.sh` broken-link checks unreliable. | Medium | Medium | The mode enforces `lowercase-with-hyphens` at creation time ([`config/custom_modes.yaml:193`](../config/custom_modes.yaml#L193)); run a monthly audit prompt (§7.4) to catch any files created outside the mode; use `validate-kb.sh` to surface broken links from misnamed targets. |
 | R-4 | **Memory limit / saturation** — After a very large number of `save_memory` calls, the in-context fact store approaches its capacity limit. New facts may be silently dropped or earlier facts may be evicted, causing Path 1 query results to degrade. | Low | Medium | Prefer concise, factual memory entries over long narratives; rely on Path 2 (`search_file_content`) as the authoritative completeness guarantee; periodically start a fresh session to reset the memory state for a domain area. |
-| R-5 | **Export format incompatibility** — HTML or PDF export fails because `pandoc` is not installed or `pdflatex` is absent, blocking the export pipeline. | Medium | Low | The script detects missing `pandoc` and exits with a clear error ([`scripts/export-kb.sh:61-65`](../scripts/export-kb.sh:61)); use `markdown` or `obsidian` formats (no dependencies) as fallback; document `pandoc` as a required dependency in project README. |
+| R-5 | **Export format incompatibility** — HTML or PDF export fails because `pandoc` is not installed or `pdflatex` is absent, blocking the export pipeline. | Medium | Low | The script detects missing `pandoc` and exits with a clear error ([`scripts/export-kb.sh:61-65`](../scripts/export-kb.sh#L61)); use `markdown` or `obsidian` formats (no dependencies) as fallback; document `pandoc` as a required dependency in project README. |
 
 ---
 
@@ -944,10 +944,10 @@ The following six scenarios define verifiable success criteria for each major op
 |---|---|
 | **Bob mode** | A named configuration unit in [`config/custom_modes.yaml`](../config/custom_modes.yaml) that binds a system prompt, a tool set, and `customInstructions` to a Bob Shell `--chat-mode` flag. The `knowledge-manager` mode activates the 7-step document creation workflow and all KB-specific tool bindings. |
 | **`search_file_content`** | A Bob Shell built-in tool that performs a regex or substring scan across all files in a specified directory tree. In the knowledge-manager mode it is used during query resolution (Path 2, §4.1) to find documents whose facts were not saved to memory. |
-| **`save_memory`** | A Bob Shell CLI built-in tool that persists a key-value or structured fact into the session's in-context memory store. Facts saved with this tool are automatically recalled on subsequent turns. Used in Step 6 of the document creation workflow ([`config/custom_modes.yaml:195`](../config/custom_modes.yaml:195)) and after every update operation. **Not available in Bob IDE** — use `write_file` to `docs/knowledge-base/` instead. |
-| **INDEX.md** | The canonical document registry at [`docs/knowledge-base/index.md`](knowledge-base/INDEX.md). Contains three sections: Quick Navigation (category links), Recent Additions (reverse-chronological), and All Documents (full enumeration by category). It is the single source of truth for what documents exist in the knowledge base and is updated in Step 7 of every document creation. |
-| **Cross-reference** | A bidirectional relative Markdown link between two documents in the knowledge base. Cross-references appear in each document's "Related Documents" section and are validated by [`scripts/validate-kb.sh`](../scripts/validate-kb.sh). The mode's core principles require bidirectionality ([`config/custom_modes.yaml:185`](../config/custom_modes.yaml:185)): if document A links to document B, document B should link back to document A. |
-| **knowledge-manager workflow** | The 7-step sequence defined at [`config/custom_modes.yaml:191-197`](../config/custom_modes.yaml:191): (1) determine category, (2) select template, (3) apply naming convention, (4) write content, (5) add cross-references, (6) save key facts to memory, (7) update INDEX.md. Every document creation and significant update follows this sequence. |
+| **`save_memory`** | A Bob Shell CLI built-in tool that persists a key-value or structured fact into the session's in-context memory store. Facts saved with this tool are automatically recalled on subsequent turns. Used in Step 6 of the document creation workflow ([`config/custom_modes.yaml:195`](../config/custom_modes.yaml#L195)) and after every update operation. **Not available in Bob IDE** — use `write_file` to `docs/knowledge-base/` instead. |
+| **INDEX.md** | The canonical document registry at [`docs/knowledge-base/index.md`](knowledge-base/index.md). Contains three sections: Quick Navigation (category links), Recent Additions (reverse-chronological), and All Documents (full enumeration by category). It is the single source of truth for what documents exist in the knowledge base and is updated in Step 7 of every document creation. |
+| **Cross-reference** | A bidirectional relative Markdown link between two documents in the knowledge base. Cross-references appear in each document's "Related Documents" section and are validated by [`scripts/validate-kb.sh`](../scripts/validate-kb.sh). The mode's core principles require bidirectionality ([`config/custom_modes.yaml:185`](../config/custom_modes.yaml#L185)): if document A links to document B, document B should link back to document A. |
+| **knowledge-manager workflow** | The 7-step sequence defined at [`config/custom_modes.yaml:191-197`](../config/custom_modes.yaml#L191): (1) determine category, (2) select template, (3) apply naming convention, (4) write content, (5) add cross-references, (6) save key facts to memory, (7) update INDEX.md. Every document creation and significant update follows this sequence. |
 
 ---
 
@@ -1023,7 +1023,7 @@ What do we know about containerization?
 
 - **Customize**: See [Customization Guide](CUSTOMIZATION.md)
 - **Workflows**: See [Workflows Guide](WORKFLOWS.md)
-- **Compare**: See [Comparison with LLM-Wiki](COMPARISON.md)
+- **Compare**: See [Comparison with LLM-Wiki](archive/COMPARISON.md)
 
 ## Support
 

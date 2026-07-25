@@ -22,9 +22,9 @@ identically in **Bob IDE** and **Bob Shell CLI** — same modes, same KB, same c
 ![status](https://img.shields.io/badge/status-Beta%20%E2%80%94%20Not%20Production%20Ready-orange)
 ![license](https://img.shields.io/badge/license-MIT-blue)
 ![python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue)
-![version](https://img.shields.io/badge/version-1.1.0-informational)
-![tests](https://img.shields.io/badge/tests-1386%20passing-success)
-![coverage](https://img.shields.io/badge/coverage-%E2%89%8889%25%20(gate%20%E2%89%A580%25)-success)
+![version](https://img.shields.io/badge/version-1.2.0-informational)
+![tests](https://img.shields.io/badge/tests-1414%20passing-success)
+![coverage](https://img.shields.io/badge/coverage%20gate-%E2%89%A580%25-success)
 
 `MIT licensed` · `Native Bob modes` · `No MCP servers required` · `No plugins` · `Pattern: LLM-Wiki (Karpathy)` · `Bob Shell CLI` · `Bob IDE`
 
@@ -252,7 +252,7 @@ core scripts (`install`, `init-project`, `validate-kb`, `export-kb` → Markdown
 analysis suite; and 3 worked-example knowledge bases (software project, research project, personal wiki).
 
 **Token Optimization System (the Python system `src/`, Beta):** the `TokenOptimizer` facade + `bob-optimize` CLI
-(16 subcommands); a multi-level cache (L1 exact `<1 ms`, L2 semantic `<100 ms`); the prompt optimizer (~20% mean
+(16 subcommands); a multi-level cache (L1 exact `<1 ms`, L2 semantic `<100 ms`); the prompt optimizer (6.8% mean
 compression, near-lossless, tiktoken-counted — manifest-backed, [§11](#11-what-is-actually-measured)); truncation (lossy budget-fit, reported separately); structured
 monitoring (JSON logging, metrics, health, cost tracking); the knowledge graph (`src/graph/` — orphan/hub
 detection, multi-hop BFS, PageRank re-ranking; `graph-build / graph-query / graph-health`); and a provenance layer
@@ -431,11 +431,11 @@ detected and withdrawn ([§16](#16-provenance--honesty-policy)).
 
 | Metric | Value | Basis |
 |---|---|---|
-| **Optimizer compression** | **~20% mean** (95% CI [18.9%, 21.2%], N = 183 real in-repo docs; null test passing; token-weighted ~23%) | `evaluation/results/validation-2026-07-14/`; reproduce with `python -m src.validation` |
+| **Optimizer compression** | **6.8% mean** (95% CI [6.2%, 7.4%], N = 265 real in-repo docs; null test 0.48% passing; hold-out reproduces at 6.0%, divergence 0.83pp) | `evaluation/results/validation-2026-07-25/`; reproduce with `python -m src.validation`. **Supersedes the 20.0% of 2026-07-14** — same 120 documents give 19.63% on that code vs 7.57% today, at quality 0.798 vs 0.995: the optimizer was made structure-preserving and the figure was never re-measured. See [`STATUS.md`](STATUS.md). |
 | **Retrieval quality (default backend)** | **p@3 = 0.84**, at parity with the keyword baseline (0.84) — no net lift | `evaluation/results/retrieval-2026-07-19/` (116-doc golden set) |
-| Retrieval quality (MiniLM, lab) | **p@3 = 0.88** — *not* reproducible in CI (needs the optional MiniLM backend) | ADR-014 / ADR-017; graph-validation report |
+| Retrieval quality (MiniLM, lab) | **p@3 = 0.88** — *not* reproducible in CI (needs the optional MiniLM backend), and **no manifest was ever committed for that run**; superseded as the published figure by p@3=0.84 | ADR-014 / ADR-017; the committed figure is `evaluation/results/retrieval-2026-07-19/report.json` |
 | Read-boundary trust | a forged `trust_tier: verified` document is withheld; a validly-signed one is served | `tests/security/` (re-verified by re-running the forgery exploit) |
-| Test suite | **1,386 passing**, 23 skipped (CI-green, ex load/perf) | `docs/project-management/plans/wave3-status.md` |
+| Test suite | **1,414 passing**, 23 skipped in the gated coverage run; 1,518 collected tree-wide | [`STATUS.md`](STATUS.md) (single home) |
 | Coverage | **≈89%** global; gate **≥80%** with per-package floors | `STATUS.md`; `pyproject.toml` (`fail_under = 80`) |
 
 > These figures are **not additive**; cache recompute-avoidance and lossy truncation are reported **separately** from
@@ -453,10 +453,14 @@ detected and withdrawn ([§16](#16-provenance--honesty-policy)).
 
 ## 12. Status & known limitations
 
-Mnemox is **Beta — Not Production Ready**. Two remediation waves landed through 2026-07-20 and were independently
-re-verified by re-running the original exploits
-(see [`docs/knowledge-base/research/master-engagement-reaudit-2026-07-20.md`](docs/knowledge-base/research/master-engagement-reaudit-2026-07-20.md));
-the independent audit score moved **2.9 → 3.8 → 4.2/5** (a formal independent re-grade is pending). Honest current state:
+Mnemox is **Beta — Not Production Ready**. Two remediation waves landed through 2026-07-20, each fix carrying a
+regression test at the layer the attack lands on. **No independent re-grade has been filed since those waves.** The
+on-file independent verdicts remain the counter-audit **2.9/5** (2026-07-19) and **NO-GO 3.46/4.30** (2026-07-14);
+[`STATUS.md`](STATUS.md) is the one home for that position. An earlier version of this section cited a
+**4.2/5** score — that figure is a *projected target after remediation* from
+[`engineering-soundness-audit-2026-07-19.md`](docs/knowledge-base/research/engineering-soundness-audit-2026-07-19.md),
+not a verdict anyone awarded, and citing it as achieved was exactly the kind of overclaim this project's gates exist
+to catch. Honest current state:
 
 **Fixed and verified (two waves, through 2026-07-20):** retrieval is wired into production (`kb-search`,
 `research_agent`); the optimizer is never-empty and structure-preserving; `validate-kb.sh` fails closed on broken
@@ -464,11 +468,11 @@ links and the broken cross-references were repaired; ranking is normalized (retr
 denial-of-service vectors (PageRank complexity, graph edge explosion) are bounded; **trust is now verified at the
 read boundary** (a forged `trust_tier: verified` document is withheld); the **L2 semantic-cache contract**
 (collision, TTL, metadata aliasing) and the **optimizer's budget-aware cache key** are closed; and all CI honesty
-gates are green with planted-defect tests proving they can fail.
+gates are green, and each ships a `--selftest` (or a dedicated `tests/gates/` module) that plants a known defect and requires the gate to catch it.
 
 **Known residuals (tracked):**
 
-- **Retrieval quality is at keyword parity on the default backend** (p@3 = 0.84). Higher quality needs the optional
+- **Retrieval quality is at keyword parity on the default backend** (p@3 = 0.84; manifest: evaluation/results/retrieval-2026-07-19/report.json). Higher quality needs the optional
   MiniLM backend and the proposed PPR / RRF / contextual-chunking work ([§11](#11-what-is-actually-measured)).
 - **Cold-start context cost** is bounded and budget-gated but still ~11.3k tokens (the sub-3k target is proposed),
   and most tests use tiktoken rather than live LLM APIs.
@@ -493,7 +497,13 @@ honoured only when `verify_document` validates an authentic signature over its s
 bogus-signature, or tamper-after-sign `trust_tier: verified` document is **withheld** at read on both the scan and
 index paths (re-verified by re-running the forgery exploit). This is what converts the git-native substrate from a
 liability into a genuine security control. The KB's trust posture is auditable in one command — `bob-optimize attest`
-lists every document that claims `verified` without a valid signature (and `--strict` fails CI on any).
+lists every document that claims `verified` without a valid signature (`--strict` exits non-zero — run it where the signing key lives; see the CI note below).
+
+**What `attest` reports on this repo today:** `118 attested · 1 authentic · 117 untrusted · 0 withheld`. Every document claiming `trust_tier: verified` is authentically signed — the one that previously claimed the tier without a signature was promoted through `kb-promote`, which signs it, rather than having the claim quietly deleted.
+
+Read the 117 honestly: `untrusted` is not a failure state, it is the default. It means those documents make no trust claim and are retrievable on their own merits. **Review every KB document like code**; the signature detects tampering, it does not vouch for content. Reproduce with `bob-optimize attest --kb-path docs/knowledge-base`.
+
+Note a real limit: verification is HMAC-keyed on a local secret, so **CI cannot check signatures** — it runs the keyless structural check (`scripts/check_trust_claims.py`) that a claimed tier carries a signature at all, which is the forgery that matters. Cryptographic verification runs where the key lives.
 
 The posture is now *load-bearing*, not *hardened*: the provenance key is a **local integrity secret** — it proves a
 document was produced by something holding this repo's key and detects tampering, but it is not a public-key identity
@@ -532,7 +542,7 @@ Organized into six opportunity spaces and three horizons (full detail in the inn
 
 ```bash
 uv sync --frozen                       # locked dev environment
-pytest -q                              # run the suite (1,386 passing, ex load/perf)
+pytest -q                              # run the suite (1,414 passing, ex load/perf)
 pytest --cov=src --cov-report=term     # coverage (gate ≥80%, ≈89% measured)
 ruff check . && ruff format --check .   # lint + format
 mypy src                               # type check
@@ -542,7 +552,7 @@ python -m src.validation --corpus repo # reproduce the savings measurement
 CI runs a 3.11 / 3.12 matrix with a coverage gate and per-package floors, ruff, mypy, a flag-gated e2e suite, the
 manifest-backed validation harness (null + provenance gates), an SBOM with a blocking `pip-audit --strict`, bandit
 SAST, a `src → scripts` layering gate, and provenance/consistency/gate-integrity validators (the honesty gates carry
-planted-defect tests that prove they can fail). See [CONTRIBUTING.md](CONTRIBUTING.md),
+each gate ships a self-test that plants a known defect and requires the gate to catch it, run before the real scan in CI). See [CONTRIBUTING.md](CONTRIBUTING.md),
 [GOVERNANCE.md](GOVERNANCE.md), and [SUPPORT.md](SUPPORT.md).
 
 ## 16. Provenance & honesty policy
@@ -553,10 +563,17 @@ savings number) was produced by a simulation that never invoked the optimizer; i
 documented** — see [`evaluation/validation-disclaimer.md`](evaluation/validation-disclaimer.md). The replacement
 harness includes a null test, refuses to gate on savings *magnitude* (which would re-incentivise inflation), and
 reports each mechanism separately. In the same spirit, the earlier self-assessed "A+" grade has been **withdrawn** —
-self-grading is not a substitute for independent verification; the on-file independent verdicts are the counter-audit
-(2.9/5) and the post-remediation re-audits (3.8 → 4.2/5 across two verified waves; a formal independent re-grade is
-pending). `STATUS.md` is the one home for the maturity status, enforced by
+self-grading is not a substitute for independent verification. The on-file independent verdicts are the counter-audit
+**2.9/5** (2026-07-19) and **NO-GO 3.46/4.30** (2026-07-14); a formal independent re-grade is pending and no
+post-remediation score has been filed. `STATUS.md` is the one home for the maturity status, enforced by
 `scripts/check_status_consistency.py`.
+
+The same discipline applied to this file on 2026-07-25: a full-project audit found this section publishing a
+**4.2/5** "independent audit score" that was a projection, not a verdict, sourced to a document that was never
+committed. The grade-provenance gate did not catch it because its pattern only matched the bold
+`**<letter> (n.nn/4.30)**` shape, so a bare `n.n/5` score was invisible to it — a gate that could not see the
+violation it existed to prevent. Both the claim and the gate's blind spot are recorded here rather than quietly
+corrected. (Written with a placeholder rather than the literal token, because the literal is what the gate matches.)
 
 ## 17. Project documents
 
@@ -568,7 +585,7 @@ pending). `STATUS.md` is the one home for the maturity status, enforced by
 | [docs/BOB-IDE-GUIDE.md](docs/BOB-IDE-GUIDE.md) | Bob IDE complete reference (activation, tool groups, skill, troubleshooting) |
 | [docs/kb-manager/ARCHITECTURE.md](docs/kb-manager/ARCHITECTURE.md) · [docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md) | arc42 architecture (KB Manager · Python system) |
 | [INTEGRATIONS.md](INTEGRATIONS.md) | The three opt-in KB ↔ TOS integration points (fallback-safe) |
-| [docs/sla.md](docs/sla.md) · [docs/security/threat-model.md](docs/security/threat-model.md) · [docs/adr/](docs/adr/) | SLA v1.0 · STRIDE threat model · 19 ADRs |
+| [docs/sla.md](docs/SLA.md) · [docs/security/threat-model.md](docs/security/threat-model.md) · [docs/adr/](docs/adr/) | SLA v1.0 · STRIDE threat model · 19 ADRs |
 | [SECURITY.md](SECURITY.md) · [CONTRIBUTING.md](CONTRIBUTING.md) · [GOVERNANCE.md](GOVERNANCE.md) · [SUPPORT.md](SUPPORT.md) | Vulnerability reporting, contribution, governance, support |
 | [`docs/knowledge-base/research/`](docs/knowledge-base/research/) | Dated audits: counter-audit & adversarial audit (07-19), re-audit (07-20), innovation portfolio (v1 07-19 + v2 07-20) |
 | [`evaluation/validation-disclaimer.md`](evaluation/validation-disclaimer.md) | The fabricated-figure retraction record |

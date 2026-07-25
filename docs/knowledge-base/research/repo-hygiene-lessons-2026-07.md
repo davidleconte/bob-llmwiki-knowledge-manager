@@ -257,10 +257,10 @@ ls *.md | grep -vE "^(README|CHANGELOG|AGENTS|CONTRIBUTING|GOVERNANCE|INTEGRATIO
 ## Sources
 
 - [`.gitignore`](../../../.gitignore) — updated with `LABs/`, `Recipes/`, anchored plan patterns
-- [`.bob/mcp.json`](../../../.bob/mcp.json) — redacted API key, portable paths
-- [`docs/project-management/reviews/HANDOFF_PROMPT.md`](../../project-management/reviews/HANDOFF_PROMPT.md) — absolute paths replaced
-- [`evaluation/LIVE_EXAMPLE_HCD_ANALYSIS.md`](../../../evaluation/LIVE_EXAMPLE_HCD_ANALYSIS.md) — absolute paths replaced
-- [`evaluation/TEST_REPOSITORIES.md`](../../../evaluation/TEST_REPOSITORIES.md) — absolute paths replaced
+- [`.bob/mcp.json`](../../../.bob/mcp.json.example) — redacted API key, portable paths
+- [`docs/project-management/reviews/HANDOFF_PROMPT.md`](../../project-management/reviews/handoff-prompt.md) — absolute paths replaced
+- [`evaluation/LIVE_EXAMPLE_HCD_ANALYSIS.md`](../../../evaluation/live-example-hcd-analysis.md) — absolute paths replaced
+- [`evaluation/TEST_REPOSITORIES.md`](../../../evaluation/test-repositories.md) — absolute paths replaced
 
 ## Related Documents
 

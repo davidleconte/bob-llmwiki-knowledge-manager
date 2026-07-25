@@ -155,7 +155,7 @@ where R = repair sprint (Sub-Task R), 0 = baseline freeze.
 
 ## Sub-Task 0 — Baseline Freeze (Gate-Green Prerequisite)
 
-**Status:** `[ ] pending`
+**Status:** `[x] closed` — verified 2026-07-25: all six honesty gates + `validate-kb` exit 0 on this tree
 
 ### Intent
 Fix the three currently failing CI gates and two genuine test failures before
@@ -202,7 +202,7 @@ sub-task starts from a known baseline. Addresses CLM-01 from the counter-audit.
 
 ## Sub-Task R — Integrity Repair Sprint (Broken Pointers, Case Bug, Subshell)
 
-**Status:** `[ ] pending`
+**Status:** `[~] PARTIALLY closed` — verified 2026-07-25. The `validate-kb.sh` subshell counter bug and the 15 broken KB refs are fixed. **The case bug is NOT fixed:** the 2026-07-25 audit found ~103 case-broken references still live tree-wide (e.g. 8 inbound links to `security/THREAT_MODEL.md` when the file is `threat-model.md`), plus 11 tracked files whose git-index filename case differs from the on-disk name. Tracked as Wave 2 of the audit remediation.
 
 ### Intent
 Close the counter-audit's High-severity KB integrity cluster: MEM-02
@@ -259,7 +259,7 @@ retrieval claim and for the trust in the integrity gates.
 
 ## Sub-Task 1 — Path Containment on All KB Read Paths
 
-**Status:** `[ ] pending`
+**Status:** `[x] closed` — `tests/security/test_path_containment.py`
 
 ### Intent
 Apply `resolve_within()` to every file-open call in `KnowledgeBaseQuery` that
@@ -310,7 +310,7 @@ This sub-task addresses (b) on all paths.
 
 ## Sub-Task 2 — Cache Integrity: Exact-Key Promotion, TTL, Metadata Isolation
 
-**Status:** `[ ] pending`
+**Status:** `[x] closed` — `tests/security/test_cache_integrity.py`; L2 contract residuals R-1 (ATK-FS-02/04/05) closed in `443ad77`
 
 ### Intent
 Close ATK-FS-02 (cache poisoning), ATK-FS-04 (TTL bypass in `contains()`),
@@ -367,7 +367,7 @@ via its own exact key, not via cosine similarity matching.
 
 ## Sub-Task 3 — Retrieval Wiring: Wire Index + Graph into Every Production Path
 
-**Status:** `[ ] pending`
+**Status:** `[x] closed` — `tests/retrieval/test_wiring.py`
 
 ### Intent
 This is the **highest-ROI fix in the plan** (~20 lines of code, p@3 uplift
@@ -441,7 +441,7 @@ Two separate fixes:
 
 ## Sub-Task 4 — Optimizer Integrity: Structure Preservation and Never-Empty Contract
 
-**Status:** `[ ] pending`
+**Status:** `[x] closed` — `tests/optimizer/test_optimizer_integrity.py`
 
 ### Intent
 Close CODE-03 (optimizer returns empty string for inputs >4096 tokens) and
@@ -502,7 +502,7 @@ line and returns `""` when the single line exceeds `max_tokens=4096`.
 
 ## Sub-Task 5 — Ranking Algebra: Normalization and Signal Calibration
 
-**Status:** `[ ] pending`
+**Status:** `[x] closed` — `tests/retrieval/test_ranking_normalization.py`
 
 ### Intent
 Close CODE-05 (recency normalization numerically inert) and CODE-06 (PageRank
@@ -564,7 +564,7 @@ Root causes confirmed:
 
 ## Sub-Task 6 — KB Content Sanitization (Prompt Injection Boundary)
 
-**Status:** `[ ] pending`
+**Status:** `[x] closed` — `tests/security/test_prompt_injection_boundary.py`
 
 ### Intent
 Close ATK-MEM-01 (indirect prompt injection). KB documents are loaded verbatim
@@ -614,7 +614,7 @@ is the trust boundary; the fix makes that boundary visible.
 
 ## Sub-Task 7 — Provenance, Trust Tier, and Review-Gated Writes
 
-**Status:** `[ ] pending`
+**Status:** `[x] closed` — `src/provenance.py` + `tests/security/test_trust_tier.py`; verify-at-read enforced in `0e97f6e` (ATK-MEM-02). **Caveat:** `bob-optimize attest` reports 0 of 118 documents authentic — enforcement is live, the corpus is unsigned.
 
 ### Intent
 Close ATK-MEM-02 (no trust tier), ATK-MEM-04 (unreviewed auto-commit),
@@ -677,7 +677,7 @@ provenance*, which neither RAG stores nor MCP memory servers offer."
 
 ## Sub-Task 8 — Honesty Gate: Savings Claim Binding and Magnitude Cap
 
-**Status:** `[ ] pending`
+**Status:** `[x] closed` — `scripts/check_savings_claims.py` + `tests/gates/test_savings_gate.py`. **Residual:** the scan does not reach `2026_IBMer_Watsonx_Challenge/**` (audit finding G-1); widened in Wave 5.
 
 ### Intent
 Close ATK-GATE-03 (savings gate keyword bypass) and ATK-GATE-01 (no magnitude
@@ -732,7 +732,7 @@ value binding.
 
 ## Sub-Task 9 — Status and Grade Gate Hardening
 
-**Status:** `[ ] pending`
+**Status:** `[x] closed` — `tests/gates/test_status_gate.py`. **Residual:** the grade regex matches only the bold `(n.nn/4.30)` shape, so an `n.n/5` score evades it (audit finding N-5); widened in Wave 5.
 
 ### Intent
 Close ATK-GATE-02 (status validator fails open on renamed doc), ATK-GATE-06
@@ -783,7 +783,7 @@ no guard anywhere.
 
 ## Sub-Task 10 — Gate Independence (Self-Referential Gate Architecture)
 
-**Status:** `[ ] pending`
+**Status:** `[x] closed` — `scripts/check_gate_integrity.py`. **Residual:** `.github/workflows/**` is not treated as a gate definition, so a PR can stop invoking a gate and plant a claim together (audit finding G-2); fixed in Wave 5.
 
 ### Intent
 Partially close ATK-GATE-07. Externalize gate thresholds and configuration
@@ -849,7 +849,7 @@ goes in `config/gates/` to avoid collision with existing content.
 
 ## Sub-Task 11 — DoS Hardening: Edge Cap, L2 Scan, Index Reclamation
 
-**Status:** `[ ] pending`
+**Status:** `[x] closed` — `tests/performance/test_dos_hardening.py` (9 tests). **These ran in no CI job until `be7df58`** (2026-07-25) — the fix was real, its durability proof was not executing.
 
 ### Intent
 Close ATK-DOS-02 (semantic graph edge explosion), ATK-DOS-03 (L2 O(n) per-miss
@@ -904,7 +904,7 @@ below verifies the fix is intact; no code change is needed for ATK-DOS-01.
 
 ## Sub-Task 12 — Supply-Chain Hygiene
 
-**Status:** `[ ] pending`
+**Status:** `[x] closed` — SBOM + Dependabot wired in CI
 
 ### Intent
 Close ATK-SUP-09 (committed lab credential, enabled preview/placeholder MCP
@@ -946,7 +946,7 @@ trivially fixable and a credential in a config file violates the project's own
 
 ## Sub-Task 13 — Adversarial Regression Suite and Program Gate
 
-**Status:** `[ ] pending`
+**Status:** `[x] closed` — 11 modules under `tests/security/` plus `tests/gates/`
 
 ### Intent
 Create the complete adversarial regression test infrastructure. Individual tests

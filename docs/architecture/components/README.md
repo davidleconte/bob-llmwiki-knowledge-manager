@@ -30,7 +30,7 @@ This document covers:
 
 Original component specifications (5,534 lines total) have been moved to:
 
-**Location:** [deprecated/](../deprecated/)
+**Location:** the removed `deprecated/` tree (git history)
 
 **Contents:**
 - BATCH.md (828 lines) — Batch processing (not implemented)
@@ -41,7 +41,7 @@ Original component specifications (5,534 lines total) have been moved to:
 - OPTIMIZER.md (698 lines) — Original optimizer (implemented differently)
 - TRUNCATION.md (751 lines) — Original truncation (implemented differently)
 
-**Why Deprecated:** See [deprecated/README.md](../deprecated/README.md)
+**Why Deprecated:** See `deprecated/README.md` (git history)
 
 ---
 
@@ -97,7 +97,7 @@ Original component specifications (5,534 lines total) have been moved to:
 ## Related Documentation
 
 - **Current Architecture:** [ARCHITECTURE.md](../ARCHITECTURE.md) — authoritative, v3.0
-- **Deprecated Specs:** [deprecated/](../deprecated/)
+- **Deprecated Specs:** the removed `deprecated/` tree (git history)
 - **Gap Analysis:** [docs/knowledge-base/research/external-audit-2026-07-12.md](../../knowledge-base/research/external-audit-2026-07-12.md)
 
 ---

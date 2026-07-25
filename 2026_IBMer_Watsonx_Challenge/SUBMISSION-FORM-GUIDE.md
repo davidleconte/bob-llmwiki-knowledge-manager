@@ -1,5 +1,22 @@
 # Submission Form Guide — do the whole form from here
 
+> ✅ **SUBMITTED — frozen 2026-07-25.** This pack was submitted to the 2026 IBMer
+> watsonx Challenge before the **22 July 2026, 10:00 ET** deadline, as a zip of the
+> repository at that release. It is preserved as the record of what was entered and is
+> **no longer a working document**: unchecked boxes below are the state at submission,
+> not outstanding work, and the deadline references are historical.
+>
+> Numbers here were correct against the evidence available on 22 July. Two have since
+> been superseded and are **not** retro-edited, because this is a submission record:
+>
+> * **Compression.** The pack cites ~20% mean. A 2026-07-25 re-measurement puts the
+>   current system at **6.8%** — the optimizer was made structure-preserving, trading
+>   ~12pp of compression for fidelity (0.798 → 0.995). See [`STATUS.md`](../STATUS.md).
+> * **The ≈60% Bobcoin figure.** A single-project practitioner observation with **no
+>   repo artifact**, as `09-compound-loop-demo.md` in this same pack says of it. It was
+>   labelled as an observation rather than a measurement, which was the right call, but
+>   it is not reproducible and should not be repeated as one.
+
 > Platform: `compete.ibmer.watsonx-challenge.ibm.com` → **Submissions** tab. **Deadline: July 22, 10:00 ET.**
 > You can resubmit; only the **last** submission counts.
 
@@ -12,10 +29,10 @@
 - [ ] Judging = **Yes** → committee = **Software**
 
 ## 1 — Field 1 (Solution statement)
-Open **`paste-field1.txt`** → Select All → Copy → paste into the form. (Header already stripped; 483 words ≤ 500.)
+Copy everything below the `---` in **`01-solution-statement.md`** → paste into the form. (483 words ≤ 500.) *A `paste-field1.txt` scratch file was used at submission time; it was never committed, so this step now names the tracked source instead of a file a fresh clone would not have.*
 
 ## 2 — Field 2 (Technical statement)
-Open **`paste-field2.txt`** → Select All → Copy → paste. (478 words ≤ 500.)
+Copy everything below the `---` in **`02-technical-statement.md`** → paste. (478 words ≤ 500.)
 
 > **Plain-text caveat:** if the form box shows literal `**` / backticks, the field is plain-text — ask me for
 > a de-formatted version and I'll strip the markdown in ~30 seconds.
@@ -57,7 +74,7 @@ Upload **`08-pitch-deck.pdf`** (3 pages, 0.46 MB — within the ≤3-page / ≤1
 ---
 
 ### Files in this folder
-- `paste-field1.txt`, `paste-field2.txt` — clean, header-stripped bodies to paste
+- `01-solution-statement.md`, `02-technical-statement.md` — the tracked sources; paste the body below the `---` (the untracked `paste-field*.txt` scratch files are not part of the pack)
 - `08-pitch-deck.pdf` — the judged pitch (source: `08-pitch-deck.html`)
 - `AB-velocity-measurement-protocol.md` — how to get the measured velocity number (Field 3 Option C)
 - `01`–`03` — the field sources · `04`/`06`/`07`/`README` — internal working notes (not submitted)

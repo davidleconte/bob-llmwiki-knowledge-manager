@@ -167,7 +167,7 @@ progressively improve retrieval quality as they are activated:
 
 | Layer | What it adds | How it is activated |
 |---|---|---|
-| **Semantic embedding index** | KB search uses MiniLM dense vectors instead of keyword matching. Retrieval precision p@3 = 0.84 (21/25), matched by keyword-only — no net lift on the shipped backend (report.json: evaluation/results/retrieval-2026-07-19/report.json). | `bob-optimize index-kb` |
+| **Semantic embedding index** | KB search uses MiniLM dense vectors instead of keyword matching. Retrieval precision p@3 = 0.84 (21/25), matched by keyword-only — no net lift on the shipped backend (report.json: evaluation/results/retrieval-2026-07-19/report.json). | `bob-optimize graph-build --with-semantic` |
 | **Knowledge graph** | Surfaces orphaned documents, dead cross-references, and authority hubs. Turns a flat file collection into a navigable graph. | `bob-optimize graph-build` |
 | **Parallel analysis pipeline** | Runs 6 analysis agents simultaneously on your repository, compresses their output, and files the findings into the KB in a single command. | `bob-optimize analyze` |
 
@@ -535,7 +535,7 @@ started today produces a data-backed decision by mid-August.
 | [KB Savings Measurement Guide](../guides/km-bobcoin-savings-measurement-guide.md) | How to measure your own workload savings during the pilot |
 | [KB-TOS Integration Roadmap](../guides/kb-tos-integration-roadmap.md) | P1/P2/P3 integration milestones and current status |
 | [Architecture — KB Manager](../../../docs/kb-manager/ARCHITECTURE.md) | KB Manager arc42 architecture (arc42 v2.1) |
-| [Architecture — Token Optimizer](../../../docs/architecture/architecture.md) | Python token-optimizer architecture (arc42 v3.0) |
+| [Architecture — Token Optimizer](../../architecture/ARCHITECTURE.md) | Python token-optimizer architecture (arc42 v3.0) |
 | [STATUS.md](../../../STATUS.md) | Canonical maturity status — single source of truth |
 
 ---

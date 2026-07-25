@@ -15,7 +15,7 @@ It has no uptime SLA, no concurrent-user model, and no on-call rotation.
 The SLAs below are **latency and throughput targets** for a single-operator workstation
 running on developer-class hardware (Apple M3 Pro or equivalent x86 laptop, Python 3.11+).
 
-> Formal uptime / availability SLAs are explicitly **not claimed** here. See [`STATUS.md`](STATUS.md).
+> Formal uptime / availability SLAs are explicitly **not claimed** here. See [`STATUS.md`](../STATUS.md).
 
 ---
 
@@ -71,9 +71,9 @@ from all latency targets.
 
 ## Quality SLAs
 
-| Metric | Target | Measured (N=183, 2026-07-14) |
+| Metric | Target | Measured (N=265, 2026-07-25) |
 |---|---|---|
-| Lossless compression savings | ≥ 15% mean | 20.0% mean (95% CI [18.9%, 21.2%]) — manifest: `evaluation/results/validation-2026-07-14/manifest.json` |
+| Lossless compression savings | **target under review** — the 2026-07-25 re-measurement puts the system at 6.8%, below the ≥15% written here when the optimizer compressed to its quality floor | 6.8% mean (95% CI [6.2%, 7.4%]) — manifest: `evaluation/results/validation-2026-07-25/manifest.json`. The optimizer was deliberately made structure-preserving (fidelity 0.798 -> 0.995); the SLA target predates that trade and needs an owner decision, so it is flagged rather than quietly lowered. |
 | Null-test pass (shuffled input savings < threshold) | Must pass | PASS |
 | tiktoken active (not estimated) | Always | PASS |
 

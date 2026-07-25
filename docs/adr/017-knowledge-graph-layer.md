@@ -71,7 +71,7 @@ The `PersistentEmbeddingIndex` operates at chunk granularity
 (`category/file.md#slug`). The graph must operate at document granularity because:
 
 1. Cross-references in markdown always point to files, not sections:
-   `[See caching](../concepts/caching.md)` never `../concepts/caching.md#performance-targets`
+   `[See caching](../knowledge-base/concepts/multi-level-caching.md)` never `../concepts/caching.md#performance-targets`
 2. Users reason about *documents*, not chunks, when navigating the KB
 3. At 78 documents, chunk-level nodes (estimated ~400–600) would create a
    5–8× explosion in node count and edge count with no retrieval benefit
@@ -296,8 +296,8 @@ Validated with **two embedding backends**: `HashingVectorizer` (fallback) and
 | Graph build on live KB | < 5s | 88 ms | ~90 ms | ✅ |
 | Orphan count | Documented | 40→13 | 39→13 | ✅ |
 | Semantic / explicit edge ratio | ≤ 10:1 | 17:1 ⚠️ | 16:1 ⚠️ | see note |
-| p@3 (embedding only) | ≥ 0.88 baseline | 0.60 | **0.88** | ✅ (MiniLM) |
-| p@3 with `graph_weight=0.3` | ≥ baseline, no regression | 0.60 | 0.88 | ✅ |
+| p@3 (embedding only) | ≥ 0.88 baseline | 0.60 | **0.88** | ✅ (MiniLM; lab, unmanifested — superseded by report.json) |
+| p@3 with `graph_weight=0.3` | ≥ baseline, no regression | 0.60 | 0.88 | ✅ (lab, unmanifested — superseded by report.json) |
 
 > ⚠️ **On the semantic/explicit ratio:** Both backends exceed 10:1 because this
 > corpus is a single-topic project (all documents are about the same Python
@@ -316,7 +316,7 @@ Validated with **two embedding backends**: `HashingVectorizer` (fallback) and
 | Parameter | Validated Value | Notes |
 |---|---|---|
 | `semantic_threshold` | **0.30** | Rescues 26/39 orphans; stable from 0.20–0.40 with MiniLM |
-| `graph_weight` default | **0.0** | No p@3 uplift on MiniLM corpus; safe conservative default |
+| `graph_weight` default | **0.0** | No p@3 uplift on MiniLM corpus (lab, unmanifested; superseded by report.json); safe conservative default |
 | `graph_weight` max tested | 0.5 | No regression at any tested weight (0.1–0.5) on MiniLM |
 
 **Follow-up action item (ADR-015 amendment):** Wire `sentence-transformers` as a

@@ -39,10 +39,15 @@ An ADR:
 
 ## Roadmap
 
-The project follows a dependency-ordered remediation roadmap (Phases 0–8),
-tracked in `AGENTS.md` and the audit under
-`docs/knowledge-base/research/`. The current phase status is a single home in
-`AGENTS.md`, validated by `scripts/check_status_consistency.py`.
+The project follows a dependency-ordered remediation roadmap (Phases 0–8, then the
+2026-07 waves), with the audit trail under `docs/knowledge-base/research/`.
+
+**The single home for status, maturity and grade is [`STATUS.md`](STATUS.md)** —
+validated by `scripts/check_status_consistency.py`, which reads STATUS.md and the
+other live docs and fails CI on divergence. This paragraph previously named
+`AGENTS.md` as that home, which was wrong twice over: AGENTS.md itself says "Do not
+derive status from this file", and no validator ever enforced the claim. Corrected
+2026-07-25.
 
 ## Changing this document
 

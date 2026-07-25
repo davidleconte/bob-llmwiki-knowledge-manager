@@ -1,0 +1,51 @@
+{
+  "code_sha": "82d307a68d5a422daf5c1f813f68ab19155b07bd",
+  "config": {
+    "cache": {
+      "l1_enabled": true,
+      "l1_max_size": 1000,
+      "l1_ttl_seconds": 3600,
+      "l2_enabled": true,
+      "l2_max_size": 10000,
+      "l2_similarity_threshold": 0.85,
+      "l2_ttl_seconds": 86400,
+      "max_versions": 5,
+      "version_support_enabled": true
+    },
+    "monitoring": {
+      "enabled": true,
+      "health_check_interval": 60,
+      "log_level": "INFO",
+      "metrics_enabled": true
+    },
+    "optimizer": {
+      "max_tokens": 4096,
+      "min_quality_score": 0.8,
+      "strategies": [
+        "remove_whitespace",
+        "compress_repeated"
+      ],
+      "target_reduction": 0.3
+    }
+  },
+  "data_hash": "31e9fa606923ab327138faead1af415a53c764ae808988e04d025549a7681e7f",
+  "extra": {
+    "cache_repeat_rate": 0.3,
+    "corpus": "repo",
+    "environment": "dev",
+    "n_docs": 265,
+    "truncation_budget": 256
+  },
+  "git_dirty": true,
+  "library_versions": {
+    "numpy": "2.5.1",
+    "scikit-learn": "1.9.0",
+    "tiktoken": "0.13.0"
+  },
+  "model": "gpt-4",
+  "platform": "macOS-26.4.1-arm64-arm-64bit",
+  "python_version": "3.12.10",
+  "seed": 0,
+  "tiktoken_active": true,
+  "timestamp": "2026-07-25T16:38:58.943522+00:00"
+}

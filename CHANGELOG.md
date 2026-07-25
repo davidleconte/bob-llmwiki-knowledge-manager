@@ -7,7 +7,101 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- oldest-release marker; see [1.1.0] above for the current release -->
-## [Unreleased] — 2026-07-19 Adversarial Audit & Remediation
+## [1.2.0] - 2026-07-25 — Wave 3 completion + full-project audit remediation
+
+> Cut 2026-07-25. Covers PRs #26–#41 (Wave 3) plus the 2026-07-25 Tier-1 full-project
+> audit and its remediation. Feature-bearing, hence a minor bump.
+
+> ⚠️ **The savings headline changed in this release, and not because of new work.**
+> Re-running the measurement found **6.8% mean compression** (95% CI [6.2%, 7.4%],
+> N=265, manifest `evaluation/results/validation-2026-07-25/`), superseding the 20.0%
+> published since 2026-07-14. The cause is a deliberate trade made earlier and never
+> re-measured: on the *same 120 documents*, the 2026-07-14 code scores 19.63% at
+> quality 0.798 and today's scores 7.57% at quality 0.995. The optimizer was made
+> structure-preserving. See `STATUS.md`.
+>
+> Recorded on 2026-07-25 by the full-project audit, which found the CHANGELOG's
+> newest entry frozen at 2026-07-19 while **18 PRs had merged after it** — including
+> two new modules and a new user-facing CLI subcommand. `grep -niE
+> 'attest|velocity|limits\.py|scale-regression|ATK-MEM-02' CHANGELOG.md` returned
+> nothing before this entry existed.
+
+### Added
+
+- **Governed-memory attestation** (`src/attest.py`, `bob-optimize attest`) — reports,
+  per KB document, whether a `trust_tier: verified` claim is backed by a valid
+  provenance signature: authentic / untrusted / **WITHHELD**. On the current corpus it
+  reports 118 attested, **1 authentic, 0 withheld** as of 2026-07-25: the one document
+  that claimed `trust_tier: verified` without a signature was promoted through
+  `kb-promote` (which signs it) rather than having the claim deleted (PR #41,
+  `af77dfb`).
+- **A/B developer-velocity harness** (`src/velocity.py`, `evaluation/velocity/`) — the
+  instrument for a paired, pre-registered cost-per-resolved-task measurement. Honesty
+  guards are enforced in code; it needs real session data to produce a number, and
+  until then no velocity claim is published (PR #41, `af77dfb`).
+- **A7 global input-bound caps** (`src/limits.py`) — one home for `MAX_FILE_BYTES`,
+  `MAX_CHUNKS_PER_DOC`, `MAX_QUERY_CHARS`, `MAX_GRAPH_NODES`, enforced at the chunker,
+  index ingest, query entry and graph builder. Registered with
+  `scripts/check_value_homes.py` and restated in the CODEOWNERS-reviewed
+  `config/gates/gate-config.yaml` so weakening a ceiling is conspicuous (PR #39, `37c1ebc`).
+- **A8 scale-regression gate** (`tests/performance/test_scale_invariants.py`) — ratio
+  ceilings read from `gate-config.yaml`, never re-declared in the test. Calibrated from
+  measurement, not assumption: the spec's `l2_evict` ratio of 1.5 was wrong (O(1)
+  `popitem` shows ~4× memory-locality effects; an O(N) min-scan ~46×), so the ceiling is
+  8.0 (PR #39, `37c1ebc`).
+- **Cold-start budget map** — bounded, budget-gated, orphan-safe (`src/cold_start.py`,
+  surfaced in `bob-optimize kb-status`) (PRs #30/#36, `af65006`).
+- **Archived trust tier + `kb-promote` provenance** for KB curation (PR #32, `147aeec`).
+- **`analyze --allow-external`** for out-of-cwd analysis — containment **rebased, not
+  relaxed**, across all three enforcement layers, with 26 security tests (PR #33, `9606fdc`).
+- **Held-out corpus reproduction gate** (C4/ATK-GATE-01) — a frozen i.i.d. slice that an
+  honest headline reproduces within ~0.5pp while a cherry-picked one diverges by ~9pp
+  (PR #29, `7e044d4`).
+- **E1 re-grade kit** (`evaluation/regrade/`) — verdict template plus a gate that checks
+  the kit's own path citations resolve (PRs #37/#38).
+- **Wave-3 exit status** (`docs/project-management/plans/wave3-status.md`) — finding →
+  commit map and exit-criteria checklist (PR #40).
+
+### Fixed
+
+- **Verify-at-read trust enforcement (ATK-MEM-02, HIGH).** The retrieval read path now
+  requires a valid provenance signature before honouring `trust_tier: verified`;
+  previously the tier was trusted straight from frontmatter, and `verify_document` was
+  wired only into promotion, never into reads. A hand-forged `verified` document is now
+  withheld on both read paths. Mutation-verified (PR #39, `0e97f6e`).
+- **L2 semantic-cache contract residuals (R-1).** ATK-FS-05 metadata dict-copy
+  (aliasing), ATK-FS-04 TTL honoured on `get_with_similarity`, ATK-FS-02 collision guard
+  — a near-perfect cosine match to a *distinct* stored prompt is now refused, failing
+  safe to a miss. Two `test_metadata_storage` tests that had asserted the aliasing bug
+  were corrected (PR #41, `443ad77`).
+- **Budget-honest optimizer cache key (NEW-1).** `_cache_key` now folds in the effective
+  `max_tokens` and strategy set, so a cached result cannot be served for a different
+  budget (PR #41, `443ad77`).
+- **B615 bandit finding** scoped with a justified `nosec` for the offline granite
+  tokenizer (PR #27, `36d8f2c`).
+
+### Changed
+
+- **Coverage gate scope** widened so `src/tools/` and `src/delegation/` fold into the
+  gated denominator, with per-package floors (PR #26).
+- **Wave-3 governance gates** — banner-hatch (C1), metric-claim (C2), grade-provenance
+  (C5) (PR #28).
+- **Vulnerable-layer test discipline institutionalised** in
+  `adversarial-remediation-plan.md`: every security fix carries a regression test at the
+  layer the attack *lands* on, not where the PoC happened to be written.
+
+### Known open at this entry
+
+- **NEW-2/3/4** (Low/cosmetic: date-filter index path, edge-cap direction, staleness
+  noise) — verified real, deferred, tracked in `wave3-status.md` §2.
+- **R14** — an independent re-grade by a distinct lineage. This is the sole remaining
+  GO-blocker; no post-remediation score is on file (see `STATUS.md`).
+
+## [Unreleased — earlier section] — 2026-07-19 Adversarial Audit & Remediation
+
+> Retained as written. This section covers Waves 0–2 and the Wave-3 Phase-1 gates
+> (PRs #24/#25); the section above continues from it with PRs #26–#41. Both are
+> unreleased: the two together are what `1.2.0` would contain.
 
 ### Research / Audits Added
 - **Independent Counter-Audit 2026-07-19** (`docs/knowledge-base/research/counter-audit-2026-07-19-independent.md`):
@@ -32,7 +126,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Index, Docling Ingestion Bridge, Memory-Lifecycle Intelligence ("the Gardener"),
   Trust-Tiered Memory.
 
-### Added — Adversarial Regression Test Suites (untracked, pending merge)
+### Added — Adversarial Regression Test Suites (merged 2026-07-19 in PR #24/#25)
 
 - **`tests/security/`** — 4 test modules covering ATK-FS-01 (path containment on all
   KB read paths), ATK-FS-02/CODE-08 (cache integrity: exact-key promotion, TTL,
@@ -142,7 +236,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   broken links, PageRank top-10).
 - **Live validation** (`docs/knowledge-base/research/graph-validation-2026-07-17.md`):
   80-doc corpus, 2 836 edges (163 explicit + 2 654 semantic), 39→13 orphans rescued
-  by semantic edges, p@3=0.88 with MiniLM (no regression, no uplift from graph
+  by semantic edges, p@3=0.88 with MiniLM (lab, unmanifested; superseded by report.json; no regression, no uplift from graph
   re-ranking at any tested weight). Validated defaults: `semantic_threshold=0.30`,
   `graph_weight=0.0`. See ADR-017.
 
@@ -403,7 +497,7 @@ retracted and replaced with manifest-backed measurements. See [`STATUS.md`](STAT
 - **The fabricated "68.96% / VALIDATED" savings figure is retracted.** The
   simulation that produced it never invoked the optimizer; Phase 5 replaced it
   with the real harness and reduced the old validator to a thin shim. See
-  [`evaluation/VALIDATION_DISCLAIMER.md`](evaluation/VALIDATION_DISCLAIMER.md).
+  [`evaluation/VALIDATION_DISCLAIMER.md`](evaluation/validation-disclaimer.md).
 - **The fabricated security architecture in ADR-012 is retracted** (Phase 7). It
   documented an auth / AES-256 / RBAC / rate-limit / audit-log stack and asserted
   it had passed a security audit with zero incidents — none of which was ever

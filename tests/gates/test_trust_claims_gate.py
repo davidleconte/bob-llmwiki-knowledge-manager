@@ -68,3 +68,17 @@ def test_malformed_signature_does_not_count():
 # NOTE: the assertion that the *live tree* has no unsigned trust claims lives in
 # the claim-surface PR — that is the PR which promotes (and thereby signs) the one
 # document `attest` was withholding. This file tests the detector.
+
+
+# ── The live tree (this PR promotes the one document that was withheld) ──────────
+
+
+def test_live_tree_has_no_unsigned_trust_claims():
+    """The condition the audit found violated: one document claimed the verified tier
+    with nothing backing it, and `attest` withheld it at read. This PR promotes it
+    through `kb-promote`, which signs it — so the claim is now backed rather than the
+    tier being hand-edited away."""
+    from scripts.check_trust_claims import unsigned_trust_claims
+
+    bad = unsigned_trust_claims()
+    assert bad == [], "unsigned `trust_tier: verified` claims: " + ", ".join(bad)
