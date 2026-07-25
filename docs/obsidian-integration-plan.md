@@ -1,5 +1,14 @@
 # Obsidian Integration Plan
 
+> ✅ **EXECUTED — closed 2026-07-25.** All six sub-tasks shipped; each `Status` line
+> below cites the artifact that closes it. This document is retained as the design
+> record, not as open work. Until 2026-07-25 every sub-task still read
+> `[ ] pending` while the code had been in the tree for days — a tracking-doc
+> staleness the full-project audit flagged.
+>
+> The live operator documentation is
+> [`docs/knowledge-base/guides/obsidian-integration-guide.md`](knowledge-base/guides/obsidian-integration-guide.md).
+
 ## Top-Level Overview
 
 Two independent features that together make the Mnemox knowledge graph visible and
@@ -37,7 +46,7 @@ Document prerequisites and setup in a new KB guide.
 
 ### ST-1 — Obsidian Canvas exporter (`scripts/export-kb-graph-canvas.py`)
 
-**Status:** [ ] pending
+**Status:** [x] closed — verified 2026-07-25: `scripts/export-kb-graph-canvas.py` + `scripts/canvas_export.py`
 
 **Intent**
 Produce a `kb-export/kb-semantic-graph.canvas` file that renders the Mnemox
@@ -104,7 +113,7 @@ with distinct colours. This gives a visual, interactive map of the full 109-node
 
 ### ST-2 — Dataview frontmatter injector (`scripts/export-kb-graph-dataview.py`)
 
-**Status:** [ ] pending
+**Status:** [x] closed — verified 2026-07-25: `scripts/export-kb-graph-dataview.py` + `scripts/dataview_export.py`
 
 **Intent**
 Produce an annotated copy of the KB in `kb-export/knowledge-base/` where each
@@ -161,7 +170,7 @@ the live KB. Runs after ST-1 (or independently after `export-kb.sh obsidian`).
 
 ### ST-3 — Extend `scripts/export-kb.sh` with `obsidian-graph` target
 
-**Status:** [ ] pending
+**Status:** [x] closed — verified 2026-07-25: `scripts/export-kb.sh:63` (`obsidian-graph` target) — and its non-idempotent `cp -r` was fixed 2026-07-25
 
 **Intent**
 Wire ST-1 and ST-2 into the existing export script as a new `obsidian-graph`
@@ -196,7 +205,7 @@ the complete Obsidian vault with semantic graph support.
 
 ### ST-4 — Tests for ST-1 and ST-2
 
-**Status:** [ ] pending
+**Status:** [x] closed — verified 2026-07-25: `tests/graph/test_canvas_export.py` + `tests/graph/test_dataview_export.py`
 
 **Intent**
 Add unit tests for the two export scripts so that Canvas JSON validity and
@@ -251,7 +260,7 @@ existing test pattern in `tests/graph/`.
 
 ### ST-5 — Obsidian MCP registration in `.bob/mcp.json`
 
-**Status:** [ ] pending
+**Status:** [x] closed — verified 2026-07-25: `.bob/mcp.json.example` carries the Obsidian entry (`.bob/mcp.json` itself is gitignored as credential-bearing)
 
 **Intent**
 Register `obsidian-mcp` (MarkusPfundstein/obsidian-mcp) as an active MCP server
@@ -304,7 +313,7 @@ to connect (Bob IDE degrades gracefully — no crash).
 
 ### ST-6 — KB guide: Obsidian integration setup
 
-**Status:** [ ] pending
+**Status:** [x] closed — verified 2026-07-25: `docs/knowledge-base/guides/obsidian-integration-guide.md`
 
 **Intent**
 Write a KB guide that documents both features end-to-end: how to run the semantic

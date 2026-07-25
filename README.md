@@ -499,6 +499,12 @@ index paths (re-verified by re-running the forgery exploit). This is what conver
 liability into a genuine security control. The KB's trust posture is auditable in one command — `bob-optimize attest`
 lists every document that claims `verified` without a valid signature (and `--strict` fails CI on any).
 
+**What `attest` reports on this repo today, stated plainly:** `118 attested · 0 authentic · 117 untrusted ·
+1 WITHHELD`. The enforcement is real and the withheld document is correctly withheld — but **no KB document is
+signed yet**, so verify-at-read currently grants trust to nothing rather than gatekeeping a signed corpus. The
+control is in place ahead of the corpus it will govern; treat every KB document as `untrusted` (i.e. review it like
+code) until signing is part of the ingest path. Reproduce with `bob-optimize attest --kb-path docs/knowledge-base`.
+
 The posture is now *load-bearing*, not *hardened*: the provenance key is a **local integrity secret** — it proves a
 document was produced by something holding this repo's key and detects tampering, but it is not a public-key identity
 or a multi-tenant boundary. So **do not run Mnemox against secrets or as a multi-tenant trust boundary without

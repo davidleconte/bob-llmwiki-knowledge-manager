@@ -222,7 +222,7 @@ Auto-generated API documentation from source code (see [full API reference](api/
 | **Cache System** | `src/cache/` | `bob-optimize cache-stats` | [API](api/cache/) |
 | **Config** | `src/config/` | `bob-optimize config` | [API](api/config/) |
 | **Monitoring** | `src/monitoring/` | `bob-optimize health`, `metrics`, `cost-report` | [Guide](MONITORING.md) |
-| **KB Embedding Index (P2)** | `src/embeddings/` | `bob-optimize kb-index` | [API](api/embeddings/) |
+| **KB Embedding Index (P2)** | `src/embeddings/` | `bob-optimize graph-build --with-semantic` | [API](api/embeddings/) |
 | **Knowledge Graph (P3)** | `src/graph/` | `bob-optimize graph-build/query/health` | [API](api/graph/) |
 | **KB Search (P4)** | `src/tools/kb_query.py` | `bob-optimize kb-search`, `kb-status` | [API](api/tools/kb_query.md) |
 | **Delegation Pipeline** | `src/delegation/` | `bob-optimize analyze` | [API](api/delegation/) · [ADR-019](adr/019-delegation-pipeline-activation.md) |

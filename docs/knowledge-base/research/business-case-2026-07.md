@@ -167,7 +167,7 @@ progressively improve retrieval quality as they are activated:
 
 | Layer | What it adds | How it is activated |
 |---|---|---|
-| **Semantic embedding index** | KB search uses MiniLM dense vectors instead of keyword matching. Retrieval precision p@3 = 0.84 (21/25), matched by keyword-only — no net lift on the shipped backend (report.json: evaluation/results/retrieval-2026-07-19/report.json). | `bob-optimize index-kb` |
+| **Semantic embedding index** | KB search uses MiniLM dense vectors instead of keyword matching. Retrieval precision p@3 = 0.84 (21/25), matched by keyword-only — no net lift on the shipped backend (report.json: evaluation/results/retrieval-2026-07-19/report.json). | `bob-optimize graph-build --with-semantic` |
 | **Knowledge graph** | Surfaces orphaned documents, dead cross-references, and authority hubs. Turns a flat file collection into a navigable graph. | `bob-optimize graph-build` |
 | **Parallel analysis pipeline** | Runs 6 analysis agents simultaneously on your repository, compresses their output, and files the findings into the KB in a single command. | `bob-optimize analyze` |
 
