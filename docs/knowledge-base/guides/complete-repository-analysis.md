@@ -144,8 +144,9 @@ This comprehensive analysis provides insights into the current state of the **bo
 │   │   ├── PROJECT_STATUS.md
 │   │   ├── README.md
 │   │   └── reviews
+```
 
-*For full details, see: [`docs/knowledge-base/research/repo-scan-2026-07-13.md`](docs/knowledge-base/research/repo-scan-2026-07-13.md)*
+*For full details, see: [`docs/knowledge-base/research/repo-scan-2026-07-13.md`](../research/repo-scan-2026-07-13.md)*
 
 
 ---
@@ -202,7 +203,7 @@ No vulnerabilities found or safety check failed
 
 ---
 
-*For full details, see: [`docs/knowledge-base/concepts/dependency-analysis.md`](docs/knowledge-base/concepts/dependency-analysis.md)*
+*For full details, see: [`docs/knowledge-base/concepts/dependency-analysis.md`](../concepts/dependency-analysis.md)*
 
 
 ---
@@ -258,7 +259,7 @@ No vulnerabilities found or safety check failed
 
 ---
 
-*For full details, see: [`docs/knowledge-base/research/code-metrics-2026-07-13.md`](docs/knowledge-base/research/code-metrics-2026-07-13.md)*
+*For full details, see: [`docs/knowledge-base/research/code-metrics-2026-07-13.md`](../research/code-metrics-2026-07-13.md)*
 
 
 ---
@@ -365,6 +366,7 @@ No vulnerabilities found or safety check failed
   null: null
   Fix: No fix available
 [null] authlib 1.4.1
+```
   PYSEC-2026-25: ### Summary  There is no CSRF protection on the cache feature on most integrations clients.  ### Details In `authlib.integrations.starlette_client.OAuth`, no CSRF protection is set up when using the cache parameter. When _not_ using the cache parameter, the use of SessionMiddleware ties the client to the auth state, preventing CSRF attacks. With the cache, there is no such mechanism. Other integratons have the same issue, it's not just starlette.  The state parameter is taken from the callback URL and the state is fetched from the cache without checking that it is the same client calling the redirect endpoint as was the one that initiated the auth flow.  This issue is documented in RFC 6749 section 10.12: https://datatracker.ietf.org/doc/html/rfc6749#section-10.12  ### PoC - Set up a Starlette integration with a cache - The attacker starts the auth flow up until before the callback URL is followed. - The attacked sends the redirect URL to the victim - The victim now completes the authorisation  ### Impact This impacts all users that use the cache to store auth state.  All users will be vulnerable to CSRF attacks and may have an attacker's account tied to their own.
   Fix: 1.6.11
 
