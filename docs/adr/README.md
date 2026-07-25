@@ -44,7 +44,7 @@ Architecture Decision Records document important architectural decisions made du
 
 **[018: P4 Query Quality](018-p4-query-quality.md)**
 - Decision: Recency tiebreaker (`recency_weight` blend), date-aware filter (`date_filter` prefix), length normalisation deferred
-- Rationale: Addresses 2 of 3 known golden-set misses; backward-compatible (all params default to off); Miss #1 handled adequately by MiniLM at p@3=0.88
+- Rationale: Addresses 2 of 3 known golden-set misses; backward-compatible (all params default to off); Miss #1 handled adequately by MiniLM at p@3=0.88 (lab, unmanifested; superseded by report.json)
 - Status: ✅ Accepted
 
 **[006: Cache Strategy](006-cache-strategy.md)**

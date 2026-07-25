@@ -33,7 +33,10 @@ class ResearchAgent(SubAgent):
         )
         try:
             # CODE-02: load the canonical index and graph so the validated
-            # p@3=0.88 stack is used instead of keyword-only search.
+            # embedding stack is used instead of keyword-only search.
+            # (This once quoted p@3=0.88 — superseded: that was an unmanifested MiniLM
+            #  lab run. Committed result is p@3 = 0.84 at keyword parity, no net lift
+            #  — manifest: evaluation/results/retrieval-2026-07-19/report.json)
             from src.cache.embeddings import EmbeddingGenerator
             from src.embeddings.index import PersistentEmbeddingIndex
             from src.graph.store import GraphStore

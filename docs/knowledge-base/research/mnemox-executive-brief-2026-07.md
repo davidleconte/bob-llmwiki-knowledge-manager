@@ -16,7 +16,7 @@ related:
 
 > **RECONCILED 2026-07-20.** Re-checked against current state. Corrections since the 2026-07-18
 > draft: the **withdrawn A+ self-grade was removed** (see *Engineering quality*), and stale
-> test/coverage/ADR counts were refreshed. Retrieval already reflects the reconciled **p@3 = 0.84
+> test/coverage/ADR counts were refreshed (manifest: evaluation/results/retrieval-2026-07-19/report.json). Retrieval already reflects the reconciled **p@3 = 0.84
 > (no net lift over keyword)**. Canonical homes: `STATUS.md` and the validation manifest
 > (`evaluation/results/validation-2026-07-14/manifest.json`).
 

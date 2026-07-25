@@ -14,7 +14,7 @@ KB at ~19ms/query that is acceptable, but it scales linearly with corpus size an
 re-embeds the same unchanged documents on every Bob Shell session.
 
 The A/B validation (2026-07-16) confirmed that the embedding scorer at `w=0.7`
-meaningfully outperforms the keyword scorer (p@3: 0.68 vs 0.64; p@5: 0.80 vs 0.72).
+meaningfully outperforms the keyword scorer (p@3: 0.68 vs 0.64; p@5: 0.80 vs 0.72 — lab, unmanifested; superseded by report.json).
 A persistent index eliminates per-session recompute entirely.
 
 Four design decisions must be made before implementation.

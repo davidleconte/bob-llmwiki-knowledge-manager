@@ -16,6 +16,14 @@ updated: 2026-07-16
 
 # KB Query Scorer A/B Validation — July 2026
 
+> ⚠️ **FROZEN A/B REPORT (2026-07-16) — no manifest was committed for this run.**
+> The p@3 figures below (keyword 0.64, `w=0.7` 0.68, `w=1.0` 0.88) were measured with
+> the optional MiniLM backend on the corpus of that date and are preserved here as the
+> record of that experiment. **They are superseded as the project's published retrieval
+> figure** by the manifest-backed result on the shipped backend: **p@3 = 0.84, at parity
+> with a keyword baseline (no net lift)** — `evaluation/results/retrieval-2026-07-19/report.json`.
+> Do not cite the numbers below as current retrieval quality.
+
 **Mandate:** ADR-014 requires empirical A/B validation before `embedding_weight > 0`
 is used in any production call path. This document records the results.
 

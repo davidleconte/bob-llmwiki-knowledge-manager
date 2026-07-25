@@ -16,7 +16,7 @@ related:
 
 > **RECONCILED 2026-07-20.** Re-checked against current state. Corrections since the 2026-07-18 draft:
 > the **withdrawn A+ self-grade was removed**, and stale test/coverage/ADR counts were refreshed.
-> Retrieval already reflects the reconciled **p@3 = 0.84 (no net lift over keyword)**. The canonical,
+> Retrieval already reflects the reconciled **p@3 = 0.84 (no net lift over keyword)** (manifest: evaluation/results/retrieval-2026-07-19/report.json). The canonical,
 > A+-free challenge pack now lives at [`2026_IBMer_Watsonx_Challenge/`](../../../2026_IBMer_Watsonx_Challenge/);
 > this KB doc is the earlier narrative draft. Canonical numbers: `STATUS.md` + the validation manifest.
 

@@ -213,7 +213,7 @@ Expected indicators of a healthy graph:
 **Cause:** Most documents lack `related:` frontmatter, and the semantic threshold (0.30)
 is too high for the embedding backend in use.  
 **Fix (short-term):** Add `related:` frontmatter to key documents.  
-**Fix (long-term):** Switch to MiniLM — hashing p@3=0.60 vs MiniLM p@3=0.88 on
+**Fix (long-term):** Switch to MiniLM — hashing p@3=0.60 vs MiniLM p@3=0.88 (lab, unmanifested; superseded by report.json) on
 the same corpus; semantic edges are much more accurate with MiniLM.
 
 ### T3 — `semantic_threshold` produces too many or too few edges
