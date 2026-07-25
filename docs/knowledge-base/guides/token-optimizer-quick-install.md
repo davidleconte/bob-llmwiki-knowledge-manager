@@ -89,7 +89,7 @@ python -m src "Your prompt text here"
 ## What You Get
 
 **Measured Savings:**
-- **~20% compression** (95% CI ≈ [19%, 21%], N=183 in-repo docs; provenance: `evaluation/results/validation-2026-07-14/manifest.json`)
+- **~20% compression** (95% CI ≈ [18.9%, 21.2%], N=183 in-repo docs; provenance: `evaluation/results/validation-2026-07-14/manifest.json`)
 - **Near-lossless** (whitespace + redundant phrase removal)
 - **Manifest-backed** reproducibility
 
@@ -180,7 +180,7 @@ config.cache.l2_max_size = 250  # Default: 500
 
 ⚠️ **Not Production Ready** — See [STATUS.md](../../../STATUS.md) for the current, authoritative grade.
 
-**Status:** A (3.89 / 4.30) against institutional vendor standard — **Beta, not production-ready.**
+**Status:** **Beta, not production-ready.** No grade is claimed here — the previously stated "A (3.89 / 4.30)" is a superseded value that appears nowhere in the current status.
 See [`STATUS.md`](../../../STATUS.md) for full dimension breakdown and roadmap.
 
 **Critical Blockers (for production deployment):**

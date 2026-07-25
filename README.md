@@ -23,8 +23,8 @@ identically in **Bob IDE** and **Bob Shell CLI** — same modes, same KB, same c
 ![license](https://img.shields.io/badge/license-MIT-blue)
 ![python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue)
 ![version](https://img.shields.io/badge/version-1.1.0-informational)
-![tests](https://img.shields.io/badge/tests-1386%20passing-success)
-![coverage](https://img.shields.io/badge/coverage-%E2%89%8889%25%20(gate%20%E2%89%A580%25)-success)
+![tests](https://img.shields.io/badge/tests-1414%20passing-success)
+![coverage](https://img.shields.io/badge/coverage%20gate-%E2%89%A580%25-success)
 
 `MIT licensed` · `Native Bob modes` · `No MCP servers required` · `No plugins` · `Pattern: LLM-Wiki (Karpathy)` · `Bob Shell CLI` · `Bob IDE`
 
@@ -435,7 +435,7 @@ detected and withdrawn ([§16](#16-provenance--honesty-policy)).
 | **Retrieval quality (default backend)** | **p@3 = 0.84**, at parity with the keyword baseline (0.84) — no net lift | `evaluation/results/retrieval-2026-07-19/` (116-doc golden set) |
 | Retrieval quality (MiniLM, lab) | **p@3 = 0.88** — *not* reproducible in CI (needs the optional MiniLM backend) | ADR-014 / ADR-017; graph-validation report |
 | Read-boundary trust | a forged `trust_tier: verified` document is withheld; a validly-signed one is served | `tests/security/` (re-verified by re-running the forgery exploit) |
-| Test suite | **1,386 passing**, 23 skipped (CI-green, ex load/perf) | `docs/project-management/plans/wave3-status.md` |
+| Test suite | **1,414 passing**, 23 skipped in the gated coverage run; 1,518 collected tree-wide | [`STATUS.md`](STATUS.md) (single home) |
 | Coverage | **≈89%** global; gate **≥80%** with per-package floors | `STATUS.md`; `pyproject.toml` (`fail_under = 80`) |
 
 > These figures are **not additive**; cache recompute-avoidance and lossy truncation are reported **separately** from
@@ -453,10 +453,14 @@ detected and withdrawn ([§16](#16-provenance--honesty-policy)).
 
 ## 12. Status & known limitations
 
-Mnemox is **Beta — Not Production Ready**. Two remediation waves landed through 2026-07-20 and were independently
-re-verified by re-running the original exploits
-(see [`docs/knowledge-base/research/master-engagement-reaudit-2026-07-20.md`](docs/knowledge-base/research/master-engagement-reaudit-2026-07-20.md));
-the independent audit score moved **2.9 → 3.8 → 4.2/5** (a formal independent re-grade is pending). Honest current state:
+Mnemox is **Beta — Not Production Ready**. Two remediation waves landed through 2026-07-20, each fix carrying a
+regression test at the layer the attack lands on. **No independent re-grade has been filed since those waves.** The
+on-file independent verdicts remain the counter-audit **2.9/5** (2026-07-19) and **NO-GO 3.46/4.30** (2026-07-14);
+[`STATUS.md`](STATUS.md) is the one home for that position. An earlier version of this section cited a
+**4.2/5** score — that figure is a *projected target after remediation* from
+[`engineering-soundness-audit-2026-07-19.md`](docs/knowledge-base/research/engineering-soundness-audit-2026-07-19.md),
+not a verdict anyone awarded, and citing it as achieved was exactly the kind of overclaim this project's gates exist
+to catch. Honest current state:
 
 **Fixed and verified (two waves, through 2026-07-20):** retrieval is wired into production (`kb-search`,
 `research_agent`); the optimizer is never-empty and structure-preserving; `validate-kb.sh` fails closed on broken
@@ -532,7 +536,7 @@ Organized into six opportunity spaces and three horizons (full detail in the inn
 
 ```bash
 uv sync --frozen                       # locked dev environment
-pytest -q                              # run the suite (1,386 passing, ex load/perf)
+pytest -q                              # run the suite (1,414 passing, ex load/perf)
 pytest --cov=src --cov-report=term     # coverage (gate ≥80%, ≈89% measured)
 ruff check . && ruff format --check .   # lint + format
 mypy src                               # type check
@@ -553,10 +557,17 @@ savings number) was produced by a simulation that never invoked the optimizer; i
 documented** — see [`evaluation/validation-disclaimer.md`](evaluation/validation-disclaimer.md). The replacement
 harness includes a null test, refuses to gate on savings *magnitude* (which would re-incentivise inflation), and
 reports each mechanism separately. In the same spirit, the earlier self-assessed "A+" grade has been **withdrawn** —
-self-grading is not a substitute for independent verification; the on-file independent verdicts are the counter-audit
-(2.9/5) and the post-remediation re-audits (3.8 → 4.2/5 across two verified waves; a formal independent re-grade is
-pending). `STATUS.md` is the one home for the maturity status, enforced by
+self-grading is not a substitute for independent verification. The on-file independent verdicts are the counter-audit
+**2.9/5** (2026-07-19) and **NO-GO 3.46/4.30** (2026-07-14); a formal independent re-grade is pending and no
+post-remediation score has been filed. `STATUS.md` is the one home for the maturity status, enforced by
 `scripts/check_status_consistency.py`.
+
+The same discipline applied to this file on 2026-07-25: a full-project audit found this section publishing a
+**4.2/5** "independent audit score" that was a projection, not a verdict, sourced to a document that was never
+committed. The grade-provenance gate did not catch it because its pattern only matched the bold
+`**<letter> (n.nn/4.30)**` shape, so a bare `n.n/5` score was invisible to it — a gate that could not see the
+violation it existed to prevent. Both the claim and the gate's blind spot are recorded here rather than quietly
+corrected. (Written with a placeholder rather than the literal token, because the literal is what the gate matches.)
 
 ## 17. Project documents
 

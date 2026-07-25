@@ -18,8 +18,10 @@ docs/knowledge-base/research/   ← audit findings, validation results, benchmar
 **Mode-switch protocol:** When you switch modes mid-session (knowledge-manager →
 plan, plan → agent, etc.) your context resets. On the first task in the new mode,
 check `docs/knowledge-base/index.md` for a KB doc covering the topic before
-reading raw source. A KB hit replaces a full source read and saves ~51% of tokens
-on well-formed pairs (measured; see README §10).
+reading raw source. On N=10 curated well-formed pairs a KB hit replaced a full
+source read for ≈51% fewer tokens; treat that as an illustrative upper band on
+hand-picked pairs, not an all-pairs expectation (see §"Token Optimization System"
+below for the exact assertion that backs it).
 
 **After every KB write (any mode):** rebuild the knowledge graph so the new
 document is immediately queryable:
@@ -59,7 +61,7 @@ A lightweight knowledge management framework for Bob Shell that provides structu
 
 **Purpose:** Organize and maintain knowledge bases using Bob Shell's native capabilities  
 **Technology:** Bash scripts, YAML configuration, Markdown templates  
-**Complexity:** ~500 lines of configuration and scripts  
+**Complexity:** ~5,320 lines of Bash across 23 scripts, plus YAML config and Markdown templates  
 
 **Key Components:**
 - Custom Bob Shell mode (`knowledge-manager`)
@@ -75,7 +77,7 @@ A Python-based framework that reduces token usage for LLM operations through cac
 
 **Purpose:** Reduce LLM token costs while preserving quality  
 **Technology:** Python 3.11+, tiktoken, scikit-learn, numpy, pytest  
-**Complexity:** ~3,500 lines of Python code (core system)  
+**Complexity:** ~12,850 non-blank/non-comment lines of Python across 67 modules (16,840 physical)  
 
 **Key Components:**
 - Multi-level caching (L1: exact, L2: semantic)
@@ -444,16 +446,16 @@ metrics.record_optimization(1000, 800, 10.0)
 
 **Authoritative status: [`STATUS.md`](STATUS.md)** — single source of truth. Do not derive status from this file.
 
-Summary (2026-07-18): grade **A+ (4.30/4.30)** (self-assessed; since **withdrawn** — self-grading is not independent verification, see `STATUS.md`), 1 112 tests passing, the ≥80% coverage gate met (measured coverage lives in `STATUS.md`), all per-package floors met, SLA defined, load tests present. See `STATUS.md` for the full scorecard.
+Summary (2026-07-25): **no current independent grade** — the earlier self-assessed **A+ (4.30/4.30)** is **withdrawn** (self-grading is not independent verification); on-file verdicts are counter-audit **2.9/5** and **NO-GO 3.46/4.30**. The ≥80% coverage gate is met with all per-package floors green, SLA defined, load tests present. Test and coverage counts are **not** restated here — `STATUS.md` is their single home. See `STATUS.md` for the full scorecard.
 
 ### Bob Shell Knowledge Manager
-- **Status:** Functional. KB at `docs/knowledge-base/` (90+ documents).
+- **Status:** Functional. KB at `docs/knowledge-base/` (**116 tracked documents**: 14 concepts · 27 guides · 4 references · 70 research · 1 index).
 - **Entry point for any mode:** `docs/knowledge-base/index.md`
 
 ### Token Optimization System
 - **Implementation:** `TokenOptimizer` facade → cache → optimizer → truncation; `bob-optimize` CLI
 - **Tests / Coverage:** see [`STATUS.md`](STATUS.md)
-- **Savings (measured):** ~20% optimizer compression (N=183, manifest-backed); ~51% re-derivation saving on well-formed KB pairs (N=10, `tests/validation/test_km_savings.py`)
+- **Savings (measured):** 20.0% mean optimizer compression, 95% CI [18.9%, 21.2%] (N=183, manifest-backed at `evaluation/results/validation-2026-07-14/`). Separately, ≈51% re-derivation saving on N=10 *curated* well-formed KB/source pairs — note the accompanying test (`tests/validation/test_km_savings.py:327`) asserts only `50.0 <= savings_pct <= 99.0`, i.e. it **bounds** the claim rather than pinning it, and the pairs are hand-picked rather than sampled, so this is not an all-pairs expectation.
 
 ### Delegation Module
 - **Status:** Functional and integrated (`bob-optimize analyze`); layering-clean

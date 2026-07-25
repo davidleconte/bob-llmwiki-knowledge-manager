@@ -10,7 +10,7 @@ status: active
 # Token Optimization
 
 ## Overview
-Token optimization is a systematic approach to reducing LLM token consumption while preserving output quality. The Token Optimization System combines intelligent caching, prompt compression, and context-aware truncation in a three-layer architecture. Measured optimizer compression is ~20% mean savings on real in-repo prose (95% CI ≈ [19%, 21%], N=183; manifest: `evaluation/results/validation-2026-07-14/`); cache recompute-avoidance and lossy truncation are reported separately, not blended in.
+Token optimization is a systematic approach to reducing LLM token consumption while preserving output quality. The Token Optimization System combines intelligent caching, prompt compression, and context-aware truncation in a three-layer architecture. Measured optimizer compression is ~20% mean savings on real in-repo prose (95% CI ≈ [18.9%, 21.2%], N=183; manifest: `evaluation/results/validation-2026-07-14/`); cache recompute-avoidance and lossy truncation are reported separately, not blended in.
 
 ## Key Points
 - **Three-Layer Architecture**: Cache → Optimizer → Truncator working in sequence

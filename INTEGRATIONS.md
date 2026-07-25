@@ -20,7 +20,7 @@ print(result["compression_ratio"])                # e.g. 0.80 → 20% smaller
 `TokenOptimizer` composes the full stack (L1 exact cache, L2 semantic cache,
 prompt optimizer, truncator, monitoring) from a single `ConfigSchema`.
 
-**Compression baseline:** ~20% mean on real in-repo prose (95% CI ≈ [19%, 21%],
+**Compression baseline:** ~20% mean on real in-repo prose (95% CI ≈ [18.9%, 21.2%],
 N=183; manifest-backed: `evaluation/results/validation-2026-07-14/`).
 
 ---

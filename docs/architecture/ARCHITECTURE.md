@@ -25,7 +25,7 @@ each measured **separately** (never blended — blending is how the retracted
 "68.96%" was manufactured):
 
 - **Optimizer compression** — near-lossless removal of redundancy. The only
-  "savings" headline: **~20% mean** on real in-repo prose (95% CI ≈ [19%, 21%],
+  "savings" headline: **~20% mean** on real in-repo prose (95% CI ≈ [18.9%, 21.2%],
   N=183), manifest-backed at `evaluation/results/validation-2026-07-14/`.
 - **Cache recompute-avoidance** — a hit returns a prior result for 0 tokens;
   workload-dependent (a property of the request stream's repeat rate).
