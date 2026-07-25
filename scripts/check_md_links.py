@@ -138,6 +138,30 @@ def iter_links(text: str) -> list[tuple[int, str]]:
     return found
 
 
+def unbalanced_fence(text: str) -> int | None:
+    """Line number of the last opening fence if the file ends inside a code block.
+
+    An unterminated fence is a *link-integrity* problem, not just a rendering one: every
+    link after it is swallowed into a code block and becomes invisible to this scan, so
+    the document silently shrinks its own checked surface.
+
+    Found in the wild by the 2026-07-25 audit —
+    ``docs/knowledge-base/guides/complete-repository-analysis.md`` had two unterminated
+    fences that ran a directory tree and a package listing together with 220 lines of
+    real prose, swallowing five headings and the links under them. Note that a plain
+    *parity* count did not catch it: the file had an even number of fence markers, they
+    were simply mis-paired. Only tracking the state to end-of-file does.
+    """
+    in_fence = False
+    opened_at: int | None = None
+    for line_no, line in enumerate(text.splitlines(), start=1):
+        if FENCE_RE.match(line):
+            if not in_fence:
+                opened_at = line_no
+            in_fence = not in_fence
+    return opened_at if in_fence else None
+
+
 def classify(source: str, target: str, tracked: set[str], dirs: set[str]) -> tuple[str, str] | None:
     """Return ``(kind, resolved)`` if *target* is a violation, else ``None``."""
     if target.startswith(("http://", "https://", "mailto:", "#")):
@@ -194,6 +218,17 @@ def scan(tracked: set[str] | None = None) -> list[tuple[str, int, str, str]]:
             text = (REPO_ROOT / rel).read_text(encoding="utf-8", errors="replace")
         except OSError:
             continue
+        stray = unbalanced_fence(text)
+        if stray is not None:
+            violations.append(
+                (
+                    rel,
+                    stray,
+                    "unterminated-fence",
+                    "code fence opened here is never closed — every link after it is "
+                    "swallowed and goes unchecked",
+                )
+            )
         for line_no, target in iter_links(text):
             verdict = classify(rel, target, tracked, dirs)
             if verdict:
@@ -206,6 +241,7 @@ KIND_HELP = {
     "case-mismatch": "wrong filename case — resolves on macOS, 404s on GitHub/Linux",
     "missing": "target is not in the git index",
     "citation-in-link": "path:LINE citation used as a link target — use #L<n>",
+    "unterminated-fence": "an unclosed code fence hides every link after it from this scan",
     "missing+citation": "path:LINE citation AND the path is not in the git index",
 }
 

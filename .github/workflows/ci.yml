@@ -125,6 +125,17 @@ jobs:
         # against `git ls-files`, never the filesystem — checking the filesystem would
         # reproduce the exact blindness it exists to remove.
         run: python scripts/check_md_links.py
+      - name: Prove the doc-freshness date parser is correct
+        # This self-test earned its place immediately: the first pattern could not read
+        # STATUS.md's own `| **As of** | date |` row, so the live scan passed by silently
+        # skipping the very file the gate exists for. A green scan proved nothing until
+        # the parser was pinned.
+        run: python scripts/check_doc_freshness.py --selftest
+      - name: Documents asserting currency must be current
+        # Audit 2026-07-25 (V-6): STATUS.md — "the canonical maturity status", which every
+        # other doc defers to — read "As of 2026-07-19" through 18 merged PRs. Staleness
+        # has no syntax; only the commit log can catch it.
+        run: python scripts/check_doc_freshness.py
       - name: Prove the architecture-freshness detector can fail
         run: python scripts/check_architecture_freshness.py --selftest
       - name: Pin the hand-written architecture layer to src/
