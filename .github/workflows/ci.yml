@@ -125,6 +125,16 @@ jobs:
         # against `git ls-files`, never the filesystem — checking the filesystem would
         # reproduce the exact blindness it exists to remove.
         run: python scripts/check_md_links.py
+      - name: Prove the architecture-freshness detector can fail
+        run: python scripts/check_architecture_freshness.py --selftest
+      - name: Pin the hand-written architecture layer to src/
+        # Audit 2026-07-25, finding A-11: docs/api/ was in perfect sync (55/55 modules)
+        # while ARCHITECTURE.md — "the single authoritative architecture document" —
+        # described none of six modules added after its last update, two of them security
+        # controls (provenance signing, the A7 input-bound caps). The difference between
+        # the two layers was not care: one had a freshness gate and the other did not.
+        # This applies the same pin to the layer that actually drifts.
+        run: python scripts/check_architecture_freshness.py
 
   gate-integrity:
     name: gate integrity (ATK-GATE-07)
