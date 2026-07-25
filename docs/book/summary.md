@@ -10,13 +10,13 @@
 ## What This Book Covers
 
 This book provides a complete guide to Bob Shell Knowledge Manager, a dual-system framework that:
-1. **Reduces LLM token costs by 40-60%** through intelligent caching and optimization
+1. **Reduces LLM token costs by a measured 20.0% mean compression (manifest-backed)** through prompt compression, with cache recompute-avoidance reported separately
 2. **Organizes documentation** with structured templates and workflows
 
 **Total Content:**
 - 9 core chapters
 - 3 detailed appendices
-- 400+ pages of comprehensive documentation
+- ~60-70 printed pages (the "400+ pages" claim was an 8-10x overstatement, retracted)
 - Real-world examples and case studies
 - Production-ready implementation guidance
 
@@ -32,7 +32,7 @@ This book provides a complete guide to Bob Shell Knowledge Manager, a dual-syste
 - Why traditional solutions fall short
 - The dual system approach
 
-**Chapter 2: What is Bob Shell Knowledge Manager?**
+**Chapter 2: What Mnemox Is**
 - System overview and architecture
 - The two core systems (Token Optimization + Knowledge Base)
 - Key features and benefits
@@ -44,7 +44,7 @@ This book provides a complete guide to Bob Shell Knowledge Manager, a dual-syste
 - What tokens are and why they matter
 - The cost of inefficiency (real examples)
 - Three optimization strategies
-- Expected savings: 40-60%
+- Measured compression: 20.0% mean compression (manifest-backed)
 
 **Chapter 4: Multi-Level Caching Architecture**
 - L1 Cache: Exact match (<1ms)
@@ -71,7 +71,7 @@ This book provides a complete guide to Bob Shell Knowledge Manager, a dual-syste
 ### Part V: Validation and Getting Started
 
 **Chapter 7: Test Results and Validation**
-- 310+ tests passing (98.4% coverage)
+- Test and coverage counts: STATUS.md is the single home ("98.4% coverage" was a mislabelled pass rate, retracted)
 - Token savings validation (~20% measured on real prose; see validation manifest)
 - Performance benchmarks
 - Known limitations
@@ -120,9 +120,9 @@ This book provides a complete guide to Bob Shell Knowledge Manager, a dual-syste
 
 ### 1. Proven Token Savings
 - **Measured:** ~20% savings on real prose (see validation manifest; 68.96% "validated" synthetic figure retracted)
-- **Real-world:** 40-60% savings expected
+- **Real-world:** 20.0% mean compression (manifest-backed)
 - **Measurable:** 310+ tests validate functionality
-- **Cost impact:** $300-600/year saved per developer
+- **Cost impact:** not published — the per-developer figure once quoted here was derived from the retracted 40-60% range and has no manifest
 
 ### 2. Dual System Approach
 - **System 1:** Token Optimization (Python) - Reduces costs
@@ -131,7 +131,7 @@ This book provides a complete guide to Bob Shell Knowledge Manager, a dual-syste
 
 ### 3. Production Ready (Beta)
 - **Core functionality:** 100% operational
-- **Test coverage:** 98.4%
+- **Test coverage:** see STATUS.md — the "98.4%" figure was a pass rate, retracted
 - **Status:** 7/10 production ready
 - **Suitable for:** Early adopters, development use, small teams
 
@@ -156,7 +156,7 @@ This book provides a complete guide to Bob Shell Knowledge Manager, a dual-syste
 
 **Path:**
 1. Chapter 1: The Problem We're Solving (10 min)
-2. Chapter 2: What is Bob Shell Knowledge Manager? (15 min)
+2. Chapter 2: What Mnemox Is (15 min)
 3. Chapter 8: Getting Started Guide (30 min)
 4. Chapter 5: Knowledge Base Framework (20 min)
 5. Chapter 6: Real-World Example (15 min)
@@ -348,7 +348,7 @@ After reading this book, you should be able to:
 ## Final Thoughts
 
 Bob Shell Knowledge Manager represents a practical solution to two real problems:
-1. **High LLM costs** - Solved with 40-60% token savings
+1. **High LLM costs** — addressed with 20.0% mean compression (manifest-backed), plus workload-dependent cache recompute-avoidance
 2. **Documentation chaos** - Solved with structured templates
 
 **Current status:** Beta quality (7/10), suitable for early adopters

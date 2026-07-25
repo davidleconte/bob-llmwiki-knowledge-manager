@@ -6,7 +6,10 @@
 ## 7.1 Test Suite Overview
 
 **Total Tests:** 771 passing (2026-07-14; the earlier "310+" was aspirational/stale)
-**Test Coverage:** 87.1% measured, gated ≥80% (the earlier "98.4%" was never measured)
+**Test Coverage:** gated ≥80% (`pyproject.toml` is the single home for the gate; the
+measured snapshot lives in [`STATUS.md`](../../STATUS.md), not here — a measured
+percentage restated in a narrative doc is exactly the drift CLM-03 forbids). The
+earlier "98.4%" was a *pass rate* mislabelled as coverage and is retracted.
 **Test-to-Code Ratio:** 1.14:1 (higher is better)
 **Grade:** A (95/100)
 
@@ -204,7 +207,7 @@ Total: 68.96%  (retracted — measured ~20%; see validation manifest)
 - Min: 52%
 - Max: 85%
 
-### Real-World Expectations: 40-60%
+### Real-World Expectations: ~20% compression
 
 **Why Lower Than Synthetic?**
 
@@ -226,7 +229,7 @@ Cache savings: 35% × 100% = 35%
 Optimization savings: 65% × 12% = 8%
 Truncation savings: 65% × 18% = 12%
 ────────────────────────────────────
-Total: ~55% (range: 40-60%)
+Compression total: 20.0% mean optimizer compression (95% CI [18.9%, 21.2%], N=183; manifest: evaluation/results/validation-2026-07-14/report.json)
 ```
 
 **Factors Affecting Real-World Savings:**

@@ -75,7 +75,9 @@ Delegation analysis pipeline:
 - **[Security (STRIDE threat model)](security/threat-model.md)** — trust boundaries, residual risks; supersedes the retracted ADR-012.
 - **Design** — [Design document](archive/design-document.md) · [MECE framework](archive/mece-framework.md) · [Comparison with alternatives](archive/COMPARISON.md)
 - **Savings methodology** — [KB savings estimation methodology](knowledge-base/references/kb-savings-estimation-methodology.md).
-- **The Complete Guide (book)** — [table of contents](archive/book-table-of-contents.md) (long-form narrative; historical — metrics retracted).
+- **[Mnemox — The Complete Guide](book/table-of-contents.md)** — the long-form narrative:
+  12 chapters + 3 appendices covering the problem, the optimizer, the KB, retrieval, the
+  trust controls and the honesty gates. Live and in gate scope as of 2026-07-25.
 
 ---
 

@@ -1,4 +1,4 @@
-# Chapter 2: What is Bob Shell Knowledge Manager?
+# Chapter 2: What Mnemox Is
 
 > ⚠️ **Metrics correction (2026-07-14).** Earlier drafts of this document cited fabricated token-savings/quality figures — "68.96%", "89.3%", "91.80%" — produced by a simulation that never invoked the optimizer. **Those figures are retracted.** The honest, measured figure is **~20% mean optimizer compression** on real prose (manifest-backed: `evaluation/results/validation-2026-07-14/`; see `STATUS.md` and `CHANGELOG.md`). Inline numbers below have been corrected where they appeared.
 
@@ -6,7 +6,7 @@
 ## 2.1 System Overview
 
 Bob Shell Knowledge Manager is a dual-system framework that:
-1. **Reduces LLM token costs by 40-60%** through intelligent caching and optimization
+1. **Reduces LLM token costs by a measured 20.0% mean compression (manifest-backed)** through prompt compression, with cache recompute-avoidance reported separately
 2. **Organizes documentation** with structured templates and workflows
 
 **Key Characteristics:**
@@ -31,7 +31,7 @@ Bob Shell Knowledge Manager is a dual-system framework that:
 - L1 cache: <1ms lookup (O(1) hash table)
 - L2 cache: <100ms lookup (O(n) similarity search)
 - Overall latency (p95): <100ms
-- Token savings: 40-60% validated
+- Token savings: 20.0% mean optimizer compression (95% CI [18.9%, 21.2%], N=183; manifest: evaluation/results/validation-2026-07-14/report.json)
 
 ### System 2: Knowledge Base Framework (Bash/YAML)
 
@@ -71,7 +71,7 @@ Bob Shell Knowledge Manager is a dual-system framework that:
 ✅ **Bob Shell integration** - Works with standard modes
 
 ### Combined Benefits
-💰 **Cost Savings:** 40-60% reduction in token usage
+💰 **Cost Savings:** 20.0% mean compression (manifest-backed) on prompt compression; cache and truncation reported separately
 ⏱️ **Time Savings:** Organized docs = faster information retrieval
 ✅ **Quality:** Consistent structure and formatting
 📊 **Measurable:** 310+ tests validate functionality

@@ -135,7 +135,7 @@ Keep: Function + 50 lines before/after (400 tokens)
 Savings: 1,600 tokens (80%)
 ```
 
-## 3.4 Expected Savings: 40-60%
+## 3.4 Measured Savings: 20.0% mean compression
 
 ### Validated Results
 
@@ -150,7 +150,7 @@ Savings: 1,600 tokens (80%)
 - Cache hit rate: 30-40% (varies by usage)
 - Optimization: 10-15% (depends on prompt style)
 - Truncation: 15-25% (depends on context size)
-- **Total savings: 40-60%**
+- **Measured compression: 20.0% mean optimizer compression (95% CI [18.9%, 21.2%], N=183; manifest: evaluation/results/validation-2026-07-14/report.json).** Cache recompute-avoidance and truncation are reported separately and are NOT added to this figure — blending them is exactly how the retracted 68.96% was manufactured.
 
 ### Why the Difference?
 
@@ -164,7 +164,7 @@ Savings: 1,600 tokens (80%)
 - Different context sizes
 - Unpredictable usage
 
-**Conservative estimate: 40-60% is realistic and achievable**
+**The measured figure is 20.0% mean compression.** Any larger number in an older draft was an estimate, never a measurement.
 
 ### Cost Impact Example
 

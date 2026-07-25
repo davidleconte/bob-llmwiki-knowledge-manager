@@ -11,8 +11,8 @@
 
 **7/10 = Beta Quality**
 - Core functionality: 100% operational ✅
-- Test coverage: 98.4% ✅
-- Token savings: Validated (40-60%) ✅
+- Test coverage: see STATUS.md (the single home). The "98.4%" once quoted here was a *pass rate*, not coverage, and is retracted ✅
+- Token savings: 20.0% mean compression (manifest-backed) ✅
 - Mock-based testing: Complete ✅
 - Real LLM integration: Not tested ⚠️
 - Phase 4: Not implemented ⚠️
@@ -54,7 +54,7 @@
 ✅ Memory: <50MB for 10K entries (efficient)
 ✅ Throughput: >100 requests/second (adequate)
 
-### 2. Test Coverage: 98.4%
+### 2. Test Coverage — and a retraction
 
 **310+ Tests Passing:**
 ✅ Cache tests: 72 tests
@@ -79,7 +79,7 @@
 ✅ Methodology documented
 
 **Real-World Expectations:**
-✅ 40-60% savings (conservative)
+✅ 20.0% mean compression (manifest-backed)
 ✅ Validated approach
 ✅ Measurable results
 
@@ -90,14 +90,14 @@
 ✅ API reference (auto-generated)
 ✅ 12 Architecture Decision Records
 ✅ User guides and tutorials
-✅ This book (400+ pages)
+✅ This book (~60-70 pages; the "400+" claim is retracted)
 ✅ Code examples
 
 ### 5. Code Quality: Grade A
 
 **Metrics:**
 ✅ Test-to-code ratio: 1.14:1
-✅ Coverage: 98.4%
+✅ Coverage: gated ≥80%; the measured snapshot lives in STATUS.md ("98.4%" was a mislabelled pass rate, retracted)
 ✅ Type hints: Complete
 ✅ Docstrings: Comprehensive
 ✅ Error handling: Robust
@@ -162,12 +162,12 @@
 ❌ No production variability
 
 **Impact:**
-- Real-world savings may vary (40-60% expected)
+- Real-world savings vary by workload; the measured compression figure is 20.0% mean compression (manifest-backed)
 - Usage patterns affect results
 - Individual results may differ
 
 **Mitigation:**
-- Conservative estimates provided (40-60%)
+- Measured figures provided, not estimates (20.0% mean compression (manifest-backed))
 - Real-world validation planned
 - Continuous monitoring recommended
 
