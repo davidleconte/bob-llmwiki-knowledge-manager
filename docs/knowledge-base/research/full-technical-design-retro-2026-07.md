@@ -31,6 +31,14 @@ related:
   - ../guides/p0-critical-fixes-implementation.md
 ---
 
+> ℹ️ **Not the authoritative architecture.** That is
+> [`docs/architecture/ARCHITECTURE.md`](../../architecture/ARCHITECTURE.md). This document is a
+> retro-engineering *narrative* derived from the codebase — useful for understanding how the
+> pieces came to fit together, but it is not maintained as the system of record and may lag it.
+> Where the two disagree, ARCHITECTURE.md wins. (Added 2026-07-25: the audit found this file
+> claiming to cover "the full architecture surface" while never referencing the canonical doc,
+> unlike every other competitor in the tree, which correctly recuse themselves.)
+
 > **RECONCILED 2026-07-20.** Re-checked against the current codebase and measurements.
 > **Material correction since the 2026-07-18 draft:** the retrieval figures were updated from
 > the early golden-set numbers (keyword 0.44 → MiniLM 0.88, `graph-validation-2026-07-17`) to
