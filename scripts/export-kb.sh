@@ -37,9 +37,15 @@ case "$FORMAT" in
     obsidian)
         echo "📝 Exporting for Obsidian..."
         
-        # Copy entire structure
+        # Copy entire structure. The pre-clean is load-bearing: `cp -r src dst`
+        # creates dst on the first run but copies src *inside* dst on every run
+        # after that, producing kb-export/knowledge-base/knowledge-base/... one
+        # level deeper each time. Without it this script is not idempotent, and
+        # docs/knowledge-base/guides/obsidian-integration-guide.md:110 ("The
+        # previous kb-export/ is overwritten") is false.
+        rm -rf "$OUTPUT_DIR/knowledge-base"
         cp -r "$KB_DIR" "$OUTPUT_DIR/knowledge-base"
-        
+
         # Create Obsidian vault config
         mkdir -p "$OUTPUT_DIR/.obsidian"
         cat > "$OUTPUT_DIR/.obsidian/app.json" << 'OBSIDIAN'
@@ -57,7 +63,9 @@ OBSIDIAN
     obsidian-graph)
         echo "📝 Exporting for Obsidian with semantic graph..."
 
-        # Step 1: Obsidian vault copy (same as obsidian case)
+        # Step 1: Obsidian vault copy (same as obsidian case, same pre-clean —
+        # see the note above; without it the vault nests one level per run).
+        rm -rf "$OUTPUT_DIR/knowledge-base"
         cp -r "$KB_DIR" "$OUTPUT_DIR/knowledge-base"
 
         mkdir -p "$OUTPUT_DIR/.obsidian"

@@ -1,8 +1,0 @@
-# Docling Server Configuration
-# Copy this file to your project root as .docling-env and update the values
-
-# Required: Base URL of your docling-serve instance
-DOCLING_SERVER_URL=http://localhost:5001
-
-# Optional: API key for authentication (only if enabled on server)
-# DOCLING_API_KEY=your-api-key-here

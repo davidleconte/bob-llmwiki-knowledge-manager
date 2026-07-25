@@ -1,4 +1,0 @@
-# Part 2: Schema Evolution Migration Pipeline (V1 → V2)
-# This pipeline migrates data from old schema to new schema
-
-migrate_schema: python3 scenarios/migrations/part2_schema_evolution/scripts/migrate_v1_to_v2.py

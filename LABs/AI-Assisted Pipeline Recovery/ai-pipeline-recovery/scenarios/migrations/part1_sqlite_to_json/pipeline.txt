@@ -1,4 +1,0 @@
-# Part 1: SQLite to JSON Data Lake Migration Pipeline
-# This pipeline will fail on the broken database, triggering AI recovery
-
-migrate_to_json: python3 scenarios/migrations/part1_sqlite_to_json/scripts/migrate_to_json.py
