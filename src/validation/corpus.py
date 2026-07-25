@@ -62,8 +62,20 @@ def load_holdout_paths(repo_root: Path) -> set[str]:
 
 # Path fragments that mark synthetic / mock / invalid inputs. Any candidate whose
 # path contains one of these is dropped -- measuring there is the fraud undone.
+#
+# ``docs/archive/`` added 2026-07-25 (audit finding B-9). That directory is prose the
+# project explicitly disowns: docs/archive/README.md calls it "not authoritative" and
+# its figures "fabricated and withdrawn". Measuring the headline compression ratio
+# partly on documents the project has retracted is indefensible on its face -- it is a
+# milder version of the same error as the retracted 68.96%, which was measured on
+# inputs that did not represent the claim. 13 of 293 candidates came from there.
+#
+# ``docs/book/`` is deliberately NOT excluded: it was moved out of archive on
+# 2026-07-25, rewritten, and is now live prose the project maintains and stands behind.
+# That is exactly the kind of text the headline is about.
 EXCLUDE_FRAGMENTS: tuple[str, ...] = (
     "evaluation/data",
+    "docs/archive/",
     "/node_modules/",
     "/.venv/",
 )
@@ -115,25 +127,50 @@ def load_holdout(
 ) -> List[Document]:
     """Load the frozen hold-out slice (corpus B, C4) named in the manifest.
 
-    Loads exactly the paths frozen in
-    ``evaluation/holdout/holdout-manifest.json`` that still exist. Deterministic
-    (sorted). Returns ``[]`` when the manifest is absent (e.g. a synthetic test
-    root), so a corpus-B-less run degrades gracefully — :func:`src.validation.holdout_ok`
-    then treats the check as not-applicable.
+    Loads exactly the paths frozen in ``evaluation/holdout/holdout-manifest.json``.
+    Deterministic (sorted). Returns ``[]`` when the manifest is absent (e.g. a
+    synthetic test root), so a corpus-B-less run degrades gracefully —
+    :func:`src.validation.holdout_ok` then treats the check as not-applicable.
+
+    **Fails closed on a missing frozen path** (audit 2026-07-25). This previously
+    skipped absent paths "gracefully", which quietly defeated the property the frozen
+    slice exists for. B is the cherry-pick detector precisely because its membership is
+    fixed in advance; if members can vanish without complaint, then B *can* be
+    pre-arranged — by deleting the inconvenient ones. It is not hypothetical: pruning
+    ``docs/architecture/deprecated/`` during this audit's own remediation silently took
+    corpus B from 35 to 33 and every hold-out test still passed green.
+
+    A missing member now raises. The manifest's own discipline note already said
+    "Refresh only in its own PR with a rationale" — this makes that enforceable rather
+    than advisory.
     """
     holdout_paths = load_holdout_paths(repo_root)
     docs: dict[str, Document] = {}
-    for rel in holdout_paths:
+    missing: list[str] = []
+    for rel in sorted(holdout_paths):
         path = repo_root / rel
         if not path.is_file():
-            continue  # frozen path since removed/renamed -> skip (graceful)
+            missing.append(rel)
+            continue
         try:
             text = path.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError):
+            missing.append(rel)
             continue
         if len(text.split()) < min_words:
             continue
         docs[rel] = Document(source=rel, text=text)
+    if missing:
+        raise FileNotFoundError(
+            f"Frozen hold-out slice is incomplete: {len(missing)} of "
+            f"{len(holdout_paths)} paths are missing or unreadable.\n  "
+            + "\n  ".join(missing)
+            + "\n\nCorpus B's whole purpose is that its membership was fixed in advance "
+            "(C4/ATK-GATE-01). A slice that shrinks silently can be pre-arranged by "
+            "deleting members, so this fails closed rather than measuring on a subset.\n"
+            "If the removal was intended, refresh evaluation/holdout/holdout-manifest.json "
+            "in its own commit with a rationale, re-applying the frozen selection rule."
+        )
     return [docs[key] for key in sorted(docs)]
 
 

@@ -22,6 +22,7 @@ Usage::
 
 from __future__ import annotations
 
+import re
 import sys
 
 try:
@@ -72,13 +73,25 @@ METRIC_KEYWORDS = (
 # line. Reuse the savings backing tokens plus the retrieval report path shapes.
 METRIC_BACKED_TOKENS = BACKED_TOKENS + ("retrieval-2", "golden set", "golden_set")
 
+# Audit 2026-07-25 (finding G-3): requiring a literal ``%`` made this gate blind to
+# every retrieval figure the repo actually publishes. The authoritative numbers are
+# ratios — ``evaluation/results/retrieval-2026-07-19/report.json`` gives
+# ``p_at_3_wired = 0.84`` — and every claim in the tree is written that way
+# (``p@3 = 0.84``, ``p@3 0.88``). So the gate guarding retrieval overclaims could not
+# see a single real one. A bare 0<x<=1 ratio next to a metric keyword now counts.
+RATIO_RE = re.compile(r"(?<![\w.])(?:0?\.\d+|1\.0+)(?![\w.%])")
+
 
 def line_is_unbacked_metric(line: str) -> bool:
-    """True if ``line`` publishes a retrieval/accuracy metric percentage without a report."""
+    """True if ``line`` publishes a retrieval/accuracy metric without a report citation.
+
+    "Publishes a metric" means a metric keyword together with either a percentage or a
+    bare ratio — see :data:`RATIO_RE` for why the ratio form is load-bearing.
+    """
     low = line.lower()
     if not any(k in low for k in METRIC_KEYWORDS):
         return False
-    if not PERCENT_RE.search(line):
+    if not (PERCENT_RE.search(line) or RATIO_RE.search(line)):
         return False
     if any(token in low for token in METRIC_BACKED_TOKENS):
         return False

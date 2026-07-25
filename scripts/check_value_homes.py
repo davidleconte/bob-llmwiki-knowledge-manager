@@ -156,6 +156,37 @@ REGISTRY: tuple[ValueHome, ...] = (
         pattern=r"MAX_FILE_BYTES\s*=\s*(\d+)",
         mirrors=(Mirror("config/gates/gate-config.yaml", "extract", r"max_file_bytes:\s*(\d+)"),),
     ),
+    # Audit 2026-07-25 (finding G-4). gate-config.yaml opens by claiming it exists to
+    # "externalize thresholds from gate scripts so a PR that weakens a threshold is
+    # conspicuous". Four of its six blocks were read by nothing and cross-checked by
+    # nothing -- savings_gate and metric_gate in particular restated values that the
+    # scripts also hardcoded, so the two could drift and the config would still *look*
+    # authoritative. An inert config block that claims to externalize a threshold is
+    # worse than no block: it invites a reviewer to check the wrong file.
+    #
+    # The scripts stay stdlib-only (no YAML parser in a gate), so the fix is the same
+    # one the DoS ceilings above use: code is the home, config mirrors it, and a
+    # divergence fails here.
+    ValueHome(
+        name="savings_gate_banner_scan_lines",
+        file="scripts/check_savings_claims.py",
+        pattern=r"(?m)^BANNER_SCAN_LINES\s*=\s*(\d+)",
+        mirrors=(
+            Mirror("config/gates/gate-config.yaml", "extract", r"banner_scan_lines:\s*(\d+)"),
+        ),
+    ),
+    ValueHome(
+        name="savings_gate_manifest_tolerance_pct",
+        file="scripts/check_savings_claims.py",
+        pattern=r"(?m)^_MANIFEST_TOLERANCE_PCT\s*=\s*([\d.]+)",
+        mirrors=(
+            Mirror(
+                "config/gates/gate-config.yaml",
+                "extract",
+                r"magnitude_tolerance_pct:\s*([\d.]+)",
+            ),
+        ),
+    ),
     ValueHome(
         name="limit_max_chunks_per_doc",
         file="src/limits.py",

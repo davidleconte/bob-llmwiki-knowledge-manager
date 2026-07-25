@@ -17,8 +17,8 @@
     "docs/api/monitoring/cost_reporting.md",
     "docs/api/optimizer/prompt_optimizer.md",
     "docs/api/validation/__main__.md",
+    "docs/architecture/deprecated/BATCH.md",
     "docs/architecture/deprecated/README.md",
-    "docs/architecture/deprecated/batch.md",
     "docs/archive/design-document.md",
     "docs/knowledge-base/concepts/adversarial-review-pattern.md",
     "docs/knowledge-base/concepts/multi-level-caching.md",
@@ -40,5 +40,6 @@
     "docs/project-management/planning/docs-tier2-remediation-plan.md",
     "docs/project-management/planning/knowledge-graph-plan.md",
     "docs/repository-analysis-workflow.md"
-  ]
+  ],
+  "case_correction_2026_07_25": "One frozen path read 'deprecated/batch.md'. The git index spells it 'BATCH.md'. The lowercase form resolved only on a case-insensitive filesystem, so corpus B silently loaded 34 of 35 members on Linux CI for as long as this manifest has existed \u2014 the membership was not actually frozen there. Found by the fail-closed check added the same day, on its first CI run. Path corrected to the index spelling; selection unchanged."
 }

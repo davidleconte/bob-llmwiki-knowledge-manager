@@ -128,16 +128,18 @@ pytest.skip("psutil is optional dependency - test requires psutil installed")
 # From src/monitoring/health.py
 try:
     import psutil
+
     PSUTIL_AVAILABLE = True
 except ImportError:
     PSUTIL_AVAILABLE = False
+
 
 def check_system_resources(self) -> ComponentHealth:
     if not PSUTIL_AVAILABLE:
         return ComponentHealth(
             name="system_resources",
             status=HealthStatus.DEGRADED,
-            message="psutil not available - system monitoring disabled"
+            message="psutil not available - system monitoring disabled",
         )
 ```
 
@@ -325,10 +327,12 @@ def exact_cache():
     """Provide clean ExactCache instance."""
     return ExactCache(max_size=100)
 
+
 @pytest.fixture
 def semantic_cache():
     """Provide clean SemanticCache instance."""
     return SemanticCache(max_size=50, threshold=0.85)
+
 
 @pytest.fixture
 def multi_level_cache(exact_cache, semantic_cache):
@@ -514,8 +518,8 @@ def test_optional_feature(self):
 
 - [pytest Documentation](https://docs.pytest.org/)
 - [Coverage.py](https://coverage.readthedocs.io/)
-- [Project Status](../docs/project-management/PROJECT_STATUS.md)
-- [Honest Assessment](../evaluation/HONEST_ASSESSMENT.md)
+- [Project Status](../docs/project-management/project-status.md)
+- [Honest Assessment](../evaluation/honest-assessment.md)
 
 ---
 
