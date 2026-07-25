@@ -1,5 +1,7 @@
 # Chapter 5: Knowledge Base Framework
 
+> **Live document.** This chapter is part of [Mnemox — The Complete Guide](table-of-contents.md). Numbers here cite a manifest or say they do not; [`STATUS.md`](../../STATUS.md) is the single home for maturity, coverage and test counts. Chapters 1–9 were written mid-2026 — where a chapter predates a subsystem, chapters 10–12 cover it.
+
 ## 5.1 Structured Documentation Philosophy
 
 **The Problem:** Documentation chaos

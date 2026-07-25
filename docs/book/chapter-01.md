@@ -61,7 +61,7 @@ Bob Shell Knowledge Manager solves both problems:
 - Multi-level caching (L1 + L2)
 - Prompt optimization (15% savings)
 - Smart truncation (20% savings)
-- **Result: 40-60% token savings**
+- **Result: 20.0% mean compression (manifest-backed)** — see chapter 7
 
 **System 2: Knowledge Base (Bash/YAML)**
 - 4 document templates (concepts, guides, references, research)
@@ -70,10 +70,10 @@ Bob Shell Knowledge Manager solves both problems:
 - Bob Shell integration
 
 **Combined Value:**
-- Save money (40-60% token reduction)
+- Save money (20.0% mean compression (manifest-backed))
 - Save time (organized documentation)
 - Proven results (310+ tests passing)
 
 ---
 
-**Next Chapter:** What is Bob Shell Knowledge Manager?
+**Next Chapter:** What Mnemox Is
