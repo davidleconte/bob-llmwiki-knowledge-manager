@@ -7,6 +7,8 @@ updated: 2026-07-19
 status: active
 trust_tier: verified
 provenance: Senior engineering-soundness review (McKinsey-style, MECE) synthesising the 2026-07-19 counter-audit (2.9/5) and red-team, cross-checked against the live working tree with file:line verification. This is the FROZEN evidence home for docs/consulting/engineering-soundness-review-2026-07-19.md — it is the single home for the numbers that the living report cites. Quotes RETRACTED figures verbatim for critique only.
+promoted_by: audit-2026-07-25
+provenance_sig: ffc867f878efd8e3b5fe2b2643b855381bf48baf1240237179aea42a06cabf70
 ---
 
 > **FROZEN SNAPSHOT — quotes RETRACTED / FABRICATED figures for critique.** The "68.96%" and "89.3%" figures named below are WITHDRAWN and are reproduced only to analyse them. Canonical maturity lives in `STATUS.md`; validated savings live in `evaluation/results/validation-2026-07-14/manifest.json`. This directory (`docs/knowledge-base/research/`) is exempt from the savings/status CI gates by design; the head banner is belt-and-suspenders.

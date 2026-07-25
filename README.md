@@ -497,13 +497,13 @@ honoured only when `verify_document` validates an authentic signature over its s
 bogus-signature, or tamper-after-sign `trust_tier: verified` document is **withheld** at read on both the scan and
 index paths (re-verified by re-running the forgery exploit). This is what converts the git-native substrate from a
 liability into a genuine security control. The KB's trust posture is auditable in one command — `bob-optimize attest`
-lists every document that claims `verified` without a valid signature (and `--strict` fails CI on any).
+lists every document that claims `verified` without a valid signature (`--strict` exits non-zero — run it where the signing key lives; see the CI note below).
 
-**What `attest` reports on this repo today, stated plainly:** `118 attested · 0 authentic · 117 untrusted ·
-1 WITHHELD`. The enforcement is real and the withheld document is correctly withheld — but **no KB document is
-signed yet**, so verify-at-read currently grants trust to nothing rather than gatekeeping a signed corpus. The
-control is in place ahead of the corpus it will govern; treat every KB document as `untrusted` (i.e. review it like
-code) until signing is part of the ingest path. Reproduce with `bob-optimize attest --kb-path docs/knowledge-base`.
+**What `attest` reports on this repo today:** `118 attested · 1 authentic · 117 untrusted · 0 withheld`. Every document claiming `trust_tier: verified` is authentically signed — the one that previously claimed the tier without a signature was promoted through `kb-promote`, which signs it, rather than having the claim quietly deleted.
+
+Read the 117 honestly: `untrusted` is not a failure state, it is the default. It means those documents make no trust claim and are retrievable on their own merits. **Review every KB document like code**; the signature detects tampering, it does not vouch for content. Reproduce with `bob-optimize attest --kb-path docs/knowledge-base`.
+
+Note a real limit: verification is HMAC-keyed on a local secret, so **CI cannot check signatures** — it runs the keyless structural check (`scripts/check_trust_claims.py`) that a claimed tier carries a signature at all, which is the forgery that matters. Cryptographic verification runs where the key lives.
 
 The posture is now *load-bearing*, not *hardened*: the provenance key is a **local integrity secret** — it proves a
 document was produced by something holding this repo's key and detects tampering, but it is not a public-key identity

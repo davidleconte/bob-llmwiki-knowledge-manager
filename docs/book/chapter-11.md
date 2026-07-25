@@ -49,19 +49,28 @@ honest path flows is not a control.** It has to sit where the attack lands.
 
 ```
 documents attested                              : 118
-authentic  (trusted tier, signature verified)   : 0
+authentic  (trusted tier, signature verified)   : 1
 untrusted  (not a 'verified' claim; retrievable): 117
-WITHHELD   (claims 'verified', signature fails) : 1
+WITHHELD   (claims 'verified', signature fails) : 0
 ```
 
-Read that honestly: **enforcement is live, and no document is signed.** The one document
-claiming `verified` is correctly withheld. The control is in place ahead of the corpus
-it will eventually govern, which means today it grants trust to nothing rather than
-gatekeeping a signed set. Treat every KB document as `untrusted` — review it like code —
-until signing is part of the ingest path.
+Read the 117 honestly: `untrusted` is not a failure state, it is the **default**. Those
+documents make no trust claim, and they remain retrievable on their own merits. The tier
+is for content someone deliberately vouched for.
 
-Saying so is the point. A security control described by its design rather than its
-current effect is how a project ends up believing it is protected.
+For most of this project's life the first line read `0 authentic` and the last read
+`1 WITHHELD` — the control was enforced while governing nothing, because one document had
+simply had `trust_tier: verified` typed into its frontmatter. The fix was to promote it
+through `kb-promote`, which signs it, rather than to delete the claim: deleting would have
+made the number look right without making anything true.
+
+Two things still worth saying plainly. **The signature detects tampering; it does not
+vouch for content** — review every KB document like code. And **CI cannot verify
+signatures at all**: the scheme is HMAC-keyed on a local secret, so a runner without the
+key would report every signed document as forged. CI runs the keyless structural check
+instead — that a claimed tier carries a signature — which is exactly the forgery that
+matters. A security control described by its design rather than its current effect is how
+a project ends up believing it is protected.
 
 ## 11.4 Input bounds
 

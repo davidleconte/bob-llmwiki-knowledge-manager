@@ -25,8 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Governed-memory attestation** (`src/attest.py`, `bob-optimize attest`) — reports,
   per KB document, whether a `trust_tier: verified` claim is backed by a valid
   provenance signature: authentic / untrusted / **WITHHELD**. On the current corpus it
-  reports 118 attested, **0 authentic, 1 withheld** — the control is enforced but no
-  document is signed yet (PR #41, `af77dfb`).
+  reports 118 attested, **1 authentic, 0 withheld** as of 2026-07-25: the one document
+  that claimed `trust_tier: verified` without a signature was promoted through
+  `kb-promote` (which signs it) rather than having the claim deleted (PR #41,
+  `af77dfb`).
 - **A/B developer-velocity harness** (`src/velocity.py`, `evaluation/velocity/`) — the
   instrument for a paired, pre-registered cost-per-resolved-task measurement. Honesty
   guards are enforced in code; it needs real session data to produce a number, and

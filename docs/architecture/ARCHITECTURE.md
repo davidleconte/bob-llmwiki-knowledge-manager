@@ -371,7 +371,9 @@ document to `src/`.
 - **Attestation (`src/attest.py`, `bob-optimize attest`).** Reports the KB's trust
   posture in one command: per document, whether a `trust_tier: verified` claim is backed
   by a valid signature — *authentic* / *untrusted* / **WITHHELD**. `--strict` fails CI on
-  any withheld document. On the current corpus it reports **118 attested, 0 authentic,
+  any withheld document. On the current corpus it reports **118 attested, 1 authentic, 0
+  withheld** — every claimed `verified` tier is signed. CI cannot verify signatures (the key
+  is a local secret); it runs the keyless structural check instead.
   1 withheld**: enforcement is live, but no document is signed yet, so the control
   presently gatekeeps an unsigned corpus rather than a signed one.
 - **Cold-start map (`src/cold_start.py`).** Computes the set of files a fresh session
