@@ -98,6 +98,14 @@ markers = [
 # background thread) FAILS with a full thread dump instead of stalling the whole
 # suite / CI forever. Generous enough for the benchmark tests (~seconds each).
 timeout = 60
+# MUST be "thread" (2026-07-25). The default "signal" method delivers SIGALRM to the
+# MAIN thread only, so it cannot interrupt a worker blocked in a ThreadPoolExecutor —
+# and several concurrency regression tests here run 8 workers with
+# sys.setswitchinterval(1e-7). When such a test overran the 60s ceiling on a 2-core CI
+# runner, the alarm fired, the workers kept running, and the job hung until GitHub's
+# 6-hour default killed it. The ceiling was there; it just could not be enforced
+# against the exact class of test it was written for.
+timeout_method = "thread"
 
 [tool.coverage.run]
 source = ["src"]

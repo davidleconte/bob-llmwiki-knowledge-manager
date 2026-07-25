@@ -29,6 +29,7 @@ env:
 jobs:
   test:
     name: tests + coverage gate (py${{ matrix.python-version }})
+    timeout-minutes: 25
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -93,6 +94,7 @@ jobs:
 
   kb-integrity:
     name: KB cross-reference integrity
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -107,6 +109,7 @@ jobs:
 
   link-integrity:
     name: Markdown link integrity (tree-wide, case-sensitive)
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -159,6 +162,7 @@ jobs:
 
   gate-integrity:
     name: gate integrity (ATK-GATE-07)
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     # Only meaningful on a PR (needs the base...HEAD diff). Structural substitute
     # for a second gate reviewer — see SECURITY.md §Gate Independence.
@@ -182,6 +186,7 @@ jobs:
 
   lint:
     name: lint + format (ruff)
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -278,6 +283,7 @@ jobs:
 
   typecheck:
     name: typecheck (mypy)
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -295,6 +301,7 @@ jobs:
 
   e2e:
     name: e2e (RUN_E2E_TESTS)
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -317,6 +324,7 @@ jobs:
 
   validation:
     name: validation (manifest-backed savings)
+    timeout-minutes: 25
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -346,6 +354,7 @@ jobs:
 
   benchmarks:
     name: benchmarks (perf regression)
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -390,6 +399,7 @@ jobs:
 
   load:
     name: load + soak (informational)
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -412,6 +422,7 @@ jobs:
 
   sbom:
     name: SBOM + dependency audit
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -455,6 +466,7 @@ jobs:
 
   adversarial-regression:
     name: Adversarial regression tests
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     needs: [test]
     steps:
@@ -476,6 +488,7 @@ jobs:
 
   supply-chain-hygiene:
     name: Supply-chain hygiene (secrets scan + gate independence)
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     needs: [test]
     steps:
