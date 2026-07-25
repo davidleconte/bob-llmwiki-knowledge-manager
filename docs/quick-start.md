@@ -239,7 +239,7 @@ This step creates the **KB directory contract** — the fixed directory layout t
 | 6 | Add cross-references | Links to related documents inserted |
 | 7 | Update INDEX.md | Entry added under `### Concepts` |
 
-> This workflow is defined verbatim in the `customInstructions` of the [`knowledge-manager` mode](../config/custom_modes.yaml:180).
+> This workflow is defined verbatim in the `customInstructions` of the [`knowledge-manager` mode](../config/custom_modes.yaml#L180).
 
 ---
 

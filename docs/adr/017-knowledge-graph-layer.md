@@ -71,7 +71,7 @@ The `PersistentEmbeddingIndex` operates at chunk granularity
 (`category/file.md#slug`). The graph must operate at document granularity because:
 
 1. Cross-references in markdown always point to files, not sections:
-   `[See caching](../concepts/caching.md)` never `../concepts/caching.md#performance-targets`
+   `[See caching](../knowledge-base/concepts/multi-level-caching.md)` never `../concepts/caching.md#performance-targets`
 2. Users reason about *documents*, not chunks, when navigating the KB
 3. At 78 documents, chunk-level nodes (estimated ~400–600) would create a
    5–8× explosion in node count and edge count with no retrieval benefit

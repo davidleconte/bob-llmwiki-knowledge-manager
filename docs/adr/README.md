@@ -101,7 +101,7 @@ Architecture Decision Records document important architectural decisions made du
 - Rationale: Comprehensive protection, compliance
 - Status: ⛔ Superseded (2026-07-14) — its implementation/validation claims were
   fabricated; retracted in Phase 7. Canonical security docs:
-  [STRIDE Threat Model](../security/THREAT_MODEL.md) and
+  [STRIDE Threat Model](../security/threat-model.md) and
   [SECURITY.md](../../SECURITY.md).
 
 **[019: Delegation Pipeline Activation](019-delegation-pipeline-activation.md)**
@@ -198,7 +198,7 @@ Create an ADR when making decisions about:
 - [Architecture Documentation](../architecture/) - System architecture
 - [Component Specifications](../architecture/components/) - Component details
 - [Project Management](../project-management/) - Implementation planning
-- [Root Index](../../INDEX.md) - Complete documentation index
+- [Root Index](../INDEX.md) - Complete documentation index
 
 ## Questions?
 

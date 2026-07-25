@@ -369,26 +369,26 @@ metrics.record_optimization(1000, 800, 10.0)
 
 - **[README.md](README.md)** - Project overview and quick start
 - **[docs/quick-start.md](docs/quick-start.md)** - 5-minute getting started guide
-- **[docs/installation.md](docs/installation.md)** - Detailed installation
-- **[docs/usage.md](docs/usage.md)** - Usage guide with examples
-- **[docs/customization.md](docs/customization.md)** - Customization options
-- **[docs/workflows.md](docs/workflows.md)** - Common workflows
+- **[docs/installation.md](docs/INSTALLATION.md)** - Detailed installation
+- **[docs/usage.md](docs/USAGE.md)** - Usage guide with examples
+- **[docs/customization.md](docs/CUSTOMIZATION.md)** - Customization options
+- **[docs/workflows.md](docs/WORKFLOWS.md)** - Common workflows
 - **[docs/archive/COMPARISON.md](docs/archive/COMPARISON.md)** — Comparison with LLM-Wiki (archived)
 
 ### Token Optimization System Documentation
 
-- **[docs/architecture/architecture.md](docs/architecture/architecture.md)** — Authoritative architecture (v3.0: facade, cache, KB subsystems, delegation, validation)
-- **[docs/kb-manager/architecture.md](docs/kb-manager/architecture.md)** — KB Manager architecture (arc42 v2.1)
-- **[docs/monitoring.md](docs/monitoring.md)** — Monitoring and observability
-- **[docs/sla.md](docs/sla.md)** — SLA v1.0: latency, throughput, quality, concurrency targets
+- **[docs/architecture/architecture.md](docs/architecture/ARCHITECTURE.md)** — Authoritative architecture (v3.0: facade, cache, KB subsystems, delegation, validation)
+- **[docs/kb-manager/architecture.md](docs/kb-manager/ARCHITECTURE.md)** — KB Manager architecture (arc42 v2.1)
+- **[docs/monitoring.md](docs/MONITORING.md)** — Monitoring and observability
+- **[docs/sla.md](docs/SLA.md)** — SLA v1.0: latency, throughput, quality, concurrency targets
 - **[docs/api/README.md](docs/api/README.md)** — Auto-generated API reference
 - **[docs/adr/](docs/adr/)** — Architecture Decision Records (ADR-001–019; ADR-012 superseded)
 - **[docs/knowledge-base/index.md](docs/knowledge-base/index.md)** — KB master index (pre-digested knowledge; check here before reading raw source)
-- **[docs/index.md](docs/index.md)** — TOS documentation index
+- **[docs/index.md](docs/INDEX.md)** — TOS documentation index
 
 ### Important Notes
 
-1. **Deprecated Docs:** Files in `docs/architecture/deprecated/` describe an earlier or planned system — use `docs/architecture/architecture.md` for the current system.
+1. **Deprecated Docs:** `docs/architecture/deprecated/` was removed on 2026-07-25 (an earlier, largely unimplemented design; recoverable from git history). Use `docs/architecture/ARCHITECTURE.md` for the current system.
 2. **Current Architecture:** `docs/architecture/architecture.md` for TOS; `docs/kb-manager/architecture.md` for KB Manager. The old `ACTUAL_SYSTEM_ARCHITECTURE.md` no longer exists.
 3. **Dual Nature:** This repository contains both the simple KB framework AND the Python optimization system.
 4. **Optional Dependencies:** psutil is optional for Token Optimization System; gracefully degrades without it.

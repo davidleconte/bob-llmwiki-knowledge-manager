@@ -440,12 +440,12 @@ This plan prioritizes **honest value delivery** over feature expansion. The focu
 
 ## Related Documents
 - [Token Optimization](../concepts/token-optimization.md) - Core optimization concepts
-- [Project Status](../../project-management/PROJECT_STATUS.md) - Current project status
+- [Project Status](../../project-management/project-status.md) - Current project status
 
 ## References
 - [README.md](../../../README.md) - Project overview
 - [AGENTS.md](../../../AGENTS.md) - Agent rules and conventions
-- [Test Results](../../../evaluation/TEST_RESULTS_FINAL.md) - Current test status
+- [Test Results](../../../evaluation/test-results-final.md) - Current test status
 
 ---
 *Last Updated: 2026-07-13*

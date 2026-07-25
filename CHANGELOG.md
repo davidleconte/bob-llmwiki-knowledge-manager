@@ -489,7 +489,7 @@ retracted and replaced with manifest-backed measurements. See [`STATUS.md`](STAT
 - **The fabricated "68.96% / VALIDATED" savings figure is retracted.** The
   simulation that produced it never invoked the optimizer; Phase 5 replaced it
   with the real harness and reduced the old validator to a thin shim. See
-  [`evaluation/VALIDATION_DISCLAIMER.md`](evaluation/VALIDATION_DISCLAIMER.md).
+  [`evaluation/VALIDATION_DISCLAIMER.md`](evaluation/validation-disclaimer.md).
 - **The fabricated security architecture in ADR-012 is retracted** (Phase 7). It
   documented an auth / AES-256 / RBAC / rate-limit / audit-log stack and asserted
   it had passed a security audit with zero incidents — none of which was ever

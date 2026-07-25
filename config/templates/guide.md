@@ -50,7 +50,7 @@ Expected result
 
 ## Related Documents
 - [Related Concept](../concepts/related-concept.md)
-- [Related Guide](./related-guide.md)
+- [Related Guide]: `./related-guide.md`
 
 ## References
 - [Official Documentation](https://example.com)

@@ -585,7 +585,7 @@ corrected. (Written with a placeholder rather than the literal token, because th
 | [docs/BOB-IDE-GUIDE.md](docs/BOB-IDE-GUIDE.md) | Bob IDE complete reference (activation, tool groups, skill, troubleshooting) |
 | [docs/kb-manager/ARCHITECTURE.md](docs/kb-manager/ARCHITECTURE.md) · [docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md) | arc42 architecture (KB Manager · Python system) |
 | [INTEGRATIONS.md](INTEGRATIONS.md) | The three opt-in KB ↔ TOS integration points (fallback-safe) |
-| [docs/sla.md](docs/sla.md) · [docs/security/threat-model.md](docs/security/threat-model.md) · [docs/adr/](docs/adr/) | SLA v1.0 · STRIDE threat model · 19 ADRs |
+| [docs/sla.md](docs/SLA.md) · [docs/security/threat-model.md](docs/security/threat-model.md) · [docs/adr/](docs/adr/) | SLA v1.0 · STRIDE threat model · 19 ADRs |
 | [SECURITY.md](SECURITY.md) · [CONTRIBUTING.md](CONTRIBUTING.md) · [GOVERNANCE.md](GOVERNANCE.md) · [SUPPORT.md](SUPPORT.md) | Vulnerability reporting, contribution, governance, support |
 | [`docs/knowledge-base/research/`](docs/knowledge-base/research/) | Dated audits: counter-audit & adversarial audit (07-19), re-audit (07-20), innovation portfolio (v1 07-19 + v2 07-20) |
 | [`evaluation/validation-disclaimer.md`](evaluation/validation-disclaimer.md) | The fabricated-figure retraction record |

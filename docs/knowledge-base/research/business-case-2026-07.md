@@ -535,7 +535,7 @@ started today produces a data-backed decision by mid-August.
 | [KB Savings Measurement Guide](../guides/km-bobcoin-savings-measurement-guide.md) | How to measure your own workload savings during the pilot |
 | [KB-TOS Integration Roadmap](../guides/kb-tos-integration-roadmap.md) | P1/P2/P3 integration milestones and current status |
 | [Architecture — KB Manager](../../../docs/kb-manager/ARCHITECTURE.md) | KB Manager arc42 architecture (arc42 v2.1) |
-| [Architecture — Token Optimizer](../../../docs/architecture/architecture.md) | Python token-optimizer architecture (arc42 v3.0) |
+| [Architecture — Token Optimizer](../../architecture/ARCHITECTURE.md) | Python token-optimizer architecture (arc42 v3.0) |
 | [STATUS.md](../../../STATUS.md) | Canonical maturity status — single source of truth |
 
 ---

@@ -98,4 +98,4 @@ throws that away.
 
 - [`../README.md`](../README.md) — full project documentation
 - [`../STATUS.md`](../STATUS.md) — canonical maturity status. **Shows "Beta — Not Production Ready" and records that the prior A+ self-grade was withdrawn.** Consistent with our brand, but *do not put it on camera* — raw internal audit scores add nothing to the pitch and invite off-topic questions.
-- [`../docs/knowledge-base/INDEX.md`](../docs/knowledge-base/INDEX.md) — KB master index
+- [`../docs/knowledge-base/INDEX.md`](../docs/knowledge-base/index.md) — KB master index

@@ -19,7 +19,7 @@
 - [API Reference](api/README.md) - Complete API documentation
 - [Monitoring Guide](MONITORING.md) - Observability and metrics
 - [Security Policy](../SECURITY.md) - Vulnerability disclosure
-- [Threat Model](security/THREAT_MODEL.md) - STRIDE analysis (supersedes ADR-012)
+- [Threat Model](security/threat-model.md) - STRIDE analysis (supersedes ADR-012)
 
 ---
 
@@ -40,14 +40,14 @@
 - **[Usage Guide](USAGE.md)** — Comprehensive usage examples
 - **[Customization Guide](CUSTOMIZATION.md)** — Customization options
 - **[Workflows Guide](WORKFLOWS.md)** — Common workflows and patterns
-- **[Repository Analysis Workflow](REPOSITORY_ANALYSIS_WORKFLOW.md)** — Token-efficient repo analysis
+- **[Repository Analysis Workflow](repository-analysis-workflow.md)** — Token-efficient repo analysis
 
 ### 3. Testing & Validation
 
 **Location:** `evaluation/`
 
-- **[Honest Assessment](../evaluation/HONEST_ASSESSMENT.md)** - Critical analysis with real measurements
-- **[Token Savings Test Plan](TOKEN_SAVINGS_TEST_PLAN.md)** - Validation methodology
+- **[Honest Assessment](../evaluation/honest-assessment.md)** - Critical analysis with real measurements
+- **[Token Savings Test Plan](token-savings-test-plan.md)** - Validation methodology
 - **[Validation Report (Phase 5, measured)](../evaluation/results/validation-2026-07-14/report.json)** — manifest-backed run (`report.json` + `manifest.json`); the earlier `validation_report.json` (68.96%) is retracted/fabricated
 
 **Key Findings:**
@@ -73,13 +73,11 @@
 
 #### Superseded / Deprecated
 
-- **[Actual System Architecture](architecture/deprecated/ACTUAL_SYSTEM_ARCHITECTURE.md)** — v1.0, superseded by ARCHITECTURE.md
-- **[Unified Architecture](architecture/deprecated/UNIFIED_ARCHITECTURE.md)** — v2.0, superseded (predates the Phase-4 facade)
-- **[Master Architecture](architecture/deprecated/MASTER.md)** — Original design (deprecated)
-- **[Quality Attributes](architecture/deprecated/QUALITY_ATTRIBUTES.md)** — Quality goals (deprecated; metrics retracted)
-- **[Documentation Plan](architecture/deprecated/DOCUMENTATION_PLAN.md)** — Planning doc (deprecated)
 
-**Note:** the deprecated documents describe an earlier or planned system. Refer to [ARCHITECTURE.md](architecture/ARCHITECTURE.md) for the current implementation.
+**Note:** the 13 deprecated component specifications described an earlier, largely unimplemented
+design. They were removed from the tree on 2026-07-25 and remain in git history
+(`git log --diff-filter=D --name-only -- 'docs/architecture/deprecated/*'`).
+Refer to [ARCHITECTURE.md](architecture/ARCHITECTURE.md) for the current implementation.
 
 ### 5. API Reference
 
@@ -166,7 +164,7 @@ Auto-generated API documentation from source code (see [full API reference](api/
 - **[Quick Start](quick-start.md)** — Getting started guide
 - **[Usage](USAGE.md)** — Detailed usage instructions
 - **[Workflows](WORKFLOWS.md)** — Common workflows
-- **[Repository Analysis Workflow](REPOSITORY_ANALYSIS_WORKFLOW.md)** — Token-efficient repository audit workflow
+- **[Repository Analysis Workflow](repository-analysis-workflow.md)** — Token-efficient repository audit workflow
 - **[Customization](CUSTOMIZATION.md)** — Configuration and customization
 - **[Bob IDE Guide](BOB-IDE-GUIDE.md)** — Bob IDE mode picker, skill activation, persistence
 - **[SLA](sla.md)** — Latency/throughput targets and measurement methodology
@@ -282,8 +280,8 @@ See [API Reference](api/README.md) for details.
 ### Architects
 1. Read the [Architecture](architecture/ARCHITECTURE.md)
 2. Review [ADRs](adr/README.md)
-3. See [STRIDE Threat Model](security/THREAT_MODEL.md)
-4. Check the [SLA](sla.md) for quality scenarios
+3. See [STRIDE Threat Model](security/threat-model.md)
+4. Check the [SLA](SLA.md) for quality scenarios
 
 ### Contributors
 1. Read [CONTRIBUTING.md](../CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md)
