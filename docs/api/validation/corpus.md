@@ -41,11 +41,22 @@ here must reproduce on the held-out prose it never saw.
 
 Load the frozen hold-out slice (corpus B, C4) named in the manifest.
 
-Loads exactly the paths frozen in
-``evaluation/holdout/holdout-manifest.json`` that still exist. Deterministic
-(sorted). Returns ``[]`` when the manifest is absent (e.g. a synthetic test
-root), so a corpus-B-less run degrades gracefully — :func:`src.validation.holdout_ok`
-then treats the check as not-applicable.
+Loads exactly the paths frozen in ``evaluation/holdout/holdout-manifest.json``.
+Deterministic (sorted). Returns ``[]`` when the manifest is absent (e.g. a
+synthetic test root), so a corpus-B-less run degrades gracefully —
+:func:`src.validation.holdout_ok` then treats the check as not-applicable.
+
+**Fails closed on a missing frozen path** (audit 2026-07-25). This previously
+skipped absent paths "gracefully", which quietly defeated the property the frozen
+slice exists for. B is the cherry-pick detector precisely because its membership is
+fixed in advance; if members can vanish without complaint, then B *can* be
+pre-arranged — by deleting the inconvenient ones. It is not hypothetical: pruning
+``docs/architecture/deprecated/`` during this audit's own remediation silently took
+corpus B from 35 to 33 and every hold-out test still passed green.
+
+A missing member now raises. The manifest's own discipline note already said
+"Refresh only in its own PR with a rationale" — this makes that enforceable rather
+than advisory.
 
 
 ### `_extract_prompt(payload: object) -> Optional[str]`
