@@ -178,7 +178,13 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
       - name: Install ruff
-        run: pip install "ruff>=0.6.0"
+        # PINNED (2026-07-25). `ruff>=0.6.0` was a floating lower bound, so this job
+        # silently upgraded on every run. When 0.16.0 added Python-block formatting
+        # *inside Markdown*, three files that had passed for months began failing —
+        # on `main`, with nobody having changed a line. A lint job whose result depends
+        # on the day it ran is not a gate; it is a coin flip that occasionally blocks
+        # merges. Bump this deliberately, and reformat in the same commit.
+        run: pip install "ruff==0.16.0"
       - name: Ruff lint (config in pyproject [tool.ruff.lint])
         run: ruff check src tests scripts
       - name: Ruff format check
