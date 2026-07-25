@@ -117,6 +117,66 @@ def check(changed_files: Iterable[str]) -> List[str]:
     return []
 
 
+def _selftest() -> int:
+    """Prove the classifier separates gate definitions from claim surfaces.
+
+    Added 2026-07-25: this was the one gate of eleven with no ``--selftest``, which is
+    an odd omission for the gate whose whole job is to be trusted about what counts as
+    a gate. It has always had a dedicated tests/gates/ module; this makes it provable
+    from the command line too, the way the others are.
+    """
+    cases_gate = [
+        "config/gates/gate-config.yaml",
+        "src/validation/corpus.py",
+        "scripts/check_savings_claims.py",
+        ".github/workflows/ci.yml",
+    ]
+    cases_claim = [
+        "STATUS.md",
+        "README.md",
+        "AGENTS.md",
+        "docs/architecture/ARCHITECTURE.md",
+        "2026_IBMer_Watsonx_Challenge/03-solution-impact.md",
+    ]
+    cases_neutral = [
+        "src/optimizer/token_counter.py",
+        "tests/gates/test_gate_integrity.py",
+        ".github/CODEOWNERS",
+        "docs/api/root/facade.md",  # generated, pinned by the freshness gate
+    ]
+    failures: list[str] = []
+    for p in cases_gate:
+        if not is_gate_file(p):
+            failures.append(f"NOT CLASSIFIED AS GATE: {p}")
+    for p in cases_claim:
+        if not is_claim_surface(p):
+            failures.append(f"NOT CLASSIFIED AS CLAIM: {p}")
+    for p in cases_neutral:
+        if is_gate_file(p) or is_claim_surface(p):
+            failures.append(f"SHOULD BE NEUTRAL: {p}")
+    # The rule itself: the combination is what is forbidden, not either half.
+    if not check(["scripts/check_savings_claims.py", "STATUS.md"]):
+        failures.append("MISSED: a gate + claim co-modification must be blocked")
+    if check(["scripts/check_savings_claims.py", "config/gates/gate-config.yaml"]):
+        failures.append("FALSE POSITIVE: a gate-only change must pass")
+    if check(["STATUS.md", "docs/README.md"]):
+        failures.append("FALSE POSITIVE: a claim-only change must pass")
+    if check(["src/validation/measure.py", "docs/api/root/facade.md"]):
+        failures.append("FALSE POSITIVE: validation + its regenerated api docs must pass")
+
+    if failures:
+        print("Self-test FAILED:", file=sys.stderr)
+        for f in failures:
+            print(f"  {f}", file=sys.stderr)
+        return 1
+    print(
+        f"Self-test passed: {len(cases_gate)} gate / {len(cases_claim)} claim / "
+        f"{len(cases_neutral)} neutral paths classified correctly, and the "
+        "co-modification rule fires only on the combination."
+    )
+    return 0
+
+
 def _changed_files_from_base(base: str) -> List[str]:
     """Return files changed between *base* and HEAD (three-dot / merge-base diff)."""
     out = subprocess.run(
@@ -133,7 +193,11 @@ def main(argv: List[str] | None = None) -> int:
     parser.add_argument("files", nargs="*", help="Changed file paths to classify.")
     parser.add_argument("--base", help="Diff against this git ref (base...HEAD).")
     parser.add_argument("--stdin", action="store_true", help="Read file paths from stdin.")
+    parser.add_argument("--selftest", action="store_true", help="verify the classifier")
     args = parser.parse_args(argv)
+
+    if args.selftest:
+        return _selftest()
 
     if args.base:
         changed = _changed_files_from_base(args.base)

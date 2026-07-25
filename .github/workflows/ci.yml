@@ -170,6 +170,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+      - name: Prove the gate-integrity classifier can fail
+        run: python scripts/check_gate_integrity.py --selftest
       - name: Forbid weakening a gate + planting a claim in one PR
         # Fails a PR whose diff touches BOTH a gate definition
         # (config/gates/**, scripts/check_*.py, src/validation/**) and a claim
