@@ -7,12 +7,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- oldest-release marker; see [1.1.0] above for the current release -->
-## [Unreleased] — Wave 3 completion (2026-07-20/21, PRs #26–#41)
+## [1.2.0] - 2026-07-25 — Wave 3 completion + full-project audit remediation
 
-> **Release decision pending.** This work is merged to `main` (HEAD `f70c27d`) but no
-> version has been cut for it; `pyproject.toml` and the README badge still read
-> `1.1.0`, the version released 2026-07-18. Cutting `1.2.0` is the owner's call —
-> the content below is feature-bearing, so a minor bump is the honest choice.
+> Cut 2026-07-25. Covers PRs #26–#41 (Wave 3) plus the 2026-07-25 Tier-1 full-project
+> audit and its remediation. Feature-bearing, hence a minor bump.
+
+> ⚠️ **The savings headline changed in this release, and not because of new work.**
+> Re-running the measurement found **6.8% mean compression** (95% CI [6.2%, 7.4%],
+> N=265, manifest `evaluation/results/validation-2026-07-25/`), superseding the 20.0%
+> published since 2026-07-14. The cause is a deliberate trade made earlier and never
+> re-measured: on the *same 120 documents*, the 2026-07-14 code scores 19.63% at
+> quality 0.798 and today's scores 7.57% at quality 0.995. The optimizer was made
+> structure-preserving. See `STATUS.md`.
 >
 > Recorded on 2026-07-25 by the full-project audit, which found the CHANGELOG's
 > newest entry frozen at 2026-07-19 while **18 PRs had merged after it** — including

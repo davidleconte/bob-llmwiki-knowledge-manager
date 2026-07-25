@@ -22,7 +22,7 @@ identically in **Bob IDE** and **Bob Shell CLI** — same modes, same KB, same c
 ![status](https://img.shields.io/badge/status-Beta%20%E2%80%94%20Not%20Production%20Ready-orange)
 ![license](https://img.shields.io/badge/license-MIT-blue)
 ![python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue)
-![version](https://img.shields.io/badge/version-1.1.0-informational)
+![version](https://img.shields.io/badge/version-1.2.0-informational)
 ![tests](https://img.shields.io/badge/tests-1414%20passing-success)
 ![coverage](https://img.shields.io/badge/coverage%20gate-%E2%89%A580%25-success)
 
@@ -468,7 +468,7 @@ links and the broken cross-references were repaired; ranking is normalized (retr
 denial-of-service vectors (PageRank complexity, graph edge explosion) are bounded; **trust is now verified at the
 read boundary** (a forged `trust_tier: verified` document is withheld); the **L2 semantic-cache contract**
 (collision, TTL, metadata aliasing) and the **optimizer's budget-aware cache key** are closed; and all CI honesty
-gates are green with planted-defect tests proving they can fail.
+gates are green, and each ships a `--selftest` (or a dedicated `tests/gates/` module) that plants a known defect and requires the gate to catch it.
 
 **Known residuals (tracked):**
 
@@ -552,7 +552,7 @@ python -m src.validation --corpus repo # reproduce the savings measurement
 CI runs a 3.11 / 3.12 matrix with a coverage gate and per-package floors, ruff, mypy, a flag-gated e2e suite, the
 manifest-backed validation harness (null + provenance gates), an SBOM with a blocking `pip-audit --strict`, bandit
 SAST, a `src → scripts` layering gate, and provenance/consistency/gate-integrity validators (the honesty gates carry
-planted-defect tests that prove they can fail). See [CONTRIBUTING.md](CONTRIBUTING.md),
+each gate ships a self-test that plants a known defect and requires the gate to catch it, run before the real scan in CI). See [CONTRIBUTING.md](CONTRIBUTING.md),
 [GOVERNANCE.md](GOVERNANCE.md), and [SUPPORT.md](SUPPORT.md).
 
 ## 16. Provenance & honesty policy
