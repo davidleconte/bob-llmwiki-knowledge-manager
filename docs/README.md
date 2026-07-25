@@ -59,7 +59,7 @@ Delegation analysis pipeline:
 - **[Architecture](architecture/ARCHITECTURE.md)** — the authoritative system architecture (also explanation).
 - **CLI** — [`src/cli.py`](../src/cli.py): `optimize`, `truncate`, `count`, `cache-stats`, `cost-report`, `metrics`, `health`, `config`, `kb-status`, `analyze`, `kb-search`, `kb-index`, `graph-build`, `graph-query`, `graph-health`.
 - **Configuration** — [`src/config/schema.py`](../src/config/schema.py) (typed defaults).
-- **SLA** — [`docs/sla.md`](sla.md) — latency, throughput, quality, and concurrency targets.
+- **SLA** — [`docs/SLA.md`](SLA.md) — latency, throughput, quality, and concurrency targets.
 - **Validation harness** — [`src/validation/README.md`](../src/validation/README.md) (`python -m src.validation`).
 - **Cache API** — [cache-api.md](knowledge-base/references/cache-api.md).
 - **Security policy** — [`SECURITY.md`](../SECURITY.md) (vulnerability disclosure).

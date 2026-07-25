@@ -71,14 +71,25 @@ jobs:
         # Fails if a live status doc cites a coverage gate that disagrees with
         # pyproject fail_under, or reintroduces a retracted maturity claim.
         run: uv run python scripts/check_status_consistency.py
-      - name: Scale-regression gate (A8)
-        # The WS-A scale invariants live in tests/performance/ (excluded from the
-        # coverage run above) and use manual timing, so the benchmarks job's
-        # --benchmark-only deselects them — i.e. they run in NO other job. Run them
-        # here as a dedicated gate so a re-introduced quadratic in PageRank (A1),
+      - name: Scale-regression + DoS-hardening gate (A8 / ATK-DOS)
+        # Both suites live in tests/performance/ (excluded from the coverage run
+        # above) and use manual timing, so the benchmarks job's --benchmark-only
+        # deselects them — i.e. they run in NO other job. Run them here as a
+        # dedicated gate so a re-introduced quadratic in PageRank (A1),
         # build_semantic (A2), the cold rebuild (A3ii) or L2 eviction (A4) fails the
         # PR before it reaches main. Ratio ceilings: config/gates/gate-config.yaml.
-        run: uv run pytest tests/performance/test_scale_invariants.py -q
+        #
+        # test_dos_hardening.py (ATK-DOS-01/05/06) was previously in this same
+        # "runs in NO other job" hole but was never added to this step, so its 9
+        # regression tests guarded nothing. Named explicitly rather than running the
+        # whole directory: test_prod_confidence.py has known p99 wall-clock flakes
+        # on shared runners, and test_{cache,optimizer}_performance.py are
+        # benchmark-driven and belong to the benchmarks job.
+        run: |
+          uv run pytest \
+            tests/performance/test_scale_invariants.py \
+            tests/performance/test_dos_hardening.py \
+            -q
 
   kb-integrity:
     name: KB cross-reference integrity
@@ -159,15 +170,24 @@ jobs:
         # Exclusions: project-management plans, deprecated/, archive/, adr/
         # (historic prose), and knowledge-base/research/ (mnemox lesson notes
         # that discuss the renames as prose, not as live hrefs).
-        # Pattern rationale (mnemox lessons 2026-07-18 Finding 1):
+        # Pattern rationale (mnemox lessons 2026-07-18 Finding 1) — each entry is
+        # the WRONG spelling, verified against `git ls-files` (the Linux ground
+        # truth), not against the case-insensitive local filesystem:
         #   ](QUICK_START.md)   → on-disk name is quick-start.md
-        #   ](SLA.md)           → on-disk name is sla.md
+        #   ](sla.md)           → on-disk name is SLA.md
         #   ](architecture.md)  → on-disk name is ARCHITECTURE.md
+        #
+        # The SLA rule was INVERTED before 2026-07-25: it forbade `](SLA.md)` — the
+        # correct spelling — while permitting the broken `](sla.md)`, so the gate was
+        # driving docs toward the 404. `git ls-files | grep -i 'sla\.md'` returns
+        # exactly `docs/SLA.md`. This rule remains a 3-pattern stopgap; the general
+        # replacement is scripts/check_md_links.py (resolves every href against the
+        # git index, case-sensitively).
         run: |
           bad=$(grep -rn \
             --include="*.md" \
             -e "](QUICK_START\.md)" \
-            -e "](SLA\.md)" \
+            -e "](sla\.md)" \
             -e "](architecture\.md)" \
             README.md STATUS.md CHANGELOG.md docs/ \
             --exclude-dir=".git" \
