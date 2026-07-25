@@ -142,7 +142,7 @@ query → keyword scorer (always on)
 ```
 
 **Reconciled retrieval result (the honest headline):** on the shipped backend
-(hashing embedding, `embedding_weight=0.7`, `graph_weight=0.0`), **p@3 = 0.84 (21/25
+(hashing embedding, `embedding_weight=0.7`, `graph_weight=0.0`; manifest: evaluation/results/retrieval-2026-07-19/report.json), **p@3 = 0.84 (21/25
 queries)** — and a **keyword-only baseline scores the same 0.84**. There is **no net
 retrieval lift** from the embedding/graph blend on this corpus and query set
 (`evaluation/results/retrieval-2026-07-19/report.json`, N=25). **p@3 = 0.84 means** the
@@ -530,6 +530,7 @@ P-2 Token inflation
 P-4 Context dislocation
   └─► UC-2 blended keyword + embedding retrieval ranks by relevance
         └─► RESULT: p@3 = 0.84 — AT PARITY with a keyword baseline (0.84); NO net lift
+              [manifest: evaluation/results/retrieval-2026-07-19/report.json]
               on this tight-topic corpus (reconciled, N=25). Not a savings lever.
               └─► CONDITION: value is graceful semantic fallback + possible lift on a
                   larger/diverse corpus (untested) — re-measure on a held-out set first
@@ -551,7 +552,7 @@ P-3 Context pollution
 | Graph structural health | `KnowledgeGraph` | 26/39 orphans rescued; 19 broken links | 80-doc snapshot (2026-07-17; stale) | `graph-build` run on KB |
 
 > **Retrieval and graph are quality/structural levers, not token savings.** The
-> reconciled evaluation shows the embedding blend at **parity with keyword (p@3 = 0.84
+> reconciled evaluation shows (manifest: evaluation/results/retrieval-2026-07-19/report.json) the embedding blend at **parity with keyword (p@3 = 0.84
 > both ways) — no net lift** on this corpus; the graph layer contributes **0 p@3 uplift**
 > and earns its place through structural health (orphans, hubs, dead links), not ranking.
 > Neither reduces token spend, so neither belongs in a savings total. Only the first three
@@ -575,7 +576,7 @@ condition**. They are **mutually exclusive** (each is a distinct unresolved issu
 | **G-2** | Low | `EmbeddingGenerator.embeddings_cache` eviction is coupled to `self.corpus` LRU FIFO. Risk: unbounded dict growth for corpora > `max_corpus_size=1000` docs. **Not a risk at current corpus size (118 docs).** | Set `use_cache=False` in `KBIndexer.index_document()` for document embeddings; cache only query embeddings | Not urgent at 118 docs | Corpus > 500 docs |
 | **G-3** | Low (cosmetic) | ~~`sentence-transformers` not wired as second MiniLM path~~ **CLOSED**. Residual: when `backend="minilm"` is requested but *neither* package is available, the warning says `"mlx-embeddings is not installed or failed to load"`, omitting `sentence-transformers`. Display-only; fallback to `"hashing"` is correct. | Fix one line: [`src/cache/embeddings.py:167-170`](../../../src/cache/embeddings.py) | None — one-line fix | Next patch release |
 | **G-4** | Low | 13 structural orphans measured on the **80-doc snapshot (2026-07-17 — stale)**. Current corpus is **118 docs**. Orphan count is unknown without a fresh graph-health run. | Run `bob-optimize graph-health --kb-path docs/knowledge-base`; add `related:` cross-references to identified orphans | Needs fresh run | Zero orphans on post-cleanup run |
-| **G-5** | Medium | Query classes architecturally hard for the current stack: (a) date-based queries (`"external audit july 2026"`) require `date_filter`; (b) short concept docs outranked by longer docs with more term occurrences; (c) duplicate-date tie cannot be broken by similarity alone. These misses (4 of 25) set the reconciled p@3 ≈ 0.84. | (a) Add `date_filter` to date-based query patterns; (b) expand short concept docs; (c) add recency weight or doc-length normalisation | Design decision required | p@3 improves over the keyword baseline (0.84) after fixes |
+| **G-5** | Medium | Query classes architecturally hard for the current stack: (a) date-based queries (`"external audit july 2026"`) require `date_filter`; (b) short concept docs outranked by longer docs with more term occurrences; (c) duplicate-date tie cannot be broken by similarity alone. These misses (4 of 25) set the reconciled p@3 ≈ 0.84 (manifest: evaluation/results/retrieval-2026-07-19/report.json). | (a) Add `date_filter` to date-based query patterns; (b) expand short concept docs; (c) add recency weight or doc-length normalisation | Design decision required | p@3 improves over the keyword baseline (0.84) after fixes |
 | **G-6** | **High** | The KB Manager → TOS subprocess bridge (P1-3 in the integration roadmap) requires TOS to reach v1.0 stability. **Currently blocked** — STATUS.md: `Beta — Not Production Ready`. The §3 diagram shows the target architecture; the subprocess bridge is not yet live. | Tag TOS as stable; implement explicit fallback contract (subprocess failure must **never** block KB retrieval) | **TOS stability milestone** | `STATUS.md` updated to `Stable`; fallback contract in CI |
 
 ---

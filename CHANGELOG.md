@@ -228,7 +228,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   broken links, PageRank top-10).
 - **Live validation** (`docs/knowledge-base/research/graph-validation-2026-07-17.md`):
   80-doc corpus, 2 836 edges (163 explicit + 2 654 semantic), 39→13 orphans rescued
-  by semantic edges, p@3=0.88 with MiniLM (no regression, no uplift from graph
+  by semantic edges, p@3=0.88 with MiniLM (lab, unmanifested; superseded by report.json; no regression, no uplift from graph
   re-ranking at any tested weight). Validated defaults: `semantic_threshold=0.30`,
   `graph_weight=0.0`. See ADR-017.
 

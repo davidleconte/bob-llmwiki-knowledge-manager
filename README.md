@@ -433,7 +433,7 @@ detected and withdrawn ([§16](#16-provenance--honesty-policy)).
 |---|---|---|
 | **Optimizer compression** | **~20% mean** (95% CI [18.9%, 21.2%], N = 183 real in-repo docs; null test passing; token-weighted ~23%) | `evaluation/results/validation-2026-07-14/`; reproduce with `python -m src.validation` |
 | **Retrieval quality (default backend)** | **p@3 = 0.84**, at parity with the keyword baseline (0.84) — no net lift | `evaluation/results/retrieval-2026-07-19/` (116-doc golden set) |
-| Retrieval quality (MiniLM, lab) | **p@3 = 0.88** — *not* reproducible in CI (needs the optional MiniLM backend) | ADR-014 / ADR-017; graph-validation report |
+| Retrieval quality (MiniLM, lab) | **p@3 = 0.88** — *not* reproducible in CI (needs the optional MiniLM backend), and **no manifest was ever committed for that run**; superseded as the published figure by p@3=0.84 | ADR-014 / ADR-017; the committed figure is `evaluation/results/retrieval-2026-07-19/report.json` |
 | Read-boundary trust | a forged `trust_tier: verified` document is withheld; a validly-signed one is served | `tests/security/` (re-verified by re-running the forgery exploit) |
 | Test suite | **1,414 passing**, 23 skipped in the gated coverage run; 1,518 collected tree-wide | [`STATUS.md`](STATUS.md) (single home) |
 | Coverage | **≈89%** global; gate **≥80%** with per-package floors | `STATUS.md`; `pyproject.toml` (`fail_under = 80`) |
@@ -472,7 +472,7 @@ gates are green with planted-defect tests proving they can fail.
 
 **Known residuals (tracked):**
 
-- **Retrieval quality is at keyword parity on the default backend** (p@3 = 0.84). Higher quality needs the optional
+- **Retrieval quality is at keyword parity on the default backend** (p@3 = 0.84; manifest: evaluation/results/retrieval-2026-07-19/report.json). Higher quality needs the optional
   MiniLM backend and the proposed PPR / RRF / contextual-chunking work ([§11](#11-what-is-actually-measured)).
 - **Cold-start context cost** is bounded and budget-gated but still ~11.3k tokens (the sub-3k target is proposed),
   and most tests use tiktoken rather than live LLM APIs.
