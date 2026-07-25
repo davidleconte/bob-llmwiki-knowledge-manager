@@ -171,7 +171,9 @@ REGISTRY: tuple[ValueHome, ...] = (
         name="savings_gate_banner_scan_lines",
         file="scripts/check_savings_claims.py",
         pattern=r"(?m)^BANNER_SCAN_LINES\s*=\s*(\d+)",
-        mirrors=(Mirror("config/gates/gate-config.yaml", "extract", r"banner_scan_lines:\s*(\d+)"),),
+        mirrors=(
+            Mirror("config/gates/gate-config.yaml", "extract", r"banner_scan_lines:\s*(\d+)"),
+        ),
     ),
     ValueHome(
         name="savings_gate_manifest_tolerance_pct",
