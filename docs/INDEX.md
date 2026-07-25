@@ -6,8 +6,8 @@
 > always [`STATUS.md`](../STATUS.md).
 
 **Version:** 3.0
-**Last Updated:** 2026-07-18
-**Status:** Beta — Not Production Ready (A+; all structural gaps closed — see [`STATUS.md`](../STATUS.md))
+**Last Updated:** 2026-07-25
+**Status:** Beta — Not Production Ready — see [`STATUS.md`](../STATUS.md) for the canonical status and grade position. This page states no grade of its own.
 
 ---
 
@@ -51,9 +51,9 @@
 - **[Validation Report (Phase 5, measured)](../evaluation/results/validation-2026-07-14/report.json)** — manifest-backed run (`report.json` + `manifest.json`); the earlier `validation_report.json` (68.96%) is retracted/fabricated
 
 **Key Findings:**
-- ✅ 1112 tests passing — see [STATUS.md](../STATUS.md) for the current live snapshot; gate is `pyproject.toml`
-- ✅ Token savings **measured**: ~20% mean optimizer compression (95% CI [19%, 21%], N=183) — manifest-backed at `evaluation/results/validation-2026-07-14/`; the earlier 68.96% is retracted
-- ✅ A+ (4.30/4.30) — all 4 structural gaps closed (SLA v1.0, sentence-transformers, full mypy scope, CODEOWNERS)
+- ✅ 1414 passed / 23 skipped in the gated coverage run (1518 collected tree-wide) — [STATUS.md](../STATUS.md) is the single home for this snapshot; the coverage gate lives in `pyproject.toml`
+- ✅ Token savings **measured**: 20.0% mean optimizer compression (95% CI [18.9%, 21.2%], N=183) — manifest-backed at `evaluation/results/validation-2026-07-14/`; the earlier 68.96% is retracted
+- ✅ 4 structural gaps closed (SLA v1.0, sentence-transformers, full mypy scope, CODEOWNERS). **No grade is claimed here:** the previously stated "A+ (4.30/4.30)" was self-assessed and has been withdrawn — see [STATUS.md](../STATUS.md) for the on-file independent verdicts.
 - ✅ Delegation pipeline wired: `bob-optimize analyze` (ADR-019)
 - ⚠️ Mock-based testing (no real LLM API integration)
 
@@ -354,5 +354,5 @@ See [Quick Start](quick-start.md) for the Bob Shell KB Manager onboarding.
 
 ---
 
-**Last Updated:** 2026-07-18
-**Status:** Beta — Not Production Ready; A+ (4.30/4.30) — see [`STATUS.md`](../STATUS.md)
+**Last Updated:** 2026-07-25
+**Status:** Beta — Not Production Ready — see [`STATUS.md`](../STATUS.md) for the canonical status and grade position

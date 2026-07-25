@@ -1,0 +1,17 @@
+I'm a Global Product Specialist on IBM's Worldwide watsonx.data Tiger Team for South EMEA. Every week I help banks, telcos, and sovereign funds across Southern Europe, the Middle East, and Africa move from legacy warehouses to open lakehouse architecture. The blocker isn't the technology — it's pace. Each engagement raises the same architectural, integration, and real-time-pipeline questions my team already answered, documented in a Slack thread, and lost. The next engagement starts from zero, and we pay that cost again — in time, in Bobcoins, and in client seconds we can't give back.
+
+**Team BobjectifLune** — Bob + Tintin's *Objectif Lune*: aim at what looks impossible, and reach it through curiosity, a fail-fast mindset, and resilience, with IBM Bob as the craft.
+
+**The problem:** every Bob session starts amnesiac. Bob re-reads the same code, re-derives the same decisions, and re-explains the same concepts, because nothing it learned last session survived. Every Bobcoin spent re-deriving is a Bobcoin unavailable for going deeper.
+
+**Our solution — Mnemox — gives Bob a memory.** It's a living, version-controlled knowledge base — concepts, decisions, findings, guides — that persists across sessions. When Bob starts, it *retrieves* what the team already knows instead of re-deriving it. Knowledge compounds: each session builds on the last. For the Tiger Team, every new engagement launches from the team's full accumulated expertise — patterns, constraints, sizing rationale, regional specifics — not from scratch.
+
+**Who uses it, and how:** any IBMer, inside their normal Bob workflow. Mnemox runs natively as two Bob modes — no plugins, no MCP servers, no external services. One command (`scripts/init-project.sh`) scaffolds the KB and registers the mode in Bob IDE in under 30 seconds; after that, anyone activates it from the mode picker. No CLI required.
+
+**Outcomes:** lower Bobcoin cost on routine questions, and — the real prize — an expanded frontier: complex, multi-session, agentic problems that were previously too expensive to attempt become affordable.
+
+**Proven on real work.** This is a single-IBMer proof of concept, measured honestly. Its first production use was **hcd-at-its-core** — a platform of 94 interactive demos and 15 masterclasses teaching architects and operators the hardest real-time data problems, on live clusters. With Mnemox loaded, Bobcoin spend per iteration cycle dropped ≈60% (measured by comparing session cost readouts with and without the KB, across iteration cycles — see the Solution impact field). Every Bobcoin recovered was reinvested into richer failure modes and more ambitious scenarios that would otherwise have been unaffordable.
+
+**Why it's differentiated:** Mnemox is built *into* Bob, not bolted on — it exists only because of Bob's mode system, `AGENTS.md` schema layer, and skill ecosystem. And it's honest: this project caught its own fabricated 68.96% savings figure, retracted it, and re-measured at 20% with a manifest-backed harness. A productivity tool that refuses to overclaim its own productivity.
+
+Because on the way to the impossible, you can't afford to forget what you already learned.

@@ -1,7 +1,7 @@
 # Architecture Documentation
 
-**Last Updated:** July 17, 2026
-**Status:** A+ — see [STATUS.md](../../STATUS.md)
+**Last Updated:** 2026-07-25
+**Status:** Beta — Not Production Ready — see [STATUS.md](../../STATUS.md). This page states no grade of its own; the previously stated "A+" was self-assessed and has been withdrawn.
 
 ---
 
@@ -169,8 +169,8 @@ See [deprecated/README.md](deprecated/README.md) for details.
 
 **Purpose:** Reduce LLM token costs through caching and optimization  
 **Technology:** Python 3.11+, tiktoken, scikit-learn, numpy  
-**Complexity:** ~5,400 logical lines  
-**Status:** A+ (4.30/4.30) — see [STATUS.md](../../STATUS.md)
+**Complexity:** ~12,850 non-blank/non-comment lines across 67 modules (16,840 physical)  
+**Status:** Beta — Not Production Ready — see [STATUS.md](../../STATUS.md); no grade is claimed here
 
 **Key Components:**
 - Multi-level caching (L1: exact, L2: semantic)
