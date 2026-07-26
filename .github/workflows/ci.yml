@@ -386,7 +386,7 @@ jobs:
       - name: Pre-warm tiktoken cache
         run: uv run python -c "import tiktoken; tiktoken.encoding_for_model('gpt-4')"
       - name: Restore benchmark baseline
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .benchmarks
           key: benchmarks-${{ runner.os }}-${{ github.sha }}
