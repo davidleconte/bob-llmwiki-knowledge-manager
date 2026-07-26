@@ -496,24 +496,23 @@ jobs:
     name: Supply-chain hygiene (secrets scan + gate independence)
     timeout-minutes: 20
     runs-on: ubuntu-latest
-    needs: [test]
+    # NO `needs:` (2026-07-25). This job used to carry `needs: [test]`, which meant a
+    # secrets scan could only run if the whole coverage suite had already passed. The
+    # coverage job was hanging to GitHub's 6-hour ceiling and getting cancelled, so
+    # across the last six runs on `main` this job was `skipped` or `cancelled` every
+    # time — it had never once executed. A credential scan has no reason to wait on
+    # tests, and making it wait is what kept it dark.
     steps:
       - uses: actions/checkout@v4
       - name: Scan for committed credentials (ATK-SUP-09)
-        # Grep tracked files for PASSWORD= followed by a non-empty, non-placeholder value.
-        # Placeholder patterns ("PASSWORD=", "PASSWORD=<...>", PASSWORD="your-password")
-        # are intentional in .env.template and config example files and are excluded.
-        # The regex matches PASSWORD= with a real-looking value (alphanumeric, 3+ chars).
-        run: |
-          HITS=$(git ls-files | xargs grep -Pn 'PASSWORD=[A-Za-z0-9!@#$%^&*]{3,}' 2>/dev/null \
-            | grep -v ".example" | grep -v ".gitignore" | grep -v "knowledge-base/research" \
-            | grep -v "\.env\.template" | grep -v "credential-template" || true)
-          if [ -n "$HITS" ]; then
-            echo "ERROR: potential committed credential found in tracked files:"
-            echo "$HITS"
-            exit 1
-          fi
-          echo "OK: no real PASSWORD= credentials found in tracked files"
+        # Replaces an inline `grep -Pn ... | grep -v knowledge-base/research` pipeline.
+        # It exempted a live surface by directory (ATK-GATE-04) and used `grep -P`,
+        # which BSD grep does not support — so it was silently inert on macOS and only
+        # ever ran on CI, where it never ran. The script allowlists by
+        # (path, digest-of-line) instead, and self-tests that it can fail.
+        run: python3 scripts/check_committed_secrets.py
+      - name: Prove the credential gate can fail
+        run: python3 scripts/check_committed_secrets.py --selftest
       - name: Verify gate config exists (ATK-GATE-07)
         run: |
           test -f config/gates/gate-config.yaml || \
