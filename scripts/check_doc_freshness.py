@@ -73,6 +73,32 @@ def declared_date(text: str) -> date | None:
         return None
 
 
+def is_shallow(repo_root: Path | None = None) -> bool:
+    """True when the clone has truncated history, so per-file commit dates are fiction.
+
+    ``actions/checkout`` defaults to ``fetch-depth: 1``. Under that default the clone
+    holds exactly one commit -- on a pull_request event, an ephemeral merge commit
+    created when the job starts -- so ``git log -1 -- <path>`` reports *that* commit
+    for every file, dated now. Every watched document then reads as "modified today".
+
+    This gate shipped with that defect and passed anyway, because on the day it landed
+    the documents' declared date happened to equal the run date. The morning after, the
+    clock rolled over and it went red on content nobody had touched. Left unfixed it
+    would fail every pull request opened after the declared date -- unmergeable by
+    construction, for a reason with nothing to do with the change under review.
+
+    A wrong answer is worse than no answer here, so the caller refuses to run rather
+    than comparing against a synthetic date.
+    """
+    root = repo_root or REPO_ROOT
+    out = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "--is-shallow-repository"],
+        capture_output=True,
+        text=True,
+    )
+    return out.stdout.strip() == "true"
+
+
 def last_commit_date(rel: str, repo_root: Path | None = None) -> date | None:
     """Author date of the newest commit touching *rel* (None if never committed)."""
     root = repo_root or REPO_ROOT
@@ -145,6 +171,16 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.selftest:
         return _selftest()
+
+    if is_shallow():
+        print(
+            "ERROR: this repository is a shallow clone, so per-file commit dates are "
+            "not meaningful — every path resolves to the single fetched commit.\n"
+            "Check out with full history (`fetch-depth: 0`) before running this gate. "
+            "Refusing to report a verdict computed from a synthetic date.",
+            file=sys.stderr,
+        )
+        return 2
 
     stale = stale_documents()
     if not stale:

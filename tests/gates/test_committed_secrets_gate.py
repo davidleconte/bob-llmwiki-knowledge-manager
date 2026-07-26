@@ -14,6 +14,7 @@ is an exemption anything can hide behind.
 
 from scripts.check_committed_secrets import (
     ALLOWLIST,
+    credential_probe,
     line_digest,
     scan,
     scan_text,
@@ -24,13 +25,13 @@ from scripts.check_committed_secrets import (
 
 
 def test_real_credential_is_flagged():
-    hits = scan_text("src/config.py", "MQ_PASSWORD=passw0rd\n")
+    hits = scan_text("src/config.py", credential_probe("passw0rd") + "\n")
     assert len(hits) == 1
     assert hits[0].key == "MQ_PASSWORD"
 
 
 def test_credential_in_yaml_config_is_flagged():
-    assert scan_text("config/broker.yaml", "  MQ_PASSWORD=hunter2\n")
+    assert scan_text("config/broker.yaml", "  " + credential_probe("hunter2") + "\n")
 
 
 # ── Things that must never be flagged ────────────────────────────────────────────
@@ -48,8 +49,8 @@ def test_placeholders_are_not_credentials():
 
 
 def test_template_files_are_out_of_scope():
-    assert not scan_text(".env.template", "MQ_PASSWORD=passw0rd\n")
-    assert not scan_text("config/app.yaml.example", "MQ_PASSWORD=passw0rd\n")
+    assert not scan_text(".env.template", credential_probe("passw0rd") + "\n")
+    assert not scan_text("config/app.yaml.example", credential_probe("passw0rd") + "\n")
 
 
 def test_lowercase_assignment_is_not_matched():
@@ -86,17 +87,19 @@ def test_same_text_in_another_file_still_fails():
 def test_editing_an_allowlisted_line_revokes_its_exemption():
     """A digest key means the exemption covers the line as reviewed, not the file."""
     path, line = _an_allowlisted_line()
-    assert unexplained(scan_text(path, line + " MQ_PASSWORD=hunter2\n"))
+    assert unexplained(scan_text(path, line + " " + credential_probe("hunter2") + "\n"))
 
 
 def test_new_credential_in_an_allowlisted_file_still_fails():
     path, _ = _an_allowlisted_line()
-    assert unexplained(scan_text(path, "MQ_PASSWORD=freshleak\n"))
+    assert unexplained(scan_text(path, credential_probe("freshleak") + "\n"))
 
 
 def test_research_dir_is_no_longer_blanket_exempt():
     """ATK-GATE-04: the old rule dropped every hit under knowledge-base/research."""
-    assert unexplained(scan_text("docs/knowledge-base/research/notes.md", "MQ_PASSWORD=passw0rd\n"))
+    assert unexplained(
+        scan_text("docs/knowledge-base/research/notes.md", credential_probe("passw0rd") + "\n")
+    )
 
 
 # ── The live tree ────────────────────────────────────────────────────────────────

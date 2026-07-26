@@ -12,7 +12,15 @@ from datetime import date
 
 import pytest
 
-from scripts.check_doc_freshness import WATCHED, declared_date, stale_documents
+from scripts.check_doc_freshness import WATCHED, declared_date, is_shallow, stale_documents
+
+# A shallow clone has one commit, so `git log -1 -- <path>` returns it for every path
+# and every watched doc reads as modified today. This assertion is unevaluable there —
+# skipping says so, where a red would blame the change under review. CI checks out with
+# fetch-depth: 0 for the jobs that run this, so the skip should not fire in CI.
+needs_history = pytest.mark.skipif(
+    is_shallow(), reason="shallow clone: per-file commit dates are not meaningful"
+)
 
 
 @pytest.mark.parametrize(
@@ -75,6 +83,7 @@ def test_status_md_is_watched():
     assert "STATUS.md" in WATCHED
 
 
+@needs_history
 def test_live_tree_is_fresh():
     stale = stale_documents()
     assert stale == [], "stale: " + ", ".join(f"{r} ({d} < {c})" for r, d, c in stale)

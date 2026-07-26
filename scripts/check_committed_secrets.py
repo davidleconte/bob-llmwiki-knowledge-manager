@@ -173,11 +173,25 @@ def unexplained(hits: Iterable[Hit]) -> list[Hit]:
     return [h for h in hits if (h.path, h.digest) not in ALLOWLIST]
 
 
+def credential_probe(value: str, key: str = "MQ_PASSWORD") -> str:
+    """Assemble a credential-shaped line at runtime, for tests and the self-test.
+
+    Never write ``SOMEKEY=<value>`` as a source literal in this file or its tests.
+    This gate scans *tracked* files, and these files are tracked -- a literal here
+    makes the gate flag its own fixtures. That is not hypothetical: the first CI run
+    after these files were committed failed on ten of them. They had been untracked
+    when the gate was validated, so ``git ls-files`` never showed the gate to itself.
+    Assembling the string at call time keeps the source clean while the value under
+    test is byte-identical.
+    """
+    return f"{key}=" + value
+
+
 def _selftest() -> int:
     """Prove the gate can fail, and that the allowlist cannot be used as a skeleton key."""
     failures: list[str] = []
 
-    real = scan_text("src/config.py", "MQ_PASSWORD=passw0rd\n")
+    real = scan_text("src/config.py", credential_probe("passw0rd") + "\n")
     if not real:
         failures.append("MISSED: a real credential assignment must be flagged")
 
@@ -190,7 +204,7 @@ def _selftest() -> int:
         if scan_text("config/app.yaml", placeholder + "\n"):
             failures.append(f"FALSE POSITIVE: placeholder flagged: {placeholder}")
 
-    if scan_text("config/app.yaml.example", "MQ_PASSWORD=passw0rd\n"):
+    if scan_text("config/app.yaml.example", credential_probe("passw0rd") + "\n"):
         failures.append("FALSE POSITIVE: a .example template must not be flagged")
 
     # The allowlist must be scoped to one exact line in one exact file.
@@ -208,8 +222,12 @@ def _selftest() -> int:
     if not unexplained(scan_text("src/leaked.py", same_line + "\n")):
         failures.append("ESCAPE: the allowlist must not exempt the same text in another file")
     # Same file, altered line -> still a finding.
-    if not unexplained(scan_text(allow_path, same_line + " MQ_PASSWORD=hunter2\n")):
+    if not unexplained(scan_text(allow_path, same_line + " " + credential_probe("hunter2") + "\n")):
         failures.append("ESCAPE: editing an allowlisted line must revoke its exemption")
+    # The gate must see its own source. This is the miss that shipped: these files
+    # were untracked when the gate was first validated, so it never scanned itself.
+    if unexplained(scan(paths=["scripts/check_committed_secrets.py"])):
+        failures.append("this gate's own source must not contain a credential literal")
 
     if failures:
         print("Self-test FAILED:", file=sys.stderr)

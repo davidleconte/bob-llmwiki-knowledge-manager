@@ -37,6 +37,12 @@ jobs:
         python-version: ["3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
+        # Full history (2026-07-25): tests/gates/test_doc_freshness_gate.py compares a
+        # document's declared date against `git log -1 -- <path>`. Under the default
+        # fetch-depth: 1 the clone holds one commit, so every path resolves to it and
+        # every watched doc reads as modified today.
+        with:
+          fetch-depth: 0
       - uses: astral-sh/setup-uv@v4
         with:
           version: "latest"
@@ -119,6 +125,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        # Full history: check_doc_freshness.py needs real per-file commit dates, and
+        # now refuses to run (exit 2) on a shallow clone rather than reporting a
+        # verdict computed from the ephemeral merge commit's timestamp.
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -477,6 +488,10 @@ jobs:
     needs: [test]
     steps:
       - uses: actions/checkout@v4
+        # Full history: this job runs tests/gates/, which includes the doc-freshness
+        # gate's live-tree assertion. See the note on the `test` job's checkout.
+        with:
+          fetch-depth: 0
       - uses: astral-sh/setup-uv@v4
         with:
           version: "latest"
