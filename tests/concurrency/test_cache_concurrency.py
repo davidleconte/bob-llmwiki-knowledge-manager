@@ -13,6 +13,7 @@ from typing import List
 import pytest
 
 from src.cache import ExactCache, MultiLevelCache, SemanticCache
+from tests.support.stress import bounded_rounds
 
 
 class TestExactCacheConcurrency:
@@ -394,9 +395,11 @@ class TestMultiLevelCacheConcurrency:
             def reader() -> None:
                 try:
                     # The pre-fix race crashes on the first overlap, so a few
-                    # hundred iterations reliably trip it; kept modest so the
-                    # (healthy) fixed path stays a few seconds, not tens.
-                    for _ in range(500):
+                    # hundred iterations reliably trip it. Wall-clock bounded
+                    # (tests/support/stress.py): at 19.7s locally under coverage this
+                    # was the slowest test in the gated suite and the likeliest next
+                    # one to cross the 60s ceiling on a 2-core runner.
+                    for _ in bounded_rounds(500):
                         cache.size()  # iterates both sub-caches
                         cache.stats()  # calls size() again
                 except Exception as exc:  # noqa: BLE001 - the race surfaced here
@@ -448,7 +451,7 @@ class TestMultiLevelCacheConcurrency:
 
             def stat_reader() -> None:
                 try:
-                    for _ in range(500):
+                    for _ in bounded_rounds(500):
                         hr = cache.hit_rate()
                         l1r = cache.l1_hit_rate()
                         l2r = cache.l2_hit_rate()
@@ -466,7 +469,7 @@ class TestMultiLevelCacheConcurrency:
                 getters = [executor.submit(getter, t) for t in range(4)]
                 resetters = [executor.submit(resetter) for _ in range(2)]
                 readers = [executor.submit(stat_reader) for _ in range(4)]
-                # Let readers finish their fixed iteration count first.
+                # Let readers exhaust their round budget first.
                 for f in readers:
                     f.result()
                 stop.set()

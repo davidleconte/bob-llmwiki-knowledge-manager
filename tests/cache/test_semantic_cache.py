@@ -13,6 +13,7 @@ import time
 import pytest
 
 from src.cache.semantic_cache import SemanticCache
+from tests.support.stress import bounded_rounds
 
 
 class TestSemanticCache:
@@ -496,9 +497,13 @@ class TestSemanticCacheGetEntryLock:
                             cache.set(f"key_{j}", f"val_{j}")
                     i += 1
 
+            # Wall-clock budget, not a fixed round count — this is the test whose
+            # hardcoded count blew the 60s ceiling on a 2-core runner. See
+            # tests/support/stress.py for why, and for what the budget does and does
+            # not buy.
             def reader() -> None:
                 try:
-                    for _ in range(500):
+                    for _ in bounded_rounds(500):
                         for k in range(20):
                             cache.get_entry(f"key_{k}")  # must not raise
                 except Exception as exc:  # noqa: BLE001
@@ -611,7 +616,7 @@ class TestSemanticCacheAverageSimilarityLock:
             def reader() -> None:
                 """Call average_similarity_score() and assert valid range."""
                 try:
-                    for _ in range(500):
+                    for _ in bounded_rounds(500):
                         score = cache.average_similarity_score()
                         assert 0.0 <= score <= 1.0, (
                             f"average_similarity_score() out of range: {score}"
@@ -675,7 +680,7 @@ class TestSemanticCacheUpdateThresholdLock:
 
             def stat_reader() -> None:
                 try:
-                    for _ in range(500):
+                    for _ in bounded_rounds(500):
                         t = cache.similarity_threshold
                         # Threshold must always be one of the two valid values.
                         assert t in (0.5, 0.9), f"threshold has unexpected value: {t}"
