@@ -22,7 +22,7 @@ numpy==2.5.1
     #   seaborn
 packaging==26.2
     # via matplotlib
-pandas==3.0.3
+pandas==3.0.5
     # via
     #   -r evaluation/requirements.txt
     #   seaborn
