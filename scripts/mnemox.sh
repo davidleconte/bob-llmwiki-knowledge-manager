@@ -201,10 +201,20 @@ echo -e "${CYAN}Step 5/6 · Validating knowledge base structure...${NC}"
 bash "$MNEMOX_HOME/scripts/validate-kb.sh"
 
 # Step 6: rebuild knowledge graph (graceful — never blocks)
+# bob-optimize lives in the mnemox repo (MNEMOX_HOME); run it from there so it
+# works regardless of which project is being mnemoxed.
 echo ""
 echo -e "${CYAN}Step 6/6 · Rebuilding knowledge graph...${NC}"
 if command -v uv &>/dev/null; then
-    uv run bob-optimize graph-build --kb-path docs/knowledge-base --with-semantic
+    uv run --project "$MNEMOX_HOME" bob-optimize graph-build --kb-path docs/knowledge-base --with-semantic
+    GRAPH_EXIT=$?
+    if [[ $GRAPH_EXIT -ne 0 ]]; then
+        echo -e "${YELLOW}⚠️  Graph build returned exit $GRAPH_EXIT — continuing without graph update${NC}"
+    else
+        echo -e "${GREEN}✅ Knowledge graph rebuilt${NC}"
+    fi
+elif command -v bob-optimize &>/dev/null; then
+    bob-optimize graph-build --kb-path docs/knowledge-base --with-semantic
     GRAPH_EXIT=$?
     if [[ $GRAPH_EXIT -ne 0 ]]; then
         echo -e "${YELLOW}⚠️  Graph build returned exit $GRAPH_EXIT — continuing without graph update${NC}"
@@ -212,7 +222,7 @@ if command -v uv &>/dev/null; then
         echo -e "${GREEN}✅ Knowledge graph rebuilt${NC}"
     fi
 else
-    echo -e "${YELLOW}⚠️  uv not found — skipping graph rebuild (install uv to enable)${NC}"
+    echo -e "${YELLOW}⚠️  uv not found — skipping graph rebuild (install uv: https://docs.astral.sh/uv/)${NC}"
 fi
 
 # Stage KB changes on a review branch (ATK-MEM-04: no unreviewed direct-to-main commits)

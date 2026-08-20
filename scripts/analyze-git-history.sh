@@ -272,7 +272,7 @@ analyze_commit_messages() {
     echo "|------|-------|" >> "$OUTPUT_FILE"
     
     for prefix in "feat:" "fix:" "docs:" "style:" "refactor:" "test:" "chore:" "perf:"; do
-        COUNT=$(git log --oneline | grep -c "^[a-f0-9]* $prefix" || echo "0")
+        COUNT=$(git log --oneline | grep -c "^[a-f0-9]* $prefix" || true)
         if [ "$COUNT" -gt 0 ]; then
             echo "| $prefix | $COUNT |" >> "$OUTPUT_FILE"
         fi
