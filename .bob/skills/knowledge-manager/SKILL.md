@@ -89,7 +89,7 @@ Code or command example
 Explanation of the example.
 
 ## Related Documents
-- [Related Concept 1](./related-concept-1.md)
+- [Related Concept 1]: `./related-concept-1.md`
 - [Related Guide](../guides/related-guide.md)
 
 ## References
@@ -157,7 +157,7 @@ Expected result
 
 ## Related Documents
 - [Related Concept](../concepts/related-concept.md)
-- [Related Guide](./related-guide.md)
+- [Related Guide]: `./related-guide.md`
 
 ## References
 - [Official Documentation](https://example.com)

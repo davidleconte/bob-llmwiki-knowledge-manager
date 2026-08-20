@@ -52,13 +52,13 @@ Last Updated: $TODAY
 
 ## Usage
 
-This knowledge base is managed by Bob Shell in `knowledge-manager` mode.
+This knowledge base is managed by Bob Shell in \`knowledge-manager\` mode.
 
 ### Getting Started
-```bash
+\`\`\`bash
 # Start Bob Shell in knowledge-manager mode
 bob --chat-mode=knowledge-manager
-```
+\`\`\`
 
 ### Common Tasks
 - **Research a topic**: "Research [topic] and create a concept document"
